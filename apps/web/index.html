@@ -2,9 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, Initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <link rel="stylesheet" href="src/main.css" />
     <title>Hello world!</title>
   </head>
 
@@ -25,8 +24,13 @@
       <article>
         <h2>Experiment 1</h2>
         <p>Short description of the experiment.</p>
-        <div id="experiment-settings"></div>
-        <button data-target="modal-example" onclick="toggleModal(event)">
+        <h3>Settings</h3>
+        <div id="experiment-settings">
+          <ul>
+            <li></li>
+          </ul>
+        </div>
+        <button data-target="modal" onclick="toggleModal(event)">
           Configure experiment
         </button>
       </article>
@@ -44,22 +48,25 @@
       </article>
     </main>
 
-    <dialog id="modal-example">
+    <dialog id="modal">
       <article>
         <header>
           <button
             aria-label="Close"
             rel="prev"
-            data-target="modal-example"
+            data-target="modal"
             onclick="toggleModal(event)"
           ></button>
           <h3>Configure your CLASS experiment</h3>
         </header>
 
-        <form>
+        <form
+          data-target="modal"
+          onsubmit="parseForm();toggleModal(event);return false"
+        >
           <fieldset role="group">
             <label for="h">
-              <small id="h-helper">initial ABL height [m]</small>
+              <small id="h-helper">Initial ABL height [m]</small>
               <input
                 type="range"
                 value="5"
@@ -74,7 +81,7 @@
           <fieldset role="group">
             <label for="theta">
               <small id="theta-helper"
-                >initial mixed-layer potential temperature [K]</small
+                >Initial mixed-layer potential temperature [K]</small
               >
               <input
                 type="range"
@@ -90,7 +97,7 @@
           <fieldset role="group">
             <label for="dtheta">
               <small id="dtheta-helper"
-                >initial temperature jump at h [K]</small
+                >Initial temperature jump at h [K]</small
               >
               <input
                 type="range"
@@ -120,7 +127,7 @@
           <fieldset role="group">
             <label for="q">
               <small id="q-helper"
-                >initial mixed-layer specific humidity [kg kg-1]</small
+                >Initial mixed-layer specific humidity [kg kg-1]</small
               >
               <input
                 type="range"
@@ -136,7 +143,7 @@
           <fieldset role="group">
             <label for="dq">
               <small id="dq-helper"
-                >initial specific humidity jump at h [kg kg-1]</small
+                >Initial specific humidity jump at h [kg kg-1]</small
               >
               <input
                 type="range"
@@ -156,5 +163,6 @@
 
     <script type="module" src="/src/main.ts"></script>
     <script src="src/modal.js"></script>
+    <script src="src/form.ts"></script>
   </body>
 </html>
