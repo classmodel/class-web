@@ -1,12 +1,10 @@
 {
-  "name": "@repo/ui",
+  "name": "@repo/class",
   "version": "0.0.0",
   "exports": {
-    "./counter": "./components/counter.ts",
-    "./header": "./components/header.ts",
-    "./setup-counter": "./utils/counter.ts"
+    "./class": "./src/class.ts"
   },
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "scripts": {
     "lint": "eslint \"**/*.ts\""
   },

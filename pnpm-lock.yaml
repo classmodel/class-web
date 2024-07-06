@@ -20,9 +20,9 @@ importers:
 
   apps/docs:
     dependencies:
-      '@repo/ui':
+      '@repo/class':
         specifier: workspace:*
-        version: link:../../packages/ui
+        version: link:../../packages/class
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -45,9 +45,9 @@ importers:
       '@picocss/pico':
         specifier: ^2.0.6
         version: 2.0.6
-      '@repo/ui':
+      '@repo/class':
         specifier: workspace:*
-        version: link:../../packages/ui
+        version: link:../../packages/class
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -68,21 +68,7 @@ importers:
         specifier: ^5.1.4
         version: 5.1.4(sass@1.77.6)
 
-  packages/config-eslint:
-    dependencies:
-      '@typescript-eslint/eslint-plugin':
-        specifier: ^7.1.0
-        version: 7.1.0(@typescript-eslint/parser@7.1.0(eslint@8.57.0)(typescript@5.3.3))(eslint@8.57.0)(typescript@5.3.3)
-      '@typescript-eslint/parser':
-        specifier: ^7.1.0
-        version: 7.1.0(eslint@8.57.0)(typescript@5.3.3)
-      eslint-config-prettier:
-        specifier: ^9.1.0
-        version: 9.1.0(eslint@8.57.0)
-
-  packages/config-typescript: {}
-
-  packages/ui:
+  packages/class:
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -96,6 +82,20 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
+
+  packages/config-eslint:
+    dependencies:
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^7.1.0
+        version: 7.1.0(@typescript-eslint/parser@7.1.0(eslint@8.57.0)(typescript@5.3.3))(eslint@8.57.0)(typescript@5.3.3)
+      '@typescript-eslint/parser':
+        specifier: ^7.1.0
+        version: 7.1.0(eslint@8.57.0)(typescript@5.3.3)
+      eslint-config-prettier:
+        specifier: ^9.1.0
+        version: 9.1.0(eslint@8.57.0)
+
+  packages/config-typescript: {}
 
 packages:
 

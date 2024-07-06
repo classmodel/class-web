@@ -24,12 +24,6 @@
       <article>
         <h2>Experiment 1</h2>
         <p>Short description of the experiment.</p>
-        <h3>Settings</h3>
-        <div id="experiment-settings">
-          <ul>
-            <li></li>
-          </ul>
-        </div>
         <button data-target="modal" onclick="toggleModal(event)">
           Configure experiment
         </button>
@@ -37,7 +31,9 @@
 
       <article>
         <h2>Output 1</h2>
-        <p>Timeseries plot or vertical profile or radiosounding</p>
+        <p id="outputBody">
+          Timeseries plot or vertical profile or radiosounding
+        </p>
         <button>Configure output</button>
       </article>
 
@@ -60,10 +56,7 @@
           <h3>Configure your CLASS experiment</h3>
         </header>
 
-        <form
-          data-target="modal"
-          onsubmit="parseForm();toggleModal(event);return false"
-        >
+        <form id="form">
           <fieldset role="group">
             <label for="h">
               <small id="h-helper">Initial ABL height [m]</small>
@@ -156,13 +149,13 @@
             /></label>
           </fieldset>
 
-          <input type="submit" value="Start simulation" />
+          <button type="submit" id="start-simulation">Start simulation</button>
         </form>
       </article>
     </dialog>
 
     <script type="module" src="/src/main.ts"></script>
     <script src="src/modal.js"></script>
-    <script src="src/form.ts"></script>
+    <script type="module" src="src/form.ts"></script>
   </body>
 </html>
