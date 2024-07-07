@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, Initial-scale=1" />
-    <meta name="color-scheme" content="light dark" />
     <title>Hello world!</title>
   </head>
 
@@ -19,143 +18,15 @@
       </nav>
     </header>
 
-    <main class="container grid">
-      <!-- Experiment card -->
-      <article>
-        <h2>Experiment 1</h2>
-        <p>Short description of the experiment.</p>
-        <button data-target="modal" onclick="toggleModal(event)">
-          Configure experiment
-        </button>
-      </article>
-
-      <article>
-        <h2>Output 1</h2>
-        <p id="outputBody">
-          Timeseries plot or vertical profile or radiosounding
-        </p>
-        <button>Configure output</button>
-      </article>
-
-      <article>
-        <h2>Output 2</h2>
-        <p>Simulation data in tabular form?</p>
-        <button>Configure output</button>
-      </article>
+    <main class="container">
+      <section id="experiments"></section>
+      <section id="output" class="grid"></section>
     </main>
 
-    <dialog id="modal">
-      <article>
-        <header>
-          <button
-            aria-label="Close"
-            rel="prev"
-            data-target="modal"
-            onclick="toggleModal(event)"
-          ></button>
-          <h3>Configure your CLASS experiment</h3>
-        </header>
+    <dialog id="modal"></dialog>
 
-        <form id="form">
-          <fieldset role="group">
-            <label for="h">
-              <small id="h-helper">Initial ABL height [m]</small>
-              <input
-                type="range"
-                value="5"
-                min="0"
-                max="10"
-                name="h"
-                aria-label="h"
-                aria-describedby="h-helper"
-            /></label>
-          </fieldset>
-
-          <fieldset role="group">
-            <label for="theta">
-              <small id="theta-helper"
-                >Initial mixed-layer potential temperature [K]</small
-              >
-              <input
-                type="range"
-                value="5"
-                min="0"
-                max="10"
-                name="theta"
-                aria-label="theta"
-                aria-describedby="theta-helper"
-            /></label>
-          </fieldset>
-
-          <fieldset role="group">
-            <label for="dtheta">
-              <small id="dtheta-helper"
-                >Initial temperature jump at h [K]</small
-              >
-              <input
-                type="range"
-                value="5"
-                min="0"
-                max="10"
-                name="dtheta"
-                aria-label="dtheta"
-                aria-describedby="dtheta-helper"
-            /></label>
-          </fieldset>
-
-          <fieldset role="group">
-            <label for="dz_h">
-              <small id="dz_h-helper">Transition layer thickness [-]</small>
-              <input
-                type="range"
-                value="5"
-                min="0"
-                max="10"
-                name="dz_h"
-                aria-label="dz_h"
-                aria-describedby="dz_h-helper"
-            /></label>
-          </fieldset>
-
-          <fieldset role="group">
-            <label for="q">
-              <small id="q-helper"
-                >Initial mixed-layer specific humidity [kg kg-1]</small
-              >
-              <input
-                type="range"
-                value="5"
-                min="0"
-                max="10"
-                name="q"
-                aria-label="q"
-                aria-describedby="q-helper"
-            /></label>
-          </fieldset>
-
-          <fieldset role="group">
-            <label for="dq">
-              <small id="dq-helper"
-                >Initial specific humidity jump at h [kg kg-1]</small
-              >
-              <input
-                type="range"
-                value="5"
-                min="0"
-                max="10"
-                name="dq"
-                aria-label="dq"
-                aria-describedby="dq-helper"
-            /></label>
-          </fieldset>
-
-          <button type="submit" id="start-simulation">Start simulation</button>
-        </form>
-      </article>
-    </dialog>
+    <footer class="container">© 2024 CLASS developers.</footer>
 
     <script type="module" src="/src/main.ts"></script>
-    <script src="src/modal.js"></script>
-    <script type="module" src="src/form.ts"></script>
   </body>
 </html>
