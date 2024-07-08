@@ -18,28 +18,6 @@ importers:
         specifier: ^2.0.6
         version: 2.0.6
 
-  apps/docs:
-    dependencies:
-      '@repo/class':
-        specifier: workspace:*
-        version: link:../../packages/class
-    devDependencies:
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: link:../../packages/config-eslint
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/config-typescript
-      eslint:
-        specifier: ^8.57.0
-        version: 8.57.0
-      typescript:
-        specifier: ^5.3.3
-        version: 5.3.3
-      vite:
-        specifier: ^5.1.4
-        version: 5.1.4(sass@1.77.6)
-
   apps/web:
     dependencies:
       '@picocss/pico':
@@ -69,6 +47,13 @@ importers:
         version: 5.1.4(sass@1.77.6)
 
   packages/class:
+    dependencies:
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
+      zod-to-json-schema:
+        specifier: ^3.23.1
+        version: 3.23.1(zod@3.23.8)
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -954,6 +939,14 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
+  zod-to-json-schema@3.23.1:
+    resolution: {integrity: sha512-oT9INvydob1XV0v1d2IadrR74rLtDInLvDFfAa1CG0Pmg/vxATk7I2gSelfj271mbzeM4Da0uuDQE/Nkj3DWNw==}
+    peerDependencies:
+      zod: ^3.23.3
+
+  zod@3.23.8:
+    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
+
 snapshots:
 
   '@aashutoshrathi/word-wrap@1.2.6': {}
@@ -1736,3 +1729,9 @@ snapshots:
   yallist@4.0.0: {}
 
   yocto-queue@0.1.0: {}
+
+  zod-to-json-schema@3.23.1(zod@3.23.8):
+    dependencies:
+      zod: 3.23.8
+
+  zod@3.23.8: {}

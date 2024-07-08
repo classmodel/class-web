@@ -1,6 +1,7 @@
-import { ISettings } from "@repo/class/class";
+import { classDefaultConfigSchema } from "@repo/class/class";
 
-function asFieldSet(setting: ISettings) {
+function asFieldSet(setting: object) {
+  // TODO get proper types for setting (or replace with form generator)
   // TODO work for other types than number/range
   return /*html*/ `
         <fieldset role="group">
@@ -20,15 +21,17 @@ function asFieldSet(setting: ISettings) {
     `;
 }
 
-export function buildForm(settings: ISettings[]) {
+export function buildForm(defaults = classDefaultConfigSchema) {
   // TODO combine "defaults" with previous state
+  const settings = defaults.definitions.classDefaultConfig.properties;
+  const settingsArray = Object.keys(settings).map((key) => settings[key]);
   return /*html*/ `
     <article>
         <header>
             <h2>Configure your CLASS experiment</h2>
         </header>
         <form>
-            ${settings.map((setting) => asFieldSet(setting)).join("")}
+            ${settingsArray.map((setting) => asFieldSet(setting)).join("")}
         </form>
         <footer>
 

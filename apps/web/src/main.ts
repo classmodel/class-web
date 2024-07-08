@@ -1,7 +1,7 @@
 import "./style.scss";
 import { experimentCard, outputCard } from "./components/cards";
 import { buildForm, parseForm } from "./components/form";
-import { runClass, defaultSettings, ClassOutput } from "@repo/class/class";
+import { runClass, ClassOutput } from "@repo/class/class";
 
 // Populate experiments section
 const experimentsSection = document.getElementById("experiments")!;
@@ -10,7 +10,7 @@ experimentsSection.innerHTML += experimentCard();
 // Add modal
 function openSettingsDialog() {
   const modal = document.querySelector("dialog")!;
-  modal.innerHTML = buildForm(defaultSettings); // TODO remember previous state
+  modal.innerHTML = buildForm(); // TODO remember previous state
   function onsubmit() {
     const experimentSettings = parseForm();
     const output = runClass(experimentSettings); // TODO cast to correct type
