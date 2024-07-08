@@ -1,8 +1,13 @@
-import { classDefaultConfigSchema } from "@repo/class/class";
+import {
+  classDefaultConfigSchema,
+  classDefaultConfig,
+  ClassConfig,
+} from "@repo/class/class";
 
 function asFieldSet(setting: object) {
-  // TODO get proper types for setting (or replace with form generator)
+  // TODO get proper types for setting
   // TODO work for other types than number/range
+  // TODO replace with form generator from external lib?
   return /*html*/ `
         <fieldset role="group">
             <label for="${setting.name}">
@@ -41,10 +46,10 @@ export function buildForm(defaults = classDefaultConfigSchema) {
         `;
 }
 
-export function parseForm() {
+export function parseForm(): ClassConfig {
   const form = document.querySelector("form")!;
   const formData = new FormData(form);
   const formDataObject = Object.fromEntries(formData);
-  // TODO cast form values to correct types, validate etc.
-  return formDataObject;
+  const parsedConfig = classDefaultConfig.parse(formDataObject);
+  return parsedConfig;
 }
