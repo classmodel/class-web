@@ -2,26 +2,31 @@ import { z } from "zod";
 import zodToJsonSchema from "zod-to-json-schema";
 
 export const classDefaultConfig = z.object({
-  h: z.number().min(0).max(10).default(5).describe("Initial ABL height [m]"),
-  theta: z
+  h: z.coerce
+    .number()
+    .min(0)
+    .max(10)
+    .default(5)
+    .describe("Initial ABL height [m]"),
+  theta: z.coerce
     .number()
     .min(0)
     .max(10)
     .default(5)
     .describe("Initial mixed-layer potential temperature [K]"),
-  dtheta: z
+  dtheta: z.coerce
     .number()
     .min(0)
     .max(10)
     .default(5)
     .describe("Initial temperature jump at h [K]"),
-  q: z
+  q: z.coerce
     .number()
     .min(0)
     .max(10)
     .default(5)
     .describe("Initial mixed-layer specific humidity [kg kg-1]"),
-  dq: z
+  dq: z.coerce
     .number()
     .min(0)
     .max(10)

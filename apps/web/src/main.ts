@@ -1,43 +1,65 @@
 import "./style.scss";
-import { experimentCard, outputCard } from "./components/cards";
-import { buildForm, parseForm } from "./components/form";
-import { runClass, ClassOutput } from "@repo/class/class";
+import { outputCard } from "./output";
+import { runClass, ClassConfig } from "@repo/class/class";
+import { Experiment, experimentCard } from "./experiment";
+import { Output } from "./output";
+
+const experiments: Experiment[] = [];
 
 // Populate experiments section
 const experimentsSection = document.getElementById("experiments")!;
-experimentsSection.innerHTML += experimentCard();
+const addExperimentButton = document.getElementById("addExperiment")!;
+addExperimentButton.addEventListener("click", () => addExperiment());
 
-// Add modal
-function openSettingsDialog() {
-  const modal = document.querySelector("dialog")!;
-  modal.innerHTML = buildForm(); // TODO remember previous state
-  function onsubmit() {
-    const experimentSettings = parseForm();
-    const output = runClass(experimentSettings); // TODO cast to correct type
-    updateOutputCard(output);
-    modal.close();
-  }
-  const button = modal.querySelector("button");
-  button && button.addEventListener("click", () => onsubmit());
-  modal.showModal();
-  // TODO: fix typeerror "null is not a function" when button is clicked
+function addExperiment() {
+  alert(
+    "Adding experiment. In the future this could go straight to the configuration dialog. Alternatively, perhaps you could have a choice between some defaults or custom experiments"
+  );
+  const experiment = new Experiment();
+  experiments.push(experiment);
+
+  const onConfigure = (settings: ClassConfig) => {
+    // Retrieve settings, update state, and start experiment
+    experiment.settings = settings;
+    const output = runClass(settings);
+    experiment.output = output;
+    alert(
+      "Received output from class: \n" +
+        JSON.stringify(output) +
+        "\n In the future, this should trigger updates of the outputs."
+    );
+  };
+
+  const onRemove = () => {
+    // Update app state
+    experiments.splice(experiments.indexOf(experiment), 1);
+  };
+
+  // Add to UI
+  const card = experimentCard(experiment, onConfigure, onRemove);
+  experimentsSection.appendChild(card);
 }
-
-const configureExperimentButton = document.getElementById(
-  "configure-experiment"
-)!;
-configureExperimentButton.addEventListener("click", () => {
-  openSettingsDialog();
-});
 
 // Populate output section
-const outputSection = document.getElementById("output")!;
-outputSection.innerHTML += outputCard(
-  "Timeseries plot or vertical profile or radiosounding"
-);
-outputSection.innerHTML += outputCard("Simulation data in tabular form?");
+const outputSection = document.getElementById("outputs")!;
+const addOutputButton = document.getElementById("addOutput")!;
+addOutputButton.addEventListener("click", () => addOutput());
 
-function updateOutputCard(output: ClassOutput) {
-  const card = outputSection.querySelector("article")!;
-  card.querySelector("p")!.innerHTML = JSON.stringify(output);
+const outputs = [];
+
+function addOutput() {
+  alert(
+    "Adding output. In the future this should open a configuration form to select e.g. whether you want a timeseries or profile/sounding, and which experiments / variables should be  plotted."
+  );
+  const output = new Output();
+  outputs.push(output);
+
+  // Add to UI
+  const card = outputCard(output);
+  outputSection.appendChild(card);
 }
+
+// function updateOutput(output: ClassOutput) {
+//   const card = outputSection.querySelector("article")!;
+//   card.querySelector("p")!.innerHTML = JSON.stringify(output);
+// }
