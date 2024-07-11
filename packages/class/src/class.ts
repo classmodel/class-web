@@ -99,7 +99,7 @@ export class CLASS {
 
   /** Entrainment velocity [m s-1]. */
   get we() {
-    // TODO add sw_whearwe
+    // TODO add sw_shearwe
     let we = -this.wthetave / this.dthetav;
 
     // Don't allow boundary layer shrinking
@@ -131,7 +131,7 @@ export class CLASS {
 
   /** Entrainment kinematic virtual heat flux [K m s-1]. */
   get wthetave() {
-    return this._cfg.mixedLayer.beta * this.wthetav;
+    return -this._cfg.mixedLayer.beta * this.wthetav;
   }
 
   /** Virtual temperature jump at h [K]. */

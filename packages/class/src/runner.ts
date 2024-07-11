@@ -14,10 +14,10 @@ export function runClass(config: ClassConfig): ClassOutput {
   while (model.t < config.timeControl.runtime) {
     model.update();
 
-    console.log(model.t, model.h);
-
-    output.t.push(model.t);
-    output.h.push(model.h);
+    if (model.t % 60 == 0) {
+      output.t.push(model.t);
+      output.h.push(model.h);
+    }
   }
 
   return output;

@@ -1,5 +1,6 @@
 import { CLASS } from "./class";
 import { classConfig } from "./config";
+import { runClass, ClassOutput } from "./runner";
 
 describe("CLASS model", () => {
   it("can be instantiated with default config", () => {
@@ -25,12 +26,14 @@ describe("CLASS model", () => {
     const model = new CLASS(config);
     while (model.t < config.timeControl.runtime) {
       model.update();
-      if (model.t % 3600 == 0) {
-        // TODO I wasn't sure how to quickly try this in a REPL
-        // briefly tried ts-node but it complained about modules and more
-        console.log(model.t, model.h);
-      }
     }
     expect(model.t).toEqual(12 * 3600);
+  });
+
+  it("produces realistic results", () => {
+    const config = classConfig.parse({});
+    const output = runClass(config);
+    console.log(output);
+    expect(output);
   });
 });
