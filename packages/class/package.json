@@ -2,7 +2,9 @@
   "name": "@repo/class",
   "version": "0.0.0",
   "exports": {
-    "./class": "./src/class.ts"
+    "./class": "./src/class.ts",
+    "./config": "./src/config.ts",
+    "./runner": "./src/runner.ts"
   },
   "license": "GPL-3.0-only",
   "scripts": {
