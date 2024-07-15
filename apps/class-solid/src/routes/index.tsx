@@ -51,11 +51,11 @@ function ObjectField({ schema, name = "" }: { schema: any; name?: string }) {
     <fieldset class="border p-2">
       <legend>{schema.description ?? name}</legend>
       <div>
-      <For each={Object.entries(schema.properties)}>
-        {([propName, propSchema]) => (
-          <PropField name={`${name}.${propName}`} schema={propSchema} />
-        )}
-      </For>
+        <For each={Object.entries(schema.properties)}>
+          {([propName, propSchema]) => (
+            <PropField name={`${name}.${propName}`} schema={propSchema} />
+          )}
+        </For>
       </div>
     </fieldset>
   );
@@ -77,11 +77,16 @@ function PropField({ name, schema }: { name: string; schema: any }) {
   );
 }
 
-function MyTextField({name, schema}: {name: string, schema: any}) {
+function MyTextField({ name, schema }: { name: string; schema: any }) {
   return (
     <TextField class="grid w-full max-w-sm items-center gap-1.5">
       <TextFieldLabel for={name}>{schema.description ?? name}</TextFieldLabel>
-      <TextFieldInput type="text" id={name} name={name} placeholder={schema.default} />
+      <TextFieldInput
+        type="text"
+        id={name}
+        name={name}
+        placeholder={schema.default}
+      />
     </TextField>
   );
 }
@@ -108,7 +113,9 @@ function EditExperimentConfig({
       }}
     >
       <ObjectField schema={ClassConfigJsonSchema} />
-      <Button type="submit">Run</Button>
+      <DialogFooter>
+        <Button type="submit">Run</Button>
+      </DialogFooter>
     </form>
   );
 }
@@ -141,7 +148,7 @@ function AddCustomExperiment() {
               output,
             };
             setExperiments(experiments.length, newExperiment);
-            setOpen(false)
+            setOpen(false);
           }}
         />
       </DialogContent>
