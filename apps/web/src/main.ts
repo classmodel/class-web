@@ -1,6 +1,7 @@
 import "./style.scss";
 import { outputCard } from "./output";
-import { runClass, ClassConfig } from "@repo/class/class";
+import { ClassConfig } from "@repo/class/config";
+import { runClass } from "@repo/class/runner";
 import { Experiment, experimentCard } from "./experiment";
 import { Output } from "./output";
 
