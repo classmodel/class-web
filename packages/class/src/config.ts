@@ -31,7 +31,7 @@ const timeControl = z.object({
     .number()
     .default(12 * 3600)
     .describe("Total run time [s]"),
-});
+}).describe('Time control');
 
 const mixedLayer = z.object({
   // TODO: can we automatically coerce everthing?
