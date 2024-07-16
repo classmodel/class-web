@@ -21,6 +21,20 @@ import {
   TextFieldInput,
   TextFieldLabel,
 } from "~/components/ui/text-field";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Flex } from "~/components/ui/flex";
+import {
+  MdiCog,
+  MdiContentCopy,
+  MdiDelete,
+  MdiDownload,
+} from "~/components/icons";
 
 interface Experiment {
   name: string;
@@ -163,25 +177,46 @@ export default function Home() {
         Welcome to CLASS
       </h1>
 
-      <Button variant="outline" size="lg" onClick={addDefaultExperiment}>
-        Add default experiment
-      </Button>
-      <AddCustomExperiment />
-
-      <p class="mt-8">
-        Start your first experiment by clicking this beautiful button
-      </p>
-
-      <ul>
+      <h2 class="text-4xl my-8">Experiments</h2>
+      <Flex justifyContent="center" class="gap-4">
         <For each={experiments}>
           {(experiment) => (
-            <li>
-              {experiment.name} {experiment.config.initialState.dq_0}{" "}
-              {experiment.output!.h[experiment.output!.h.length - 1]}
-            </li>
+            <Card class="w-[380px]">
+              <CardHeader>
+                {/* TODO: make name & description editable */}
+                <CardTitle>{experiment.name}</CardTitle>
+                <CardDescription>{experiment.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* TODO: implement functionality below */}
+
+                <Button variant="outline">
+                  <MdiDownload />
+                </Button>
+                <Button variant="outline">
+                  <MdiCog />
+                </Button>
+                <Button variant="outline">
+                  <MdiContentCopy />
+                </Button>
+                <Button variant="outline">
+                  <MdiDelete />
+                </Button>
+              </CardContent>
+            </Card>
           )}
         </For>
-      </ul>
+        <div>
+          <div>
+            <Button variant="outline" size="lg" onClick={addDefaultExperiment}>
+              Add default experiment
+            </Button>
+          </div>
+          <div>
+            <AddCustomExperiment />
+          </div>
+        </div>
+      </Flex>
     </main>
   );
 }
