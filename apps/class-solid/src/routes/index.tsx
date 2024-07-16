@@ -1,4 +1,4 @@
-import { For } from "solid-js";
+import { For, Show } from "solid-js";
 import { Button } from "~/components/ui/button";
 import { Flex } from "~/components/ui/flex";
 import {
@@ -8,6 +8,8 @@ import {
 } from "~/components/Experiment";
 
 import { experiments } from "~/lib/store";
+import { analyses } from "~/lib/store";
+import { addAnalysis, AnalysisCard } from "~/components/Analysis";
 
 export default function Home() {
   return (
@@ -30,8 +32,47 @@ export default function Home() {
           <div>
             <AddCustomExperiment />
           </div>
+          <div>
+            <Button variant="outline" size="lg">
+              Upload experiment config (not implemented)
+            </Button>{" "}
+          </div>
+          <div>
+            <Button variant="outline" size="lg">
+              Add experiment from choice of presets (not implemented)
+            </Button>
+          </div>
         </div>
       </Flex>
+
+      <h2 class="text-4xl my-8">Analysis</h2>
+      <Show when={experiments.length} fallback={<p>Add an experiment first</p>}>
+        <Flex justifyContent="center" class="gap-4">
+          <For each={analyses}>{(analysis) => AnalysisCard(analysis)}</For>
+          <div>
+            <div>
+              <Button variant="outline" size="lg" onClick={addAnalysis}>
+                Add standard analysis
+              </Button>
+            </div>
+            <div>
+              <Button variant="outline" size="lg">
+                Add timeseries plot (not implemented)
+              </Button>
+            </div>
+            <div>
+              <Button variant="outline" size="lg">
+                Add vertical profile plot (not implemented)
+              </Button>
+            </div>
+            <div>
+              <Button variant="outline" size="lg">
+                Add output table (not implemented)
+              </Button>
+            </div>
+          </div>
+        </Flex>
+      </Show>
     </main>
   );
 }

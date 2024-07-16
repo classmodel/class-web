@@ -25,7 +25,10 @@ function inflate(rawData: { [key: string]: any }) {
 
     parts.forEach((child, index) => {
       if (index === parts.length - 1) {
-        parent[child] = rawData[key];
+        // Prevent parsing "" as 0 later on
+        if (rawData[key] !== "") {
+          parent[child] = rawData[key];
+        }
       } else {
         if (!parent[child]) {
           parent[child] = {};
@@ -55,7 +58,9 @@ export function ExperimentConfigForm({
         const formData = new FormData(event.currentTarget);
         const rawData = Object.fromEntries(formData.entries());
         const nestedData = inflate(rawData);
+        console.log(nestedData);
         const data = classConfig.parse(nestedData);
+        console.log(data);
         onSubmit(data);
       }}
     >
