@@ -36,7 +36,7 @@ export function addDefaultExperiment() {
   const config = classConfig.parse({});
   const output = runClass(config);
   const newExperiment = {
-    name: "Default experiment",
+    name: "My experiment",
     description: "Default experiment",
     id,
     config,
@@ -69,7 +69,7 @@ export function AddCustomExperiment() {
             const id = createUniqueId();
             const output = runClass(config);
             const newExperiment = {
-              name: "Custom experiment",
+              name: "My experiment",
               description: "Custom experiment",
               id,
               config,
@@ -99,9 +99,10 @@ export function ExperimentCard(experiment: Experiment) {
       <CardHeader>
         {/* TODO: make name & description editable */}
         <CardTitle>{experiment.name}</CardTitle>
-        <CardDescription>{experiment.description}</CardDescription>
+        <CardDescription>{experiment.id}</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent>{experiment.description}</CardContent>
+      <CardFooter>
         {/* TODO: implement download functionality */}
         <Button variant="outline">
           <MdiDownload />
@@ -117,7 +118,7 @@ export function ExperimentCard(experiment: Experiment) {
         <Button variant="outline" onClick={() => deleteExperiment(experiment)}>
           <MdiDelete />
         </Button>
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 }

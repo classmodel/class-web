@@ -58,9 +58,7 @@ export function ExperimentConfigForm({
         const formData = new FormData(event.currentTarget);
         const rawData = Object.fromEntries(formData.entries());
         const nestedData = inflate(rawData);
-        console.log(nestedData);
         const data = classConfig.parse(nestedData);
-        console.log(data);
         onSubmit(data);
       }}
     >
