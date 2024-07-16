@@ -6,6 +6,7 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
+  CardFooter,
 } from "./ui/card";
 import { ClassConfig, classConfig } from "@repo/class/config";
 import { ClassOutput, runClass } from "@repo/class/runner";
@@ -87,6 +88,10 @@ export function AddCustomExperiment() {
   );
 }
 
+function deleteExperiment(experiment: Experiment) {
+  setExperiments(experiments.filter((exp) => exp.id !== experiment.id));
+}
+
 export function ExperimentCard(experiment: Experiment) {
   return (
     <Card class="w-[380px]">
@@ -96,18 +101,19 @@ export function ExperimentCard(experiment: Experiment) {
         <CardDescription>{experiment.description}</CardDescription>
       </CardHeader>
       <CardContent>
-        {/* TODO: implement functionality below */}
-
+        {/* TODO: implement download functionality */}
         <Button variant="outline">
           <MdiDownload />
         </Button>
+        {/* TODO: implement "configure" functionality */}
         <Button variant="outline">
           <MdiCog />
         </Button>
+        {/* TODO: implement duplicate functionality */}
         <Button variant="outline">
           <MdiContentCopy />
         </Button>
-        <Button variant="outline">
+        <Button variant="outline" onClick={() => deleteExperiment(experiment)}>
           <MdiDelete />
         </Button>
       </CardContent>
