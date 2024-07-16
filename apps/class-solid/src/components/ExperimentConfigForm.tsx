@@ -12,6 +12,32 @@ import {
 
 const ClassConfigJsonSchema = classDefaultConfigSchema.definitions!.classConfig;
 
+/**
+ * Nest form rawData to shape of classConfig
+ * "initialState.h_0" => { initialState: { h_0: ... } }
+ */
+function inflate(rawData: { [key: string]: any }) {
+  const config: { [key: string]: any } = {};
+
+  for (const key in rawData) {
+    const parts = key.split(".");
+    let parent = config;
+
+    parts.forEach((child, index) => {
+      if (index === parts.length - 1) {
+        parent[child] = rawData[key];
+      } else {
+        if (!parent[child]) {
+          parent[child] = {};
+        }
+        parent = parent[child];
+      }
+    });
+  }
+
+  return config;
+}
+
 export function ExperimentConfigForm({
   id,
   config,
@@ -28,9 +54,8 @@ export function ExperimentConfigForm({
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
         const rawData = Object.fromEntries(formData.entries());
-        // TODO nest form rawData to shape of classConfig
-        // ".initialState.h_0" => { initialState: { h_0: ... } }
-        const data = classConfig.parse(rawData);
+        const nestedData = inflate(rawData);
+        const data = classConfig.parse(nestedData);
         onSubmit(data);
       }}
     >
