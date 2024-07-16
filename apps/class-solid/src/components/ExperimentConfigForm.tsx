@@ -40,17 +40,35 @@ export function ExperimentConfigForm({
 }
 
 function ObjectField({ schema, name = "" }: { schema: any; name?: string }) {
+  // name can be empty, but only for root, which should be treated differently
+  const isRoot = name === "";
+
+  function Children() {
+    return (
+      <For each={Object.entries(schema.properties)}>
+        {([propName, propSchema]) => (
+          <PropField
+            // Nested fields should be connected with .
+            name={isRoot ? `${propName}` : `${name}.${propName}`}
+            schema={propSchema}
+          />
+        )}
+      </For>
+    );
+  }
+
   return (
-    <fieldset class="border p-2">
-      <legend>{schema.description ?? name}</legend>
-      <div>
-        <For each={Object.entries(schema.properties)}>
-          {([propName, propSchema]) => (
-            <PropField name={`${name}.${propName}`} schema={propSchema} />
-          )}
-        </For>
-      </div>
-    </fieldset>
+    <Switch>
+      <Match when={isRoot}>
+        <Children />
+      </Match>
+      <Match when={!isRoot}>
+        <fieldset class="border p-2">
+          <legend>{schema.description ?? name}</legend>
+          {Children()}
+        </fieldset>
+      </Match>
+    </Switch>
   );
 }
 
