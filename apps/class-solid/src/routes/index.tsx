@@ -1,11 +1,7 @@
-import { createSignal, createUniqueId, For, Match, Switch } from "solid-js";
+import { createSignal, createUniqueId, For } from "solid-js";
 import { Button } from "~/components/ui/button";
 import { createStore } from "solid-js/store";
-import {
-  classConfig,
-  ClassConfig,
-  classDefaultConfigSchema,
-} from "@repo/class/config";
+import { classConfig, ClassConfig } from "@repo/class/config";
 import { ClassOutput, runClass } from "@repo/class/runner";
 import {
   Dialog,
@@ -16,11 +12,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import {
-  TextField,
-  TextFieldInput,
-  TextFieldLabel,
-} from "~/components/ui/text-field";
 import {
   Card,
   CardContent,
@@ -35,6 +26,7 @@ import {
   MdiDelete,
   MdiDownload,
 } from "~/components/icons";
+import { ExperimentConfigForm } from "~/components/ExperimentConfigForm";
 
 interface Experiment {
   name: string;
@@ -60,80 +52,6 @@ function addDefaultExperiment() {
   setExperiments(experiments.length, newExperiment);
 }
 
-function ObjectField({ schema, name = "" }: { schema: any; name?: string }) {
-  return (
-    <fieldset class="border p-2">
-      <legend>{schema.description ?? name}</legend>
-      <div>
-        <For each={Object.entries(schema.properties)}>
-          {([propName, propSchema]) => (
-            <PropField name={`${name}.${propName}`} schema={propSchema} />
-          )}
-        </For>
-      </div>
-    </fieldset>
-  );
-}
-
-function PropField({ name, schema }: { name: string; schema: any }) {
-  return (
-    <Switch fallback={<p>Unknown type</p>}>
-      <Match when={schema.type === "object"}>
-        <ObjectField name={name} schema={schema} />
-      </Match>
-      <Match when={schema.type === "number"}>
-        <MyTextField name={name} schema={schema} />
-      </Match>
-      <Match when={schema.type === "string"}>
-        <MyTextField name={name} schema={schema} />
-      </Match>
-    </Switch>
-  );
-}
-
-function MyTextField({ name, schema }: { name: string; schema: any }) {
-  return (
-    <TextField class="grid w-full max-w-sm items-center gap-1.5">
-      <TextFieldLabel for={name}>{schema.description ?? name}</TextFieldLabel>
-      <TextFieldInput
-        type="text"
-        id={name}
-        name={name}
-        placeholder={schema.default}
-      />
-    </TextField>
-  );
-}
-
-const ClassConfigJsonSchema = classDefaultConfigSchema.definitions!.classConfig;
-
-function EditExperimentConfig({
-  config,
-  onSubmit,
-}: {
-  config: ClassConfig;
-  onSubmit: (c: ClassConfig) => void;
-}) {
-  return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        const rawData = Object.fromEntries(formData.entries());
-        // TODO nest form rawData to shape of classConfig
-        // ".initialState.h_0" => { initialState: { h_0: ... } }
-        const data = classConfig.parse(rawData);
-        onSubmit(data);
-      }}
-    >
-      <ObjectField schema={ClassConfigJsonSchema} />
-      <DialogFooter>
-        <Button type="submit">Run</Button>
-      </DialogFooter>
-    </form>
-  );
-}
-
 function AddCustomExperiment() {
   const config = classConfig.parse({});
   const [open, setOpen] = createSignal(false);
@@ -149,7 +67,10 @@ function AddCustomExperiment() {
             Configure your custom experiment here.
           </DialogDescription>
         </DialogHeader>
-        <EditExperimentConfig
+        <ExperimentConfigForm
+          // TODO: not sure if passing around ids like this is the proper way to do things in solidjs
+          // note, id ius used as form target in submit button below;
+          id="experiment-config-form"
           config={config}
           onSubmit={(config) => {
             const id = createUniqueId();
@@ -165,6 +86,11 @@ function AddCustomExperiment() {
             setOpen(false);
           }}
         />
+        <DialogFooter>
+          <Button type="submit" form="experiment-config-form">
+            Run
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
