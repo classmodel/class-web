@@ -51,13 +51,17 @@ export default function Home() {
           <For each={analyses}>{(analysis) => AnalysisCard(analysis)}</For>
           <div>
             <div>
-              <Button variant="outline" size="lg" onClick={addAnalysis}>
+              <Button variant="outline" size="lg" onClick={() => addAnalysis()}>
                 Add standard analysis
               </Button>
             </div>
             <div>
-              <Button variant="outline" size="lg">
-                Add timeseries plot (not implemented)
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => addAnalysis("timeseries")}
+              >
+                Add timeseries plot
               </Button>
             </div>
             <div>
