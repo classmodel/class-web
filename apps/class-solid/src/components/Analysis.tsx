@@ -5,7 +5,6 @@ import {
   Card,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardContent,
   CardFooter,
 } from "./ui/card";
@@ -41,23 +40,20 @@ function deleteAnalysis(analysis: Analysis) {
 
 /** Very rudimentary plot showing time series of each experiment globally available
  * It only works if the time axes are equal
- * It isn't reactive
+ * It isn't reactive; would require intercepting the signal to call chart.update()
  */
 export function TimeSeriesPlot() {
-  const expData: { label: string; data: number[]; fill: boolean }[] = [];
-  experiments.forEach((experiment) => {
-    if (experiment.output) {
-      expData.push({
-        label: experiment.id,
-        data: experiment.output.h,
-        fill: false,
-      });
-    }
-  });
-
   const chartData = {
     labels: experiments[0].output?.t,
-    datasets: expData,
+    datasets: experiments
+      .filter((e) => e.output)
+      .map((e) => {
+        return {
+          label: e.id,
+          data: e.output!.h,
+          fill: false,
+        };
+      }),
   };
 
   return <LineChart data={chartData} />;
