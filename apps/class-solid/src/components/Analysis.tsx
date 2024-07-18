@@ -22,13 +22,21 @@ export interface Analysis {
 }
 
 export function addAnalysis(type = "default") {
+  const name = {
+    default: "Final height",
+    timeseries: "Timeseries",
+  }[type];
+
   setAnalyses(analyses.length, {
-    name: "Default analysis",
-    description: "Default analysis",
+    name: name,
     id: createUniqueId(),
     experiments: experiments,
     type: type,
   });
+}
+
+function deleteAnalysis(analysis: Analysis) {
+  setAnalyses(analyses.filter((ana) => ana.id !== analysis.id));
 }
 
 /** Very rudimentary plot showing time series of each experiment globally available
@@ -55,37 +63,38 @@ export function TimeSeriesPlot() {
   return <LineChart data={chartData} />;
 }
 
-function deleteAnalysis(analysis: Analysis) {
-  setAnalyses(analyses.filter((ana) => ana.id !== analysis.id));
-}
-
-function finalHeight(experiment: Experiment) {
-  const h =
-    (experiment.output &&
-      experiment.output.h[experiment.output.h.length - 1]) ||
-    "";
+/** Simply show the final height for each experiment that has output */
+function FinalHeights() {
   return (
-    <div class="mb-2">
-      <p>Experiment id: {experiment.id}</p>
-      <p>Final height: {h}</p>
-    </div>
+    <For each={experiments}>
+      {(experiment, i) => {
+        const h =
+          (experiment.output &&
+            experiment.output.h[experiment.output.h.length - 1]) ||
+          0;
+        return (
+          <div class="mb-2">
+            <p>
+              {experiment.id}: {h.toFixed()} m
+            </p>
+          </div>
+        );
+      }}
+    </For>
   );
 }
 
 export function AnalysisCard(analysis: Analysis) {
   return (
-    <Card class="w-[380px]">
+    <Card class="w-[500px]">
       <CardHeader>
         {/* TODO: make name & description editable */}
         <CardTitle>{analysis.name}</CardTitle>
-        <CardDescription>{analysis.description}</CardDescription>
       </CardHeader>
       <CardContent>
         <Switch fallback={<p>Unknown analysis type</p>}>
           <Match when={analysis.type === "default"}>
-            <For each={analysis.experiments}>
-              {(experiment) => finalHeight(experiment)}
-            </For>
+            <FinalHeights />
           </Match>
           <Match when={analysis.type === "timeseries"}>
             <TimeSeriesPlot />
