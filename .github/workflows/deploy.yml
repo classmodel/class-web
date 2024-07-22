@@ -30,13 +30,14 @@ jobs:
 
       - name: build
         run: pnpm build
+        working-directory: ./apps/class-solid
         env:
           BASE_PATH: "/class-web"
 
       - name: upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ".output/public"
+          path: "./apps/class-solid/.output/public"
 
   deploy:
     name: Deploy
