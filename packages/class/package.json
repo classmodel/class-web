@@ -2,16 +2,23 @@
   "name": "@repo/class",
   "version": "0.0.0",
   "exports": {
-    "./class": "./src/class.ts"
+    "./class": "./src/class.ts",
+    "./config": "./src/config.ts",
+    "./runner": "./src/runner.ts"
   },
   "license": "GPL-3.0-only",
   "scripts": {
-    "lint": "eslint \"**/*.ts\""
+    "lint": "eslint \"**/*.ts\"",
+    "test": "jest",
+    "test:watch": "jext --watch"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@types/jest": "^29.5.12",
     "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.2",
     "typescript": "^5.3.3"
   },
   "dependencies": {

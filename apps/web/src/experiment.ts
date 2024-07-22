@@ -1,10 +1,9 @@
 import {
   ClassConfig,
-  classDefaultConfig,
+  classConfig,
   classDefaultConfigSchema,
-  ClassOutput,
-} from "@repo/class/class";
-
+} from "@repo/class/config";
+import { ClassOutput } from "@repo/class/runner";
 import { counter } from "./utils";
 
 let _id = counter();
@@ -13,7 +12,7 @@ export class Experiment {
   name = "Default experiment";
   description = "Default experiment";
   id = _id.next().value;
-  settings: ClassConfig = classDefaultConfig.parse({});
+  settings: ClassConfig = classConfig.parse({});
   output: ClassOutput = {};
 }
 
@@ -70,7 +69,7 @@ function showSettingsDialog(onConfigure: CallableFunction) {
     const form = article.querySelector("form")!;
     const formData = new FormData(form);
     const formDataObject = Object.fromEntries(formData);
-    const parsedConfig = classDefaultConfig.parse(formDataObject);
+    const parsedConfig = classConfig.parse(formDataObject);
 
     // Get out of the way
     dialog.close();
@@ -87,7 +86,7 @@ function showSettingsDialog(onConfigure: CallableFunction) {
 
 export function buildForm(defaults = classDefaultConfigSchema) {
   // TODO combine "defaults" with previous state
-  const settings = defaults.definitions.classDefaultConfig.properties;
+  const settings = defaults.definitions.classConfig.properties;
   const settingsArray: object[] = [];
   Object.keys(settings).forEach((key) => {
     settingsArray.push({ ...settings[key], name: key });
