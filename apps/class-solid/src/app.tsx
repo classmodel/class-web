@@ -7,7 +7,8 @@ import "./app.css";
 export default function App() {
   return (
     <Router
-      root={props => (
+      base={import.meta.env.SERVER_BASE_URL}
+      root={(props) => (
         <>
           <Nav />
           <Suspense>{props.children}</Suspense>
