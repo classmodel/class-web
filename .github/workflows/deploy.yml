@@ -1,8 +1,9 @@
 name: Deploy to GitHub pages
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - prep-release
 
 permissions:
   contents: read
