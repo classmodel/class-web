@@ -1,33 +1,74 @@
-# `Turborepo` Vite starter
+# CLASS-web
 
-This is an official starter Turborepo.
+This is an implementation of CLASS that runs entirely in the browser.
 
-## Using this example
+The CLASS web application is available at https://classmodel.github.io/class-web.
 
-Run the following command:
+For more information on CLASS, see https://classmodel.github.io/.
+
+## Developers
+
+This repository is a so-called monorepo, where multiple packages and application
+can easily be developed in tandem.
+
+We used [TurboRepo](https://turbo.build/repo) for the initial setup, which uses
+[pnpm workspaces](https://pnpm.io/workspaces) under the hood. As such, it is
+possible to do advanced tricks with Turbo, such as "lint/test/build all
+apps/packages at once with `turbo build`", and share tooling configurations
+across packages/apps, but since this repo is small, we will not rely too much on
+these features.
+
+Currently the repo is home to the following:
+
+- packages/
+  - class: reimplementation of CLASS in typescript
+  - config-eslint: shared configuration for eslint
+  - config-typescript: shared configuration for typescript
+- apps/
+  - class-solid: web application with a graphical user interface for CLASS
+
+## Local build
+
+To run a local development version:
 
 ```sh
-npx create-turbo@latest -e with-vite
+git clone git@github.com:classmodel/class-web.git
+cd class-web/apps/class-solid
+pnpm install
+pnpm run dev
 ```
 
-## What's inside?
+## Tech stack
 
-This Turborepo includes the following packages and apps:
+The CLASS package is written in typescript. It uses [zod](https://zod.dev/) for
+the configuration and runtime validation. Zod can be converted to/from
+[JSONSchema](https://json-schema.org/), which is ideal for sharing the
+configuration between web-app, library code, and perhaps other implementations
+of CLASS as well.
 
-### Apps and Packages
+The web application is build with [solid.js](https://docs.solidjs.com/). Solid
+has a relatively simple model for building reactive web applications. With its
+metaframework [SolidStart](https://docs.solidjs.com/solid-start) it is quite
+easy to pre-render the web application as static pages that can be hosted on
+github pages.
 
-- `docs`: a vanilla [vite](https://vitejs.dev) ts app
-- `web`: another vanilla [vite](https://vitejs.dev) ts app
-- `@repo/ui`: a stub component & utility library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: shared `eslint` configurations
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+We've chosen [SolidUI](https://www.solid-ui.com/) as the basis for the UI. Build
+after [ShadCN](), SolidUI provides good-looking, accessible components (powered
+by [Kobalte](https://kobalte.dev/docs/core/overview/introduction) and
+[tailwind](https://tailwindcss.com/)) that can be copy-pasted into the web
+application and tweaked further as seen fit. It can also do charts, using
+[chart.js](https://www.chartjs.org/), though we might deviate from that later.
 
-Each package and app is 100% [TypeScript](https://www.typescriptlang.org/).
+**Further plans/ideas**
 
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+- Use [biome](https://biomejs.dev/) for linting/formatting
+- Use [modular forms](https://modularforms.dev/) for form state management/validation
+- Use [auto](https://intuit.github.io/auto/index) for managing versions/releases
+- Use [d3.js](https://d3js.org/) for more low-level charting
+- Use [web workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) to run CLASS off the main thread
+- Use [AssemblyScript](https://www.assemblyscript.org/) or
+  [rust](https://www.rust-lang.org/what/wasm) for a faster implementation of
+  CLASS running on web assembly.
+- Test with node test runner rather than jest (for the package) and/or use
+  [playwright](https://playwright.dev/) and/or
+  [storybook](https://storybook.js.org/) (for the web app)
