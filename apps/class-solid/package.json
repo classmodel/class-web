@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "vinxi dev",
     "build": "vinxi build",
-    "start": "vinxi start"
+    "start": "serve --no-clipboard .output/public"
   },
   "dependencies": {
     "@kobalte/core": "^0.13.3",
@@ -16,6 +16,7 @@
     "chart.js": "^4.4.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "comlink": "^4.4.1",
     "postcss": "^8.4.38",
     "solid-js": "^1.8.18",
     "tailwind-merge": "^2.4.0",
@@ -25,5 +26,8 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "serve": "^14.2.3"
   }
 }
