@@ -3,6 +3,7 @@ name: Code quality
 on:
   push:
   pull_request:
+    actions: [opened, synchronize, reopened]
 
 jobs:
   quality:
