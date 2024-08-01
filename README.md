@@ -57,9 +57,11 @@ by [Kobalte](https://kobalte.dev/docs/core/overview/introduction) and
 application and tweaked further as seen fit. It can also do charts, using
 [chart.js](https://www.chartjs.org/), though we might deviate from that later.
 
+To format and lint the code, we use [biome](https://biomejs.dev/) as it combines eslint, prettier in one package.
+To check types, we use typescript script `pnpm typecheck` as other commands ignore types.
+
 **Further plans/ideas**
 
-- Use [biome](https://biomejs.dev/) for linting/formatting
 - Use [modular forms](https://modularforms.dev/) for form state management/validation
 - Use [auto](https://intuit.github.io/auto/index) for managing versions/releases
 - Use [d3.js](https://d3js.org/) for more low-level charting
