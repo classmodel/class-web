@@ -22,7 +22,7 @@ import {
   DialogFooter,
 } from "./ui/dialog";
 import { experiments, setExperiments } from "~/lib/store";
-import { runner } from "~/lib/runner";
+import { runClass } from "~/lib/runner";
 
 export interface Experiment {
   name: string;
@@ -35,7 +35,7 @@ export interface Experiment {
 export async function addDefaultExperiment() {
   const id = createUniqueId();
   const config = classConfig.parse({});
-  const output = await runner.runClass(config);
+  const output = await runClass(config);
   const newExperiment = {
     name: "My experiment",
     description: "Default experiment",
@@ -68,7 +68,7 @@ export function AddCustomExperiment() {
           config={config}
           onSubmit={async (config) => {
             const id = createUniqueId();
-            const output = await runner.runClass(config);
+            const output = await runClass(config);
             const newExperiment = {
               name: "My experiment",
               description: "Custom experiment",
