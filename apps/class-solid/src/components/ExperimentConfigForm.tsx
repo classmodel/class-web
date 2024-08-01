@@ -10,7 +10,7 @@ import {
 	TextFieldLabel,
 } from "~/components/ui/text-field";
 
-const ClassConfigJsonSchema = classDefaultConfigSchema.definitions!.classConfig;
+const ClassConfigJsonSchema = classDefaultConfigSchema.definitions?.classConfig;
 
 /**
  * Nest form rawData to shape of classConfig

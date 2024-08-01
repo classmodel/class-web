@@ -94,7 +94,7 @@ const BaseChart: Component<ChartProps> = (rawProps) => {
 			() => props.data,
 			() => {
 				chart()!.data = props.data;
-				chart()!.update();
+				chart()?.update();
 			},
 			{ defer: true },
 		),
@@ -105,7 +105,7 @@ const BaseChart: Component<ChartProps> = (rawProps) => {
 			() => props.options,
 			() => {
 				chart()!.options = props.options;
-				chart()!.update();
+				chart()?.update();
 			},
 			{ defer: true },
 		),
@@ -115,7 +115,7 @@ const BaseChart: Component<ChartProps> = (rawProps) => {
 		on(
 			[() => props.width, () => props.height],
 			() => {
-				chart()!.resize(props.width, props.height);
+				chart()?.resize(props.width, props.height);
 			},
 			{ defer: true },
 		),
@@ -125,10 +125,10 @@ const BaseChart: Component<ChartProps> = (rawProps) => {
 		on(
 			() => props.type,
 			() => {
-				const dimensions = [chart()!.width, chart()!.height];
-				chart()!.destroy();
+				const dimensions = [chart()?.width, chart()?.height];
+				chart()?.destroy();
 				init();
-				chart()!.resize(...dimensions);
+				chart()?.resize(...dimensions);
 			},
 			{ defer: true },
 		),
@@ -164,7 +164,7 @@ function showTooltip(context: ChartContext) {
 	}
 
 	el.className = `p-2 bg-card text-card-foreground rounded-lg border shadow-sm text-sm ${
-		model.yAlign ?? `no-transform`
+		model.yAlign ?? "no-transform"
 	}`;
 
 	let content = "";
@@ -183,7 +183,7 @@ function showTooltip(context: ChartContext) {
           ${line}
         </div>`;
 	});
-	content += `</div>`;
+	content += "</div>";
 
 	el.innerHTML = content;
 

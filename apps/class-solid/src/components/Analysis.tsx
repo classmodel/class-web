@@ -50,7 +50,7 @@ export function TimeSeriesPlot() {
 			.map((e) => {
 				return {
 					label: e.id,
-					data: e.output!.h,
+					data: e.output?.h,
 					fill: false,
 				};
 			}),
@@ -65,8 +65,7 @@ function FinalHeights() {
 		<For each={experiments}>
 			{(experiment, i) => {
 				const h =
-					(experiment.output &&
-						experiment.output.h[experiment.output.h.length - 1]) ||
+					(experiment.output?.h[experiment.output.h.length - 1]) ||
 					0;
 				return (
 					<div class="mb-2">

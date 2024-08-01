@@ -14,7 +14,7 @@ export function runClass(config: ClassConfig): ClassOutput {
 	while (model.t < config.timeControl.runtime) {
 		model.update();
 
-		if (model.t % 60 == 0) {
+		if (model.t % 60 === 0) {
 			output.t.push(model.t);
 			output.h.push(model.h);
 		}
