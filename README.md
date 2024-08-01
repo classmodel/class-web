@@ -25,14 +25,6 @@ Currently the repo is home to the following:
 - apps/
   - class-solid: web application with a graphical user interface for CLASS
 
-To run linter and formatter use
-
-```shell
-pnpm format-and-lint
-# To fix some of the issues automatically use
-pnpm format-and-lint:fix
-```
-
 ## Local build
 
 To run a local development version:
@@ -42,6 +34,20 @@ git clone git@github.com:classmodel/class-web.git
 cd class-web/apps/class-solid
 pnpm install
 pnpm run dev
+```
+
+## Linter & formatter
+
+We use [biome](https://biomejs.dev/) to lint and format the code. 
+The following commands are available
+
+```shell
+# To run linter and formatter use
+pnpm format-and-lint
+# To fix formatting and some lint errors run
+pnpm format-and-lint:fix
+# To run other biome comands use
+pnpm exec biome --help
 ```
 
 ## Tech stack
