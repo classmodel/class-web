@@ -9,8 +9,8 @@ import {
   CardFooter,
 } from "./ui/card";
 import { ClassConfig, classConfig } from "@repo/class/config";
-import { ClassOutput, runClass } from "@repo/class/runner";
-import { createUniqueId, createSignal } from "solid-js";
+import { type ClassOutput } from "@repo/class/runner";
+import { createUniqueId, createSignal, Show } from "solid-js";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import {
   Dialog,
@@ -22,6 +22,7 @@ import {
   DialogFooter,
 } from "./ui/dialog";
 import { experiments, setExperiments } from "~/lib/store";
+import { runner } from "~/lib/runner";
 
 export interface Experiment {
   name: string;
@@ -31,10 +32,10 @@ export interface Experiment {
   output: ClassOutput | undefined;
 }
 
-export function addDefaultExperiment() {
+export async function addDefaultExperiment() {
   const id = createUniqueId();
   const config = classConfig.parse({});
-  const output = runClass(config);
+  const output = await runner.runClass(config);
   const newExperiment = {
     name: "My experiment",
     description: "Default experiment",
@@ -65,9 +66,9 @@ export function AddCustomExperiment() {
           // note, id ius used as form target in submit button below;
           id="experiment-config-form"
           config={config}
-          onSubmit={(config) => {
+          onSubmit={async (config) => {
             const id = createUniqueId();
-            const output = runClass(config);
+            const output = await runner.runClass(config);
             const newExperiment = {
               name: "My experiment",
               description: "Custom experiment",
@@ -101,7 +102,17 @@ export function ExperimentCard(experiment: Experiment) {
         <CardTitle>{experiment.name}</CardTitle>
         <CardDescription>{experiment.id}</CardDescription>
       </CardHeader>
-      <CardContent>{experiment.description}</CardContent>
+      <CardContent>
+        {experiment.description}
+        <Show when={experiment.output} fallback={<p>No output</p>}>
+          <details>
+            <summary>Output</summary>
+            <pre class="w-full h-60 overflow-auto">
+              {JSON.stringify(experiment.output, undefined, 2)}
+            </pre>
+          </details>
+        </Show>
+      </CardContent>
       <CardFooter>
         {/* TODO: implement download functionality */}
         <Button variant="outline">
