@@ -1,6 +1,6 @@
 import { CLASS } from "./class";
 import { classConfig } from "./config";
-import { ClassOutput } from "./runner";
+import type { ClassOutput } from "./runner";
 
 const config = classConfig.parse({});
 const model = new CLASS(config);

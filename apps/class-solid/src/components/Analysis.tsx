@@ -9,7 +9,7 @@ import {
 	CardFooter,
 } from "./ui/card";
 import { Button } from "./ui/button";
-import { Experiment } from "./Experiment";
+import type { Experiment } from "./Experiment";
 import { LineChart } from "./ui/charts";
 
 export interface Analysis {

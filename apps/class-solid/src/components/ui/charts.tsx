@@ -9,7 +9,7 @@ import {
 } from "solid-js";
 import { unwrap } from "solid-js/store";
 
-import { mergeRefs, Ref } from "@solid-primitives/refs";
+import { mergeRefs, type Ref } from "@solid-primitives/refs";
 import type {
 	ChartComponent,
 	ChartData,

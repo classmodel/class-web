@@ -1,5 +1,5 @@
 import { CLASS } from "./class";
-import { classConfig, ClassConfig } from "./config";
+import { classConfig, type ClassConfig } from "./config";
 
 export type ClassOutput = Record<string, number[]>;
 

@@ -6,7 +6,7 @@ import {
 import { For, Switch, Match } from "solid-js";
 import {
 	classConfig,
-	ClassConfig,
+	type ClassConfig,
 	classDefaultConfigSchema,
 } from "@classmodel/class/config";
 
