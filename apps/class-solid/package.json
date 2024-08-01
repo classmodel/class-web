@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@kobalte/core": "^0.13.3",
-    "@repo/class": "workspace:*",
+    "@classmodel/class": "workspace:*",
     "@solid-primitives/refs": "^1.0.8",
     "@solidjs/router": "^0.14.1",
     "@solidjs/start": "^1.0.4",
