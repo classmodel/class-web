@@ -1,29 +1,29 @@
 {
-  "name": "class-solid",
-  "type": "module",
-  "scripts": {
-    "dev": "vinxi dev",
-    "build": "vinxi build",
-    "start": "vinxi start"
-  },
-  "dependencies": {
-    "@kobalte/core": "^0.13.3",
-    "@classmodel/class": "workspace:*",
-    "@solid-primitives/refs": "^1.0.8",
-    "@solidjs/router": "^0.14.1",
-    "@solidjs/start": "^1.0.4",
-    "autoprefixer": "^10.4.19",
-    "chart.js": "^4.4.3",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.1",
-    "postcss": "^8.4.38",
-    "solid-js": "^1.8.18",
-    "tailwind-merge": "^2.4.0",
-    "tailwindcss": "^3.4.4",
-    "tailwindcss-animate": "^1.0.7",
-    "vinxi": "^0.3.14"
-  },
-  "engines": {
-    "node": ">=18"
-  }
+	"name": "class-solid",
+	"type": "module",
+	"scripts": {
+		"dev": "vinxi dev",
+		"build": "vinxi build",
+		"start": "vinxi start"
+	},
+	"dependencies": {
+		"@kobalte/core": "^0.13.3",
+		"@classmodel/class": "workspace:*",
+		"@solid-primitives/refs": "^1.0.8",
+		"@solidjs/router": "^0.14.1",
+		"@solidjs/start": "^1.0.4",
+		"autoprefixer": "^10.4.19",
+		"chart.js": "^4.4.3",
+		"class-variance-authority": "^0.7.0",
+		"clsx": "^2.1.1",
+		"postcss": "^8.4.38",
+		"solid-js": "^1.8.18",
+		"tailwind-merge": "^2.4.0",
+		"tailwindcss": "^3.4.4",
+		"tailwindcss-animate": "^1.0.7",
+		"vinxi": "^0.3.14"
+	},
+	"engines": {
+		"node": ">=18"
+	}
 }
