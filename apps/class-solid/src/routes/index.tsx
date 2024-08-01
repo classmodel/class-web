@@ -1,15 +1,15 @@
 import { For, Show } from "solid-js";
-import { Button } from "~/components/ui/button";
-import { Flex } from "~/components/ui/flex";
 import {
+	AddCustomExperiment,
 	ExperimentCard,
 	addDefaultExperiment,
-	AddCustomExperiment,
 } from "~/components/Experiment";
+import { Button } from "~/components/ui/button";
+import { Flex } from "~/components/ui/flex";
 
+import { AnalysisCard, addAnalysis } from "~/components/Analysis";
 import { experiments } from "~/lib/store";
 import { analyses } from "~/lib/store";
-import { addAnalysis, AnalysisCard } from "~/components/Analysis";
 
 export default function Home() {
 	return (

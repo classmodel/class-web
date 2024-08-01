@@ -1,4 +1,4 @@
-import { type JSX, splitProps, type ValidComponent } from "solid-js";
+import { type JSX, type ValidComponent, splitProps } from "solid-js";
 
 import * as ButtonPrimitive from "@kobalte/core/button";
 import type { PolymorphicProps } from "@kobalte/core/polymorphic";

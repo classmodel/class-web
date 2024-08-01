@@ -1,15 +1,15 @@
-import { createUniqueId, For, Match, Switch } from "solid-js";
-import { setAnalyses, analyses, experiments } from "~/lib/store";
-import { MdiDownload, MdiCog, MdiContentCopy, MdiDelete } from "./icons";
+import { For, Match, Switch, createUniqueId } from "solid-js";
+import { analyses, experiments, setAnalyses } from "~/lib/store";
+import type { Experiment } from "./Experiment";
+import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
+import { Button } from "./ui/button";
 import {
 	Card,
-	CardHeader,
-	CardTitle,
 	CardContent,
 	CardFooter,
+	CardHeader,
+	CardTitle,
 } from "./ui/card";
-import { Button } from "./ui/button";
-import type { Experiment } from "./Experiment";
 import { LineChart } from "./ui/charts";
 
 export interface Analysis {

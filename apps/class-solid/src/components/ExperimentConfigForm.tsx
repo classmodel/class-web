@@ -1,14 +1,14 @@
 import {
+	type ClassConfig,
+	classConfig,
+	classDefaultConfigSchema,
+} from "@classmodel/class/config";
+import { For, Match, Switch } from "solid-js";
+import {
 	TextField,
 	TextFieldInput,
 	TextFieldLabel,
 } from "~/components/ui/text-field";
-import { For, Switch, Match } from "solid-js";
-import {
-	classConfig,
-	type ClassConfig,
-	classDefaultConfigSchema,
-} from "@classmodel/class/config";
 
 const ClassConfigJsonSchema = classDefaultConfigSchema.definitions!.classConfig;
 

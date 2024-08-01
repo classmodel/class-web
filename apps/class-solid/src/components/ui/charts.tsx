@@ -9,7 +9,7 @@ import {
 } from "solid-js";
 import { unwrap } from "solid-js/store";
 
-import { mergeRefs, type Ref } from "@solid-primitives/refs";
+import { type Ref, mergeRefs } from "@solid-primitives/refs";
 import type {
 	ChartComponent,
 	ChartData,
@@ -31,9 +31,9 @@ import {
 	DoughnutController,
 	Filler,
 	Legend,
-	LinearScale,
 	LineController,
 	LineElement,
+	LinearScale,
 	PieController,
 	PointElement,
 	PolarAreaController,

@@ -1,27 +1,27 @@
-import { Button } from "~/components/ui/button";
-import { MdiDownload, MdiCog, MdiContentCopy, MdiDelete } from "./icons";
-import {
-	Card,
-	CardHeader,
-	CardTitle,
-	CardDescription,
-	CardContent,
-	CardFooter,
-} from "./ui/card";
 import { type ClassConfig, classConfig } from "@classmodel/class/config";
 import { type ClassOutput, runClass } from "@classmodel/class/runner";
-import { createUniqueId, createSignal } from "solid-js";
+import { createSignal, createUniqueId } from "solid-js";
+import { Button } from "~/components/ui/button";
+import { experiments, setExperiments } from "~/lib/store";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
+import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "./ui/card";
 import {
 	Dialog,
-	DialogTrigger,
 	DialogContent,
-	DialogHeader,
-	DialogTitle,
 	DialogDescription,
 	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
 } from "./ui/dialog";
-import { experiments, setExperiments } from "~/lib/store";
 
 export interface Experiment {
 	name: string;
