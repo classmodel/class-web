@@ -22,8 +22,6 @@ Currently the repo is home to the following:
 
 - packages/
   - class: reimplementation of CLASS in typescript
-  - config-eslint: shared configuration for eslint
-  - config-typescript: shared configuration for typescript
 - apps/
   - class-solid: web application with a graphical user interface for CLASS
 
