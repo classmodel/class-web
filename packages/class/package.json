@@ -11,6 +11,7 @@
   "scripts": {
     "lint": "eslint \"**/*.ts\"",
     "test": "jest",
+    "typecheck": "tsc --noEmit",
     "test:watch": "jext --watch"
   },
   "devDependencies": {
