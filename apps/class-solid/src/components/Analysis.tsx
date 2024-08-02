@@ -51,7 +51,7 @@ export function TimeSeriesPlot() {
       .map((e) => {
         return {
           label: e.id,
-          data: e.output == undefined ? [null] : e.output.h,
+          data: e.output === undefined ? [null] : e.output.h,
           fill: false,
         };
       }),

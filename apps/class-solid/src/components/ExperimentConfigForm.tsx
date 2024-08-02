@@ -16,7 +16,10 @@ const ClassConfigJsonSchema = classDefaultConfigSchema.definitions?.classConfig;
  * Nest form rawData to shape of classConfig
  * "initialState.h_0" => { initialState: { h_0: ... } }
  */
+
+// biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
 function inflate(rawData: { [key: string]: any }) {
+  // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
   const config: { [key: string]: any } = {};
 
   for (const key in rawData) {
@@ -67,6 +70,7 @@ export function ExperimentConfigForm({
   );
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
 function ObjectField({ schema, name = "" }: { schema: any; name?: string }) {
   // name can be empty, but only for root, which should be treated differently
   const isRoot = name === "";
@@ -100,6 +104,7 @@ function ObjectField({ schema, name = "" }: { schema: any; name?: string }) {
   );
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
 function PropField({ name, schema }: { name: string; schema: any }) {
   return (
     <Switch fallback={<p>Unknown type</p>}>
@@ -116,6 +121,7 @@ function PropField({ name, schema }: { name: string; schema: any }) {
   );
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
 function MyTextField({ name, schema }: { name: string; schema: any }) {
   return (
     <TextField class="grid w-full max-w-sm items-center gap-1.5">

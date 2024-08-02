@@ -93,6 +93,7 @@ const BaseChart: Component<ChartProps> = (rawProps) => {
     on(
       () => props.data,
       () => {
+        // biome-ignore lint/style/noNonNullAssertion: generated code
         chart()!.data = props.data;
         chart()?.update();
       },
@@ -104,6 +105,7 @@ const BaseChart: Component<ChartProps> = (rawProps) => {
     on(
       () => props.options,
       () => {
+        // biome-ignore lint/style/noNonNullAssertion: generated code
         chart()!.options = props.options;
         chart()?.update();
       },
@@ -169,6 +171,7 @@ function showTooltip(context: ChartContext) {
 
   let content = "";
 
+  // biome-ignore lint/complexity/noForEach: generated code
   model.title.forEach((title) => {
     content += `<h3 class="font-semibold leading-none tracking-tight">${title}</h3>`;
   });
