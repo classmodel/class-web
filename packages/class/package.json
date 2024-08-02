@@ -4,12 +4,14 @@
   "exports": {
     "./class": "./src/class.ts",
     "./config": "./src/config.ts",
-    "./runner": "./src/runner.ts"
+    "./runner": "./src/runner.ts",
+    "./bmi": "./src/bmi.ts"
   },
   "license": "GPL-3.0-only",
   "scripts": {
     "lint": "eslint \"**/*.ts\"",
     "test": "jest",
+    "typecheck": "tsc --noEmit",
     "test:watch": "jext --watch"
   },
   "devDependencies": {

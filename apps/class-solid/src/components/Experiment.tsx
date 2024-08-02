@@ -9,7 +9,7 @@ import {
   CardFooter,
 } from "./ui/card";
 import { ClassConfig, classConfig } from "@classmodel/class/config";
-import { ClassOutput, runClass } from "@classmodel/class/runner";
+import { type ClassOutput } from "@classmodel/class/runner";
 import { createUniqueId, createSignal } from "solid-js";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import {
@@ -22,6 +22,7 @@ import {
   DialogFooter,
 } from "./ui/dialog";
 import { experiments, setExperiments } from "~/lib/store";
+import { runClass } from "~/lib/runner";
 
 export interface Experiment {
   name: string;
@@ -31,10 +32,10 @@ export interface Experiment {
   output: ClassOutput | undefined;
 }
 
-export function addDefaultExperiment() {
+export async function addDefaultExperiment() {
   const id = createUniqueId();
   const config = classConfig.parse({});
-  const output = runClass(config);
+  const output = await runClass(config);
   const newExperiment = {
     name: "My experiment",
     description: "Default experiment",
@@ -65,9 +66,9 @@ export function AddCustomExperiment() {
           // note, id ius used as form target in submit button below;
           id="experiment-config-form"
           config={config}
-          onSubmit={(config) => {
+          onSubmit={async (config) => {
             const id = createUniqueId();
-            const output = runClass(config);
+            const output = await runClass(config);
             const newExperiment = {
               name: "My experiment",
               description: "Custom experiment",
@@ -101,7 +102,9 @@ export function ExperimentCard(experiment: Experiment) {
         <CardTitle>{experiment.name}</CardTitle>
         <CardDescription>{experiment.id}</CardDescription>
       </CardHeader>
-      <CardContent>{experiment.description}</CardContent>
+      <CardContent>
+        {experiment.description}
+      </CardContent>
       <CardFooter>
         {/* TODO: implement download functionality */}
         <Button variant="outline">
