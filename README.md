@@ -1,5 +1,8 @@
 # CLASS-web
 
+[![github repo badge](https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue)]([https://github.com//classmodel/class-web](https://github.com//classmodel/class-web))
+[![Code quality](https://github.com/classmodel/class-web/actions/workflows/quality.yml/badge.svg)](https://github.com/classmodel/class-web/actions/workflows/quality.yml)
+
 This is an implementation of CLASS that runs entirely in the browser.
 
 The CLASS web application is available at https://classmodel.github.io/class-web.
