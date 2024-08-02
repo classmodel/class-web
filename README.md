@@ -69,7 +69,8 @@ The end-to-end tests are written with [playwright](https://playwright.dev/).
 The tests are in `apps/class-solid/tests/*.spec.ts` and can be run with the following command:
 
 ```shell
-pnpm --filter=./apps/class-solid exec playwright test
+cd ./apps/class-solid
+pnpm exec playwright test
 ```
 
 ## Tech stack
