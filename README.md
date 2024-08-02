@@ -65,6 +65,15 @@ The unit tests can be run with the following command:
 pnpm test
 ```
 
+To get test coverage
+
+```shell
+# Does not work via pnpm script so need to call node directly
+node --import tsx --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=lcov.info src/*.test.ts
+# To generate a html report use genhtml which is part of lcov OS package
+genhtml lcov.info --output-directory coverage
+```
+
 The end-to-end tests are written with [playwright](https://playwright.dev/).
 The tests are in `apps/class-solid/tests/*.spec.ts` and can be run with the following command:
 

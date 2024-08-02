@@ -22,6 +22,6 @@
     "zod-to-json-schema": "^3.23.1"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20.16.0"
   }
 }
