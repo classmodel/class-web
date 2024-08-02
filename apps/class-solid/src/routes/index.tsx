@@ -13,12 +13,12 @@ import { analyses } from "~/lib/store";
 
 export default function Home() {
   return (
-    <main class="text-center mx-auto text-gray-700 p-4">
-      <h1 class="max-6-xs text-6xl text-sky-700 font-thin uppercase my-16">
+    <main class="mx-auto p-4 text-center text-gray-700">
+      <h1 class="max-6-xs my-16 font-thin text-6xl text-sky-700 uppercase">
         Welcome to CLASS
       </h1>
 
-      <h2 class="text-4xl my-8">Experiments</h2>
+      <h2 class="my-8 text-4xl">Experiments</h2>
       <Flex justifyContent="center" class="gap-4">
         <For each={experiments}>
           {(experiment) => ExperimentCard(experiment)}
@@ -45,7 +45,7 @@ export default function Home() {
         </div>
       </Flex>
 
-      <h2 class="text-4xl my-8">Analysis</h2>
+      <h2 class="my-8 text-4xl">Analysis</h2>
       <Show when={experiments.length} fallback={<p>Add an experiment first</p>}>
         <Flex justifyContent="center" class="gap-4">
           <For each={analyses}>{(analysis) => AnalysisCard(analysis)}</For>
