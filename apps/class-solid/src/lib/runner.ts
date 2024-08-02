@@ -1,5 +1,5 @@
-import type { BmiClass } from "@repo/class/bmi";
-import type { ClassConfig } from "@repo/class/config";
+import type { BmiClass } from "@classmodel/class/bmi";
+import type { ClassConfig } from "@classmodel/class/config";
 import { wrap } from "comlink";
 
 const worker = new Worker(new URL("./worker.ts", import.meta.url), {

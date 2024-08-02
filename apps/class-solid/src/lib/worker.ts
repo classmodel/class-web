@@ -1,4 +1,4 @@
-import { BmiClass } from "@repo/class/bmi";
+import { BmiClass } from "@classmodel/class/bmi";
 import { expose } from "comlink";
 
 expose(BmiClass);
