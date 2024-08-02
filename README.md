@@ -53,6 +53,8 @@ pnpm format-and-lint:fix
 pnpm exec biome --help
 ```
 
+To check types, you can run the `pnpm typecheck` command as other commands ignore types.
+
 ## Tech stack
 
 The CLASS package is written in typescript. It uses [zod](https://zod.dev/) for
@@ -75,7 +77,6 @@ application and tweaked further as seen fit. It can also do charts, using
 [chart.js](https://www.chartjs.org/), though we might deviate from that later.
 
 To format and lint the code, we use [biome](https://biomejs.dev/) as it combines eslint, prettier in one package.
-To check types, we use typescript script `pnpm typecheck` as other commands ignore types.
 
 **Further plans/ideas**
 
