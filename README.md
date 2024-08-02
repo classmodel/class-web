@@ -76,6 +76,11 @@ by [Kobalte](https://kobalte.dev/docs/core/overview/introduction) and
 application and tweaked further as seen fit. It can also do charts, using
 [chart.js](https://www.chartjs.org/), though we might deviate from that later.
 
+To expose the model in a standard way we use the [Basic Model Interface (BMI)](https://bmi.readthedocs.io/).
+
+To prevent the user interface from getting blocked by running the model we use a [Web worker](https://developer.mozilla.org/en-US/docs/Web/API/Worker) to run the computation in a background task/thread.
+A Web worker uses messages passing to communicate, this does not fit with the Basic Model Interface so we use [comlink](https://github.com/GoogleChromeLabs/comlink) to wrap the Web Worker in a BMI class.
+
 To format and lint the code, we use [biome](https://biomejs.dev/) as it combines eslint, prettier in one package.
 
 **Further plans/ideas**

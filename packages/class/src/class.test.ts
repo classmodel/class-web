@@ -1,6 +1,6 @@
 import { CLASS } from "./class";
 import { classConfig } from "./config";
-import { ClassOutput, runClass } from "./runner";
+import { runClass } from "./runner";
 
 describe("CLASS model", () => {
   it("can be instantiated with default config", () => {
