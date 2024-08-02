@@ -1,15 +1,15 @@
-import { createUniqueId, For, Match, Switch } from "solid-js";
-import { setAnalyses, analyses, experiments } from "~/lib/store";
-import { MdiDownload, MdiCog, MdiContentCopy, MdiDelete } from "./icons";
+import { For, Match, Switch, createUniqueId } from "solid-js";
+import { analyses, experiments, setAnalyses } from "~/lib/store";
+import type { Experiment } from "./Experiment";
+import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
+import { Button } from "./ui/button";
 import {
   Card,
-  CardHeader,
-  CardTitle,
   CardContent,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from "./ui/card";
-import { Button } from "./ui/button";
-import { Experiment } from "./Experiment";
 import { LineChart } from "./ui/charts";
 
 export interface Analysis {
@@ -44,13 +44,14 @@ function deleteAnalysis(analysis: Analysis) {
  */
 export function TimeSeriesPlot() {
   const chartData = {
-    labels: experiments[0].output?.t,
+    labels:
+      experiments[0].output === undefined ? undefined : experiments[0].output.t,
     datasets: experiments
       .filter((e) => e.output)
       .map((e) => {
         return {
           label: e.id,
-          data: e.output!.h,
+          data: e.output === undefined ? [null] : e.output.h,
           fill: false,
         };
       }),
@@ -64,10 +65,7 @@ function FinalHeights() {
   return (
     <For each={experiments}>
       {(experiment, i) => {
-        const h =
-          (experiment.output &&
-            experiment.output.h[experiment.output.h.length - 1]) ||
-          0;
+        const h = experiment.output?.h[experiment.output.h.length - 1] || 0;
         return (
           <div class="mb-2">
             <p>

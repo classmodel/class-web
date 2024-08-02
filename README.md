@@ -1,5 +1,8 @@
 # CLASS-web
 
+[![github repo badge](https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue)]([https://github.com//classmodel/class-web](https://github.com//classmodel/class-web))
+[![Code quality](https://github.com/classmodel/class-web/actions/workflows/quality.yml/badge.svg)](https://github.com/classmodel/class-web/actions/workflows/quality.yml)
+
 This is an implementation of  the **C**hemistry **L**and-surface **A**tmosphere **S**oil **S**lab (CLASS) model that runs entirely in the browser.
 
 The CLASS web application is available at https://classmodel.github.io/class-web.
@@ -22,8 +25,6 @@ Currently the repo is home to the following:
 
 - packages/
   - class: reimplementation of CLASS in typescript
-  - config-eslint: shared configuration for eslint
-  - config-typescript: shared configuration for typescript
 - apps/
   - class-solid: web application with a graphical user interface for CLASS
 
@@ -37,6 +38,22 @@ cd class-web
 pnpm install
 pnpm dev
 ```
+
+## Linter & formatter
+
+We use [biome](https://biomejs.dev/) to lint and format the code. 
+The following commands are available
+
+```shell
+# To run linter and formatter use
+pnpm format-and-lint
+# To fix formatting and some lint errors run
+pnpm format-and-lint:fix
+# To run other biome comands use
+pnpm exec biome --help
+```
+
+To check types, you can run the `pnpm typecheck` command as other commands ignore types.
 
 ## Tech stack
 
@@ -64,9 +81,10 @@ To expose the model in a standard way we use the [Basic Model Interface (BMI)](h
 To prevent the user interface from getting blocked by running the model we use a [Web worker](https://developer.mozilla.org/en-US/docs/Web/API/Worker) to run the computation in a background task/thread.
 A Web worker uses messages passing to communicate, this does not fit with the Basic Model Interface so we use [comlink](https://github.com/GoogleChromeLabs/comlink) to wrap the Web Worker in a BMI class.
 
+To format and lint the code, we use [biome](https://biomejs.dev/) as it combines eslint, prettier in one package.
+
 **Further plans/ideas**
 
-- Use [biome](https://biomejs.dev/) for linting/formatting
 - Use [modular forms](https://modularforms.dev/) for form state management/validation
 - Use [auto](https://intuit.github.io/auto/index) for managing versions/releases
 - Use [d3.js](https://d3js.org/) for more low-level charting

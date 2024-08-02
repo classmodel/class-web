@@ -94,5 +94,5 @@ export const classConfig = z.object({
 export type ClassConfig = z.infer<typeof classConfig>;
 export const classDefaultConfigSchema = zodToJsonSchema(
   classConfig,
-  "classConfig"
+  "classConfig",
 );

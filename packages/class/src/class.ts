@@ -1,4 +1,4 @@
-import { ClassConfig } from "./config";
+import type { ClassConfig } from "./config";
 
 // Constants
 const rho = 1.2; /** Density of air [kg m-3] */
@@ -29,7 +29,7 @@ export class CLASS {
   dtheta: number;
   q: number;
   dq: number;
-  t: number = 0;
+  t = 0;
 
   /**
    * Create object and initialize the model state

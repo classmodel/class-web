@@ -9,16 +9,12 @@
   },
   "license": "GPL-3.0-only",
   "scripts": {
-    "lint": "eslint \"**/*.ts\"",
     "test": "jest",
-    "typecheck": "tsc --noEmit",
-    "test:watch": "jext --watch"
+    "test:watch": "jext --watch",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@classmodel/eslint-config": "workspace:*",
-    "@classmodel/typescript-config": "workspace:*",
     "@types/jest": "^29.5.12",
-    "eslint": "^8.57.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.2",
     "typescript": "^5.3.3"

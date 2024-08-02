@@ -1,28 +1,27 @@
+import { type ClassConfig, classConfig } from "@classmodel/class/config";
+import { type ClassOutput, runClass } from "@classmodel/class/runner";
+import { createSignal, createUniqueId } from "solid-js";
 import { Button } from "~/components/ui/button";
-import { MdiDownload, MdiCog, MdiContentCopy, MdiDelete } from "./icons";
+import { experiments, setExperiments } from "~/lib/store";
+import { ExperimentConfigForm } from "./ExperimentConfigForm";
+import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import {
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from "./ui/card";
-import { ClassConfig, classConfig } from "@classmodel/class/config";
-import { type ClassOutput } from "@classmodel/class/runner";
-import { createUniqueId, createSignal } from "solid-js";
-import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "./ui/dialog";
-import { experiments, setExperiments } from "~/lib/store";
-import { runClass } from "~/lib/runner";
 
 export interface Experiment {
   name: string;
@@ -102,9 +101,7 @@ export function ExperimentCard(experiment: Experiment) {
         <CardTitle>{experiment.name}</CardTitle>
         <CardDescription>{experiment.id}</CardDescription>
       </CardHeader>
-      <CardContent>
-        {experiment.description}
-      </CardContent>
+      <CardContent>{experiment.description}</CardContent>
       <CardFooter>
         {/* TODO: implement download functionality */}
         <Button variant="outline">

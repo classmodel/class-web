@@ -1,5 +1,5 @@
 import { CLASS } from "./class";
-import { classConfig, ClassConfig } from "./config";
+import { type ClassConfig, classConfig } from "./config";
 
 /**
  * A lightweight [BMI](https://bmi.readthedocs.io) like interface for the CLASS model.
@@ -126,7 +126,7 @@ export class BmiClass implements BmiLight<ClassConfig> {
       Object.fromEntries([["t", []], ...var_names.map((name) => [name, []])]);
     while (this.model.t < this.config.timeControl.runtime) {
       this.update();
-      if (this.model.t % freq == 0) {
+      if (this.model.t % freq === 0) {
         output.t.push(this.model.t);
         for (const name of var_names) {
           const value = this.model[name as keyof CLASS] as number;

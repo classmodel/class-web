@@ -1,7 +1,8 @@
-import { JSX } from "solid-js";
+import type { JSX } from "solid-js";
 
 export function MdiDownload(props: JSX.IntrinsicElements["svg"]) {
   return (
+    // biome-ignore lint/a11y/noSvgWithoutTitle: generated code
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="1em"
@@ -16,6 +17,7 @@ export function MdiDownload(props: JSX.IntrinsicElements["svg"]) {
 
 export function MdiCog(props: JSX.IntrinsicElements["svg"]) {
   return (
+    // biome-ignore lint/a11y/noSvgWithoutTitle: generated code
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="1em"
@@ -33,6 +35,7 @@ export function MdiCog(props: JSX.IntrinsicElements["svg"]) {
 
 export function MdiContentCopy(props: JSX.IntrinsicElements["svg"]) {
   return (
+    // biome-ignore lint/a11y/noSvgWithoutTitle: generated code
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="1em"
@@ -50,6 +53,7 @@ export function MdiContentCopy(props: JSX.IntrinsicElements["svg"]) {
 
 export function MdiDelete(props: JSX.IntrinsicElements["svg"]) {
   return (
+    // biome-ignore lint/a11y/noSvgWithoutTitle: generated code
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="1em"
