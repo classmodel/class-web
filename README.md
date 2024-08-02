@@ -3,7 +3,7 @@
 [![github repo badge](https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue)]([https://github.com//classmodel/class-web](https://github.com//classmodel/class-web))
 [![Code quality](https://github.com/classmodel/class-web/actions/workflows/quality.yml/badge.svg)](https://github.com/classmodel/class-web/actions/workflows/quality.yml)
 
-This is an implementation of CLASS that runs entirely in the browser.
+This is an implementation of  the **C**hemistry **L**and-surface **A**tmosphere **S**oil **S**lab (CLASS) model that runs entirely in the browser.
 
 The CLASS web application is available at https://classmodel.github.io/class-web.
 
@@ -34,9 +34,9 @@ To run a local development version:
 
 ```sh
 git clone git@github.com:classmodel/class-web.git
-cd class-web/apps/class-solid
+cd class-web
 pnpm install
-pnpm run dev
+pnpm dev
 ```
 
 ## Linter & formatter
@@ -62,7 +62,7 @@ configuration between web-app, library code, and perhaps other implementations
 of CLASS as well.
 
 The web application is build with [solid.js](https://docs.solidjs.com/). Solid
-has a relatively simple model for building reactive web applications. With its
+is a relatively simple framework for building reactive web applications. With its
 metaframework [SolidStart](https://docs.solidjs.com/solid-start) it is quite
 easy to pre-render the web application as static pages that can be hosted on
 github pages.

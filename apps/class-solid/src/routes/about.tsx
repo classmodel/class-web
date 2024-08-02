@@ -7,16 +7,8 @@ export default function About() {
         About Page
       </h1>
       <p class="mt-8">
-        Visit{" "}
-        <a
-          href="https://solidjs.com"
-          target="_blank"
-          class="text-sky-600 hover:underline"
-          rel="noreferrer"
-        >
-          solidjs.com
-        </a>{" "}
-        to learn how to build Solid apps.
+        Here, we're developing a new version of CLASS that can run in the
+        browser!
       </p>
       <p class="my-4">
         <A href="/" class="text-sky-600 hover:underline">
