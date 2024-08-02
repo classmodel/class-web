@@ -7,7 +7,11 @@ export default function About() {
         About Page
       </h1>
       <p class="mt-8">
-        Visit{" "}
+        Here, we're developing a new version of CLASS that can run in the
+        browser!
+      </p>
+      <p>
+        For more information about the CLASS model, visit{" "}
         <a
           href="https://classmodel.github.io/"
           target="_blank"
@@ -15,7 +19,6 @@ export default function About() {
         >
           classmodel.github.io
         </a>{" "}
-        to learn how to about the CLASS model.
       </p>
       <p class="my-4">
         <A href="/" class="text-sky-600 hover:underline">
