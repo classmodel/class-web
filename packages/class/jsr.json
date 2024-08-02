@@ -1,14 +1,14 @@
 {
-	"name": "@classmodel/class",
-	"version": "0.0.0",
-	"exports": {
-		".": "./src/class.ts",
-		"./class": "./src/class.ts",
-		"./config": "./src/config.ts",
-		"./runner": "./src/runner.ts"
-	},
-	"publish": {
-		"include": ["README.md", "LICENSE", "src/**/*.ts"],
-		"exclude": ["src/**/*.test.ts"]
-	}
+  "name": "@classmodel/class",
+  "version": "0.0.0",
+  "exports": {
+    ".": "./src/class.ts",
+    "./class": "./src/class.ts",
+    "./config": "./src/config.ts",
+    "./runner": "./src/runner.ts"
+  },
+  "publish": {
+    "include": ["README.md", "LICENSE", "src/**/*.ts"],
+    "exclude": ["src/**/*.test.ts"]
+  }
 }

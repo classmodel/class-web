@@ -1,15 +1,15 @@
 {
-	"private": true,
-	"scripts": {
-		"build": "turbo build",
-		"dev": "turbo dev",
-		"format-and-lint": "biome check .",
-		"format-and-lint:fix": "biome check . --write"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "1.8.3",
-		"turbo": "^2.0.6"
-	},
-	"packageManager": "pnpm@8.15.6",
-	"name": "class-web"
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "format-and-lint": "biome check .",
+    "format-and-lint:fix": "biome check . --write"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.8.3",
+    "turbo": "^2.0.6"
+  },
+  "packageManager": "pnpm@8.15.6",
+  "name": "class-web"
 }
