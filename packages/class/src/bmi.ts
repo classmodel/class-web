@@ -34,10 +34,6 @@ export class BmiClass implements BmiLight<ClassConfig> {
   config: ClassConfig = classConfig.parse({});
   model: CLASS = new CLASS(this.config);
 
-  constructor() {
-    // no-op
-  }
-
   // Model control functions
 
   initialize(config: ClassConfig) {
@@ -91,7 +87,7 @@ export class BmiClass implements BmiLight<ClassConfig> {
   }
 
   get_time_step() {
-    return 1;
+    return this.config.timeControl.dt;
   }
 
   // Variable getter and setter functions
@@ -111,6 +107,14 @@ export class BmiClass implements BmiLight<ClassConfig> {
 
   // Extra methods
 
+  /**
+   * Runs the model till the end and returns the output data.
+   *
+   * @param options - The options for running the model.
+   * @param options.freq - The frequency at which to record the output data. Default is 60 seconds.
+   * @param options.var_names - For which output variables to record the data. Default is all output variables.
+   * @returns The output data, including the time values in t key and the values of the output variables.
+   */
   run<T extends string[]>({
     freq = 60,
     var_names = ouput_var_names as T,

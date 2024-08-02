@@ -10,7 +10,7 @@ import {
 } from "./ui/card";
 import { ClassConfig, classConfig } from "@repo/class/config";
 import { type ClassOutput } from "@repo/class/runner";
-import { createUniqueId, createSignal, Show } from "solid-js";
+import { createUniqueId, createSignal } from "solid-js";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import {
   Dialog,
@@ -104,14 +104,6 @@ export function ExperimentCard(experiment: Experiment) {
       </CardHeader>
       <CardContent>
         {experiment.description}
-        <Show when={experiment.output} fallback={<p>No output</p>}>
-          <details>
-            <summary>Output</summary>
-            <pre class="w-full h-60 overflow-auto">
-              {JSON.stringify(experiment.output, undefined, 2)}
-            </pre>
-          </details>
-        </Show>
       </CardContent>
       <CardFooter>
         {/* TODO: implement download functionality */}
