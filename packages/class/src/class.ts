@@ -57,12 +57,12 @@ export class CLASS {
   }
 
   /** Tendency of CLB [m s-1]*/
-  get htend() {
+  get htend(): number {
     return this.we + this.ws + this.wf - M;
   }
 
   /** Tendency of mixed-layer potential temperature [K s-1] */
-  get thetatend() {
+  get thetatend(): number {
     return (
       (this._cfg.mixedLayer.wtheta - this.wthetae) / this.h +
       this._cfg.mixedLayer.advtheta
@@ -70,7 +70,7 @@ export class CLASS {
   }
 
   /** Tendency of potential temperature jump at h [K s-1] */
-  get dthetatend() {
+  get dthetatend(): number {
     const w_th_ft = 0.0; // TODO: add free troposphere switch
     return (
       this._cfg.mixedLayer.gammatheta * (this.we + this.wf - M) -
@@ -80,7 +80,7 @@ export class CLASS {
   }
 
   /** Tendency of mixed-layer specific humidity [kg kg-1 s-1] */
-  get qtend() {
+  get qtend(): number {
     return (
       (this._cfg.mixedLayer.wq - this.wqe - wqM) / this.h +
       this._cfg.mixedLayer.advq
@@ -88,7 +88,7 @@ export class CLASS {
   }
 
   /** Tendency of specific humidity jump at h[kg kg-1 s-1] */
-  get dqtend() {
+  get dqtend(): number {
     const w_q_ft = 0; // TODO: add free troposphere switch
     return (
       this._cfg.mixedLayer.gammaq * (this.we + this.wf - M) -
@@ -98,7 +98,7 @@ export class CLASS {
   }
 
   /** Entrainment velocity [m s-1]. */
-  get we() {
+  get we(): number {
     // TODO add sw_shearwe
     let we = -this.wthetave / this.dthetav;
 
@@ -110,32 +110,32 @@ export class CLASS {
   }
 
   /** Large-scale vertical velocity [m s-1]. */
-  get ws() {
+  get ws(): number {
     return -this._cfg.mixedLayer.divU * this.h;
   }
 
   /** Mixed-layer growth due to radiative divergence [m s-1]. */
-  get wf() {
+  get wf(): number {
     return this._cfg.radiation.dFz / (rho * cp * this.dtheta);
   }
 
   /** Entrainment kinematic heat flux [K m s-1]. */
-  get wthetae() {
+  get wthetae(): number {
     return -this.we * this.dtheta;
   }
 
   /** Entrainment moisture flux [kg kg-1 m s-1]. */
-  get wqe() {
+  get wqe(): number {
     return -this.we * this.dq;
   }
 
   /** Entrainment kinematic virtual heat flux [K m s-1]. */
-  get wthetave() {
+  get wthetave(): number {
     return -this._cfg.mixedLayer.beta * this.wthetav;
   }
 
   /** Virtual temperature jump at h [K]. */
-  get dthetav() {
+  get dthetav(): number {
     return (
       (this.theta + this.dtheta) * (1.0 + 0.61 * (this.q + this.dq)) -
       this.theta * (1.0 + 0.61 * this.q)
@@ -143,7 +143,7 @@ export class CLASS {
   }
 
   /** Surface kinematic virtual heat flux [K m s-1]. */
-  get wthetav() {
+  get wthetav(): number {
     return (
       this._cfg.mixedLayer.wtheta + 0.61 * this.theta * this._cfg.mixedLayer.wq
     );

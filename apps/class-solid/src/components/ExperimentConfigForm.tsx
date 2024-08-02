@@ -8,7 +8,7 @@ import {
   classConfig,
   ClassConfig,
   classDefaultConfigSchema,
-} from "@repo/class/config";
+} from "@classmodel/class/config";
 
 const ClassConfigJsonSchema = classDefaultConfigSchema.definitions!.classConfig;
 
