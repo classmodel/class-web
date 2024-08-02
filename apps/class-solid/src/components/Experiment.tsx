@@ -8,8 +8,8 @@ import {
   CardContent,
   CardFooter,
 } from "./ui/card";
-import { ClassConfig, classConfig } from "@repo/class/config";
-import { ClassOutput, runClass } from "@repo/class/runner";
+import { ClassConfig, classConfig } from "@classmodel/class/config";
+import { ClassOutput, runClass } from "@classmodel/class/runner";
 import { createUniqueId, createSignal } from "solid-js";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import {
