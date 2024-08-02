@@ -55,6 +55,16 @@ pnpm exec biome --help
 
 To check types, you can run the `pnpm typecheck` command as other commands ignore types.
 
+## Tests
+
+The unit tests are written with [node:test](https://nodejs.org/api/test.html) and [node:assert](https://nodejs.org/api/assert.html).
+
+The unit tests can be run with the following command:
+
+```shell
+pnpm test
+```
+
 ## Tech stack
 
 The CLASS package is written in typescript. It uses [zod](https://zod.dev/) for
@@ -87,6 +97,5 @@ To format and lint the code, we use [biome](https://biomejs.dev/) as it combines
 - Use [AssemblyScript](https://www.assemblyscript.org/) or
   [rust](https://www.rust-lang.org/what/wasm) for a faster implementation of
   CLASS running on web assembly.
-- Test with node test runner rather than jest (for the package) and/or use
-  [playwright](https://playwright.dev/) and/or
+- Test [playwright](https://playwright.dev/) and/or
   [storybook](https://storybook.js.org/) (for the web app)
