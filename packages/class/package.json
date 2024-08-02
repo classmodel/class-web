@@ -1,6 +1,6 @@
 {
   "name": "@repo/class",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "exports": {
     "./class": "./src/class.ts",
     "./config": "./src/config.ts",
