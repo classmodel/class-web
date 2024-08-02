@@ -101,9 +101,7 @@ export function ExperimentCard(experiment: Experiment) {
         <CardTitle>{experiment.name}</CardTitle>
         <CardDescription>{experiment.id}</CardDescription>
       </CardHeader>
-      <CardContent>
-        {experiment.description}
-      </CardContent>
+      <CardContent>{experiment.description}</CardContent>
       <CardFooter>
         {/* TODO: implement download functionality */}
         <Button variant="outline">

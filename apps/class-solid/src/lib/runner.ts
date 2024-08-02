@@ -1,5 +1,5 @@
-import { ClassConfig } from "@repo/class/config";
-import { BmiClass } from "@repo/class/bmi";
+import type { BmiClass } from "@repo/class/bmi";
+import type { ClassConfig } from "@repo/class/config";
 import { wrap } from "comlink";
 
 const worker = new Worker(new URL("./worker.ts", import.meta.url), {
@@ -13,5 +13,5 @@ export async function runClass(config: ClassConfig) {
   const output = await model.run({
     var_names: ["h"],
   });
-  return output
+  return output;
 }

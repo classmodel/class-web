@@ -16,6 +16,7 @@ export default function About() {
           href="https://classmodel.github.io/"
           target="_blank"
           class="text-sky-600 hover:underline"
+          rel="noreferrer"
         >
           classmodel.github.io
         </a>{" "}
