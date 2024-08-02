@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Run Biome
-        run: pnpm exec biome ci .
+        run: pnpm exec biome ci --reporter github .
   typecheck:
     runs-on: ubuntu-latest
     steps:
