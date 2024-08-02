@@ -44,13 +44,14 @@ function deleteAnalysis(analysis: Analysis) {
  */
 export function TimeSeriesPlot() {
   const chartData = {
-    labels: experiments[0].output?.t,
+    labels:
+      experiments[0].output === undefined ? undefined : experiments[0].output.t,
     datasets: experiments
       .filter((e) => e.output)
       .map((e) => {
         return {
           label: e.id,
-          data: e.output?.h,
+          data: e.output == undefined ? [null] : e.output.h,
           fill: false,
         };
       }),

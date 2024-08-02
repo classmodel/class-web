@@ -62,6 +62,10 @@ importers:
       vinxi:
         specifier: ^0.3.14
         version: 0.3.14(@types/node@20.14.10)(ioredis@5.4.1)(sass@1.77.6)(terser@5.31.2)
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
 
   packages/class:
     dependencies:
@@ -3038,6 +3042,7 @@ packages:
 
   shikiji@0.9.19:
     resolution: {integrity: sha512-Kw2NHWktdcdypCj1GkKpXH4o6Vxz8B8TykPlPuLHOGSV8VkhoCLcFOH4k19K4LXAQYRQmxg+0X/eM+m2sLhAkg==}
+    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
 
   signal-exit@3.0.7:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}

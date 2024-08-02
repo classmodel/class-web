@@ -2,8 +2,9 @@ name: Code quality
 
 on:
   push:
+    branches: [ "main" ]
   pull_request:
-    actions: [opened, synchronize, reopened]
+    branches: [ "main" ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,3 +22,19 @@ jobs:
           version: latest
       - name: Run Biome
         run: biome ci --reporter github .
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: ./pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install
+      - name: Typecheck
+        run: pnpm typecheck
