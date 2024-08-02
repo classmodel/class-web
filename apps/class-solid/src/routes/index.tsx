@@ -1,4 +1,6 @@
 import { For, Show } from "solid-js";
+
+import { AnalysisCard, addAnalysis } from "~/components/Analysis";
 import {
   AddCustomExperiment,
   ExperimentCard,
@@ -7,7 +9,6 @@ import {
 import { Button } from "~/components/ui/button";
 import { Flex } from "~/components/ui/flex";
 
-import { AnalysisCard, addAnalysis } from "~/components/Analysis";
 import { experiments } from "~/lib/store";
 import { analyses } from "~/lib/store";
 

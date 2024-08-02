@@ -15,10 +15,6 @@
       "cache": false,
       "persistent": true
     },
-    "typecheck": {},
-    "//#format-and-lint": {},
-    "//#format-and-lint:fix": {
-      "cache": false
-    }
+    "typecheck": {}
   }
 }

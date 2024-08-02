@@ -10,6 +10,17 @@ export default function About() {
         Here, we're developing a new version of CLASS that can run in the
         browser!
       </p>
+      <p>
+        For more information about the CLASS model, visit{" "}
+        <a
+          href="https://classmodel.github.io/"
+          target="_blank"
+          class="text-sky-600 hover:underline"
+          rel="noreferrer"
+        >
+          classmodel.github.io
+        </a>{" "}
+      </p>
       <p class="my-4">
         <A href="/" class="text-sky-600 hover:underline">
           Home

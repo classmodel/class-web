@@ -16,12 +16,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Biome
-        uses: biomejs/setup-biome@v2
+      - uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          version: latest
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: ./pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install
       - name: Run Biome
-        run: biome ci --reporter github .
+        run: pnpm exec biome ci --reporter github .
   typecheck:
     runs-on: ubuntu-latest
     steps:

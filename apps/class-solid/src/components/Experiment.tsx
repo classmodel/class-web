@@ -31,10 +31,10 @@ export interface Experiment {
   output: ClassOutput | undefined;
 }
 
-export function addDefaultExperiment() {
+export async function addDefaultExperiment() {
   const id = createUniqueId();
   const config = classConfig.parse({});
-  const output = runClass(config);
+  const output = await runClass(config);
   const newExperiment = {
     name: "My experiment",
     description: "Default experiment",
@@ -65,9 +65,9 @@ export function AddCustomExperiment() {
           // note, id ius used as form target in submit button below;
           id="experiment-config-form"
           config={config}
-          onSubmit={(config) => {
+          onSubmit={async (config) => {
             const id = createUniqueId();
-            const output = runClass(config);
+            const output = await runClass(config);
             const newExperiment = {
               name: "My experiment",
               description: "Custom experiment",

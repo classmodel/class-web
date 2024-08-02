@@ -13,7 +13,8 @@
     "noUnusedParameters": false,
     "preserveWatchOutput": true,
     "skipLibCheck": true,
-    "strict": true
+    "strict": true,
+    "lib": ["ES2019", "DOM"]
   },
   "include": ["."],
   "exclude": ["node_modules"]
