@@ -79,6 +79,7 @@ The tests are in `apps/class-solid/tests/*.spec.ts` and can be run with the foll
 
 ```shell
 cd ./apps/class-solid
+pnpm exec playwright install  # first time only
 pnpm exec playwright test
 ```
 
