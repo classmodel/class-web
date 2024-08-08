@@ -1,7 +1,8 @@
 import { type ClassConfig, classConfig } from "@classmodel/class/config";
-import { type ClassOutput, runClass } from "@classmodel/class/runner";
+import type { ClassOutput } from "@classmodel/class/runner";
 import { createSignal, createUniqueId } from "solid-js";
 import { Button } from "~/components/ui/button";
+import { runClass } from "~/lib/runner";
 import { experiments, setExperiments } from "~/lib/store";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
