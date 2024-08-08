@@ -55,6 +55,34 @@ pnpm exec biome --help
 
 To check types, you can run the `pnpm typecheck` command as other commands ignore types.
 
+## Tests
+
+The unit tests are written with [node:test](https://nodejs.org/api/test.html) and [node:assert](https://nodejs.org/api/assert.html).
+
+The unit tests can be run with the following command:
+
+```shell
+pnpm test
+```
+
+To get test coverage
+
+```shell
+# Does not work via pnpm script so need to call node directly
+node --import tsx --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=lcov.info src/*.test.ts
+# To generate a html report use genhtml which is part of lcov OS package
+genhtml lcov.info --output-directory coverage
+```
+
+The end-to-end tests are written with [playwright](https://playwright.dev/).
+The tests are in `apps/class-solid/tests/*.spec.ts` and can be run with the following command:
+
+```shell
+cd ./apps/class-solid
+pnpm exec playwright install  # first time only
+pnpm exec playwright test
+```
+
 ## Tech stack
 
 The CLASS package is written in typescript. It uses [zod](https://zod.dev/) for
@@ -92,6 +120,4 @@ To format and lint the code, we use [biome](https://biomejs.dev/) as it combines
 - Use [AssemblyScript](https://www.assemblyscript.org/) or
   [rust](https://www.rust-lang.org/what/wasm) for a faster implementation of
   CLASS running on web assembly.
-- Test with node test runner rather than jest (for the package) and/or use
-  [playwright](https://playwright.dev/) and/or
-  [storybook](https://storybook.js.org/) (for the web app)
+- Use [storybook](https://storybook.js.org/) for UI component package
