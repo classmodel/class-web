@@ -22,7 +22,7 @@ export default function Home() {
         </For>
         <div>
           <div>
-            <Button variant="outline" size="lg" onClick={addExperiment}>
+            <Button variant="outline" size="lg" onClick={() => addExperiment()}>
               Add experiment
             </Button>
           </div>

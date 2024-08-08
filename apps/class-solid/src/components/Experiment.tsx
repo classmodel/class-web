@@ -43,9 +43,8 @@ export async function runExperiment(id: string) {
   setExperiments((e) => e.id === exp.id, "output", newOutput);
 }
 
-export function addExperiment() {
+export function addExperiment(config: ClassConfig = classConfig.parse({})) {
   const id = createUniqueId();
-  const config = classConfig.parse({});
   const newExperiment: Experiment = {
     name: "My experiment",
     description: "Standard experiment",
@@ -59,15 +58,23 @@ export function addExperiment() {
 
 export function duplicateExperiment(id: string) {
   const newId = createUniqueId();
-  const copy = experiments.find((e) => e.id === id);
-  setExperiments(experiments.length, { ...copy, id: newId });
+  const original = unwrap(experiments.find((e) => e.id === id));
+  if (!original) {
+    throw new Error("No experiment with id {id}");
+  }
+  addExperiment(original.config);
 }
 
 function deleteExperiment(id: string) {
   setExperiments(experiments.filter((exp) => exp.id !== id));
 }
 
-export function ModifyExperiment(experiment: Experiment) {
+async function modifyExperiment(id: string, newConfig: ClassConfig) {
+  setExperiments((exp, i) => exp.id === id, "config", newConfig);
+  await runExperiment(id);
+}
+
+export function ExperimentSettingsDialog(experiment: Experiment) {
   const [open, setOpen] = createSignal(true);
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
@@ -82,14 +89,9 @@ export function ModifyExperiment(experiment: Experiment) {
         <ExperimentConfigForm
           id={experiment.id}
           config={experiment.config}
-          onSubmit={async (config) => {
-            setExperiments(
-              (exp, i) => exp.id === experiment.id,
-              "config",
-              config,
-            );
+          onSubmit={async (newConfig) => {
             setOpen(false);
-            await runExperiment(experiment.id);
+            modifyExperiment(experiment.id, newConfig);
           }}
         />
         <DialogFooter>
@@ -116,7 +118,7 @@ export function ExperimentCard(experiment: Experiment) {
         <Button variant="outline">
           <MdiDownload />
         </Button>
-        <ModifyExperiment {...experiment} />
+        <ExperimentSettingsDialog {...experiment} />
         <Button variant="outline">
           <MdiContentCopy onClick={() => duplicateExperiment(experiment.id)} />
         </Button>
