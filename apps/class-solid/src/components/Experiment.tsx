@@ -99,7 +99,9 @@ function DownloadExperiment(props: { experiment: Experiment }) {
       output: props.experiment.output,
     };
     return URL.createObjectURL(
-      new Blob([JSON.stringify(data, undefined, 2)], { type: "application/json" }),
+      new Blob([JSON.stringify(data, undefined, 2)], {
+        type: "application/json",
+      }),
     );
   });
 
