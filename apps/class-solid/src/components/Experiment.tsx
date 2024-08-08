@@ -1,5 +1,5 @@
-import { Show, createSignal } from "solid-js";
-import { Button } from "~/components/ui/button";
+import { Show, createMemo, createSignal, onCleanup } from "solid-js";
+import { Button, buttonVariants } from "~/components/ui/button";
 import {
   type Experiment,
   deleteExperiment,
@@ -89,6 +89,38 @@ function RunningIndicator() {
   );
 }
 
+function DownloadExperiment(props: { experiment: Experiment }) {
+  const downloadUrl = createMemo(() => {
+    // Drop id and running
+    const data = {
+      name: props.experiment.name,
+      description: props.experiment.description,
+      config: props.experiment.config,
+      output: props.experiment.output,
+    };
+    return URL.createObjectURL(
+      new Blob([JSON.stringify(data, undefined, 2)], { type: "application/json" }),
+    );
+  });
+
+  onCleanup(() => {
+    URL.revokeObjectURL(downloadUrl());
+  });
+
+  const filename = `class-${props.experiment.id}.json`;
+
+  return (
+    <a
+      class={buttonVariants({ variant: "outline" })}
+      href={downloadUrl()}
+      download={filename}
+      type="application/json"
+    >
+      <MdiDownload />
+    </a>
+  );
+}
+
 export function ExperimentCard(experiment: Experiment) {
   return (
     <Card class="w-[380px]">
@@ -111,10 +143,7 @@ export function ExperimentCard(experiment: Experiment) {
       </CardContent>
       <CardFooter>
         <Show when={!experiment.running} fallback={<RunningIndicator />}>
-          {/* TODO: implement download functionality */}
-          <Button variant="outline">
-            <MdiDownload />
-          </Button>
+          <DownloadExperiment experiment={experiment} />
           <ExperimentSettingsDialog {...experiment} />
           <Button variant="outline">
             <MdiContentCopy
