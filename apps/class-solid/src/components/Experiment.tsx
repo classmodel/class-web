@@ -1,10 +1,11 @@
-import { type ClassConfig, classConfig } from "@classmodel/class/config";
-import type { ClassOutput } from "@classmodel/class/runner";
-import { createSignal, createUniqueId } from "solid-js";
-import { unwrap } from "solid-js/store";
+import { createSignal } from "solid-js";
 import { Button } from "~/components/ui/button";
-import { runClass } from "~/lib/runner";
-import { experiments, setExperiments } from "~/lib/store";
+import {
+  type Experiment,
+  deleteExperiment,
+  duplicateExperiment,
+  modifyExperiment,
+} from "~/lib/store";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import {
@@ -24,55 +25,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-
-export interface Experiment {
-  name: string;
-  description: string;
-  id: string;
-  config: ClassConfig;
-  output: ClassOutput | undefined;
-}
-
-export async function runExperiment(id: string) {
-  const expProxy = experiments.find((exp) => exp.id === id);
-  if (!expProxy) {
-    throw new Error("No experiment with id {id}");
-  }
-  const exp = unwrap(expProxy);
-  const newOutput = await runClass(exp.config);
-  setExperiments((e) => e.id === exp.id, "output", newOutput);
-}
-
-export function addExperiment(config: ClassConfig = classConfig.parse({})) {
-  const id = createUniqueId();
-  const newExperiment: Experiment = {
-    name: "My experiment",
-    description: "Standard experiment",
-    id,
-    config,
-    output: undefined,
-  };
-  setExperiments(experiments.length, newExperiment);
-  return newExperiment;
-}
-
-export function duplicateExperiment(id: string) {
-  const newId = createUniqueId();
-  const original = unwrap(experiments.find((e) => e.id === id));
-  if (!original) {
-    throw new Error("No experiment with id {id}");
-  }
-  addExperiment(original.config);
-}
-
-function deleteExperiment(id: string) {
-  setExperiments(experiments.filter((exp) => exp.id !== id));
-}
-
-async function modifyExperiment(id: string, newConfig: ClassConfig) {
-  setExperiments((exp, i) => exp.id === id, "config", newConfig);
-  await runExperiment(id);
-}
 
 export function ExperimentSettingsDialog(experiment: Experiment) {
   const [open, setOpen] = createSignal(true);

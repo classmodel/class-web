@@ -1,6 +1,6 @@
 import { For, Match, Switch, createUniqueId } from "solid-js";
 import { analyses, experiments, setAnalyses } from "~/lib/store";
-import type { Experiment } from "./Experiment";
+import type { Experiment } from "~/lib/store";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import { Button } from "./ui/button";
 import {
