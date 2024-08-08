@@ -1,7 +1,7 @@
 import type { ClassConfig } from "@classmodel/class/config";
 import { classConfig } from "@classmodel/class/config";
 import type { ClassOutput } from "@classmodel/class/runner";
-import { createStore, unwrap } from "solid-js/store";
+import { createStore, produce, unwrap } from "solid-js/store";
 import type { Analysis } from "~/components/Analysis";
 import { runClass } from "./runner";
 
@@ -11,6 +11,7 @@ export interface Experiment {
   id: string;
   config: ClassConfig;
   output: ClassOutput | undefined;
+  running: boolean;
 }
 
 let lastExperimentId = 0;
@@ -29,18 +30,34 @@ export async function runExperiment(id: string) {
     throw new Error(`No experiment with id ${id}`);
   }
   const exp = unwrap(expProxy);
+
+  setExperiments(
+    (e) => e.id === exp.id,
+    produce((e) => {
+      e.running = true;
+    }),
+  );
+
   const newOutput = await runClass(exp.config);
-  setExperiments((e) => e.id === exp.id, "output", newOutput);
+
+  setExperiments(
+    (e) => e.id === exp.id,
+    produce((e) => {
+      e.output = newOutput;
+      e.running = false;
+    }),
+  );
 }
 
 export function addExperiment(config: ClassConfig = classConfig.parse({})) {
   const id = bumpLastExperimentId();
   const newExperiment: Experiment = {
-    name: "My experiment",
+    name: `My experiment ${id}`,
     description: "Standard experiment",
     id: id.toString(),
     config,
     output: undefined,
+    running: false,
   };
   setExperiments(experiments.length, newExperiment);
   return newExperiment;
