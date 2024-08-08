@@ -65,7 +65,9 @@ export function ExperimentConfigForm({
         onSubmit(data);
       }}
     >
-      <ObjectField schema={ClassConfigJsonSchema} value={config} />
+      <div class="grid grid-flow-col gap-1">
+        <ObjectField schema={ClassConfigJsonSchema} value={config} />
+      </div>
     </form>
   );
 }
