@@ -1,7 +1,6 @@
 import type { ClassConfig } from "@classmodel/class/config";
 import { classConfig } from "@classmodel/class/config";
 import type { ClassOutput } from "@classmodel/class/runner";
-import { createSignal } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
 import type { Analysis } from "~/components/Analysis";
 import { runClass } from "./runner";

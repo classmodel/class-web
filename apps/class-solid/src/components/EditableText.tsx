@@ -13,10 +13,7 @@ export function EditableText(props: {
       type="button"
       class={cn(props.class, "group")}
       title="Click to change"
-      onClick={(e) => {
-        // e.preventDefault();
-        setEditing(true);
-      }}
+      onClick={(e) => setEditing(true)}
     >
       {props.text}
       <span class="invisible ps-1 group-hover:visible">🖉</span>
