@@ -27,7 +27,7 @@ export const [analyses, setAnalyses] = createStore<Analysis[]>([]);
 export async function runExperiment(id: string) {
   const expProxy = experiments.find((exp) => exp.id === id);
   if (!expProxy) {
-    throw new Error("No experiment with id {id}");
+    throw new Error(`No experiment with id ${id}`);
   }
   const exp = unwrap(expProxy);
   const newOutput = await runClass(exp.config);
