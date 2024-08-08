@@ -50,8 +50,8 @@ export function ExperimentConfigForm({
   onSubmit,
 }: {
   id: string;
-  config: ClassConfig;
-  onSubmit: (c: ClassConfig) => void;
+  config: Partial<ClassConfig>;
+  onSubmit: (c: Partial<ClassConfig>) => void;
 }) {
   return (
     <form
@@ -61,8 +61,10 @@ export function ExperimentConfigForm({
         const formData = new FormData(event.currentTarget);
         const rawData = Object.fromEntries(formData.entries());
         const nestedData = inflate(rawData);
+        // Parse only for validation
         const data = classConfig.parse(nestedData);
-        onSubmit(data);
+
+        onSubmit(nestedData);
       }}
     >
       <div class="grid grid-flow-col gap-1">

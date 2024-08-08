@@ -1,5 +1,4 @@
 import type { ClassConfig } from "@classmodel/class/config";
-import { classConfig } from "@classmodel/class/config";
 import type { ClassOutput } from "@classmodel/class/runner";
 import { createStore, produce, unwrap } from "solid-js/store";
 import type { Analysis } from "~/components/Analysis";
@@ -9,7 +8,7 @@ export interface Experiment {
   name: string;
   description: string;
   id: string;
-  config: ClassConfig;
+  config: Partial<ClassConfig>;
   output: ClassOutput | undefined;
   running: boolean;
 }
@@ -49,7 +48,7 @@ export async function runExperiment(id: string) {
   );
 }
 
-export function addExperiment(config: ClassConfig = classConfig.parse({})) {
+export function addExperiment(config: Partial<ClassConfig> = {}) {
   const id = bumpLastExperimentId();
   const newExperiment: Experiment = {
     name: `My experiment ${id}`,
@@ -68,14 +67,17 @@ export function duplicateExperiment(id: string) {
   if (!original) {
     throw new Error("No experiment with id {id}");
   }
-  addExperiment(original.config);
+  addExperiment({ ...original.config });
 }
 
 export function deleteExperiment(id: string) {
   setExperiments(experiments.filter((exp) => exp.id !== id));
 }
 
-export async function modifyExperiment(id: string, newConfig: ClassConfig) {
+export async function modifyExperiment(
+  id: string,
+  newConfig: Partial<ClassConfig>,
+) {
   setExperiments((exp, i) => exp.id === id, "config", newConfig);
   await runExperiment(id);
 }
