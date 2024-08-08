@@ -1,7 +1,7 @@
 import type { ClassConfig } from "@classmodel/class/config";
 import { classConfig } from "@classmodel/class/config";
 import type { ClassOutput } from "@classmodel/class/runner";
-import { createUniqueId } from "solid-js";
+import { createSignal } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
 import type { Analysis } from "~/components/Analysis";
 import { runClass } from "./runner";
@@ -14,6 +14,16 @@ export interface Experiment {
   output: ClassOutput | undefined;
 }
 
+let lastExperimentId = 0;
+
+function bumpLastExperimentId(): string {
+  lastExperimentId++;
+  return lastExperimentId.toString();
+}
+
+export const [experiments, setExperiments] = createStore<Experiment[]>([]);
+export const [analyses, setAnalyses] = createStore<Analysis[]>([]);
+
 export async function runExperiment(id: string) {
   const expProxy = experiments.find((exp) => exp.id === id);
   if (!expProxy) {
@@ -25,11 +35,11 @@ export async function runExperiment(id: string) {
 }
 
 export function addExperiment(config: ClassConfig = classConfig.parse({})) {
-  const id = createUniqueId();
+  const id = bumpLastExperimentId();
   const newExperiment: Experiment = {
     name: "My experiment",
     description: "Standard experiment",
-    id,
+    id: id.toString(),
     config,
     output: undefined,
   };
@@ -54,5 +64,10 @@ export async function modifyExperiment(id: string, newConfig: ClassConfig) {
   await runExperiment(id);
 }
 
-export const [experiments, setExperiments] = createStore<Experiment[]>([]);
-export const [analyses, setAnalyses] = createStore<Analysis[]>([]);
+export function setExperimentName(id: string, newName: string) {
+  setExperiments((exp) => exp.id === id, "name", newName);
+}
+
+export function setExperimentDescription(id: string, newDescription: string) {
+  setExperiments((exp) => exp.id === id, "description", newDescription);
+}

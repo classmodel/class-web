@@ -5,7 +5,10 @@ import {
   deleteExperiment,
   duplicateExperiment,
   modifyExperiment,
+  setExperimentDescription,
+  setExperimentName,
 } from "~/lib/store";
+import { EditableText } from "./EditableText";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import {
@@ -60,11 +63,22 @@ export function ExperimentCard(experiment: Experiment) {
   return (
     <Card class="w-[380px]">
       <CardHeader>
-        {/* TODO: make name & description editable */}
-        <CardTitle>{experiment.name}</CardTitle>
+        <CardTitle>
+          <EditableText
+            text={experiment.name}
+            onChange={(name) => setExperimentName(experiment.id, name)}
+          />
+        </CardTitle>
         <CardDescription>{experiment.id}</CardDescription>
       </CardHeader>
-      <CardContent>{experiment.description}</CardContent>
+      <CardContent>
+        <EditableText
+          text={experiment.description}
+          onChange={(description) =>
+            setExperimentDescription(experiment.id, description)
+          }
+        />
+      </CardContent>
       <CardFooter>
         {/* TODO: implement download functionality */}
         <Button variant="outline">
