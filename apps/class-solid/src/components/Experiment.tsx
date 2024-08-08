@@ -1,6 +1,7 @@
 import { type ClassConfig, classConfig } from "@classmodel/class/config";
 import type { ClassOutput } from "@classmodel/class/runner";
 import { createSignal, createUniqueId } from "solid-js";
+import { unwrap } from "solid-js/store";
 import { Button } from "~/components/ui/button";
 import { runClass } from "~/lib/runner";
 import { experiments, setExperiments } from "~/lib/store";
@@ -32,66 +33,73 @@ export interface Experiment {
   output: ClassOutput | undefined;
 }
 
-export async function addDefaultExperiment() {
-  const id = createUniqueId();
-  const config = classConfig.parse({});
-  const output = await runClass(config);
-  const newExperiment = {
-    name: "My experiment",
-    description: "Default experiment",
-    id,
-    config,
-    output,
-  };
-  setExperiments(experiments.length, newExperiment);
+export async function runExperiment(id: string) {
+  const expProxy = experiments.find((exp) => exp.id === id);
+  if (!expProxy) {
+    throw new Error("No experiment with id {id}");
+  }
+  const exp = unwrap(expProxy);
+  const newOutput = await runClass(exp.config);
+  setExperiments((e) => e.id === exp.id, "output", newOutput);
 }
 
-export function AddCustomExperiment() {
+export function addExperiment() {
+  const id = createUniqueId();
   const config = classConfig.parse({});
-  const [open, setOpen] = createSignal(false);
+  const newExperiment: Experiment = {
+    name: "My experiment",
+    description: "Standard experiment",
+    id,
+    config,
+    output: undefined,
+  };
+  setExperiments(experiments.length, newExperiment);
+  return newExperiment;
+}
+
+export function duplicateExperiment(id: string) {
+  const newId = createUniqueId();
+  const copy = experiments.find((e) => e.id === id);
+  setExperiments(experiments.length, { ...copy, id: newId });
+}
+
+function deleteExperiment(id: string) {
+  setExperiments(experiments.filter((exp) => exp.id !== id));
+}
+
+export function ModifyExperiment(experiment: Experiment) {
+  const [open, setOpen] = createSignal(true);
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
-      <DialogTrigger variant="outline" size="lg" as={Button<"button">}>
-        Add custom experiment
+      <DialogTrigger variant="outline" as={Button<"button">}>
+        <MdiCog />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add custom experiment</DialogTitle>
-          <DialogDescription>
-            Configure your custom experiment here.
-          </DialogDescription>
+          <DialogTitle>Experiment {experiment.id}</DialogTitle>
+          <DialogDescription>{experiment.description}</DialogDescription>
         </DialogHeader>
         <ExperimentConfigForm
-          // TODO: not sure if passing around ids like this is the proper way to do things in solidjs
-          // note, id ius used as form target in submit button below;
-          id="experiment-config-form"
-          config={config}
+          id={experiment.id}
+          config={experiment.config}
           onSubmit={async (config) => {
-            const id = createUniqueId();
-            const output = await runClass(config);
-            const newExperiment = {
-              name: "My experiment",
-              description: "Custom experiment",
-              id,
+            setExperiments(
+              (exp, i) => exp.id === experiment.id,
+              "config",
               config,
-              output,
-            };
-            setExperiments(experiments.length, newExperiment);
+            );
             setOpen(false);
+            await runExperiment(experiment.id);
           }}
         />
         <DialogFooter>
-          <Button type="submit" form="experiment-config-form">
+          <Button type="submit" form={experiment.id}>
             Run
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-}
-
-function deleteExperiment(experiment: Experiment) {
-  setExperiments(experiments.filter((exp) => exp.id !== experiment.id));
 }
 
 export function ExperimentCard(experiment: Experiment) {
@@ -108,15 +116,14 @@ export function ExperimentCard(experiment: Experiment) {
         <Button variant="outline">
           <MdiDownload />
         </Button>
-        {/* TODO: implement "configure" functionality */}
+        <ModifyExperiment {...experiment} />
         <Button variant="outline">
-          <MdiCog />
+          <MdiContentCopy onClick={() => duplicateExperiment(experiment.id)} />
         </Button>
-        {/* TODO: implement duplicate functionality */}
-        <Button variant="outline">
-          <MdiContentCopy />
-        </Button>
-        <Button variant="outline" onClick={() => deleteExperiment(experiment)}>
+        <Button
+          variant="outline"
+          onClick={() => deleteExperiment(experiment.id)}
+        >
           <MdiDelete />
         </Button>
       </CardFooter>
