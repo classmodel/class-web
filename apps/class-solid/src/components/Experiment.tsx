@@ -147,10 +147,11 @@ export function ExperimentCard(experiment: Experiment) {
         <Show when={!experiment.running} fallback={<RunningIndicator />}>
           <DownloadExperiment experiment={experiment} />
           <ExperimentSettingsDialog {...experiment} />
-          <Button variant="outline">
-            <MdiContentCopy
-              onClick={() => duplicateExperiment(experiment.id)}
-            />
+          <Button
+            variant="outline"
+            onClick={() => duplicateExperiment(experiment.id)}
+          >
+            <MdiContentCopy />
           </Button>
           <Button
             variant="outline"
