@@ -1,15 +1,11 @@
 import { For, Show } from "solid-js";
 
 import { AnalysisCard, addAnalysis } from "~/components/Analysis";
-import {
-  AddCustomExperiment,
-  ExperimentCard,
-  addDefaultExperiment,
-} from "~/components/Experiment";
+import { ExperimentCard } from "~/components/Experiment";
 import { Button } from "~/components/ui/button";
 import { Flex } from "~/components/ui/flex";
 
-import { experiments } from "~/lib/store";
+import { addExperiment, experiments } from "~/lib/store";
 import { analyses } from "~/lib/store";
 
 export default function Home() {
@@ -26,12 +22,9 @@ export default function Home() {
         </For>
         <div>
           <div>
-            <Button variant="outline" size="lg" onClick={addDefaultExperiment}>
-              Add default experiment
+            <Button variant="outline" size="lg" onClick={() => addExperiment()}>
+              Add experiment
             </Button>
-          </div>
-          <div>
-            <AddCustomExperiment />
           </div>
           <div>
             <Button variant="outline" size="lg">
