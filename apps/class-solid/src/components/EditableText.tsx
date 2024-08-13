@@ -28,12 +28,22 @@ export function EditableText(props: {
           props.onChange(formData.get("text") as string);
           setEditing(false);
         }}
+        onFocusOut={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+            setEditing(false);
+          }
+        }}
       >
         <input
           name="text"
           type="text"
           value={props.text}
           class="mx-1 rounded border-2 bg-background p-1"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setEditing(false);
+            }
+          }}
         />
         <Button title="Save" type="submit" variant="ghost">
           🖉
