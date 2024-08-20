@@ -50,8 +50,8 @@ export function ExperimentConfigForm({
   onSubmit,
 }: {
   id: string;
-  config: ClassConfig;
-  onSubmit: (c: ClassConfig) => void;
+  config: Partial<ClassConfig>;
+  onSubmit: (c: Partial<ClassConfig>) => void;
 }) {
   return (
     <form
@@ -61,17 +61,25 @@ export function ExperimentConfigForm({
         const formData = new FormData(event.currentTarget);
         const rawData = Object.fromEntries(formData.entries());
         const nestedData = inflate(rawData);
+        // Parse only for validation
         const data = classConfig.parse(nestedData);
-        onSubmit(data);
+
+        onSubmit(nestedData);
       }}
     >
-      <ObjectField schema={ClassConfigJsonSchema} />
+      <div class="grid grid-flow-col gap-1">
+        <ObjectField schema={ClassConfigJsonSchema} value={config} />
+      </div>
     </form>
   );
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
-function ObjectField({ schema, name = "" }: { schema: any; name?: string }) {
+function ObjectField({
+  schema,
+  name = "",
+  value,
+  // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
+}: { schema: any; name?: string; value?: any }) {
   // name can be empty, but only for root, which should be treated differently
   const isRoot = name === "";
 
@@ -83,6 +91,7 @@ function ObjectField({ schema, name = "" }: { schema: any; name?: string }) {
             // Nested fields should be connected with .
             name={isRoot ? `${propName}` : `${name}.${propName}`}
             schema={propSchema}
+            value={value?.[propName]}
           />
         )}
       </For>
@@ -104,25 +113,33 @@ function ObjectField({ schema, name = "" }: { schema: any; name?: string }) {
   );
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
-function PropField({ name, schema }: { name: string; schema: any }) {
+function PropField({
+  name,
+  schema,
+  value,
+  // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
+}: { name: string; schema: any; value: any }) {
   return (
     <Switch fallback={<p>Unknown type</p>}>
       <Match when={schema.type === "object"}>
-        <ObjectField name={name} schema={schema} />
+        <ObjectField name={name} schema={schema} value={value} />
       </Match>
       <Match when={schema.type === "number"}>
-        <MyTextField name={name} schema={schema} />
+        <MyTextField name={name} schema={schema} value={value} />
       </Match>
       <Match when={schema.type === "string"}>
-        <MyTextField name={name} schema={schema} />
+        <MyTextField name={name} schema={schema} value={value} />
       </Match>
     </Switch>
   );
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
-function MyTextField({ name, schema }: { name: string; schema: any }) {
+function MyTextField({
+  name,
+  schema,
+  value,
+  // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
+}: { name: string; schema: any; value: any }) {
   return (
     <TextField class="grid w-full max-w-sm items-center gap-1.5">
       <TextFieldLabel for={name}>{schema.description ?? name}</TextFieldLabel>
@@ -130,6 +147,7 @@ function MyTextField({ name, schema }: { name: string; schema: any }) {
         type="text"
         id={name}
         name={name}
+        value={value}
         placeholder={schema.default}
       />
     </TextField>
