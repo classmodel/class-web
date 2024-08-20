@@ -16,7 +16,7 @@ export default function Home() {
       </h1>
 
       <h2 class="my-8 text-4xl">Experiments</h2>
-      <Flex justifyContent="center" class="gap-4">
+      <Flex justifyContent="center" class="flex-wrap gap-4">
         <For each={experiments}>
           {(experiment) => ExperimentCard(experiment)}
         </For>
@@ -41,7 +41,7 @@ export default function Home() {
 
       <h2 class="my-8 text-4xl">Analysis</h2>
       <Show when={experiments.length} fallback={<p>Add an experiment first</p>}>
-        <Flex justifyContent="center" class="gap-4">
+        <Flex justifyContent="center" class="flex-wrap gap-4">
           <For each={analyses}>{(analysis) => AnalysisCard(analysis)}</For>
           <div>
             <div>
