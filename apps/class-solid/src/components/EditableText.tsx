@@ -39,6 +39,7 @@ export function EditableText(props: {
           type="text"
           value={props.text}
           class="mx-1 rounded border-2 bg-background p-1"
+          autofocus
           onKeyDown={(e) => {
             if (e.key === "Escape") {
               setEditing(false);
@@ -46,7 +47,7 @@ export function EditableText(props: {
           }}
         />
         <Button title="Save" type="submit" variant="ghost">
-          🖉
+          ✓
         </Button>
       </form>
     </Show>
