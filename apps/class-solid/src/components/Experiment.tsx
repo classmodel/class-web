@@ -10,6 +10,7 @@ import {
 } from "~/lib/store";
 import { EditableText } from "./EditableText";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
+import { PermutationsList } from "./PermutationsList";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import {
   Card,
@@ -154,6 +155,7 @@ export function ExperimentCard(experiment: Experiment) {
             setExperimentDescription(experiment.id, description)
           }
         />
+        <PermutationsList experiment={experiment} />
       </CardContent>
       <CardFooter>
         <Show when={!experiment.running} fallback={<RunningIndicator />}>
