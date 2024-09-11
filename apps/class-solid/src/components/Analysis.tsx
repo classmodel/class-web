@@ -45,13 +45,16 @@ function deleteAnalysis(analysis: Analysis) {
 export function TimeSeriesPlot() {
   const chartData = {
     labels:
-      experiments[0].output === undefined ? undefined : experiments[0].output.t,
+      experiments[0].reference.output === undefined
+        ? undefined
+        : experiments[0].reference.output.t,
     datasets: experiments
-      .filter((e) => e.output)
+      .filter((e) => e.reference.output)
       .map((e) => {
         return {
           label: e.id,
-          data: e.output === undefined ? [null] : e.output.h,
+          data:
+            e.reference.output === undefined ? [null] : e.reference.output.h,
           fill: false,
         };
       }),
@@ -65,7 +68,10 @@ function FinalHeights() {
   return (
     <For each={experiments}>
       {(experiment, i) => {
-        const h = experiment.output?.h[experiment.output.h.length - 1] || 0;
+        const h =
+          experiment.reference.output?.h[
+            experiment.reference.output.h.length - 1
+          ] || 0;
         return (
           <div class="mb-2">
             <p>

@@ -4,12 +4,23 @@ import { createStore, produce, unwrap } from "solid-js/store";
 import type { Analysis } from "~/components/Analysis";
 import { runClass } from "./runner";
 
+export interface Permutation<
+  C extends Partial<ClassConfig> = Partial<ClassConfig>,
+> {
+  config: C;
+  output?: ClassOutput | undefined;
+  // TODO Could use per run state to show progress of run of reference and each permutation
+  // running: boolean;
+}
+
 export interface Experiment {
   name: string;
   description: string;
   id: string;
-  config: Partial<ClassConfig>;
-  output: ClassOutput | undefined;
+  // TODO make config of reference a full ClassConfig,
+  // will need refactoring of add and run experiment
+  reference: Permutation;
+  permutations: Record<string, Permutation>;
   running: boolean;
 }
 
@@ -37,12 +48,36 @@ export async function runExperiment(id: string) {
     }),
   );
 
-  const newOutput = await runClass(exp.config);
+  // Run reference
+  const newOutput = await runClass(exp.reference.config);
 
   setExperiments(
     (e) => e.id === exp.id,
     produce((e) => {
-      e.output = newOutput;
+      e.reference.output = newOutput;
+    }),
+  );
+
+  // Run permutations
+  for (const key in exp.permutations) {
+    const perm = exp.permutations[key];
+    const combinedConfig = {
+      ...exp.reference.config,
+      ...perm.config,
+    };
+    const newOutput = await runClass(combinedConfig);
+
+    setExperiments(
+      (e) => e.id === exp.id,
+      produce((e) => {
+        e.permutations[key].output = newOutput;
+      }),
+    );
+  }
+
+  setExperiments(
+    (e) => e.id === exp.id,
+    produce((e) => {
       e.running = false;
     }),
   );
@@ -54,8 +89,10 @@ export function addExperiment(config: Partial<ClassConfig> = {}) {
     name: `My experiment ${id}`,
     description: "Standard experiment",
     id: id.toString(),
-    config,
-    output: undefined,
+    reference: {
+      config,
+    },
+    permutations: {},
     running: false,
   };
   setExperiments(experiments.length, newExperiment);
@@ -67,7 +104,8 @@ export function duplicateExperiment(id: string) {
   if (!original) {
     throw new Error("No experiment with id {id}");
   }
-  addExperiment({ ...original.config });
+
+  addExperiment({ ...original.reference.config });
 }
 
 export function deleteExperiment(id: string) {
@@ -78,7 +116,7 @@ export async function modifyExperiment(
   id: string,
   newConfig: Partial<ClassConfig>,
 ) {
-  setExperiments((exp, i) => exp.id === id, "config", newConfig);
+  setExperiments((exp, i) => exp.id === id, "reference", "config", newConfig);
   await runExperiment(id);
 }
 

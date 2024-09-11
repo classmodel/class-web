@@ -30,7 +30,9 @@ import {
 } from "./ui/dialog";
 
 export function ExperimentSettingsDialog(experiment: Experiment) {
-  const [open, setOpen] = createSignal(experiment.output === undefined);
+  const [open, setOpen] = createSignal(
+    experiment.reference.output === undefined,
+  );
 
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
@@ -44,7 +46,7 @@ export function ExperimentSettingsDialog(experiment: Experiment) {
         </DialogHeader>
         <ExperimentConfigForm
           id={experiment.id}
-          config={experiment.config}
+          config={experiment.reference.config}
           onSubmit={async (newConfig) => {
             setOpen(false);
             modifyExperiment(experiment.id, newConfig);
@@ -95,9 +97,19 @@ function DownloadExperiment(props: { experiment: Experiment }) {
     const data = {
       name: props.experiment.name,
       description: props.experiment.description,
-      config: props.experiment.config,
-      output: props.experiment.output,
+      config: props.experiment.reference.config,
+      output: props.experiment.reference.output,
+      permutations: Object.fromEntries(
+        Object.entries(props.experiment.permutations).map(([key, perm]) => [
+          key,
+          {
+            config: perm.config,
+            output: perm.output,
+          },
+        ]),
+      ),
     };
+
     return URL.createObjectURL(
       new Blob([JSON.stringify(data, undefined, 2)], {
         type: "application/json",
