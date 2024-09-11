@@ -108,7 +108,7 @@ function EditPermutationButton(props: {
     <Dialog open={open()} onOpenChange={setOpen}>
       <DialogTrigger
         title="Edit permutation"
-        variant="secondary"
+        variant="outline"
         as={Button<"button">}
       >
         <MdiCog />
@@ -152,14 +152,14 @@ function PermutationDifferenceButton(props: {
     <Dialog open={open()} onOpenChange={setOpen}>
       <DialogTrigger
         variant="outline"
-        title="View difference between this permutation and reference"
+        title="View differences between this permutation and reference configuration"
         as={Button<"button">}
       >
         <MdiLightVectorDifference />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Difference between configurations</DialogTitle>
+          <DialogTitle>Differences between configurations</DialogTitle>
         </DialogHeader>
         <div class="grid grid-cols-2">
           <fieldset class="border">
@@ -168,7 +168,7 @@ function PermutationDifferenceButton(props: {
             <pre>{JSON.stringify(props.reference, null, 2)}</pre>
           </fieldset>
           <fieldset class="border">
-            <legend>Permutation</legend>
+            <legend>Permutation configuration</legend>
             <pre>{JSON.stringify(props.permutation, null, 2)}</pre>
           </fieldset>
         </div>
@@ -183,8 +183,8 @@ function PermutationInfo(props: {
   perm: Permutation;
 }) {
   return (
-    <div>
-      <span class="pr-4">{props.permutationName}</span>
+    <div class="flex flex-row items-center justify-center gap-1 p-2">
+      <span class="">{props.permutationName}</span>
       {/* TODO show difference as a summary */}
       {/* TODO show all difference between reference configuration and this permutation */}
       <PermutationDifferenceButton
@@ -214,7 +214,7 @@ function PermutationInfo(props: {
 export function PermutationsList(props: { experiment: Experiment }) {
   return (
     <fieldset class="border">
-      <legend class="flex flex-row items-center gap-2 pb-2">
+      <legend class="flex flex-row items-center gap-2">
         Permutations
         <AddPermutationButton experiment={props.experiment} />
       </legend>
