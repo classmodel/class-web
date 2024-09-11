@@ -1,37 +1,229 @@
-import { For } from "solid-js";
+import {
+  type ClassConfig,
+  classConfig,
+  classDefaultConfigSchema,
+} from "@classmodel/class/config";
+import { For, createSignal } from "solid-js";
 import { Button } from "~/components/ui/button";
-import type { Experiment, Permutation } from "~/lib/store";
+import { inflate } from "~/lib/inflate";
+import {
+  type Experiment,
+  type Permutation,
+  deletePermutationFromExperiment,
+  setPermutationConfigInExperiment,
+} from "~/lib/store";
+import { MyTextField, ObjectField } from "./ObjectField";
+import { MdiCog, MdiDelete, MdiLightVectorDifference } from "./icons";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 
-function AddPermutationButton(props: { experimentId: string }) {
-  return <Button variant="outline">Add permutation</Button>;
+const ClassConfigJsonSchema = classDefaultConfigSchema.definitions?.classConfig;
+
+function PermutationConfigForm(props: {
+  id: string;
+  onSubmit: (name: string, config: Partial<ClassConfig>) => void;
+  permutationName?: string;
+  config: Partial<ClassConfig>;
+}) {
+  return (
+    <form
+      id={props.id}
+      onSubmit={(event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const name = formData.get("name") as string;
+        const rawData = Object.fromEntries(formData.entries());
+        const nestedData = inflate(rawData);
+        // Parse only for validation
+        const data = classConfig.parse(nestedData);
+        // TODO if parse fails, show error
+        props.onSubmit(name, nestedData);
+      }}
+    >
+      <MyTextField
+        name="name"
+        schema={{ type: "string", description: "Name of permutation" }}
+        value={props.permutationName}
+        required
+        minlength="1"
+        // Dont allow changing name of existing permutation, as we would need to remove old name somehow
+        disabled={!!props.permutationName}
+      />
+      <div class="grid grid-flow-col gap-1">
+        <ObjectField schema={ClassConfigJsonSchema} value={props.config} />
+      </div>
+    </form>
+  );
+}
+
+function AddPermutationButton(props: { experiment: Experiment }) {
+  const [open, setOpen] = createSignal(false);
+  return (
+    <Dialog open={open()} onOpenChange={setOpen}>
+      <DialogTrigger
+        title="Add a permutation to the reference configuration of this experiment"
+        variant="secondary"
+        size="icon"
+        as={Button<"button">}
+      >
+        +
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            Permutation on reference configuration of experiment{" "}
+            {props.experiment.id}
+          </DialogTitle>
+        </DialogHeader>
+        <PermutationConfigForm
+          id="add-permutation-form"
+          config={props.experiment.reference.config}
+          onSubmit={(name, config) => {
+            setPermutationConfigInExperiment(props.experiment.id, name, config);
+            setOpen(false);
+          }}
+        />
+        <DialogFooter>
+          <Button type="submit" form="add-permutation-form">
+            Run
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function EditPermutationButton(props: {
+  experiment: Experiment;
+  permutationName: string;
+}) {
+  const [open, setOpen] = createSignal(false);
+  return (
+    <Dialog open={open()} onOpenChange={setOpen}>
+      <DialogTrigger
+        title="Edit permutation"
+        variant="secondary"
+        as={Button<"button">}
+      >
+        <MdiCog />
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            Permutation on reference configuration of experiment{" "}
+            {props.experiment.id}
+          </DialogTitle>
+        </DialogHeader>
+        <PermutationConfigForm
+          id="edit-permutation-form"
+          permutationName={props.permutationName}
+          config={props.experiment.permutations[props.permutationName].config}
+          onSubmit={(_, config) => {
+            setPermutationConfigInExperiment(
+              props.experiment.id,
+              props.permutationName,
+              config,
+            );
+            setOpen(false);
+          }}
+        />
+        <DialogFooter>
+          <Button type="submit" form="edit-permutation-form">
+            Run
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PermutationDifferenceButton(props: {
+  reference: Partial<ClassConfig>;
+  permutation: Partial<ClassConfig>;
+}) {
+  const [open, setOpen] = createSignal(false);
+  return (
+    <Dialog open={open()} onOpenChange={setOpen}>
+      <DialogTrigger
+        variant="outline"
+        title="View difference between this permutation and reference"
+        as={Button<"button">}
+      >
+        <MdiLightVectorDifference />
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Difference between configurations</DialogTitle>
+        </DialogHeader>
+        <div class="grid grid-cols-2">
+          <fieldset class="border">
+            <legend>Reference configuration</legend>
+            {/* TODO use something fancier to show difference, with green and red colors */}
+            <pre>{JSON.stringify(props.reference, null, 2)}</pre>
+          </fieldset>
+          <fieldset class="border">
+            <legend>Permutation</legend>
+            <pre>{JSON.stringify(props.permutation, null, 2)}</pre>
+          </fieldset>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 function PermutationInfo(props: {
-  experimentId: string;
+  experiment: Experiment;
   permutationName: string;
   perm: Permutation;
 }) {
   return (
     <div>
-      <span>{props.permutationName}</span>
-      {/* TODO show difference between reference configuration and this permutation */}
-      <Button variant="outline">View</Button>
-      <Button variant="outline">Edit</Button>
-      <Button variant="outline">Delete</Button>
+      <span class="pr-4">{props.permutationName}</span>
+      {/* TODO show difference as a summary */}
+      {/* TODO show all difference between reference configuration and this permutation */}
+      <PermutationDifferenceButton
+        reference={props.experiment.reference.config}
+        permutation={props.perm.config}
+      />
+      <EditPermutationButton
+        experiment={props.experiment}
+        permutationName={props.permutationName}
+      />
+      <Button
+        variant="outline"
+        title="Delete permutation"
+        onClick={() =>
+          deletePermutationFromExperiment(
+            props.experiment.id,
+            props.permutationName,
+          )
+        }
+      >
+        <MdiDelete />
+      </Button>
     </div>
   );
 }
 
 export function PermutationsList(props: { experiment: Experiment }) {
   return (
-    <div>
-      <AddPermutationButton experimentId={props.experiment.id} />
+    <fieldset class="border">
+      <legend class="flex flex-row items-center gap-2 pb-2">
+        Permutations
+        <AddPermutationButton experiment={props.experiment} />
+      </legend>
       <ul>
         <For each={Object.entries(props.experiment.permutations)}>
           {([key, perm]) => (
             <li>
               <PermutationInfo
-                experimentId={props.experiment.id}
+                experiment={props.experiment}
                 permutationName={key}
                 perm={perm}
               />
@@ -39,6 +231,6 @@ export function PermutationsList(props: { experiment: Experiment }) {
           )}
         </For>
       </ul>
-    </div>
+    </fieldset>
   );
 }

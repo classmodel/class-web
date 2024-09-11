@@ -48,6 +48,8 @@ export async function runExperiment(id: string) {
     }),
   );
 
+  // TODO make lazy, if config does not change do not rerun
+
   // Run reference
   const newOutput = await runClass(exp.reference.config);
 
@@ -126,4 +128,34 @@ export function setExperimentName(id: string, newName: string) {
 
 export function setExperimentDescription(id: string, newDescription: string) {
   setExperiments((exp) => exp.id === id, "description", newDescription);
+}
+
+export async function setPermutationConfigInExperiment(
+  experimentId: string,
+  permutationName: string,
+  config: Partial<ClassConfig>,
+) {
+  setExperiments(
+    (exp) => exp.id === experimentId,
+    "permutations",
+    permutationName,
+    { config },
+  );
+  await runExperiment(experimentId);
+}
+
+export async function deletePermutationFromExperiment(
+  experimentId: string,
+  permutationName: string,
+) {
+  setExperiments(
+    (exp) => exp.id === experimentId,
+    "permutations",
+    (permutations) => {
+      const { [permutationName]: toDelete, ...newPermutations } = permutations;
+      return newPermutations;
+    },
+  );
+  await runExperiment(experimentId);
+  // TODO after delete experiment is still shown unchanged
 }
