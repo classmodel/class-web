@@ -170,11 +170,9 @@ export async function deletePermutationFromExperiment(
   setExperiments(
     (exp) => exp.id === experimentId,
     "permutations",
-    (permutations) => {
-      const { [permutationName]: toDelete, ...newPermutations } = permutations;
-      return newPermutations;
-    },
+    permutationName,
+    // @ts-ignore thats how you delete a key in solid see https://docs.solidjs.com/reference/store-utilities/create-store#setter
+    undefined,
   );
   await runExperiment(experimentId);
-  // TODO after delete experiment is still shown unchanged
 }
