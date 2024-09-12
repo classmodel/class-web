@@ -29,14 +29,14 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 
-const ClassConfigJsonSchema = classDefaultConfigSchema.definitions?.classConfig;
-
 function PermutationConfigForm(props: {
   id: string;
   onSubmit: (name: string, config: Partial<ClassConfig>) => void;
   permutationName?: string;
   config: Partial<ClassConfig>;
 }) {
+  // TODO use reference config as defaults of the schema
+  const schema = classDefaultConfigSchema.definitions?.classConfig;
   return (
     <form
       id={props.id}
@@ -63,7 +63,7 @@ function PermutationConfigForm(props: {
         disabled={!!props.permutationName}
       />
       <div class="grid grid-flow-col gap-1">
-        <ObjectField schema={ClassConfigJsonSchema} value={props.config} />
+        <ObjectField schema={schema} value={props.config} />
       </div>
     </form>
   );
