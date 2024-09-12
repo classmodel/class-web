@@ -1,5 +1,14 @@
-import { Show, createMemo, createSignal, onCleanup } from "solid-js";
+import {
+  Match,
+  Show,
+  Switch,
+  createMemo,
+  createResource,
+  createSignal,
+  onCleanup,
+} from "solid-js";
 import { Button, buttonVariants } from "~/components/ui/button";
+import { createArchive, toConfigBlob } from "~/lib/download";
 import {
   type Experiment,
   deleteExperiment,
@@ -29,6 +38,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 export function ExperimentSettingsDialog(experiment: Experiment) {
   const [open, setOpen] = createSignal(
@@ -94,30 +109,9 @@ function RunningIndicator() {
   );
 }
 
-function DownloadExperiment(props: { experiment: Experiment }) {
+function DownloadExperimentConfiguration(props: { experiment: Experiment }) {
   const downloadUrl = createMemo(() => {
-    // Drop id and running
-    const data = {
-      name: props.experiment.name,
-      description: props.experiment.description,
-      config: props.experiment.reference.config,
-      output: props.experiment.reference.output,
-      permutations: Object.fromEntries(
-        Object.entries(props.experiment.permutations).map(([key, perm]) => [
-          key,
-          {
-            config: perm.config,
-            output: perm.output,
-          },
-        ]),
-      ),
-    };
-
-    return URL.createObjectURL(
-      new Blob([JSON.stringify(data, undefined, 2)], {
-        type: "application/json",
-      }),
-    );
+    return URL.createObjectURL(toConfigBlob(props.experiment));
   });
 
   onCleanup(() => {
@@ -125,16 +119,61 @@ function DownloadExperiment(props: { experiment: Experiment }) {
   });
 
   const filename = `class-${props.experiment.id}.json`;
-
   return (
-    <a
-      class={buttonVariants({ variant: "outline" })}
-      href={downloadUrl()}
-      download={filename}
-      type="application/json"
-    >
-      <MdiDownload />
+    <a href={downloadUrl()} download={filename} type="application/json">
+      Configuration
     </a>
+  );
+}
+
+function DownloadExperimentArchive(props: { experiment: Experiment }) {
+  const [downloadUrl] = createResource(props.experiment, async (experiment) => {
+    const archive = await createArchive(experiment);
+    return URL.createObjectURL(archive);
+  });
+
+  onCleanup(() => {
+    if (downloadUrl.latest) {
+      URL.revokeObjectURL(downloadUrl.latest);
+    }
+  });
+
+  const filename = `class-${props.experiment.id}.zip`;
+  return (
+    <>
+      <Show when={downloadUrl.loading}>
+        <span>Creating archive ...</span>
+      </Show>
+      <Switch>
+        <Match when={downloadUrl.error}>
+          <span>Error creating archive: {downloadUrl.error()}</span>
+        </Match>
+        <Match when={downloadUrl()}>
+          <a href={downloadUrl()} download={filename} type="application/json">
+            All
+          </a>
+        </Match>
+      </Switch>
+    </>
+  );
+}
+
+function DownloadExperiment(props: { experiment: Experiment }) {
+  // TODO on trigger the timeseries plot re-renders, it should not do that
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger class={buttonVariants({ variant: "outline" })}>
+        <MdiDownload />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem>
+          <DownloadExperimentConfiguration experiment={props.experiment} />
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <DownloadExperimentArchive experiment={props.experiment} />
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
