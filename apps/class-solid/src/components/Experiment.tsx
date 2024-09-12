@@ -159,7 +159,7 @@ function DownloadExperimentArchive(props: { experiment: Experiment }) {
 }
 
 function DownloadExperiment(props: { experiment: Experiment }) {
-  // TODO on trigger the timeseries plot re-renders, it should not do that
+  // TODO on trigger the page re-renders, it should not do that
   return (
     <DropdownMenu>
       <DropdownMenuTrigger class={buttonVariants({ variant: "outline" })}>
