@@ -1,4 +1,4 @@
-import { For, Match, Switch, createUniqueId } from "solid-js";
+import { For, Match, Switch, createMemo, createUniqueId } from "solid-js";
 import { analyses, experiments, setAnalyses } from "~/lib/store";
 import type { Experiment } from "~/lib/store";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
@@ -43,37 +43,39 @@ function deleteAnalysis(analysis: Analysis) {
  * It isn't reactive; would require intercepting the signal to call chart.update()
  */
 export function TimeSeriesPlot() {
-  const chartData = {
-    labels:
-      experiments[0].reference.output === undefined
-        ? undefined
-        : experiments[0].reference.output.t,
-    datasets: experiments
-      .filter((e) => e.reference.output)
-      .flatMap((e) => {
-        const permutationRuns = Object.entries(e.permutations).map(
-          ([key, perm]) => {
-            // TODO make clear that this is a permutation of the parent experiment
-            return {
-              label: `${e.id}/${key}`,
-              data: perm.output === undefined ? [null] : perm.output.h,
+  const chartData = createMemo(() => {
+    return {
+      labels:
+        experiments[0].reference.output === undefined
+          ? undefined
+          : experiments[0].reference.output.t,
+      datasets: experiments
+        .filter((e) => e.reference.output)
+        .flatMap((e) => {
+          const permutationRuns = Object.entries(e.permutations).map(
+            ([key, perm]) => {
+              // TODO make clear that this is a permutation of the parent experiment
+              return {
+                label: `${e.id}/${key}`,
+                data: perm.output === undefined ? [null] : perm.output.h,
+                fill: false,
+              };
+            },
+          );
+          return [
+            {
+              label: e.id,
+              data:
+                e.reference.output === undefined ? [null] : e.reference.output.h,
               fill: false,
-            };
-          },
-        );
-        return [
-          {
-            label: e.id,
-            data:
-              e.reference.output === undefined ? [null] : e.reference.output.h,
-            fill: false,
-          },
-          ...permutationRuns,
-        ];
-      }),
-  };
+            },
+            ...permutationRuns,
+          ];
+        }),
+    }
+  });
 
-  return <LineChart data={chartData} />;
+  return <LineChart data={chartData()} />;
 }
 
 /** Simply show the final height for each experiment that has output */
