@@ -1,18 +1,16 @@
 import type { ClassOutput } from "@classmodel/class/runner";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
-import type { Experiment } from "./store";
+import type { Experiment, ExperimentConfigSchema } from "./store";
 
-function toConfig(experiment: Experiment) {
+function toConfig(experiment: Experiment): ExperimentConfigSchema {
   return {
     name: experiment.name,
     description: experiment.description,
-    config: experiment.reference.config,
+    reference: experiment.reference.config,
     permutations: Object.fromEntries(
       Object.entries(experiment.permutations).map(([key, perm]) => [
         key,
-        {
-          config: perm.config,
-        },
+        perm.config,
       ]),
     ),
   };

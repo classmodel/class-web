@@ -1,6 +1,7 @@
-import type { ClassConfig } from "@classmodel/class/config";
+import { type ClassConfig, classConfig } from "@classmodel/class/config";
 import type { ClassOutput } from "@classmodel/class/runner";
 import { createStore, produce, unwrap } from "solid-js/store";
+import { z } from "zod";
 import type { Analysis } from "~/components/Analysis";
 import { runClass } from "./runner";
 
@@ -114,7 +115,7 @@ export function addExperiment(config: Partial<ClassConfig> = {}) {
   const newExperiment: Experiment = {
     name: `My experiment ${id}`,
     description: "Standard experiment",
-    id: id.toString(),
+    id,
     reference: {
       config,
     },
@@ -123,6 +124,36 @@ export function addExperiment(config: Partial<ClassConfig> = {}) {
   };
   setExperiments(experiments.length, newExperiment);
   return newExperiment;
+}
+
+const ExperimentConfigSchema = z.object({
+  name: z.string(),
+  description: z.string().default("Standard experiment"),
+  reference: classConfig.partial(),
+  permutations: z.record(classConfig.partial()),
+});
+export type ExperimentConfigSchema = z.infer<typeof ExperimentConfigSchema>;
+
+export function uploadExperiment(rawData: unknown) {
+  const upload = ExperimentConfigSchema.parse(rawData);
+  const id = bumpLastExperimentId();
+  const experiment: Experiment = {
+    name: upload.name,
+    description: upload.description,
+    id,
+    reference: {
+      config: upload.reference,
+    },
+    permutations: Object.fromEntries(
+      Object.entries(upload.permutations).map(([key, config]) => [
+        key,
+        { config },
+      ]),
+    ),
+    running: false,
+  };
+  setExperiments(experiments.length, experiment);
+  // TODO dont trigger opening of form of reference configuration
 }
 
 export function duplicateExperiment(id: string) {
