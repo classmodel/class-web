@@ -54,11 +54,7 @@ function mergeConfigurations(reference: any, permutation: any) {
 }
 
 export async function runExperiment(id: string) {
-  const expProxy = experiments.find((exp) => exp.id === id);
-  if (!expProxy) {
-    throw new Error(`No experiment with id ${id}`);
-  }
-  const exp = unwrap(expProxy);
+  const exp = findExperiment(id);
 
   setExperiments(
     (e) => e.id === exp.id,
@@ -102,6 +98,15 @@ export async function runExperiment(id: string) {
       e.running = false;
     }),
   );
+}
+
+function findExperiment(id: string) {
+  const expProxy = experiments.find((exp) => exp.id === id);
+  if (!expProxy) {
+    throw new Error(`No experiment with id ${id}`);
+  }
+  const exp = unwrap(expProxy);
+  return exp;
 }
 
 export function addExperiment(config: Partial<ClassConfig> = {}) {
@@ -175,4 +180,17 @@ export async function deletePermutationFromExperiment(
     undefined,
   );
   await runExperiment(experimentId);
+}
+
+export function promotePermutationToExperiment(
+  experimentId: string,
+  permutationName: string,
+) {
+  const exp = findExperiment(experimentId);
+  const combinedConfig = mergeConfigurations(
+    exp.reference.config,
+    exp.permutations[permutationName].config,
+  );
+  addExperiment(combinedConfig);
+  // TODO dont show form of new experiment, just show the new card
 }

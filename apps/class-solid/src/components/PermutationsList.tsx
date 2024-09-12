@@ -10,10 +10,16 @@ import {
   type Experiment,
   type Permutation,
   deletePermutationFromExperiment,
+  promotePermutationToExperiment,
   setPermutationConfigInExperiment,
 } from "~/lib/store";
 import { MyTextField, ObjectField } from "./ObjectField";
-import { MdiCog, MdiDelete, MdiLightVectorDifference } from "./icons";
+import {
+  MdiCakeVariantOutline,
+  MdiCog,
+  MdiDelete,
+  MdiLightVectorDifference,
+} from "./icons";
 import {
   Dialog,
   DialogContent,
@@ -196,6 +202,18 @@ function PermutationInfo(props: {
         experiment={props.experiment}
         permutationName={props.permutationName}
       />
+      <Button
+        variant="outline"
+        title="Promote permutation to an experiment"
+        onClick={() => {
+          promotePermutationToExperiment(
+            props.experiment.id,
+            props.permutationName,
+          );
+        }}
+      >
+        <MdiCakeVariantOutline />
+      </Button>
       <Button
         variant="outline"
         title="Delete permutation"
