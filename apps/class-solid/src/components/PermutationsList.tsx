@@ -37,13 +37,14 @@ function PermutationConfigForm(props: {
       onSubmit={(event) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
-        const name = formData.get("name") as string;
         const rawData = Object.fromEntries(formData.entries());
-        const nestedData = inflate(rawData);
+        const { name, ...rawDataWithoutName } = rawData;
+        const nameAsString = typeof name === "string" ? name : "";
+        const nestedData = inflate(rawDataWithoutName);
         // Parse only for validation
         const data = classConfig.parse(nestedData);
         // TODO if parse fails, show error
-        props.onSubmit(name, nestedData);
+        props.onSubmit(nameAsString, nestedData);
       }}
     >
       <MyTextField

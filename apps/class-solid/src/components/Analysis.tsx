@@ -66,13 +66,15 @@ export function TimeSeriesPlot() {
             {
               label: e.id,
               data:
-                e.reference.output === undefined ? [null] : e.reference.output.h,
+                e.reference.output === undefined
+                  ? [null]
+                  : e.reference.output.h,
               fill: false,
             },
             ...permutationRuns,
           ];
         }),
-    }
+    };
   });
 
   return <LineChart data={chartData()} />;
