@@ -34,6 +34,25 @@ function bumpLastExperimentId(): string {
 export const [experiments, setExperiments] = createStore<Experiment[]>([]);
 export const [analyses, setAnalyses] = createStore<Analysis[]>([]);
 
+// biome-ignore lint/suspicious/noExplicitAny: recursion is hard to type
+function mergeConfigurations(reference: any, permutation: any) {
+  const merged = { ...reference };
+
+  for (const key in permutation) {
+    if (
+      permutation[key] &&
+      typeof permutation[key] === "object" &&
+      !Array.isArray(permutation[key])
+    ) {
+      merged[key] = mergeConfigurations(reference[key], permutation[key]);
+    } else {
+      merged[key] = permutation[key];
+    }
+  }
+
+  return merged;
+}
+
 export async function runExperiment(id: string) {
   const expProxy = experiments.find((exp) => exp.id === id);
   if (!expProxy) {
@@ -63,10 +82,10 @@ export async function runExperiment(id: string) {
   // Run permutations
   for (const key in exp.permutations) {
     const perm = exp.permutations[key];
-    const combinedConfig = {
-      ...exp.reference.config,
-      ...perm.config,
-    };
+    const combinedConfig = mergeConfigurations(
+      exp.reference.config,
+      perm.config,
+    );
     const newOutput = await runClass(combinedConfig);
 
     setExperiments(
