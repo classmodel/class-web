@@ -1,6 +1,7 @@
 import { For, Match, Switch, createMemo, createUniqueId } from "solid-js";
 import { analyses, experiments, setAnalyses } from "~/lib/store";
 import type { Experiment } from "~/lib/store";
+import LinePlot from "./LinePlot";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import { Button } from "./ui/button";
 import {
@@ -24,6 +25,7 @@ export function addAnalysis(type = "default") {
   const name = {
     default: "Final height",
     timeseries: "Timeseries",
+    profiles: "Vertical profiles",
   }[type];
 
   setAnalyses(analyses.length, {
@@ -40,7 +42,6 @@ function deleteAnalysis(analysis: Analysis) {
 
 /** Very rudimentary plot showing time series of each experiment globally available
  * It only works if the time axes are equal
- * It isn't reactive; would require intercepting the signal to call chart.update()
  */
 export function TimeSeriesPlot() {
   const chartData = createMemo(() => {
@@ -75,6 +76,14 @@ export function TimeSeriesPlot() {
   });
 
   return <LineChart data={chartData()} />;
+}
+
+export function VerticalProfiles() {
+  return (
+    <div>
+      <LinePlot />
+    </div>
+  );
 }
 
 /** Simply show the final height for each experiment that has output */
@@ -125,6 +134,9 @@ export function AnalysisCard(analysis: Analysis) {
           </Match>
           <Match when={analysis.type === "timeseries"}>
             <TimeSeriesPlot />
+          </Match>
+          <Match when={analysis.type === "profiles"}>
+            <VerticalProfiles />
           </Match>
         </Switch>
       </CardContent>
