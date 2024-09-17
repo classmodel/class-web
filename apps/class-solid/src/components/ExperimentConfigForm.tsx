@@ -31,7 +31,7 @@ export function ExperimentConfigForm({
         onSubmit(nestedData);
       }}
     >
-      <div class="grid grid-flow-col gap-1">
+      <div>
         <ObjectField schema={ClassConfigJsonSchema} value={config} />
       </div>
     </form>

@@ -57,7 +57,7 @@ export function ExperimentSettingsDialog(experiment: Experiment) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle class="mr-10">
             Reference configuration of experiment {experiment.id}
           </DialogTitle>
           <DialogDescription>{experiment.description}</DialogDescription>

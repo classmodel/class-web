@@ -81,8 +81,11 @@ export function MyTextField({
   // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
 }: { name: string; schema: any; value: any; [key: string]: any }) {
   return (
-    <TextField class="grid w-full max-w-sm items-center gap-1.5">
-      <TextFieldLabel for={name}>{schema.description ?? name}</TextFieldLabel>
+    // TODO: units after input field?
+    <TextField class="flex items-center">
+      <TextFieldLabel for={name} class="basis-3/4">
+        {schema.description ?? name}
+      </TextFieldLabel>
       <TextFieldInput
         type="text"
         id={name}
@@ -90,6 +93,7 @@ export function MyTextField({
         value={value}
         placeholder={schema.default}
         {...props}
+        class="basis-1/4"
       />
     </TextField>
   );
