@@ -38,7 +38,7 @@ export function ObjectField({
   return (
     <Switch>
       <Match when={isRoot}>
-        <Accordion multiple={false} collapsible class="w-full">
+        <Accordion multiple={false} collapsible>
           <Children />
         </Accordion>
       </Match>

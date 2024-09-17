@@ -83,7 +83,7 @@ function AddPermutationButton(props: { experiment: Experiment }) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle class="mr-10">
             Permutation on reference configuration of experiment{" "}
             {props.experiment.id}
           </DialogTitle>
