@@ -150,7 +150,7 @@ function DownloadExperimentArchive(props: { experiment: Experiment }) {
         </Match>
         <Match when={downloadUrl()}>
           <a href={downloadUrl()} download={filename} type="application/json">
-            All
+            Config + output
           </a>
         </Match>
       </Switch>
