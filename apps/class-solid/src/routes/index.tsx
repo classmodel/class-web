@@ -28,7 +28,7 @@ export default function Home() {
           <DropdownMenuContent>
             <DropdownMenuLabel>Add experiment</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => addExperiment()}>
+            <DropdownMenuItem onClick={() => addExperiment()} class="cursor-pointer">
               Default settings
             </DropdownMenuItem>
             <DropdownMenuItem class="text-gray-400">
@@ -58,7 +58,7 @@ export default function Home() {
               <DropdownMenuLabel>Add analysis</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => addAnalysis()}>
-                Card
+                Final height
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => addAnalysis("timeseries")}>
                 Timeseries
