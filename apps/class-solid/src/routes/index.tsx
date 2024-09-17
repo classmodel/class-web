@@ -28,8 +28,11 @@ export default function Home() {
           <DropdownMenuContent>
             <DropdownMenuLabel>Add experiment</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => addExperiment()} class="cursor-pointer">
-              Default settings
+            <DropdownMenuItem
+              onClick={() => addExperiment()}
+              class="cursor-pointer"
+            >
+              From scratch
             </DropdownMenuItem>
             <DropdownMenuItem class="text-gray-400">
               Upload (not implemented)
