@@ -4,6 +4,12 @@ import {
   TextFieldInput,
   TextFieldLabel,
 } from "~/components/ui/text-field";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "./ui/accordion";
 
 export function ObjectField({
   schema,
@@ -32,13 +38,15 @@ export function ObjectField({
   return (
     <Switch>
       <Match when={isRoot}>
-        <Children />
+        <Accordion multiple={false} collapsible class="w-full">
+          <Children />
+        </Accordion>
       </Match>
       <Match when={!isRoot}>
-        <fieldset class="border p-2">
-          <legend>{schema.description ?? name}</legend>
-          {Children()}
-        </fieldset>
+        <AccordionItem value={name}>
+          <AccordionTrigger>{schema.description ?? name}</AccordionTrigger>
+          <AccordionContent>{Children()}</AccordionContent>
+        </AccordionItem>
       </Match>
     </Switch>
   );
