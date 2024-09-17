@@ -54,7 +54,7 @@ function PermutationConfigForm(props: {
       }}
     >
       <MyTextField
-        name="name"
+        name="permutation-name"
         schema={{ type: "string", description: "Name of permutation" }}
         value={props.permutationName}
         required
