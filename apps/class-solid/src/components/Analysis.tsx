@@ -127,7 +127,7 @@ export function AnalysisCard(analysis: Analysis) {
         {/* TODO: make name & description editable */}
         <CardTitle id={id}>{analysis.name}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent class="h-[450px]">
         <Switch fallback={<p>Unknown analysis type</p>}>
           <Match when={analysis.type === "default"}>
             <FinalHeights />
