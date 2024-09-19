@@ -35,7 +35,6 @@ function PermutationConfigForm(props: {
   permutationName?: string;
   config: Partial<ClassConfig>;
 }) {
-  // TODO use reference config as defaults of the schema
   const schema = classDefaultConfigSchema.definitions?.classConfig;
   return (
     <form
@@ -49,7 +48,6 @@ function PermutationConfigForm(props: {
         const nestedData = inflate(rawDataWithoutName);
         // Parse only for validation
         const data = classConfig.parse(nestedData);
-        // TODO if parse fails, show error
         props.onSubmit(nameAsString, nestedData);
       }}
     >
@@ -59,7 +57,7 @@ function PermutationConfigForm(props: {
         value={props.permutationName}
         required
         minlength="1"
-        // Dont allow changing name of existing permutation, as we would need to remove old name somehow
+        // TODO allow changing name of existing permutation
         disabled={!!props.permutationName}
       />
       <div class="grid grid-flow-col gap-1">
@@ -171,7 +169,6 @@ function PermutationDifferenceButton(props: {
         <div class="grid grid-cols-2">
           <fieldset class="border">
             <legend>Reference configuration</legend>
-            {/* TODO use something fancier to show difference, with green and red colors */}
             <pre>{JSON.stringify(props.reference, null, 2)}</pre>
           </fieldset>
           <fieldset class="border">
@@ -192,8 +189,6 @@ function PermutationInfo(props: {
   return (
     <div class="flex flex-row items-center justify-center gap-1 p-2">
       <span class="">{props.permutationName}</span>
-      {/* TODO show difference as a summary */}
-      {/* TODO show all difference between reference configuration and this permutation */}
       <PermutationDifferenceButton
         reference={props.experiment.reference.config}
         permutation={props.perm.config}
