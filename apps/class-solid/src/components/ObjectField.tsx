@@ -1,4 +1,5 @@
-import { For, Match, Switch } from "solid-js";
+import { Accordion as KobalteAccordion } from "@kobalte/core";
+import { For, Match, Show, Switch, createSignal } from "solid-js";
 import {
   TextField,
   TextFieldInput,
@@ -11,12 +12,18 @@ import {
   AccordionTrigger,
 } from "./ui/accordion";
 
-export function ObjectField({
+const [expanded, setExpanded] = createSignal<string[]>([  // TODO set on first propery of type object
+]);
+
+
+
+export function ObjectField<TSSchema>({
   schema,
   name = "",
   value,
+  Field,
   // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
-}: { schema: any; name?: string; value?: any }) {
+}: { schema: any; name?: string; value?: any, Field:any }) {
   // name can be empty, but only for root, which should be treated differently
   const isRoot = name === "";
 
@@ -35,17 +42,20 @@ export function ObjectField({
     );
   }
 
+  
   return (
     <Switch>
       <Match when={isRoot}>
-        <Accordion multiple={false} collapsible>
+        <Accordion multiple={false} collapsible value={expanded()} onChange={setExpanded}>
           <Children />
         </Accordion>
       </Match>
       <Match when={!isRoot}>
         <AccordionItem value={name}>
           <AccordionTrigger>{schema.description ?? name}</AccordionTrigger>
-          <AccordionContent>{Children()}</AccordionContent>
+          <Show when={expanded().includes(name)} fallback={<div class="hidden">{Children()}</div>}>
+          <AccordionContent >{Children()}</AccordionContent>
+          </Show>
         </AccordionItem>
       </Match>
     </Switch>
@@ -56,8 +66,9 @@ function PropField({
   name,
   schema,
   value,
+  Field
   // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
-}: { name: string; schema: any; value: any }) {
+}: { name: string; schema: any; value: any, Field: any }) {
   return (
     <Switch fallback={<p>Unknown type</p>}>
       <Match when={schema.type === "object"}>
