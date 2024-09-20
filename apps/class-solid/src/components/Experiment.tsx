@@ -118,7 +118,7 @@ function DownloadExperimentConfiguration(props: { experiment: Experiment }) {
     URL.revokeObjectURL(downloadUrl());
   });
 
-  const filename = `class-${props.experiment.id}.json`;
+  const filename = `class-${props.experiment.name}.json`;
   return (
     <a href={downloadUrl()} download={filename} type="application/json">
       Configuration
