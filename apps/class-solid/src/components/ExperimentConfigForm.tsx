@@ -3,7 +3,7 @@ import {
   classConfig,
   classDefaultConfigSchema,
 } from "@classmodel/class/config";
-import { createForm } from "@modular-forms/solid";
+import { SubmitHandler, createForm } from "@modular-forms/solid";
 import { inflate } from "../lib/inflate";
 import { ObjectField } from "./ObjectField";
 
@@ -20,20 +20,16 @@ export function ExperimentConfigForm({
 }) {
   const [, { Form, Field }] = createForm<ClassConfig>();
 
-  // TOOD use modular forms submit mechanism
-  function wrappedOnSubmit(event) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const rawData = Object.fromEntries(formData.entries());
-    const nestedData = inflate(rawData);
+  const handleSubmit: SubmitHandler<ClassConfig> = (values, event) => {
+    console.log(values);
     // Parse only for validation
-    const data = classConfig.parse(nestedData);
+    const data = classConfig.parse(values);
     // TODO if parse fails, show error
-    onSubmit(nestedData);
-  }
+    onSubmit(values);
+  };
 
   return (
-    <Form id={id}>
+    <Form id={id} onSubmit={handleSubmit}>
       <div>
         <ObjectField
           schema={ClassConfigJsonSchema}
