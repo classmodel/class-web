@@ -55,7 +55,7 @@ export function TimeSeriesPlot() {
           const permutationRuns = Object.entries(e.permutations).map(
             ([key, perm]) => {
               return {
-                label: `${e.id}/${key}`,
+                label: `${e.name}/${key}`,
                 data: perm.output === undefined ? [null] : perm.output.h,
                 fill: false,
               };
@@ -63,7 +63,7 @@ export function TimeSeriesPlot() {
           );
           return [
             {
-              label: e.id,
+              label: e.name,
               data:
                 e.reference.output === undefined
                   ? [null]
@@ -91,14 +91,14 @@ function FinalHeights() {
         return (
           <div class="mb-2">
             <p>
-              {experiment.id}: {h.toFixed()} m
+              {experiment.name}: {h.toFixed()} m
             </p>
             <For each={Object.entries(experiment.permutations)}>
               {([key, perm]) => {
                 const h = perm.output?.h[perm.output.h.length - 1] || 0;
                 return (
                   <p>
-                    {experiment.id}/{key}: {h.toFixed()} m
+                    {experiment.name}/{key}: {h.toFixed()} m
                   </p>
                 );
               }}
