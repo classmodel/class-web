@@ -20,6 +20,7 @@ export function ExperimentConfigForm({
 }) {
   const [, { Form, Field }] = createForm<ClassConfig>();
 
+  // TOOD use modular forms submit mechanism
   function wrappedOnSubmit(event) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);

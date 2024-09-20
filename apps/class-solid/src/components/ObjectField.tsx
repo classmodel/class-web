@@ -62,46 +62,46 @@ function PropField({
   // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
 }: { name: string; schema: any; value: any; Field: any }) {
   return (
-    <Field>
-      {(field, props) => (
-        <Switch fallback={<p>Unknown type</p>}>
-          <Match when={schema.type === "object"}>
-            <ObjectField {...props} name={name} schema={schema} value={value} />
-          </Match>
-          <Match when={schema.type === "number"}>
-            <MyTextField {...props} name={name} schema={schema} value={value} />
-          </Match>
-          <Match when={schema.type === "string"}>
-            <MyTextField {...props} name={name} schema={schema} value={value} />
-          </Match>
-        </Switch>
-      )}
-    </Field>
+    <Switch fallback={<p>Unknown type</p>}>
+      <Match when={schema.type === "object"}>
+        <ObjectField name={name} schema={schema} value={value} Field={Field} />
+      </Match>
+      <Match when={schema.type === "number"}>
+        <MyTextField name={name} schema={schema} value={value} Field={Field} />
+      </Match>
+      <Match when={schema.type === "string"}>
+        <MyTextField name={name} schema={schema} value={value} Field={Field} />
+      </Match>
+    </Switch>
   );
 }
 
 export function MyTextField({
   name,
   schema,
-  value,
-  ...props
+  Field,
   // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
-}: { name: string; schema: any; value: any; [key: string]: any }) {
+}: { name: string; schema: any; value: any; [key: string]: any; Field: any }) {
   return (
-    // TODO: units after input field?
-    <TextField class="flex items-center">
-      <TextFieldLabel for={name} class="basis-3/4">
-        {schema.description ?? name}
-      </TextFieldLabel>
-      <TextFieldInput
-        type="text"
-        id={name}
-        name={name}
-        value={value}
-        placeholder={schema.default}
-        {...props}
-        class="basis-1/4"
-      />
-    </TextField>
+    // TODO: display units after input field?
+    // TODO: add more modularforms functionality
+    <Field name={name}>
+      {(field, props) => (
+        <TextField class="flex items-center">
+          <TextFieldLabel for={name} class="basis-3/4">
+            {schema.description ?? name}
+          </TextFieldLabel>
+          <TextFieldInput
+            type="text"
+            id={name}
+            name={name}
+            value={field.value}
+            placeholder={schema.default}
+            {...props}
+            class="basis-1/4"
+          />
+        </TextField>
+      )}
+    </Field>
   );
 }
