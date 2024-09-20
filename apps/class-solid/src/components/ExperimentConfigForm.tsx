@@ -3,8 +3,11 @@ import {
   classConfig,
   classDefaultConfigSchema,
 } from "@classmodel/class/config";
-import { SubmitHandler, createForm, getValues } from "@modular-forms/solid";
-import { inflate } from "../lib/inflate";
+import {
+  type SubmitHandler,
+  createForm,
+  setValues,
+} from "@modular-forms/solid";
 import { ObjectField } from "./ObjectField";
 
 const ClassConfigJsonSchema = classDefaultConfigSchema.definitions?.classConfig;
@@ -18,11 +21,11 @@ export function ExperimentConfigForm({
   config: Partial<ClassConfig>;
   onSubmit: (c: Partial<ClassConfig>) => void;
 }) {
-  const [configForm, { Form, Field }] = createForm<ClassConfig>();
+  const [configFormStore, { Form, Field }] = createForm<ClassConfig>();
+  setValues(configFormStore, config);
 
   const handleSubmit: SubmitHandler<ClassConfig> = (values, event) => {
-    const gotValues = getValues(configForm, { shouldActive: false });
-    console.log(gotValues);
+    console.log(values);
     // Parse only for validation
     const data = classConfig.parse(values);
     // TODO if parse fails, show error
@@ -30,7 +33,12 @@ export function ExperimentConfigForm({
   };
 
   return (
-    <Form id={id} onSubmit={handleSubmit}>
+    <Form
+      id={id}
+      onSubmit={handleSubmit}
+      shouldActive={false} // Also return from collapsed fields
+      shouldDirty={true} // Don't return empty strings for unset fields
+    >
       <div>
         <ObjectField
           schema={ClassConfigJsonSchema}

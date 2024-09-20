@@ -6,7 +6,7 @@ import type { Analysis } from "~/components/Analysis";
 import { runClass } from "./runner";
 
 export interface Permutation<
-  C extends Partial<ClassConfig> = Partial<ClassConfig>,
+  C extends Partial<ClassConfig> = Partial<ClassConfig>
 > {
   config: C;
   output?: ClassOutput | undefined;
@@ -61,7 +61,7 @@ export async function runExperiment(id: string) {
     (e) => e.id === exp.id,
     produce((e) => {
       e.running = true;
-    }),
+    })
   );
 
   // TODO make lazy, if config does not change do not rerun
@@ -73,7 +73,7 @@ export async function runExperiment(id: string) {
     (e) => e.id === exp.id,
     produce((e) => {
       e.reference.output = newOutput;
-    }),
+    })
   );
 
   // Run permutations
@@ -81,7 +81,7 @@ export async function runExperiment(id: string) {
     const perm = exp.permutations[key];
     const combinedConfig = mergeConfigurations(
       exp.reference.config,
-      perm.config,
+      perm.config
     );
     const newOutput = await runClass(combinedConfig);
 
@@ -89,7 +89,7 @@ export async function runExperiment(id: string) {
       (e) => e.id === exp.id,
       produce((e) => {
         e.permutations[key].output = newOutput;
-      }),
+      })
     );
   }
 
@@ -97,7 +97,7 @@ export async function runExperiment(id: string) {
     (e) => e.id === exp.id,
     produce((e) => {
       e.running = false;
-    }),
+    })
   );
 }
 
@@ -148,7 +148,7 @@ export function uploadExperiment(rawData: unknown) {
       Object.entries(upload.permutations).map(([key, config]) => [
         key,
         { config },
-      ]),
+      ])
     ),
     running: false,
   };
@@ -171,7 +171,7 @@ export function deleteExperiment(id: string) {
 
 export async function modifyExperiment(
   id: string,
-  newConfig: Partial<ClassConfig>,
+  newConfig: Partial<ClassConfig>
 ) {
   setExperiments((exp, i) => exp.id === id, "reference", "config", newConfig);
   await runExperiment(id);
@@ -188,39 +188,39 @@ export function setExperimentDescription(id: string, newDescription: string) {
 export async function setPermutationConfigInExperiment(
   experimentId: string,
   permutationName: string,
-  config: Partial<ClassConfig>,
+  config: Partial<ClassConfig>
 ) {
   setExperiments(
     (exp) => exp.id === experimentId,
     "permutations",
     permutationName,
-    { config },
+    { config }
   );
   await runExperiment(experimentId);
 }
 
 export async function deletePermutationFromExperiment(
   experimentId: string,
-  permutationName: string,
+  permutationName: string
 ) {
   setExperiments(
     (exp) => exp.id === experimentId,
     "permutations",
     permutationName,
     // @ts-ignore thats how you delete a key in solid see https://docs.solidjs.com/reference/store-utilities/create-store#setter
-    undefined,
+    undefined
   );
   await runExperiment(experimentId);
 }
 
 export function promotePermutationToExperiment(
   experimentId: string,
-  permutationName: string,
+  permutationName: string
 ) {
   const exp = findExperiment(experimentId);
   const combinedConfig = mergeConfigurations(
     exp.reference.config,
-    exp.permutations[permutationName].config,
+    exp.permutations[permutationName].config
   );
   addExperiment(combinedConfig);
   // TODO dont show form of new experiment, just show the new card
