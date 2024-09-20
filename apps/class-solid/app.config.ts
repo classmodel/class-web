@@ -1,4 +1,5 @@
 import { defineConfig } from "@solidjs/start/config";
+// import solidPlugin from "vite-plugin-solid";
 
 export default defineConfig({
   ssr: false,
@@ -11,4 +12,7 @@ export default defineConfig({
       crawlLinks: true,
     },
   },
+  // vite: {
+  //   plugins: [solidPlugin()],
+  // },
 });
