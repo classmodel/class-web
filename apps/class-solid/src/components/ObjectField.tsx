@@ -67,10 +67,10 @@ function PropField({
         <ObjectField name={name} schema={schema} value={value} Field={Field} />
       </Match>
       <Match when={schema.type === "number"}>
-        <MyTextField name={name} schema={schema} value={value} Field={Field} />
+        <MyTextField name={name} schema={schema} Field={Field} />
       </Match>
       <Match when={schema.type === "string"}>
-        <MyTextField name={name} schema={schema} value={value} Field={Field} />
+        <MyTextField name={name} schema={schema} Field={Field} />
       </Match>
     </Switch>
   );
@@ -81,7 +81,7 @@ export function MyTextField({
   schema,
   Field,
   // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
-}: { name: string; schema: any; value: any; [key: string]: any; Field: any }) {
+}: { name: string; schema: any; [key: string]: any; Field: any }) {
   return (
     // TODO: display units after input field?
     // TODO: add more modularforms functionality
@@ -93,8 +93,8 @@ export function MyTextField({
           </TextFieldLabel>
           <TextFieldInput
             type="text"
-            id={name}
-            name={name}
+            id={props.name}
+            name={props.name}
             value={field.value}
             placeholder={schema.default}
             {...props}
