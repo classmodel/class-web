@@ -161,7 +161,15 @@ export function duplicateExperiment(id: string) {
     throw new Error("No experiment with id {id}");
   }
 
-  addExperiment({ ...original.reference.config });
+  const newExperiment = addExperiment({ ...original.reference.config });
+  for (const key in original.permutations) {
+    setPermutationConfigInExperiment(
+      newExperiment.id,
+      key,
+      original.permutations[key].config,
+    );
+  }
+  runExperiment(newExperiment.id);
 }
 
 export function deleteExperiment(id: string) {
@@ -209,8 +217,6 @@ export async function deletePermutationFromExperiment(
     // @ts-ignore thats how you delete a key in solid see https://docs.solidjs.com/reference/store-utilities/create-store#setter
     undefined,
   );
-  // TODO just delete output of permutation
-  await runExperiment(experimentId);
 }
 
 export function promotePermutationToExperiment(
