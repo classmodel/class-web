@@ -15,8 +15,9 @@ export function ObjectField({
   schema,
   name = "",
   value,
+  Field,
   // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
-}: { schema: any; name?: string; value?: any }) {
+}: { schema: any; name?: string; value?: any; Field: any }) {
   // name can be empty, but only for root, which should be treated differently
   const isRoot = name === "";
 
@@ -29,6 +30,7 @@ export function ObjectField({
             name={isRoot ? `${propName}` : `${name}.${propName}`}
             schema={propSchema}
             value={value?.[propName]}
+            Field={Field}
           />
         )}
       </For>
@@ -56,20 +58,25 @@ function PropField({
   name,
   schema,
   value,
+  Field,
   // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
-}: { name: string; schema: any; value: any }) {
+}: { name: string; schema: any; value: any; Field: any }) {
   return (
-    <Switch fallback={<p>Unknown type</p>}>
-      <Match when={schema.type === "object"}>
-        <ObjectField name={name} schema={schema} value={value} />
-      </Match>
-      <Match when={schema.type === "number"}>
-        <MyTextField name={name} schema={schema} value={value} />
-      </Match>
-      <Match when={schema.type === "string"}>
-        <MyTextField name={name} schema={schema} value={value} />
-      </Match>
-    </Switch>
+    <Field>
+      {(field, props) => (
+        <Switch fallback={<p>Unknown type</p>}>
+          <Match when={schema.type === "object"}>
+            <ObjectField {...props} name={name} schema={schema} value={value} />
+          </Match>
+          <Match when={schema.type === "number"}>
+            <MyTextField {...props} name={name} schema={schema} value={value} />
+          </Match>
+          <Match when={schema.type === "string"}>
+            <MyTextField {...props} name={name} schema={schema} value={value} />
+          </Match>
+        </Switch>
+      )}
+    </Field>
   );
 }
 
