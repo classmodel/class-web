@@ -50,16 +50,22 @@ export function ExperimentSettingsDialog(experiment: Experiment) {
       <DialogTrigger variant="outline" as={Button<"button">} title="Edit">
         <MdiCog />
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent class="min-w-[33%]">
         <DialogHeader>
-          <DialogTitle>Experiment</DialogTitle>
+          <DialogTitle class="mr-10">Experiment</DialogTitle>
         </DialogHeader>
         <ExperimentConfigForm
           id="experiment-form"
           experiment={experiment}
-          onSubmit={(newConfig, name, description) => {
+          onSubmit={(newConfig) => {
             setOpen(false);
-            modifyExperiment(experiment.id, newConfig, name, description);
+            const { title, description, ...strippedConfig } = newConfig;
+            modifyExperiment(
+              experiment.id,
+              strippedConfig,
+              title ?? experiment.name,
+              description ?? experiment.description,
+            );
           }}
         />
         <DialogFooter>

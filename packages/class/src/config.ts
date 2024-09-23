@@ -76,6 +76,8 @@ const mixedLayer = z
   .describe("Mixed layer");
 
 export const classConfig = z.object({
+  title: z.string().default(""),
+  description: z.string().default(""),
   initialState: initialState.default({}),
   timeControl: timeControl.default({}),
   mixedLayer: mixedLayer.default({}),

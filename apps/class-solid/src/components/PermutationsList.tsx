@@ -3,9 +3,9 @@ import {
   classConfig,
   classDefaultConfigSchema,
 } from "@classmodel/class/config";
+import { type SubmitHandler, createForm } from "@modular-forms/solid";
 import { For, createSignal } from "solid-js";
 import { Button } from "~/components/ui/button";
-import { inflate } from "~/lib/inflate";
 import {
   type Experiment,
   type Permutation,
@@ -15,7 +15,7 @@ import {
   setPermutationConfigInExperiment,
   swapPermutationAndReferenceConfiguration,
 } from "~/lib/store";
-import { MyTextField, ObjectField } from "./ObjectField";
+import { ObjectField } from "./ObjectField";
 import {
   MdiCakeVariantOutline,
   MdiCog,
@@ -40,45 +40,49 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
+const ClassConfigJsonSchema = classDefaultConfigSchema.definitions?.classConfig;
+
 function PermutationConfigForm(props: {
   id: string;
-  onSubmit: (name: string, config: Partial<ClassConfig>) => void;
+  onSubmit: (config: Partial<ClassConfig>) => void;
   permutationName?: string;
   config: Partial<ClassConfig>;
 }) {
-  const schema = classDefaultConfigSchema.definitions?.classConfig;
+  const [_, { Form, Field }] = createForm<ClassConfig>({
+    initialValues: {
+      title: props.permutationName ?? "",
+      ...props.config,
+    },
+  });
+
+  const handleSubmit: SubmitHandler<ClassConfig> = (values, event) => {
+    // Parse only for validation
+    const data = classConfig.parse(values);
+    // TODO if parse fails, show error
+    props.onSubmit(values);
+  };
+
   return (
-    <form
+    <Form
       id={props.id}
-      onSubmit={(event) => {
-        event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        const rawData = Object.fromEntries(formData.entries());
-        const { permutation_name: name, ...rawDataWithoutName } = rawData;
-        const nameAsString = typeof name === "string" ? name : "";
-        const nestedData = inflate(rawDataWithoutName);
-        // Parse only for validation
-        const data = classConfig.parse(nestedData);
-        // TODO handle validation errors
-        props.onSubmit(nameAsString, nestedData);
-      }}
+      onSubmit={handleSubmit}
+      shouldActive={false} // Also return from collapsed fields
+      shouldDirty={true} // Don't return empty strings for unset fields
     >
-      <MyTextField
-        name="permutation_name"
-        schema={{ type: "string", description: "Name of permutation" }}
-        value={props.permutationName}
-        required
-        minlength="1"
-      />
-      <div class="grid grid-flow-col gap-1">
-        <ObjectField schema={schema} value={props.config} />
+      <div>
+        <ObjectField
+          schema={ClassConfigJsonSchema}
+          value={props.config}
+          Field={Field}
+        />
       </div>
-    </form>
+    </Form>
   );
 }
 
 function AddPermutationButton(props: { experiment: Experiment }) {
   const [open, setOpen] = createSignal(false);
+  const permutationName = `${props.experiment.permutations.length + 1}`;
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
       <DialogTrigger
@@ -91,7 +95,7 @@ function AddPermutationButton(props: { experiment: Experiment }) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle class="mr-10">
             Permutation on reference configuration of experiment{" "}
             {props.experiment.id}
           </DialogTitle>
@@ -99,13 +103,14 @@ function AddPermutationButton(props: { experiment: Experiment }) {
         <PermutationConfigForm
           id="add-permutation-form"
           config={props.experiment.reference.config}
-          permutationName={`${props.experiment.permutations.length + 1}`}
-          onSubmit={(name, config) => {
+          permutationName={permutationName}
+          onSubmit={(config) => {
+            const { title, description, ...strippedConfig } = config;
             setPermutationConfigInExperiment(
               props.experiment.id,
               -1,
-              config,
-              name,
+              strippedConfig,
+              title ?? permutationName,
             );
             setOpen(false);
           }}
@@ -125,6 +130,8 @@ function EditPermutationButton(props: {
   permutationIndex: number;
 }) {
   const [open, setOpen] = createSignal(false);
+  const permutationName =
+    props.experiment.permutations[props.permutationIndex].name;
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
       <DialogTrigger
@@ -143,16 +150,15 @@ function EditPermutationButton(props: {
         </DialogHeader>
         <PermutationConfigForm
           id="edit-permutation-form"
-          permutationName={
-            props.experiment.permutations[props.permutationIndex].name
-          }
+          permutationName={permutationName}
           config={props.experiment.permutations[props.permutationIndex].config}
-          onSubmit={(name, config) => {
+          onSubmit={(config) => {
+            const { title, description, ...strippedConfig } = config;
             setPermutationConfigInExperiment(
               props.experiment.id,
               props.permutationIndex,
-              config,
-              name,
+              strippedConfig,
+              title ?? permutationName,
             );
             setOpen(false);
           }}
