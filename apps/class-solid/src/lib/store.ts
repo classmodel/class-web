@@ -230,9 +230,7 @@ export async function deletePermutationFromExperiment(
   setExperiments(
     (exp) => exp.id === experimentId,
     "permutations",
-    permutationIndex,
-    // @ts-ignore thats how you delete a key in solid see https://docs.solidjs.com/reference/store-utilities/create-store#setter
-    undefined,
+    (perms) => perms.filter((_, i) => i !== permutationIndex),
   );
 }
 
@@ -256,7 +254,7 @@ export function promotePermutationToExperiment(
   // TODO dont show form of new experiment, just show the new card
 }
 
-export function duplicatePerumation(
+export function duplicatePermutation(
   experimentId: string,
   permutationIndex: number,
 ) {
@@ -268,4 +266,30 @@ export function duplicatePerumation(
     perm.config,
     `Copy of ${perm.name}`,
   );
+}
+
+export function swapPermutationAndReferenceConfiguration(
+  experimentId: string,
+  permutationIndex: number,
+) {
+  const exp = findExperiment(experimentId);
+  const refConfig = structuredClone(exp.reference.config);
+  const perm = exp.permutations[permutationIndex];
+  const permConfig = structuredClone(perm.config);
+
+  setExperiments(
+    (e) => e.id === experimentId,
+    "reference",
+    "config",
+    permConfig,
+  );
+  setExperiments(
+    (e) => e.id === experimentId,
+    "permutations",
+    permutationIndex,
+    "config",
+    refConfig,
+  );
+  // TODO should names also be swapped?
+  runExperiment(experimentId);
 }

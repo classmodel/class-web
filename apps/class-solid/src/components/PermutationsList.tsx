@@ -10,9 +10,10 @@ import {
   type Experiment,
   type Permutation,
   deletePermutationFromExperiment,
-  duplicatePerumation,
+  duplicatePermutation,
   promotePermutationToExperiment,
   setPermutationConfigInExperiment,
+  swapPermutationAndReferenceConfiguration,
 } from "~/lib/store";
 import { MyTextField, ObjectField } from "./ObjectField";
 import {
@@ -21,6 +22,8 @@ import {
   MdiContentCopy,
   MdiDelete,
   MdiLightVectorDifference,
+  MdiMenu,
+  MdiRotateLeft,
 } from "./icons";
 import {
   Dialog,
@@ -30,6 +33,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 function PermutationConfigForm(props: {
   id: string;
@@ -207,39 +216,54 @@ function PermutationInfo(props: {
         experiment={props.experiment}
         permutationIndex={props.permutationIndex}
       />
-      <Button
-        variant="outline"
-        title="Promote permutation to an experiment"
-        onClick={() => {
-          promotePermutationToExperiment(
-            props.experiment.id,
-            props.permutationIndex,
-          );
-        }}
-      >
-        <MdiCakeVariantOutline />
-      </Button>
-      <Button
-        variant="outline"
-        title="Delete permutation"
-        onClick={() =>
-          deletePermutationFromExperiment(
-            props.experiment.id,
-            props.permutationIndex,
-          )
-        }
-      >
-        <MdiDelete />
-      </Button>
-      <Button
-        variant="outline"
-        title="Duplicate permutation"
-        onClick={() => {
-          duplicatePerumation(props.experiment.id, props.permutationIndex);
-        }}
-      >
-        <MdiContentCopy />
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          as={Button}
+          variant="outline"
+          title="Other actions"
+        >
+          <MdiMenu />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem
+            onClick={() =>
+              deletePermutationFromExperiment(
+                props.experiment.id,
+                props.permutationIndex,
+              )
+            }
+          >
+            <MdiDelete /> Delete permutation
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              duplicatePermutation(props.experiment.id, props.permutationIndex);
+            }}
+          >
+            <MdiContentCopy /> Duplicate permutation
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              promotePermutationToExperiment(
+                props.experiment.id,
+                props.permutationIndex,
+              );
+            }}
+          >
+            <MdiCakeVariantOutline /> Promote permutation to a new experiment
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              swapPermutationAndReferenceConfiguration(
+                props.experiment.id,
+                props.permutationIndex,
+              );
+            }}
+          >
+            <MdiRotateLeft /> Swap permutation with reference configuration
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
