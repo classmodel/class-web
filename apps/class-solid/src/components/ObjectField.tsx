@@ -82,26 +82,30 @@ export function MyTextField({
   Field,
   // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
 }: { name: string; schema: any; [key: string]: any; Field: any }) {
+  // TODO use generics to type more explicitly
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  function myfield(field: any, props: any) {
+    return (
+      <TextField class="flex items-center">
+        <TextFieldLabel for={name} class="basis-1/2">
+          {schema.description ?? name}
+        </TextFieldLabel>
+        <TextFieldInput
+          type="text"
+          id={props.name}
+          name={props.name}
+          value={field.value}
+          placeholder={schema.default}
+          {...props}
+          class="basis-1/2"
+        />
+      </TextField>
+    );
+  }
+
   return (
     // TODO: display units after input field?
     // TODO: add more modularforms functionality
-    <Field name={name}>
-      {(field, props) => (
-        <TextField class="flex items-center">
-          <TextFieldLabel for={name} class="basis-3/4">
-            {schema.description ?? name}
-          </TextFieldLabel>
-          <TextFieldInput
-            type="text"
-            id={props.name}
-            name={props.name}
-            value={field.value}
-            placeholder={schema.default}
-            {...props}
-            class="basis-1/4"
-          />
-        </TextField>
-      )}
-    </Field>
+    <Field name={name}>{myfield}</Field>
   );
 }
