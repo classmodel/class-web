@@ -11,6 +11,9 @@ jobs:
       contents: read
       id-token: write # The OIDC ID token is used for authentication with JSR.
     steps:
+      - uses: pnpm/action-setup@v2
+        with:
+          version: latest
       - uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v4
