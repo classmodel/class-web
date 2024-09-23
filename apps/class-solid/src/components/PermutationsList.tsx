@@ -55,7 +55,7 @@ function PermutationConfigForm(props: {
     },
   });
 
-  const handleSubmit: SubmitHandler<ClassConfig> = (values, event) => {
+  const handleSubmit: SubmitHandler<ClassConfig> = (values: ClassConfig) => {
     // Parse only for validation
     const data = classConfig.parse(values);
     // TODO if parse fails, show error
@@ -80,7 +80,10 @@ function PermutationConfigForm(props: {
   );
 }
 
-function AddPermutationButton(props: { experiment: Experiment }) {
+function AddPermutationButton(props: {
+  experiment: Experiment;
+  experimentIndex: number;
+}) {
   const [open, setOpen] = createSignal(false);
   const permutationName = `${props.experiment.permutations.length + 1}`;
   return (
@@ -97,7 +100,7 @@ function AddPermutationButton(props: { experiment: Experiment }) {
         <DialogHeader>
           <DialogTitle class="mr-10">
             Permutation on reference configuration of experiment{" "}
-            {props.experiment.id}
+            {props.experiment.name}
           </DialogTitle>
         </DialogHeader>
         <PermutationConfigForm
@@ -107,7 +110,7 @@ function AddPermutationButton(props: { experiment: Experiment }) {
           onSubmit={(config) => {
             const { title, description, ...strippedConfig } = config;
             setPermutationConfigInExperiment(
-              props.experiment.id,
+              props.experimentIndex,
               -1,
               strippedConfig,
               title ?? permutationName,
@@ -127,6 +130,7 @@ function AddPermutationButton(props: { experiment: Experiment }) {
 
 function EditPermutationButton(props: {
   experiment: Experiment;
+  experimentIndex: number;
   permutationIndex: number;
 }) {
   const [open, setOpen] = createSignal(false);
@@ -145,7 +149,7 @@ function EditPermutationButton(props: {
         <DialogHeader>
           <DialogTitle>
             Permutation on reference configuration of experiment{" "}
-            {props.experiment.id}
+            {props.experiment.name}
           </DialogTitle>
         </DialogHeader>
         <PermutationConfigForm
@@ -155,7 +159,7 @@ function EditPermutationButton(props: {
           onSubmit={(config) => {
             const { title, description, ...strippedConfig } = config;
             setPermutationConfigInExperiment(
-              props.experiment.id,
+              props.experimentIndex,
               props.permutationIndex,
               strippedConfig,
               title ?? permutationName,
@@ -208,6 +212,7 @@ function PermutationDifferenceButton(props: {
 
 function PermutationInfo(props: {
   experiment: Experiment;
+  experimentIndex: number;
   permutationIndex: number;
   perm: Permutation;
 }) {
@@ -220,6 +225,7 @@ function PermutationInfo(props: {
       />
       <EditPermutationButton
         experiment={props.experiment}
+        experimentIndex={props.experimentIndex}
         permutationIndex={props.permutationIndex}
       />
       <DropdownMenu>
@@ -234,7 +240,7 @@ function PermutationInfo(props: {
           <DropdownMenuItem
             onClick={() =>
               deletePermutationFromExperiment(
-                props.experiment.id,
+                props.experimentIndex,
                 props.permutationIndex,
               )
             }
@@ -243,7 +249,10 @@ function PermutationInfo(props: {
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => {
-              duplicatePermutation(props.experiment.id, props.permutationIndex);
+              duplicatePermutation(
+                props.experimentIndex,
+                props.permutationIndex,
+              );
             }}
           >
             <MdiContentCopy /> Duplicate permutation
@@ -251,7 +260,7 @@ function PermutationInfo(props: {
           <DropdownMenuItem
             onClick={() => {
               promotePermutationToExperiment(
-                props.experiment.id,
+                props.experimentIndex,
                 props.permutationIndex,
               );
             }}
@@ -261,7 +270,7 @@ function PermutationInfo(props: {
           <DropdownMenuItem
             onClick={() => {
               swapPermutationAndReferenceConfiguration(
-                props.experiment.id,
+                props.experimentIndex,
                 props.permutationIndex,
               );
             }}
@@ -274,18 +283,25 @@ function PermutationInfo(props: {
   );
 }
 
-export function PermutationsList(props: { experiment: Experiment }) {
+export function PermutationsList(props: {
+  experimentIndex: number;
+  experiment: Experiment;
+}) {
   return (
     <fieldset class="border">
       <legend class="flex flex-row items-center gap-2">
         Permutations
-        <AddPermutationButton experiment={props.experiment} />
+        <AddPermutationButton
+          experiment={props.experiment}
+          experimentIndex={props.experimentIndex}
+        />
       </legend>
       <ul>
         <For each={props.experiment.permutations}>
           {(perm, permutationIndex) => (
             <li>
               <PermutationInfo
+                experimentIndex={props.experimentIndex}
                 experiment={props.experiment}
                 permutationIndex={permutationIndex()}
                 perm={perm}

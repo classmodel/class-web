@@ -47,7 +47,9 @@ export default function Home() {
 
       <Flex justifyContent="center" class="flex-wrap gap-4">
         <For each={experiments}>
-          {(experiment) => ExperimentCard(experiment)}
+          {(experiment, index) => (
+            <ExperimentCard experiment={experiment} experimentIndex={index()} />
+          )}
         </For>
       </Flex>
 

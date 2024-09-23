@@ -40,10 +40,11 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
-export function ExperimentSettingsDialog(experiment: Experiment) {
-  const [open, setOpen] = createSignal(
-    experiment.reference.output === undefined,
-  );
+export function ExperimentSettingsDialog(props: {
+  experiment: Experiment;
+  experimentIndex: number;
+}) {
+  const [open, setOpen] = createSignal(false);
 
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
@@ -56,15 +57,15 @@ export function ExperimentSettingsDialog(experiment: Experiment) {
         </DialogHeader>
         <ExperimentConfigForm
           id="experiment-form"
-          experiment={experiment}
+          experiment={props.experiment}
           onSubmit={(newConfig) => {
             setOpen(false);
             const { title, description, ...strippedConfig } = newConfig;
             modifyExperiment(
-              experiment.id,
+              props.experimentIndex,
               strippedConfig,
-              title ?? experiment.name,
-              description ?? experiment.description,
+              title ?? props.experiment.name,
+              description ?? props.experiment.description,
             );
           }}
         />
@@ -133,7 +134,7 @@ function DownloadExperimentArchive(props: { experiment: Experiment }) {
     onCleanup(() => URL.revokeObjectURL(objectUrl));
   });
 
-  const filename = `class-${props.experiment.id}.zip`;
+  const filename = `class-${props.experiment.name}.zip`;
   return (
     <a href={url()} download={filename} type="application/json">
       Config + output
@@ -162,31 +163,42 @@ function DownloadExperiment(props: { experiment: Experiment }) {
   );
 }
 
-export function ExperimentCard(experiment: Experiment) {
+export function ExperimentCard(props: {
+  experiment: Experiment;
+  experimentIndex: number;
+}) {
+  const experiment = () => props.experiment;
+  const experimentIndex = () => props.experimentIndex;
   return (
     <Card class="w-[380px]">
       <CardHeader>
-        <CardTitle>{experiment.name}</CardTitle>
-        <CardDescription>{experiment.description}</CardDescription>
+        <CardTitle>{experiment().name}</CardTitle>
+        <CardDescription>{experiment().description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <PermutationsList experiment={experiment} />
+        <PermutationsList
+          experiment={experiment()}
+          experimentIndex={experimentIndex()}
+        />
       </CardContent>
       <CardFooter>
-        <Show when={!experiment.running} fallback={<RunningIndicator />}>
-          <DownloadExperiment experiment={experiment} />
-          <ExperimentSettingsDialog {...experiment} />
+        <Show when={!experiment().running} fallback={<RunningIndicator />}>
+          <DownloadExperiment experiment={experiment()} />
+          <ExperimentSettingsDialog
+            experiment={experiment()}
+            experimentIndex={experimentIndex()}
+          />
           <Button
             variant="outline"
             title="Duplicate experiment"
-            onClick={() => duplicateExperiment(experiment.id)}
+            onClick={() => duplicateExperiment(experimentIndex())}
           >
             <MdiContentCopy />
           </Button>
           <Button
             variant="outline"
             title="Delete experiment"
-            onClick={() => deleteExperiment(experiment.id)}
+            onClick={() => deleteExperiment(experimentIndex())}
           >
             <MdiDelete />
           </Button>
