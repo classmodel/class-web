@@ -1,15 +1,21 @@
-import { Show, createMemo, createSignal, onCleanup } from "solid-js";
+import {
+  Show,
+  createEffect,
+  createMemo,
+  createSignal,
+  onCleanup,
+} from "solid-js";
+
 import { Button, buttonVariants } from "~/components/ui/button";
+import { createArchive, toConfigBlob } from "~/lib/download";
 import {
   type Experiment,
   deleteExperiment,
   duplicateExperiment,
   modifyExperiment,
-  setExperimentDescription,
-  setExperimentName,
 } from "~/lib/store";
-import { EditableText } from "./EditableText";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
+import { PermutationsList } from "./PermutationsList";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import {
   Card,
@@ -22,36 +28,42 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 export function ExperimentSettingsDialog(experiment: Experiment) {
-  const [open, setOpen] = createSignal(experiment.output === undefined);
+  const [open, setOpen] = createSignal(
+    experiment.reference.output === undefined,
+  );
 
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
-      <DialogTrigger variant="outline" as={Button<"button">}>
+      <DialogTrigger variant="outline" as={Button<"button">} title="Edit">
         <MdiCog />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Experiment {experiment.id}</DialogTitle>
-          <DialogDescription>{experiment.description}</DialogDescription>
+          <DialogTitle>Experiment</DialogTitle>
         </DialogHeader>
         <ExperimentConfigForm
-          id={experiment.id}
-          config={experiment.config}
-          onSubmit={async (newConfig) => {
+          id="experiment-form"
+          experiment={experiment}
+          onSubmit={(newConfig, name, description) => {
             setOpen(false);
-            modifyExperiment(experiment.id, newConfig);
+            modifyExperiment(experiment.id, newConfig, name, description);
           }}
         />
         <DialogFooter>
-          <Button type="submit" form={experiment.id}>
+          <Button type="submit" form="experiment-form">
             Run
           </Button>
         </DialogFooter>
@@ -89,37 +101,58 @@ function RunningIndicator() {
   );
 }
 
-function DownloadExperiment(props: { experiment: Experiment }) {
+function DownloadExperimentConfiguration(props: { experiment: Experiment }) {
   const downloadUrl = createMemo(() => {
-    // Drop id and running
-    const data = {
-      name: props.experiment.name,
-      description: props.experiment.description,
-      config: props.experiment.config,
-      output: props.experiment.output,
-    };
-    return URL.createObjectURL(
-      new Blob([JSON.stringify(data, undefined, 2)], {
-        type: "application/json",
-      }),
-    );
+    return URL.createObjectURL(toConfigBlob(props.experiment));
   });
 
   onCleanup(() => {
     URL.revokeObjectURL(downloadUrl());
   });
 
-  const filename = `class-${props.experiment.id}.json`;
-
+  const filename = `class-${props.experiment.name}.json`;
   return (
-    <a
-      class={buttonVariants({ variant: "outline" })}
-      href={downloadUrl()}
-      download={filename}
-      type="application/json"
-    >
-      <MdiDownload />
+    <a href={downloadUrl()} download={filename} type="application/json">
+      Configuration
     </a>
+  );
+}
+
+function DownloadExperimentArchive(props: { experiment: Experiment }) {
+  const [url, setUrl] = createSignal<string>("");
+  createEffect(async () => {
+    const archive = await createArchive(props.experiment);
+    const objectUrl = URL.createObjectURL(archive);
+    setUrl(objectUrl);
+    onCleanup(() => URL.revokeObjectURL(objectUrl));
+  });
+
+  const filename = `class-${props.experiment.id}.zip`;
+  return (
+    <a href={url()} download={filename} type="application/json">
+      Config + output
+    </a>
+  );
+}
+
+function DownloadExperiment(props: { experiment: Experiment }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        class={buttonVariants({ variant: "outline" })}
+        title="Download"
+      >
+        <MdiDownload />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem>
+          <DownloadExperimentConfiguration experiment={props.experiment} />
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <DownloadExperimentArchive experiment={props.experiment} />
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -127,21 +160,11 @@ export function ExperimentCard(experiment: Experiment) {
   return (
     <Card class="w-[380px]">
       <CardHeader>
-        <CardTitle>
-          <EditableText
-            text={experiment.name}
-            onChange={(name) => setExperimentName(experiment.id, name)}
-          />
-        </CardTitle>
-        <CardDescription>{experiment.id}</CardDescription>
+        <CardTitle>{experiment.name}</CardTitle>
+        <CardDescription>{experiment.description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <EditableText
-          text={experiment.description}
-          onChange={(description) =>
-            setExperimentDescription(experiment.id, description)
-          }
-        />
+        <PermutationsList experiment={experiment} />
       </CardContent>
       <CardFooter>
         <Show when={!experiment.running} fallback={<RunningIndicator />}>
@@ -149,12 +172,14 @@ export function ExperimentCard(experiment: Experiment) {
           <ExperimentSettingsDialog {...experiment} />
           <Button
             variant="outline"
+            title="Duplicate experiment"
             onClick={() => duplicateExperiment(experiment.id)}
           >
             <MdiContentCopy />
           </Button>
           <Button
             variant="outline"
+            title="Delete experiment"
             onClick={() => deleteExperiment(experiment.id)}
           >
             <MdiDelete />

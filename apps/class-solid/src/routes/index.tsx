@@ -2,6 +2,7 @@ import { For, Show } from "solid-js";
 
 import { AnalysisCard, addAnalysis } from "~/components/Analysis";
 import { ExperimentCard } from "~/components/Experiment";
+import { UploadExperiment } from "~/components/UploadExperiment";
 import { MdiPlusBox } from "~/components/icons";
 import {
   DropdownMenu,
@@ -34,8 +35,8 @@ export default function Home() {
             >
               From scratch
             </DropdownMenuItem>
-            <DropdownMenuItem class="text-gray-400">
-              Upload (not implemented)
+            <DropdownMenuItem>
+              <UploadExperiment />
             </DropdownMenuItem>
             <DropdownMenuItem class="text-gray-400">
               Preset (not implemented)

@@ -86,3 +86,72 @@ export function MdiPlusBox(props: JSX.IntrinsicElements["svg"]) {
     </svg>
   );
 }
+
+export function MdiLightVectorDifference(props: JSX.IntrinsicElements["svg"]) {
+  return (
+    // biome-ignore lint/a11y/noSvgWithoutTitle: generated code
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      <path
+        fill="currentColor"
+        d="M4 2h8a3 3 0 0 1 3 3v1h-1V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h1v1H4a3 3 0 0 1-3-3V5a3 3 0 0 1 3-3m11 6v3h-1V9h-2V8zm3 0a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-8a3 3 0 0 1-3-3v-1h1v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V8zM7 15v-2h1v2h2v1H7zm8-2a3 3 0 0 1-3 3v-1a2 2 0 0 0 2-2zm-5-4a2 2 0 0 0-2 2H7a3 3 0 0 1 3-3z"
+      />
+    </svg>
+  );
+}
+
+export function MdiCakeVariantOutline(props: JSX.IntrinsicElements["svg"]) {
+  return (
+    // biome-ignore lint/a11y/noSvgWithoutTitle: generated code
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      <path
+        fill="currentColor"
+        d="M12 6a2 2 0 0 0 2-2c0-.38-.1-.73-.29-1.03L12 0l-1.71 2.97c-.19.3-.29.65-.29 1.03c0 1.1.9 2 2 2m6 3h-5V7h-2v2H6c-1.66 0-3 1.34-3 3v9c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-9c0-1.66-1.34-3-3-3m1 11H5v-3c.9 0 1.76-.37 2.4-1l1.1-1.08L9.56 16c1.31 1.3 3.59 1.29 4.89 0l1.08-1.08L16.6 16c.64.63 1.5 1 2.4 1zm0-4.5c-.5 0-1-.2-1.35-.57L15.5 12.8l-2.12 2.13c-.74.74-2.03.74-2.77 0L8.5 12.8l-2.16 2.13c-.34.36-.84.57-1.34.57V12c0-.55.45-1 1-1h12c.55 0 1 .45 1 1z"
+      />
+    </svg>
+  );
+}
+
+export function MdiRotateLeft(props: JSX.IntrinsicElements["svg"]) {
+  return (
+    // biome-ignore lint/a11y/noSvgWithoutTitle: generated code
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      <path
+        fill="currentColor"
+        d="M13 4.07V1L8.45 5.55L13 10V6.09c2.84.48 5 2.94 5 5.91s-2.16 5.43-5 5.91v2.02c3.95-.49 7-3.85 7-7.93s-3.05-7.44-7-7.93M7.1 18.32c1.16.9 2.51 1.44 3.9 1.61V17.9c-.87-.15-1.71-.49-2.46-1.03zM6.09 13H4.07c.17 1.39.72 2.73 1.62 3.89l1.41-1.42c-.52-.75-.87-1.59-1.01-2.47m1.02-4.47L5.7 7.11C4.8 8.27 4.24 9.61 4.07 11h2.02c.14-.87.49-1.72 1.02-2.47"
+      />
+    </svg>
+  );
+}
+
+export function MdiMenu(props: JSX.IntrinsicElements["svg"]) {
+  return (
+    // biome-ignore lint/a11y/noSvgWithoutTitle: generated code
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      <path fill="currentColor" d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z" />
+    </svg>
+  );
+}

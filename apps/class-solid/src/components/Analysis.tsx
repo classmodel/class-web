@@ -1,4 +1,4 @@
-import { For, Match, Switch, createUniqueId } from "solid-js";
+import { For, Match, Switch, createMemo, createUniqueId } from "solid-js";
 import { analyses, experiments, setAnalyses } from "~/lib/store";
 import type { Experiment } from "~/lib/store";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
@@ -43,21 +43,38 @@ function deleteAnalysis(analysis: Analysis) {
  * It isn't reactive; would require intercepting the signal to call chart.update()
  */
 export function TimeSeriesPlot() {
-  const chartData = {
-    labels:
-      experiments[0].output === undefined ? undefined : experiments[0].output.t,
-    datasets: experiments
-      .filter((e) => e.output)
-      .map((e) => {
-        return {
-          label: e.id,
-          data: e.output === undefined ? [null] : e.output.h,
-          fill: false,
-        };
-      }),
-  };
+  const chartData = createMemo(() => {
+    return {
+      labels:
+        experiments[0].reference.output === undefined
+          ? undefined
+          : experiments[0].reference.output.t,
+      datasets: experiments
+        .filter((e) => e.reference.output)
+        .flatMap((e) => {
+          const permutationRuns = e.permutations.map((perm) => {
+            return {
+              label: `${e.name}/${perm.name}`,
+              data: perm.output === undefined ? [null] : perm.output.h,
+              fill: false,
+            };
+          });
+          return [
+            {
+              label: e.name,
+              data:
+                e.reference.output === undefined
+                  ? [null]
+                  : e.reference.output.h,
+              fill: false,
+            },
+            ...permutationRuns,
+          ];
+        }),
+    };
+  });
 
-  return <LineChart data={chartData} />;
+  return <LineChart data={chartData()} />;
 }
 
 /** Simply show the final height for each experiment that has output */
@@ -65,12 +82,25 @@ function FinalHeights() {
   return (
     <For each={experiments}>
       {(experiment, i) => {
-        const h = experiment.output?.h[experiment.output.h.length - 1] || 0;
+        const h =
+          experiment.reference.output?.h[
+            experiment.reference.output.h.length - 1
+          ] || 0;
         return (
           <div class="mb-2">
             <p>
-              {experiment.id}: {h.toFixed()} m
+              {experiment.name}: {h.toFixed()} m
             </p>
+            <For each={experiment.permutations}>
+              {(perm) => {
+                const h = perm.output?.h[perm.output.h.length - 1] || 0;
+                return (
+                  <p>
+                    {experiment.name}/{perm.name}: {h.toFixed()} m
+                  </p>
+                );
+              }}
+            </For>
           </div>
         );
       }}

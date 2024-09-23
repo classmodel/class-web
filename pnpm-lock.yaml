@@ -32,6 +32,9 @@ importers:
       '@solidjs/start':
         specifier: ^1.0.4
         version: 1.0.4(rollup@4.18.1)(solid-js@1.8.18)(vinxi@0.3.14(@types/node@20.14.10)(ioredis@5.4.1)(sass@1.77.6)(terser@5.31.2))(vite@5.3.3(@types/node@20.14.10)(sass@1.77.6)(terser@5.31.2))
+      '@zip.js/zip.js':
+        specifier: ^2.7.52
+        version: 2.7.52
       autoprefixer:
         specifier: ^10.4.19
         version: 10.4.19(postcss@8.4.39)
@@ -65,6 +68,9 @@ importers:
       vinxi:
         specifier: ^0.3.14
         version: 0.3.14(@types/node@20.14.10)(ioredis@5.4.1)(sass@1.77.6)(terser@5.31.2)
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
     devDependencies:
       '@playwright/test':
         specifier: ^1.45.3
@@ -1027,6 +1033,10 @@ packages:
 
   '@zeit/schemas@2.36.0':
     resolution: {integrity: sha512-7kjMwcChYEzMKjeex9ZFXkt1AyNov9R5HZtjBKVsmVpw7pa7ZtlCGvCBC2vnnXctaYN+aRI61HjIqeetZW5ROg==}
+
+  '@zip.js/zip.js@2.7.52':
+    resolution: {integrity: sha512-+5g7FQswvrCHwYKNMd/KFxZSObctLSsQOgqBSi0LzwHo3li9Eh1w5cF5ndjQw9Zbr3ajVnd2+XyiX85gAetx1Q==}
+    engines: {bun: '>=0.7.0', deno: '>=1.0.0', node: '>=16.5.0'}
 
   abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
@@ -3969,6 +3979,8 @@ snapshots:
       vinxi: 0.3.14(@types/node@20.14.10)(ioredis@5.4.1)(sass@1.77.6)(terser@5.31.2)
 
   '@zeit/schemas@2.36.0': {}
+
+  '@zip.js/zip.js@2.7.52': {}
 
   abbrev@1.1.1: {}
 
