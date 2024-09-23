@@ -65,7 +65,7 @@ export class CLASS {
   /** Tendency of potential temperature jump at h [K s-1] */
   get dthetatend(): number {
     const w_th_ft = 0.0; // TODO: add free troposphere switch
-    return this._cfg.mixedLayer.gammatheta - this.thetatend + w_th_ft;
+    return this._cfg.mixedLayer.gammatheta * this.we - this.thetatend + w_th_ft;
   }
 
   /** Tendency of mixed-layer specific humidity [kg kg-1 s-1] */
