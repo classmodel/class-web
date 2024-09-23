@@ -255,3 +255,17 @@ export function promotePermutationToExperiment(
   addExperiment(combinedConfig, perm.name);
   // TODO dont show form of new experiment, just show the new card
 }
+
+export function duplicatePerumation(
+  experimentId: string,
+  permutationIndex: number,
+) {
+  const exp = findExperiment(experimentId);
+  const perm = exp.permutations[permutationIndex];
+  setPermutationConfigInExperiment(
+    experimentId,
+    -1,
+    perm.config,
+    `Copy of ${perm.name}`,
+  );
+}

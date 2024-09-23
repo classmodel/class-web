@@ -10,6 +10,7 @@ import {
   type Experiment,
   type Permutation,
   deletePermutationFromExperiment,
+  duplicatePerumation,
   promotePermutationToExperiment,
   setPermutationConfigInExperiment,
 } from "~/lib/store";
@@ -17,6 +18,7 @@ import { MyTextField, ObjectField } from "./ObjectField";
 import {
   MdiCakeVariantOutline,
   MdiCog,
+  MdiContentCopy,
   MdiDelete,
   MdiLightVectorDifference,
 } from "./icons";
@@ -228,6 +230,15 @@ function PermutationInfo(props: {
         }
       >
         <MdiDelete />
+      </Button>
+      <Button
+        variant="outline"
+        title="Duplicate permutation"
+        onClick={() => {
+          duplicatePerumation(props.experiment.id, props.permutationIndex);
+        }}
+      >
+        <MdiContentCopy />
       </Button>
     </div>
   );
