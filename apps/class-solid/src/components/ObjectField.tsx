@@ -86,7 +86,7 @@ export function MyTextField({
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   function myfield(field: any, props: any) {
     return (
-      <TextField class="flex items-center">
+      <TextField class="flex items-center gap-2 py-1">
         <TextFieldLabel for={name} class="basis-1/2">
           {schema.description ?? name}
         </TextFieldLabel>
