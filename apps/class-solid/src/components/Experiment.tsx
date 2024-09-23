@@ -7,6 +7,7 @@ import {
   createSignal,
   onCleanup,
 } from "solid-js";
+
 import { Button, buttonVariants } from "~/components/ui/button";
 import { createArchive, toConfigBlob } from "~/lib/download";
 import {
@@ -14,10 +15,7 @@ import {
   deleteExperiment,
   duplicateExperiment,
   modifyExperiment,
-  setExperimentDescription,
-  setExperimentName,
 } from "~/lib/store";
-import { EditableText } from "./EditableText";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import { PermutationsList } from "./PermutationsList";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
@@ -32,7 +30,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -52,26 +49,23 @@ export function ExperimentSettingsDialog(experiment: Experiment) {
 
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
-      <DialogTrigger variant="outline" as={Button<"button">}>
+      <DialogTrigger variant="outline" as={Button<"button">} title="Edit">
         <MdiCog />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            Reference configuration of experiment {experiment.id}
-          </DialogTitle>
-          <DialogDescription>{experiment.description}</DialogDescription>
+          <DialogTitle>Experiment</DialogTitle>
         </DialogHeader>
         <ExperimentConfigForm
-          id={experiment.id}
-          config={experiment.reference.config}
-          onSubmit={async (newConfig) => {
+          id="experiment-form"
+          experiment={experiment}
+          onSubmit={(newConfig, name, description) => {
             setOpen(false);
-            modifyExperiment(experiment.id, newConfig);
+            modifyExperiment(experiment.id, newConfig, name, description);
           }}
         />
         <DialogFooter>
-          <Button type="submit" form={experiment.id}>
+          <Button type="submit" form="experiment-form">
             Run
           </Button>
         </DialogFooter>
@@ -162,7 +156,10 @@ function DownloadExperiment(props: { experiment: Experiment }) {
   // TODO on trigger the page re-renders, it should not do that
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger class={buttonVariants({ variant: "outline" })}>
+      <DropdownMenuTrigger
+        class={buttonVariants({ variant: "outline" })}
+        title="Download"
+      >
         <MdiDownload />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
@@ -181,21 +178,10 @@ export function ExperimentCard(experiment: Experiment) {
   return (
     <Card class="w-[380px]">
       <CardHeader>
-        <CardTitle>
-          <EditableText
-            text={experiment.name}
-            onChange={(name) => setExperimentName(experiment.id, name)}
-          />
-        </CardTitle>
-        <CardDescription>{experiment.id}</CardDescription>
+        <CardTitle>{experiment.name}</CardTitle>
+        <CardDescription>{experiment.description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <EditableText
-          text={experiment.description}
-          onChange={(description) =>
-            setExperimentDescription(experiment.id, description)
-          }
-        />
         <PermutationsList experiment={experiment} />
       </CardContent>
       <CardFooter>
@@ -204,12 +190,14 @@ export function ExperimentCard(experiment: Experiment) {
           <ExperimentSettingsDialog {...experiment} />
           <Button
             variant="outline"
+            title="Duplicate experiment"
             onClick={() => duplicateExperiment(experiment.id)}
           >
             <MdiContentCopy />
           </Button>
           <Button
             variant="outline"
+            title="Delete experiment"
             onClick={() => deleteExperiment(experiment.id)}
           >
             <MdiDelete />

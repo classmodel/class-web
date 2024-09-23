@@ -1,7 +1,8 @@
-import { type ClassConfig, classConfig } from "@classmodel/class/config";
-import type { ClassOutput } from "@classmodel/class/runner";
 import { createStore, produce, unwrap } from "solid-js/store";
 import { z } from "zod";
+
+import { type ClassConfig, classConfig } from "@classmodel/class/config";
+import type { ClassOutput } from "@classmodel/class/runner";
 import type { Analysis } from "~/components/Analysis";
 import { runClass } from "./runner";
 
@@ -193,17 +194,19 @@ export function deleteExperiment(id: string) {
 export async function modifyExperiment(
   id: string,
   newConfig: Partial<ClassConfig>,
+  name: string,
+  description: string,
 ) {
   setExperiments((exp, i) => exp.id === id, "reference", "config", newConfig);
+  setExperiments(
+    (exp, i) => exp.id === id,
+    (exp) => ({
+      ...exp,
+      name,
+      description,
+    }),
+  );
   await runExperiment(id);
-}
-
-export function setExperimentName(id: string, newName: string) {
-  setExperiments((exp) => exp.id === id, "name", newName);
-}
-
-export function setExperimentDescription(id: string, newDescription: string) {
-  setExperiments((exp) => exp.id === id, "description", newDescription);
 }
 
 export async function setPermutationConfigInExperiment(
