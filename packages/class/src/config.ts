@@ -75,20 +75,10 @@ const mixedLayer = z
   })
   .describe("Mixed layer");
 
-const radiation = z
-  .object({
-    dFz: z.coerce
-      .number()
-      .default(0)
-      .describe("Cloud top radiative divergence [W m-2]"),
-  })
-  .describe("Radiation");
-
 export const classConfig = z.object({
   initialState: initialState.default({}),
   timeControl: timeControl.default({}),
   mixedLayer: mixedLayer.default({}),
-  radiation: radiation.default({}),
 });
 
 export type ClassConfig = z.infer<typeof classConfig>;
