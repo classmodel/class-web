@@ -3,26 +3,28 @@ import {
   classConfig,
   classDefaultConfigSchema,
 } from "@classmodel/class/config";
-import {
-  type SubmitHandler,
-  createForm,
-  setValues,
-} from "@modular-forms/solid";
+import { type SubmitHandler, createForm } from "@modular-forms/solid";
+import type { Experiment } from "~/lib/store";
 import { ObjectField } from "./ObjectField";
 
 const ClassConfigJsonSchema = classDefaultConfigSchema.definitions?.classConfig;
 
 export function ExperimentConfigForm({
   id,
-  config,
+  experiment,
   onSubmit,
 }: {
   id: string;
-  config: Partial<ClassConfig>;
+  experiment: Experiment;
   onSubmit: (c: Partial<ClassConfig>) => void;
 }) {
-  const [configFormStore, { Form, Field }] = createForm<ClassConfig>();
-  setValues(configFormStore, config);
+  const [_, { Form, Field }] = createForm<ClassConfig>({
+    initialValues: {
+      title: experiment.name,
+      description: experiment.description,
+      ...experiment.reference.config,
+    },
+  });
 
   const handleSubmit: SubmitHandler<ClassConfig> = (values, event) => {
     console.log(values);
@@ -42,7 +44,7 @@ export function ExperimentConfigForm({
       <div>
         <ObjectField
           schema={ClassConfigJsonSchema}
-          value={config}
+          value={experiment.reference.config}
           Field={Field}
         />
       </div>

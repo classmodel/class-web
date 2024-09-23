@@ -52,15 +52,13 @@ export function TimeSeriesPlot() {
       datasets: experiments
         .filter((e) => e.reference.output)
         .flatMap((e) => {
-          const permutationRuns = Object.entries(e.permutations).map(
-            ([key, perm]) => {
-              return {
-                label: `${e.name}/${key}`,
-                data: perm.output === undefined ? [null] : perm.output.h,
-                fill: false,
-              };
-            },
-          );
+          const permutationRuns = e.permutations.map((perm) => {
+            return {
+              label: `${e.name}/${perm.name}`,
+              data: perm.output === undefined ? [null] : perm.output.h,
+              fill: false,
+            };
+          });
           return [
             {
               label: e.name,
@@ -93,12 +91,12 @@ function FinalHeights() {
             <p>
               {experiment.name}: {h.toFixed()} m
             </p>
-            <For each={Object.entries(experiment.permutations)}>
-              {([key, perm]) => {
+            <For each={experiment.permutations}>
+              {(perm) => {
                 const h = perm.output?.h[perm.output.h.length - 1] || 0;
                 return (
                   <p>
-                    {experiment.name}/{key}: {h.toFixed()} m
+                    {experiment.name}/{perm.name}: {h.toFixed()} m
                   </p>
                 );
               }}
