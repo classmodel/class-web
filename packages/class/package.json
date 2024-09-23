@@ -1,6 +1,6 @@
 {
   "name": "@classmodel/class",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "exports": {
     "./class": "./src/class.ts",
     "./config": "./src/config.ts",
