@@ -18,8 +18,6 @@ export interface Experiment {
   name: string;
   description: string;
   id: string;
-  // TODO make config of reference a full ClassConfig,
-  // will need refactoring of add and run experiment
   reference: Permutation;
   permutations: Record<string, Permutation>;
   running: boolean;
@@ -65,6 +63,7 @@ export async function runExperiment(id: string) {
   );
 
   // TODO make lazy, if config does not change do not rerun
+  // or make more specific like runReference and runPermutation
 
   // Run reference
   const newOutput = await runClass(exp.reference.config);
@@ -138,7 +137,7 @@ export function uploadExperiment(rawData: unknown) {
   const upload = ExperimentConfigSchema.parse(rawData);
   const id = bumpLastExperimentId();
   const experiment: Experiment = {
-    name: upload.name,
+    name: upload.name, // TODO check name is not already used
     description: upload.description,
     id,
     reference: {
@@ -162,7 +161,15 @@ export function duplicateExperiment(id: string) {
     throw new Error("No experiment with id {id}");
   }
 
-  addExperiment({ ...original.reference.config });
+  const newExperiment = addExperiment({ ...original.reference.config });
+  for (const key in original.permutations) {
+    setPermutationConfigInExperiment(
+      newExperiment.id,
+      key,
+      original.permutations[key].config,
+    );
+  }
+  runExperiment(newExperiment.id);
 }
 
 export function deleteExperiment(id: string) {
@@ -210,7 +217,6 @@ export async function deletePermutationFromExperiment(
     // @ts-ignore thats how you delete a key in solid see https://docs.solidjs.com/reference/store-utilities/create-store#setter
     undefined
   );
-  await runExperiment(experimentId);
 }
 
 export function promotePermutationToExperiment(
