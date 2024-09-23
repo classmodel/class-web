@@ -87,12 +87,6 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
-      vite:
-        specifier: ^5.4.6
-        version: 5.4.6(@types/node@20.14.10)(sass@1.77.6)(terser@5.31.2)
-      vite-plugin-solid:
-        specifier: ^2.10.2
-        version: 2.10.2(solid-js@1.8.18)(vite@5.4.6(@types/node@20.14.10)(sass@1.77.6)(terser@5.31.2))
 
   packages/class:
     dependencies:
