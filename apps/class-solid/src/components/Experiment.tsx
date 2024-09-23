@@ -10,6 +10,7 @@ import { Button, buttonVariants } from "~/components/ui/button";
 import { createArchive, toConfigBlob } from "~/lib/download";
 import {
   type Experiment,
+  addExperiment,
   deleteExperiment,
   duplicateExperiment,
   modifyExperiment,
@@ -39,6 +40,56 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+
+export function AddExperimentDialog(props: {
+  nextIndex: number;
+  onClose: () => void;
+  open: boolean;
+}) {
+  const initialExperiment = () => {
+    return {
+      name: `My experiment ${props.nextIndex}`,
+      description: "",
+      reference: { config: {} },
+      permutations: [],
+      running: false,
+    };
+  };
+
+  function setOpen(value: boolean) {
+    if (!value) {
+      props.onClose();
+    }
+  }
+
+  return (
+    <Dialog open={props.open} onOpenChange={setOpen}>
+      <DialogContent class="min-w-[33%]">
+        <DialogHeader>
+          <DialogTitle class="mr-10">Experiment</DialogTitle>
+        </DialogHeader>
+        <ExperimentConfigForm
+          id="experiment-form"
+          experiment={initialExperiment()}
+          onSubmit={(newConfig) => {
+            props.onClose();
+            const { title, description, ...strippedConfig } = newConfig;
+            addExperiment(
+              strippedConfig,
+              title ?? initialExperiment().name,
+              description ?? initialExperiment().description,
+            );
+          }}
+        />
+        <DialogFooter>
+          <Button type="submit" form="experiment-form">
+            Run
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export function ExperimentSettingsDialog(props: {
   experiment: Experiment;

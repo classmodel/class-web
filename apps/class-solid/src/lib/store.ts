@@ -106,13 +106,14 @@ function findExperiment(index: number) {
   return exp;
 }
 
-export function addExperiment(
+export async function addExperiment(
   config: Partial<ClassConfig> = {},
   name?: string,
+  description?: string,
 ) {
   const newExperiment: Experiment = {
     name: name ?? `My experiment ${experiments.length}`,
-    description: "Standard experiment",
+    description: description ?? "Standard experiment",
     reference: {
       config,
     },
@@ -120,7 +121,7 @@ export function addExperiment(
     running: false,
   };
   setExperiments(experiments.length, newExperiment);
-  return newExperiment;
+  await runExperiment(experiments.length - 1);
 }
 
 const ExperimentConfigSchema = z.object({
