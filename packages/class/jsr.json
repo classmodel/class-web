@@ -8,13 +8,7 @@
     "./runner": "./src/runner.ts"
   },
   "publish": {
-    "include": [
-      "README.md",
-      "LICENSE",
-      "src/**/*.ts"
-    ],
-    "exclude": [
-      "src/**/*.test.ts"
-    ]
+    "include": ["README.md", "LICENSE", "src/**/*.ts"],
+    "exclude": ["src/**/*.test.ts"]
   }
 }
