@@ -43,22 +43,21 @@ function PermutationConfigForm(props: {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
         const rawData = Object.fromEntries(formData.entries());
-        const { name, ...rawDataWithoutName } = rawData;
+        const { permutation_name: name, ...rawDataWithoutName } = rawData;
         const nameAsString = typeof name === "string" ? name : "";
         const nestedData = inflate(rawDataWithoutName);
         // Parse only for validation
         const data = classConfig.parse(nestedData);
+        // TODO handle validation errors
         props.onSubmit(nameAsString, nestedData);
       }}
     >
       <MyTextField
-        name="name"
+        name="permutation_name"
         schema={{ type: "string", description: "Name of permutation" }}
         value={props.permutationName}
         required
         minlength="1"
-        // TODO allow changing name of existing permutation
-        disabled={!!props.permutationName}
       />
       <div class="grid grid-flow-col gap-1">
         <ObjectField schema={schema} value={props.config} />
@@ -89,8 +88,14 @@ function AddPermutationButton(props: { experiment: Experiment }) {
         <PermutationConfigForm
           id="add-permutation-form"
           config={props.experiment.reference.config}
+          permutationName={`${props.experiment.permutations.length + 1}`}
           onSubmit={(name, config) => {
-            setPermutationConfigInExperiment(props.experiment.id, name, config);
+            setPermutationConfigInExperiment(
+              props.experiment.id,
+              -1,
+              config,
+              name,
+            );
             setOpen(false);
           }}
         />
@@ -106,7 +111,7 @@ function AddPermutationButton(props: { experiment: Experiment }) {
 
 function EditPermutationButton(props: {
   experiment: Experiment;
-  permutationName: string;
+  permutationIndex: number;
 }) {
   const [open, setOpen] = createSignal(false);
   return (
@@ -127,13 +132,16 @@ function EditPermutationButton(props: {
         </DialogHeader>
         <PermutationConfigForm
           id="edit-permutation-form"
-          permutationName={props.permutationName}
-          config={props.experiment.permutations[props.permutationName].config}
-          onSubmit={(_, config) => {
+          permutationName={
+            props.experiment.permutations[props.permutationIndex].name
+          }
+          config={props.experiment.permutations[props.permutationIndex].config}
+          onSubmit={(name, config) => {
             setPermutationConfigInExperiment(
               props.experiment.id,
-              props.permutationName,
+              props.permutationIndex,
               config,
+              name,
             );
             setOpen(false);
           }}
@@ -183,19 +191,19 @@ function PermutationDifferenceButton(props: {
 
 function PermutationInfo(props: {
   experiment: Experiment;
-  permutationName: string;
+  permutationIndex: number;
   perm: Permutation;
 }) {
   return (
     <div class="flex flex-row items-center justify-center gap-1 p-2">
-      <span class="">{props.permutationName}</span>
+      <span class="">{props.perm.name}</span>
       <PermutationDifferenceButton
         reference={props.experiment.reference.config}
         permutation={props.perm.config}
       />
       <EditPermutationButton
         experiment={props.experiment}
-        permutationName={props.permutationName}
+        permutationIndex={props.permutationIndex}
       />
       <Button
         variant="outline"
@@ -203,7 +211,7 @@ function PermutationInfo(props: {
         onClick={() => {
           promotePermutationToExperiment(
             props.experiment.id,
-            props.permutationName,
+            props.permutationIndex,
           );
         }}
       >
@@ -215,7 +223,7 @@ function PermutationInfo(props: {
         onClick={() =>
           deletePermutationFromExperiment(
             props.experiment.id,
-            props.permutationName,
+            props.permutationIndex,
           )
         }
       >
@@ -233,12 +241,12 @@ export function PermutationsList(props: { experiment: Experiment }) {
         <AddPermutationButton experiment={props.experiment} />
       </legend>
       <ul>
-        <For each={Object.entries(props.experiment.permutations)}>
-          {([key, perm]) => (
+        <For each={props.experiment.permutations}>
+          {(perm, permutationIndex) => (
             <li>
               <PermutationInfo
                 experiment={props.experiment}
-                permutationName={key}
+                permutationIndex={permutationIndex()}
                 perm={perm}
               />
             </li>

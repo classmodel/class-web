@@ -7,12 +7,12 @@ function toConfig(experiment: Experiment): ExperimentConfigSchema {
     name: experiment.name,
     description: experiment.description,
     reference: experiment.reference.config,
-    permutations: Object.fromEntries(
-      Object.entries(experiment.permutations).map(([key, perm]) => [
-        key,
-        perm.config,
-      ]),
-    ),
+    permutations: experiment.permutations.map(({ name, config }) => {
+      return {
+        name,
+        config,
+      };
+    }),
   };
 }
 
