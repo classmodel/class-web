@@ -14,7 +14,5 @@ export async function runClass(config: Partial<ClassConfig>) {
   const output = await model.run({
     var_names: ["h"],
   });
-  console.log(parsedConfig);
-  console.log(output);
   return output;
 }

@@ -56,7 +56,6 @@ function PermutationConfigForm(props: {
   });
 
   const handleSubmit: SubmitHandler<ClassConfig> = (values, event) => {
-    console.log(values);
     // Parse only for validation
     const data = classConfig.parse(values);
     // TODO if parse fails, show error
