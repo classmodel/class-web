@@ -1,6 +1,6 @@
 {
   "name": "@classmodel/class",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "exports": {
     ".": "./src/class.ts",
     "./class": "./src/class.ts",
@@ -8,7 +8,13 @@
     "./runner": "./src/runner.ts"
   },
   "publish": {
-    "include": ["README.md", "LICENSE", "src/**/*.ts"],
-    "exclude": ["src/**/*.test.ts"]
+    "include": [
+      "README.md",
+      "LICENSE",
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "src/**/*.test.ts"
+    ]
   }
 }
