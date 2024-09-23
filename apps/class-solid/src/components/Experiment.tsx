@@ -1,9 +1,7 @@
 import {
-  Match,
   Show,
-  Switch,
+  createEffect,
   createMemo,
-  createResource,
   createSignal,
   onCleanup,
 } from "solid-js";
@@ -121,39 +119,23 @@ function DownloadExperimentConfiguration(props: { experiment: Experiment }) {
 }
 
 function DownloadExperimentArchive(props: { experiment: Experiment }) {
-  const [downloadUrl] = createResource(props.experiment, async (experiment) => {
-    const archive = await createArchive(experiment);
-    return URL.createObjectURL(archive);
-  });
-
-  onCleanup(() => {
-    if (downloadUrl.latest) {
-      URL.revokeObjectURL(downloadUrl.latest);
-    }
+  const [url, setUrl] = createSignal<string>("");
+  createEffect(async () => {
+    const archive = await createArchive(props.experiment);
+    const objectUrl = URL.createObjectURL(archive);
+    setUrl(objectUrl);
+    onCleanup(() => URL.revokeObjectURL(objectUrl));
   });
 
   const filename = `class-${props.experiment.id}.zip`;
   return (
-    <>
-      <Show when={downloadUrl.loading}>
-        <span>Creating archive ...</span>
-      </Show>
-      <Switch>
-        <Match when={downloadUrl.error}>
-          <span>Error creating archive: {downloadUrl.error()}</span>
-        </Match>
-        <Match when={downloadUrl()}>
-          <a href={downloadUrl()} download={filename} type="application/json">
-            Config + output
-          </a>
-        </Match>
-      </Switch>
-    </>
+    <a href={url()} download={filename} type="application/json">
+      Config + output
+    </a>
   );
 }
 
 function DownloadExperiment(props: { experiment: Experiment }) {
-  // TODO on trigger the page re-renders, it should not do that
   return (
     <DropdownMenu>
       <DropdownMenuTrigger

@@ -47,13 +47,13 @@ export async function createArchive(experiment: Experiment) {
     await zipWriter.add(`${experiment.name}.csv`, new BlobReader(csvBlob));
   }
 
-  for (const [key, permutation] of Object.entries(experiment.permutations)) {
+  for (const permutation of experiment.permutations) {
     const output = permutation.output;
     if (output) {
       const csvBlob = new Blob([outputToCsv(output)], {
         type: "text/csv",
       });
-      await zipWriter.add(`${key}.csv`, new BlobReader(csvBlob));
+      await zipWriter.add(`${permutation.name}.csv`, new BlobReader(csvBlob));
     }
   }
   await zipWriter.close();
