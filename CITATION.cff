@@ -1,0 +1,31 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: CLASS-Web
+message: >-
+  Implementation of the Chemistry Land-surface Atmosphere
+  Soil Slab (CLASS) model that runs entirely in the browser.
+type: software
+authors:
+  - given-names: Peter
+    family-names: Kalverla
+    orcid: 'https://orcid.org/0000-0002-5025-7862'
+    affiliation: Netherlands eScience Center
+  - given-names: 'Stefan '
+    family-names: Verhoeven
+    affiliation: Netherlands eScience Center
+    orcid: 'https://orcid.org/0000-0002-5821-2060'
+  - given-names: Chiel
+    name-particle: van
+    family-names: Heerwaarden
+    affiliation: Wageningen University and Research
+    orcid: 'https://orcid.org/0000-0001-7202-3525'
+  - given-names: Bart
+    name-particle: 'van '
+    family-names: Stratum
+    orcid: 'https://orcid.org/0000-0002-7176-9875'
+    affiliation: Wageningen University and Research
+repository-code: 'https://github.com/classmodel/class-web'
+url: 'https://classmodel.github.io/class-web/'
+license: GPL-3.0-only

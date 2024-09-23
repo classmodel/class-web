@@ -3,37 +3,50 @@ import {
   classConfig,
   classDefaultConfigSchema,
 } from "@classmodel/class/config";
-import { inflate } from "../lib/inflate";
+import { type SubmitHandler, createForm } from "@modular-forms/solid";
+import type { Experiment } from "~/lib/store";
 import { ObjectField } from "./ObjectField";
 
 const ClassConfigJsonSchema = classDefaultConfigSchema.definitions?.classConfig;
 
 export function ExperimentConfigForm({
   id,
-  config,
+  experiment,
   onSubmit,
 }: {
   id: string;
-  config: Partial<ClassConfig>;
+  experiment: Experiment;
   onSubmit: (c: Partial<ClassConfig>) => void;
 }) {
+  const [_, { Form, Field }] = createForm<ClassConfig>({
+    initialValues: {
+      title: experiment.name,
+      description: experiment.description,
+      ...experiment.reference.config,
+    },
+  });
+
+  const handleSubmit: SubmitHandler<ClassConfig> = (values, event) => {
+    // Parse only for validation
+    const data = classConfig.parse(values);
+    // TODO if parse fails, show error
+    onSubmit(values);
+  };
+
   return (
-    <form
+    <Form
       id={id}
-      onSubmit={(event) => {
-        event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        const rawData = Object.fromEntries(formData.entries());
-        const nestedData = inflate(rawData);
-        // Parse only for validation
-        const data = classConfig.parse(nestedData);
-        // TODO if parse fails, show error
-        onSubmit(nestedData);
-      }}
+      onSubmit={handleSubmit}
+      shouldActive={false} // Also return from collapsed fields
+      shouldDirty={true} // Don't return empty strings for unset fields
     >
       <div>
-        <ObjectField schema={ClassConfigJsonSchema} value={config} />
+        <ObjectField
+          schema={ClassConfigJsonSchema}
+          value={experiment.reference.config}
+          Field={Field}
+        />
       </div>
-    </form>
+    </Form>
   );
 }
