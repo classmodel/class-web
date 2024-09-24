@@ -1,7 +1,7 @@
-import { For, Show } from "solid-js";
+import { For, Show, createSignal } from "solid-js";
 
 import { AnalysisCard, addAnalysis } from "~/components/Analysis";
-import { ExperimentCard } from "~/components/Experiment";
+import { AddExperimentDialog, ExperimentCard } from "~/components/Experiment";
 import { UploadExperiment } from "~/components/UploadExperiment";
 import { MdiPlusBox } from "~/components/icons";
 import {
@@ -14,10 +14,11 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { Flex } from "~/components/ui/flex";
 
-import { addExperiment, experiments } from "~/lib/store";
+import { experiments } from "~/lib/store";
 import { analyses } from "~/lib/store";
 
 export default function Home() {
+  const [openAddDialog, setOpenAddDialog] = createSignal(false);
   return (
     <main class="mx-auto p-4 text-center text-gray-700">
       <h2 class="my-8 text-4xl">
@@ -30,7 +31,7 @@ export default function Home() {
             <DropdownMenuLabel>Add experiment</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => addExperiment()}
+              onClick={() => setOpenAddDialog(true)}
               class="cursor-pointer"
             >
               From scratch
@@ -44,10 +45,17 @@ export default function Home() {
           </DropdownMenuContent>
         </DropdownMenu>
       </h2>
+      <AddExperimentDialog
+        nextIndex={experiments.length + 1}
+        open={openAddDialog()}
+        onClose={() => setOpenAddDialog(false)}
+      />
 
       <Flex justifyContent="center" class="flex-wrap gap-4">
         <For each={experiments}>
-          {(experiment) => ExperimentCard(experiment)}
+          {(experiment, index) => (
+            <ExperimentCard experiment={experiment} experimentIndex={index()} />
+          )}
         </For>
       </Flex>
 
