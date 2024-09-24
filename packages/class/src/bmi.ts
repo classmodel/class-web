@@ -1,5 +1,5 @@
 import { CLASS } from "./class";
-import { type ClassConfig, classConfig } from "./config";
+import type { Config } from "./config";
 
 /**
  * A lightweight [BMI](https://bmi.readthedocs.io) like interface for the CLASS model.
@@ -30,13 +30,13 @@ interface BmiLight<Config> {
 
 const ouput_var_names: string[] = ["h", "theta", "dtheta", "q", "dq"] as const;
 
-export class BmiClass implements BmiLight<ClassConfig> {
-  config: ClassConfig = classConfig.parse({});
+export class BmiClass implements BmiLight<Config> {
+  config: Config = {};
   model: CLASS = new CLASS(this.config);
 
   // Model control functions
 
-  initialize(config: ClassConfig) {
+  initialize(config: Config) {
     this.config = config;
     this.model = new CLASS(config);
   }

@@ -5,7 +5,8 @@
     "./class": "./src/class.ts",
     "./config": "./src/config.ts",
     "./runner": "./src/runner.ts",
-    "./bmi": "./src/bmi.ts"
+    "./bmi": "./src/bmi.ts",
+    "./validate": "./src/validate.ts"
   },
   "license": "GPL-3.0-only",
   "scripts": {

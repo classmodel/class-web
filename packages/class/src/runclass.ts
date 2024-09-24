@@ -1,8 +1,8 @@
 import { CLASS } from "./class";
-import { classConfig } from "./config";
 import type { ClassOutput } from "./runner";
+import { parse } from "./validate";
 
-const config = classConfig.parse({});
+const config = parse({});
 const model = new CLASS(config);
 const output: ClassOutput = { t: [], h: [] };
 
