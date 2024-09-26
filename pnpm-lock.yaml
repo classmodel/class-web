@@ -38,6 +38,9 @@ importers:
       '@zip.js/zip.js':
         specifier: ^2.7.52
         version: 2.7.52
+      ajv:
+        specifier: ^8.17.1
+        version: 8.17.1
       autoprefixer:
         specifier: ^10.4.19
         version: 10.4.19(postcss@8.4.39)
