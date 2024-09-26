@@ -78,6 +78,25 @@ describe("parse", () => {
     assert.deepEqual(output, expected);
   });
 
+  test("given partial string config should return full coerced config", () => {
+    const input = { initialState: { h_0: "100" } };
+
+    const output = parse(input);
+
+    const expected = parse({});
+    expected.initialState.h_0 = 100;
+    assert.deepEqual(output, expected);
+  });
+
+  test("given emptry string should return default", () => {
+    const input = { initialState: { h_0: "" } };
+
+    const output = parse(input);
+
+    const expected = parse({});
+    assert.deepEqual(output, expected);
+  });
+
   test("given additional property should throw", () => {
     const input = { foo: 42 };
 

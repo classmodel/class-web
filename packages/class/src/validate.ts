@@ -10,10 +10,10 @@ import rawConfigJson from "./config.json";
 export const ConfigAsJsonSchema =
   rawConfigJson as unknown as JSONSchemaType<Config>;
 
-const ajv = new Ajv({
+export const ajv = new Ajv({
   coerceTypes: true,
   allErrors: true,
-  useDefaults: true,
+  useDefaults: "empty",
   code: { esm: true },
 });
 
@@ -72,7 +72,7 @@ export type PartialConfig = RecursivePartial<Config>;
  * @param config - The configuration object to prune.
  * @returns A new configuration object with default values removed.
  */
-export function pruneDefaults(config: Config): PartialConfig {
+export function pruneDefaults(config: PartialConfig): PartialConfig {
   const newConfig: PartialConfig = {};
   const defaultConfig = parse({});
   // TODO make more generic, now only handles object of objects

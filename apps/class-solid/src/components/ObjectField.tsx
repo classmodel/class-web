@@ -1,3 +1,4 @@
+import type { JSONSchemaType } from "ajv";
 import { For, Match, Switch } from "solid-js";
 import {
   TextField,
@@ -11,13 +12,13 @@ import {
   AccordionTrigger,
 } from "./ui/accordion";
 
-export function ObjectField({
+export function ObjectField<S>({
   schema,
   name = "",
   value,
   Field,
   // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
-}: { schema: any; name?: string; value?: any; Field: any }) {
+}: { schema: JSONSchemaType<S>; name?: string; value?: any; Field: any }) {
   // name can be empty, but only for root, which should be treated differently
   const isRoot = name === "";
 
@@ -86,20 +87,25 @@ export function MyTextField({
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   function myfield(field: any, props: any) {
     return (
-      <TextField class="flex items-center gap-2 py-1">
-        <TextFieldLabel for={name} class="basis-1/2">
-          {schema.description ?? name}
-        </TextFieldLabel>
-        <TextFieldInput
-          type="text"
-          id={props.name}
-          name={props.name}
-          value={field.value}
-          placeholder={schema.default}
-          {...props}
-          class="basis-1/2"
-        />
-      </TextField>
+      <>
+        <TextField class="flex items-center gap-2 py-1">
+          <TextFieldLabel for={name} class="basis-1/2">
+            {schema.description ?? name}
+          </TextFieldLabel>
+          <TextFieldInput
+            type="text"
+            id={props.name}
+            name={props.name}
+            value={field.value}
+            placeholder={schema.default}
+            {...props}
+            class="basis-1/2"
+          />
+        </TextField>
+        {field.error && (
+          <div class="bg-error p-2 text-error-foreground">{field.error}</div>
+        )}
+      </>
     );
   }
 
