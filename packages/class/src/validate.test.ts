@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import test, { describe } from "node:test";
 import type { Config } from "./config";
-import { parse, validate } from "./validate";
+import { parse, partialParse, validate } from "./validate";
 
 describe("validate", () => {
   test("should validate a valid config", () => {
@@ -22,7 +22,7 @@ describe("validate", () => {
     assert.deepEqual(validate.errors, [
       {
         instancePath: "",
-        schemaPath: "#/definitions/classConfig/additionalProperties",
+        schemaPath: "#/additionalProperties",
         keyword: "additionalProperties",
         params: { additionalProperty: "foo" },
         message: "must NOT have additional properties",
@@ -73,7 +73,52 @@ describe("parse", () => {
 
     assert.throws(() => parse(input), {
       name: "ValidationError",
-      message: "Invalid input: must NOT have additional properties",
+      message: "Invalid input: data must NOT have additional properties",
     });
   });
 });
+
+describe("partialParse()", () => {
+  test("given emtpy object should return unchanged", () => {
+    const input = {};
+
+    const output = partialParse(input);
+
+    const expected = {};
+    assert.deepEqual(output, expected);
+  });
+
+  test("given partial object should return unchanged", () => {
+    const input: Config = {
+      initialState: {
+        h_0: 111
+      }
+    };
+
+    const output = partialParse(input);
+
+    const expected = {
+      initialState: {
+        h_0: 111
+      }
+    };
+    assert.deepEqual(output, expected);
+  });
+
+  test("given partial with default value object should return unchanged", () => {
+    const input: Config = {
+      initialState: {
+        h_0: 200
+      }
+    };
+
+    const output = partialParse(input);
+
+    const expected = {
+      initialState: {
+        h_0: 200
+      }
+    };
+    assert.deepEqual(output, expected);
+  });
+})
