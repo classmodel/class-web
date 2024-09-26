@@ -31,6 +31,7 @@
         }
       },
       "additionalProperties": false,
+      "required": ["h_0", "theta_0", "dtheta_0", "q_0", "dq_0"],
       "description": "Initial State",
       "default": {}
     },
@@ -49,6 +50,7 @@
         }
       },
       "additionalProperties": false,
+      "required": ["dt", "runtime"],
       "description": "Time control",
       "default": {}
     },
@@ -97,10 +99,21 @@
         }
       },
       "additionalProperties": false,
+      "required": [
+        "wtheta",
+        "advtheta",
+        "gammatheta",
+        "wq",
+        "advq",
+        "gammaq",
+        "divU",
+        "beta"
+      ],
       "description": "Mixed layer",
       "default": {}
     }
   },
   "additionalProperties": false,
+  "required": ["initialState", "timeControl", "mixedLayer"],
   "$schema": "https://json-schema.org/draft/2019-09/schema"
 }

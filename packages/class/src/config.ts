@@ -9,76 +9,76 @@ export interface Config {
   /**
    * Initial State
    */
-  initialState?: {
+  initialState: {
     /**
      * Initial ABL height [m]
      */
-    h_0?: number;
+    h_0: number;
     /**
      * Initial mixed-layer potential temperature [K]
      */
-    theta_0?: number;
+    theta_0: number;
     /**
      * Initial temperature jump at h [K]
      */
-    dtheta_0?: number;
+    dtheta_0: number;
     /**
      * Initial mixed-layer specific humidity [kg kg-1]
      */
-    q_0?: number;
+    q_0: number;
     /**
      * Initial specific humidity jump at h [kg kg-1]
      */
-    dq_0?: number;
+    dq_0: number;
   };
   /**
    * Time control
    */
-  timeControl?: {
+  timeControl: {
     /**
      * Time step [s]
      */
-    dt?: number;
+    dt: number;
     /**
      * Total run time [s]
      */
-    runtime?: number;
+    runtime: number;
   };
   /**
    * Mixed layer
    */
-  mixedLayer?: {
+  mixedLayer: {
     /**
      * Surface kinematic heat flux [K m s-1]
      */
-    wtheta?: number;
+    wtheta: number;
     /**
      * Advection of heat [K s-1]
      */
-    advtheta?: number;
+    advtheta: number;
     /**
      * Free atmosphere potential temperature lapse rate [K m-1]
      */
-    gammatheta?: number;
+    gammatheta: number;
     /**
      * Surface kinematic moisture flux [kg kg-1 m s-1]
      */
-    wq?: number;
+    wq: number;
     /**
      * Advection of moisture [kg kg-1 s-1]
      */
-    advq?: number;
+    advq: number;
     /**
      * Free atmosphere specific humidity lapse rate [kg kg-1 m-1]
      */
-    gammaq?: number;
+    gammaq: number;
     /**
      * Horizontal large-scale divergence of wind [s-1]
      */
-    divU?: number;
+    divU: number;
     /**
      * Entrainment ratio for virtual heat [-]
      */
-    beta?: number;
+    beta: number;
   };
 }
