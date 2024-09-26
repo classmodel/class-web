@@ -2,12 +2,12 @@ import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
 import { CLASS } from "./class";
-import { classConfig } from "./config";
 import { runClass } from "./runner";
+import { parse } from "./validate";
 
 describe("CLASS model", () => {
   test("can be instantiated with default config", () => {
-    const config = classConfig.parse({});
+    const config = parse({});
     const model = new CLASS(config);
     assert.ok(model instanceof CLASS);
     assert.strictEqual(model.t, 0);
@@ -18,14 +18,14 @@ describe("CLASS model", () => {
   });
 
   test("calling update advances the model time", () => {
-    const config = classConfig.parse({});
+    const config = parse({});
     const model = new CLASS(config);
     model.update();
     assert.strictEqual(model.t, 60);
   });
 
   test("can update until the final time step", () => {
-    const config = classConfig.parse({});
+    const config = parse({});
     const model = new CLASS(config);
     while (model.t < config.timeControl.runtime) {
       model.update();
@@ -34,7 +34,7 @@ describe("CLASS model", () => {
   });
 
   test("produces realistic results", () => {
-    const config = classConfig.parse({});
+    const config = parse({});
     const output = runClass(config);
     console.log(output);
     assert.ok(output);
