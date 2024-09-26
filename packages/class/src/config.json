@@ -1,111 +1,106 @@
 {
-  "$ref": "#/definitions/classConfig",
-  "definitions": {
-    "classConfig": {
+  "type": "object",
+  "properties": {
+    "initialState": {
       "type": "object",
       "properties": {
-        "initialState": {
-          "type": "object",
-          "properties": {
-            "h_0": {
-              "type": "number",
-              "default": 200,
-              "description": "Initial ABL height [m]"
-            },
-            "theta_0": {
-              "type": "number",
-              "default": 288,
-              "description": "Initial mixed-layer potential temperature [K]"
-            },
-            "dtheta_0": {
-              "type": "number",
-              "default": 1,
-              "description": "Initial temperature jump at h [K]"
-            },
-            "q_0": {
-              "type": "number",
-              "default": 0.008,
-              "description": "Initial mixed-layer specific humidity [kg kg-1]"
-            },
-            "dq_0": {
-              "type": "number",
-              "default": -0.001,
-              "description": "Initial specific humidity jump at h [kg kg-1]"
-            }
-          },
-          "additionalProperties": false,
-          "description": "Initial State",
-          "default": {}
+        "h_0": {
+          "type": "number",
+          "default": 200,
+          "description": "Initial ABL height [m]"
         },
-        "timeControl": {
-          "type": "object",
-          "properties": {
-            "dt": {
-              "type": "number",
-              "default": 60,
-              "description": "Time step [s]"
-            },
-            "runtime": {
-              "type": "number",
-              "default": 43200,
-              "description": "Total run time [s]"
-            }
-          },
-          "additionalProperties": false,
-          "description": "Time control",
-          "default": {}
+        "theta_0": {
+          "type": "number",
+          "default": 288,
+          "description": "Initial mixed-layer potential temperature [K]"
         },
-        "mixedLayer": {
-          "type": "object",
-          "properties": {
-            "wtheta": {
-              "type": "number",
-              "default": 0.1,
-              "description": "Surface kinematic heat flux [K m s-1]"
-            },
-            "advtheta": {
-              "type": "number",
-              "default": 0,
-              "description": "Advection of heat [K s-1]"
-            },
-            "gammatheta": {
-              "type": "number",
-              "default": 0.006,
-              "description": "Free atmosphere potential temperature lapse rate [K m-1]"
-            },
-            "wq": {
-              "type": "number",
-              "default": 0.0001,
-              "description": "Surface kinematic moisture flux [kg kg-1 m s-1]"
-            },
-            "advq": {
-              "type": "number",
-              "default": 0,
-              "description": "Advection of moisture [kg kg-1 s-1]"
-            },
-            "gammaq": {
-              "type": "number",
-              "default": 0,
-              "description": "Free atmosphere specific humidity lapse rate [kg kg-1 m-1]"
-            },
-            "divU": {
-              "type": "number",
-              "default": 0,
-              "description": "Horizontal large-scale divergence of wind [s-1]"
-            },
-            "beta": {
-              "type": "number",
-              "default": 0.2,
-              "description": "Entrainment ratio for virtual heat [-]"
-            }
-          },
-          "additionalProperties": false,
-          "description": "Mixed layer",
-          "default": {}
+        "dtheta_0": {
+          "type": "number",
+          "default": 1,
+          "description": "Initial temperature jump at h [K]"
+        },
+        "q_0": {
+          "type": "number",
+          "default": 0.008,
+          "description": "Initial mixed-layer specific humidity [kg kg-1]"
+        },
+        "dq_0": {
+          "type": "number",
+          "default": -0.001,
+          "description": "Initial specific humidity jump at h [kg kg-1]"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Initial State",
+      "default": {}
+    },
+    "timeControl": {
+      "type": "object",
+      "properties": {
+        "dt": {
+          "type": "number",
+          "default": 60,
+          "description": "Time step [s]"
+        },
+        "runtime": {
+          "type": "number",
+          "default": 43200,
+          "description": "Total run time [s]"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Time control",
+      "default": {}
+    },
+    "mixedLayer": {
+      "type": "object",
+      "properties": {
+        "wtheta": {
+          "type": "number",
+          "default": 0.1,
+          "description": "Surface kinematic heat flux [K m s-1]"
+        },
+        "advtheta": {
+          "type": "number",
+          "default": 0,
+          "description": "Advection of heat [K s-1]"
+        },
+        "gammatheta": {
+          "type": "number",
+          "default": 0.006,
+          "description": "Free atmosphere potential temperature lapse rate [K m-1]"
+        },
+        "wq": {
+          "type": "number",
+          "default": 0.0001,
+          "description": "Surface kinematic moisture flux [kg kg-1 m s-1]"
+        },
+        "advq": {
+          "type": "number",
+          "default": 0,
+          "description": "Advection of moisture [kg kg-1 s-1]"
+        },
+        "gammaq": {
+          "type": "number",
+          "default": 0,
+          "description": "Free atmosphere specific humidity lapse rate [kg kg-1 m-1]"
+        },
+        "divU": {
+          "type": "number",
+          "default": 0,
+          "description": "Horizontal large-scale divergence of wind [s-1]"
+        },
+        "beta": {
+          "type": "number",
+          "default": 0.2,
+          "description": "Entrainment ratio for virtual heat [-]"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Mixed layer",
+      "default": {}
     }
   },
+  "additionalProperties": false,
   "$schema": "https://json-schema.org/draft/2019-09/schema"
 }
