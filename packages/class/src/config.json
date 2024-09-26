@@ -12,7 +12,8 @@
         "theta_0": {
           "type": "number",
           "default": 288,
-          "description": "Initial mixed-layer potential temperature [K]"
+          "description": "Initial mixed-layer potential temperature [K]",
+          "minimum": 0
         },
         "dtheta_0": {
           "type": "number",
