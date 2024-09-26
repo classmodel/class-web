@@ -29,6 +29,17 @@ Currently the repo is home to the following:
 - apps/
   - class-solid: web application with a graphical user interface for CLASS
 
+### JSON schema
+
+The Class model uses a JSON schema to validate the input configuration. The schema is defined in the `class` package and can be found in `packages/class/src/config.json`. The schema is used to validate the input configuration and to generate a form to input the configuration.
+
+If any changes are made to `packages/class/src/config.json` file then the Typescript type needs to be regenerated with the following command:
+
+```shell
+cd packages/class
+pnpm json2ts
+```
+
 ## Local build
 
 To run a local development version:
