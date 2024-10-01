@@ -81,9 +81,9 @@ export function pruneDefaults(config: PartialConfig): PartialConfig {
     const tkey = key as keyof Config;
     if (typeof value === "object") {
       for (const [subKey, subValue] of Object.entries(value)) {
-        const defaultValue = (defaultConfig[tkey] as Record<string, unknown>)[
-          subKey
-        ];
+        const defaultParent = defaultConfig[tkey];
+        const defaultValue =
+          defaultParent[subKey as keyof typeof defaultParent];
         if (subValue !== defaultValue) {
           if (!newConfig[tkey]) {
             newConfig[tkey] = {};

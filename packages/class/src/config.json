@@ -7,33 +7,34 @@
         "h_0": {
           "type": "number",
           "default": 200,
-          "description": "Initial ABL height [m]"
+          "title": "ABL height [m]"
         },
         "theta_0": {
           "type": "number",
           "default": 288,
-          "description": "Initial mixed-layer potential temperature [K]",
-          "minimum": 0
+          "title": "Mixed-layer potential temperature [K]",
+          "minimum": 0,
+          "description": "The potential temperature of the mixed layer at the initial time."
         },
         "dtheta_0": {
           "type": "number",
           "default": 1,
-          "description": "Initial temperature jump at h [K]"
+          "title": "Temperature jump at h [K]"
         },
         "q_0": {
           "type": "number",
           "default": 0.008,
-          "description": "Initial mixed-layer specific humidity [kg kg-1]"
+          "title": "Mixed-layer specific humidity [kg kg-1]"
         },
         "dq_0": {
           "type": "number",
           "default": -0.001,
-          "description": "Initial specific humidity jump at h [kg kg-1]"
+          "title": "Specific humidity jump at h [kg kg-1]"
         }
       },
       "additionalProperties": false,
       "required": ["h_0", "theta_0", "dtheta_0", "q_0", "dq_0"],
-      "description": "Initial State",
+      "title": "Initial State",
       "default": {}
     },
     "timeControl": {
@@ -42,17 +43,17 @@
         "dt": {
           "type": "number",
           "default": 60,
-          "description": "Time step [s]"
+          "title": "Time step [s]"
         },
         "runtime": {
           "type": "number",
           "default": 43200,
-          "description": "Total run time [s]"
+          "title": "Total run time [s]"
         }
       },
       "additionalProperties": false,
       "required": ["dt", "runtime"],
-      "description": "Time control",
+      "title": "Time control",
       "default": {}
     },
     "mixedLayer": {
@@ -61,42 +62,42 @@
         "wtheta": {
           "type": "number",
           "default": 0.1,
-          "description": "Surface kinematic heat flux [K m s-1]"
+          "title": "Surface kinematic heat flux [K m s-1]"
         },
         "advtheta": {
           "type": "number",
           "default": 0,
-          "description": "Advection of heat [K s-1]"
+          "title": "Advection of heat [K s-1]"
         },
         "gammatheta": {
           "type": "number",
           "default": 0.006,
-          "description": "Free atmosphere potential temperature lapse rate [K m-1]"
+          "title": "Free atmosphere potential temperature lapse rate [K m-1]"
         },
         "wq": {
           "type": "number",
           "default": 0.0001,
-          "description": "Surface kinematic moisture flux [kg kg-1 m s-1]"
+          "title": "Surface kinematic moisture flux [kg kg-1 m s-1]"
         },
         "advq": {
           "type": "number",
           "default": 0,
-          "description": "Advection of moisture [kg kg-1 s-1]"
+          "title": "Advection of moisture [kg kg-1 s-1]"
         },
         "gammaq": {
           "type": "number",
           "default": 0,
-          "description": "Free atmosphere specific humidity lapse rate [kg kg-1 m-1]"
+          "title": "Free atmosphere specific humidity lapse rate [kg kg-1 m-1]"
         },
         "divU": {
           "type": "number",
           "default": 0,
-          "description": "Horizontal large-scale divergence of wind [s-1]"
+          "title": "Horizontal large-scale divergence of wind [s-1]"
         },
         "beta": {
           "type": "number",
           "default": 0.2,
-          "description": "Entrainment ratio for virtual heat [-]"
+          "title": "Entrainment ratio for virtual heat [-]"
         }
       },
       "additionalProperties": false,
@@ -110,7 +111,7 @@
         "divU",
         "beta"
       ],
-      "description": "Mixed layer",
+      "title": "Mixed layer",
       "default": {}
     }
   },

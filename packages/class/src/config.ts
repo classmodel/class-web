@@ -5,80 +5,45 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
+export type InitialABLHeightM = number;
+export type InitialMixedLayerPotentialTemperatureK = number;
+export type InitialTemperatureJumpAtHK = number;
+export type InitialMixedLayerSpecificHumidityKgKg1 = number;
+export type InitialSpecificHumidityJumpAtHKgKg1 = number;
+export type TimeStepS = number;
+export type TotalRunTimeS = number;
+export type SurfaceKinematicHeatFluxKMS1 = number;
+export type AdvectionOfHeatKS1 = number;
+export type FreeAtmospherePotentialTemperatureLapseRateKM1 = number;
+export type SurfaceKinematicMoistureFluxKgKg1MS1 = number;
+export type AdvectionOfMoistureKgKg1S1 = number;
+export type FreeAtmosphereSpecificHumidityLapseRateKgKg1M1 = number;
+export type HorizontalLargeScaleDivergenceOfWindS1 = number;
+export type EntrainmentRatioForVirtualHeat = number;
+
 export interface Config {
-  /**
-   * Initial State
-   */
-  initialState: {
-    /**
-     * Initial ABL height [m]
-     */
-    h_0: number;
-    /**
-     * Initial mixed-layer potential temperature [K]
-     */
-    theta_0: number;
-    /**
-     * Initial temperature jump at h [K]
-     */
-    dtheta_0: number;
-    /**
-     * Initial mixed-layer specific humidity [kg kg-1]
-     */
-    q_0: number;
-    /**
-     * Initial specific humidity jump at h [kg kg-1]
-     */
-    dq_0: number;
-  };
-  /**
-   * Time control
-   */
-  timeControl: {
-    /**
-     * Time step [s]
-     */
-    dt: number;
-    /**
-     * Total run time [s]
-     */
-    runtime: number;
-  };
-  /**
-   * Mixed layer
-   */
-  mixedLayer: {
-    /**
-     * Surface kinematic heat flux [K m s-1]
-     */
-    wtheta: number;
-    /**
-     * Advection of heat [K s-1]
-     */
-    advtheta: number;
-    /**
-     * Free atmosphere potential temperature lapse rate [K m-1]
-     */
-    gammatheta: number;
-    /**
-     * Surface kinematic moisture flux [kg kg-1 m s-1]
-     */
-    wq: number;
-    /**
-     * Advection of moisture [kg kg-1 s-1]
-     */
-    advq: number;
-    /**
-     * Free atmosphere specific humidity lapse rate [kg kg-1 m-1]
-     */
-    gammaq: number;
-    /**
-     * Horizontal large-scale divergence of wind [s-1]
-     */
-    divU: number;
-    /**
-     * Entrainment ratio for virtual heat [-]
-     */
-    beta: number;
-  };
+  initialState: InitialState;
+  timeControl: TimeControl;
+  mixedLayer: MixedLayer;
+}
+export interface InitialState {
+  h_0: InitialABLHeightM;
+  theta_0: InitialMixedLayerPotentialTemperatureK;
+  dtheta_0: InitialTemperatureJumpAtHK;
+  q_0: InitialMixedLayerSpecificHumidityKgKg1;
+  dq_0: InitialSpecificHumidityJumpAtHKgKg1;
+}
+export interface TimeControl {
+  dt: TimeStepS;
+  runtime: TotalRunTimeS;
+}
+export interface MixedLayer {
+  wtheta: SurfaceKinematicHeatFluxKMS1;
+  advtheta: AdvectionOfHeatKS1;
+  gammatheta: FreeAtmospherePotentialTemperatureLapseRateKM1;
+  wq: SurfaceKinematicMoistureFluxKgKg1MS1;
+  advq: AdvectionOfMoistureKgKg1S1;
+  gammaq: FreeAtmosphereSpecificHumidityLapseRateKgKg1M1;
+  divU: HorizontalLargeScaleDivergenceOfWindS1;
+  beta: EntrainmentRatioForVirtualHeat;
 }
