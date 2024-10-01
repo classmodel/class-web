@@ -14,8 +14,8 @@ export type NamedConfig = NamedAndDescription & PartialConfig;
 export const jsonSchemaOfNamedConfig = {
   ...jsonSchemaOfConfig,
   properties: {
-    title: { type: "string" },
-    description: { type: "string" },
+    title: { type: "string", title: "Title", minLength: 1 },
+    description: { type: "string", title: "Description" },
     ...jsonSchemaOfConfig.properties,
   },
   required: [...jsonSchemaOfConfig.required, "title"],
