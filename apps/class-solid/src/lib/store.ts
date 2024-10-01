@@ -1,26 +1,20 @@
 import { createStore, produce, unwrap } from "solid-js/store";
-import { z } from "zod";
 
 import type { ClassOutput } from "@classmodel/class/runner";
-import { type PartialConfig, parse } from "@classmodel/class/validate";
+import type { PartialConfig } from "@classmodel/class/validate";
 import type { Analysis } from "~/components/Analysis";
+import {
+  type NamedConfig,
+  parseExperimentConfig,
+} from "~/components/NamedConfig";
 import { runClass } from "./runner";
 
-export interface Permutation<C extends PartialConfig = PartialConfig> {
-  name: string;
-  config: C;
+export interface Permutation extends NamedConfig {
   output?: ClassOutput | undefined;
-  // TODO Could use per run state to show progress of run of reference and each permutation
-  // running: boolean;
 }
 
 export interface Experiment {
-  name: string;
-  description: string;
-  reference: {
-    config: PartialConfig;
-    output?: ClassOutput | undefined;
-  };
+  reference: Permutation;
   permutations: Permutation[];
   running: boolean;
 }
@@ -47,6 +41,20 @@ function mergeConfigurations(reference: any, permutation: any) {
   return merged;
 }
 
+function stripNames(perm: Permutation): PartialConfig {
+  const { title, description, ...config } = perm;
+  return config;
+}
+
+export function stripOutput(perm: Permutation): NamedConfig {
+  const { output: _, ...config } = perm;
+  return config;
+}
+
+export function stripOutputAndNames(perm: Permutation): PartialConfig {
+  return stripNames(stripOutput(perm));
+}
+
 export async function runExperiment(id: number) {
   const exp = findExperiment(id);
 
@@ -61,7 +69,8 @@ export async function runExperiment(id: number) {
   // or make more specific like runReference and runPermutation
 
   // Run reference
-  const newOutput = await runClass(exp.reference.config);
+  const refConfig = stripOutputAndNames(exp.reference);
+  const newOutput = await runClass(refConfig);
 
   setExperiments(
     id,
@@ -73,11 +82,8 @@ export async function runExperiment(id: number) {
   // Run permutations
   for (const key in exp.permutations) {
     const perm = exp.permutations[key];
-    const combinedConfig = mergeConfigurations(
-      exp.reference.config,
-      perm.config,
-    );
-    const newOutput = await runClass(combinedConfig);
+    const combinedConfig = mergeConfigurations(exp.reference, perm);
+    const newOutput = await runClass(stripOutputAndNames(combinedConfig));
 
     setExperiments(
       id,
@@ -104,17 +110,10 @@ function findExperiment(index: number) {
   return exp;
 }
 
-export async function addExperiment(
-  config: PartialConfig = {},
-  name?: string,
-  description?: string,
-) {
+export async function addExperiment(config: NamedConfig) {
+  console.log(JSON.stringify(config, null, 2));
   const newExperiment: Experiment = {
-    name: name ?? `My experiment ${experiments.length}`,
-    description: description ?? "Standard experiment",
-    reference: {
-      config,
-    },
+    reference: config,
     permutations: [],
     running: false,
   };
@@ -122,30 +121,10 @@ export async function addExperiment(
   await runExperiment(experiments.length - 1);
 }
 
-const ExperimentConfigSchema = z.object({
-  name: z.string(),
-  description: z.string().default("Standard experiment"),
-  reference: z.object({}), // After zod validation, the config is parsed with ajv
-  permutations: z.array(
-    z.object({
-      config: z.object({}), // After zod validation, the config is parsed with ajv
-      name: z.string(),
-    }),
-  ),
-});
-export type ExperimentConfigSchema = z.infer<typeof ExperimentConfigSchema>;
-
 export function uploadExperiment(rawData: unknown) {
-  const upload = ExperimentConfigSchema.parse(rawData);
+  const upload = parseExperimentConfig(rawData);
   const experiment: Experiment = {
-    name: upload.name, // TODO check name is not already used
-    description: upload.description,
-    reference: {
-      config: parse(upload.reference),
-    },
-    permutations: upload.permutations.map(({ name, config }) => {
-      return { name, config: parse(config) };
-    }),
+    ...upload,
     running: false,
   };
   setExperiments(experiments.length, experiment);
@@ -157,14 +136,16 @@ export function duplicateExperiment(id: number) {
     throw new Error("No experiment with id {id}");
   }
 
-  addExperiment({ ...original.reference.config }, `Copy of ${original.name}`);
+  const newExperiment = structuredClone(original.reference);
+  newExperiment.title = `Copy of ${original.reference.title}`;
+  addExperiment(newExperiment);
   let key = 0;
   for (const perm of original.permutations) {
+    const newPermutation = structuredClone(perm);
     setPermutationConfigInExperiment(
       experiments.length - 1,
       key++,
-      perm.config,
-      perm.name,
+      newPermutation,
     );
   }
   runExperiment(experiments.length - 1);
@@ -174,26 +155,15 @@ export function deleteExperiment(index: number) {
   setExperiments(experiments.filter((_, i) => i !== index));
 }
 
-export async function modifyExperiment(
-  index: number,
-  newConfig: PartialConfig,
-  name: string,
-  description: string,
-) {
-  setExperiments(index, "reference", "config", newConfig);
-  setExperiments(index, (exp) => ({
-    ...exp,
-    name,
-    description,
-  }));
+export async function modifyExperiment(index: number, newConfig: NamedConfig) {
+  setExperiments(index, "reference", newConfig);
   await runExperiment(index);
 }
 
 export async function setPermutationConfigInExperiment(
   experimentIndex: number,
   permutationIndex: number,
-  config: PartialConfig,
-  name: string,
+  config: NamedConfig,
 ) {
   setExperiments(
     experimentIndex,
@@ -201,7 +171,7 @@ export async function setPermutationConfigInExperiment(
     permutationIndex === -1
       ? findExperiment(experimentIndex).permutations.length
       : permutationIndex,
-    { config, name },
+    config,
   );
   await runExperiment(experimentIndex);
 }
@@ -216,9 +186,9 @@ export async function deletePermutationFromExperiment(
 }
 
 export function findPermutation(exp: Experiment, permutationName: string) {
-  const perm = exp.permutations.find((perm) => perm.name === permutationName);
+  const perm = exp.permutations.find((perm) => perm.title === permutationName);
   if (!perm) {
-    throw new Error(`No permutation with name ${permutationName}`);
+    throw new Error(`No permutation with title ${permutationName}`);
   }
   return perm;
 }
@@ -230,8 +200,10 @@ export function promotePermutationToExperiment(
   const exp = findExperiment(experimentIndex);
   const perm = exp.permutations[permutationIndex];
 
-  const combinedConfig = mergeConfigurations(exp.reference.config, perm.config);
-  addExperiment(combinedConfig, perm.name);
+  const combinedConfig = mergeConfigurations(exp.reference, perm);
+  combinedConfig.title = perm.title;
+  combinedConfig.description = perm.description;
+  addExperiment(combinedConfig);
   // TODO dont show form of new experiment, just show the new card
 }
 
@@ -240,13 +212,9 @@ export function duplicatePermutation(
   permutationIndex: number,
 ) {
   const exp = findExperiment(experimentIndex);
-  const perm = exp.permutations[permutationIndex];
-  setPermutationConfigInExperiment(
-    experimentIndex,
-    -1,
-    perm.config,
-    `Copy of ${perm.name}`,
-  );
+  const perm = structuredClone(exp.permutations[permutationIndex]);
+  perm.title = `Copy of ${perm.title}`;
+  setPermutationConfigInExperiment(experimentIndex, -1, perm);
 }
 
 export function swapPermutationAndReferenceConfiguration(
@@ -254,18 +222,11 @@ export function swapPermutationAndReferenceConfiguration(
   permutationIndex: number,
 ) {
   const exp = findExperiment(experimentIndex);
-  const refConfig = structuredClone(exp.reference.config);
+  const refConfig = structuredClone(exp.reference);
   const perm = exp.permutations[permutationIndex];
-  const permConfig = structuredClone(perm.config);
+  const permConfig = structuredClone(perm);
 
-  setExperiments(experimentIndex, "reference", "config", permConfig);
-  setExperiments(
-    experimentIndex,
-    "permutations",
-    permutationIndex,
-    "config",
-    refConfig,
-  );
-  // TODO should names also be swapped?
+  setExperiments(experimentIndex, "reference", permConfig);
+  setExperiments(experimentIndex, "permutations", permutationIndex, refConfig);
   runExperiment(experimentIndex);
 }

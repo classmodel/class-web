@@ -1,15 +1,15 @@
 import {
   type PartialConfig,
+  ValidationError,
   ajv,
   jsonSchemaOfConfig,
 } from "@classmodel/class/validate";
-import type { JSONSchemaType } from "ajv";
+import type { DefinedError, JSONSchemaType } from "ajv";
 
-type NamedAndDescription = {
+export type NamedConfig = {
   title: string;
-  description: string;
-};
-export type NamedConfig = NamedAndDescription & PartialConfig;
+  description?: string;
+} & PartialConfig;
 
 export const jsonSchemaOfNamedConfig = {
   ...jsonSchemaOfConfig,
@@ -18,7 +18,37 @@ export const jsonSchemaOfNamedConfig = {
     description: { type: "string", title: "Description" },
     ...jsonSchemaOfConfig.properties,
   },
-  required: [...jsonSchemaOfConfig.required, "title"],
+  required: ["title", ...jsonSchemaOfConfig.required],
 } as JSONSchemaType<NamedConfig>;
 
 export const validate = ajv.compile(jsonSchemaOfNamedConfig);
+
+export interface ExperimentConfigSchema {
+  reference: NamedConfig;
+  permutations: NamedConfig[];
+}
+const jsonSchemaOfExperimentConfig = {
+  type: "object",
+  properties: {
+    reference: {
+      ...jsonSchemaOfNamedConfig,
+      title: "Reference",
+    },
+    permutations: {
+      type: "array",
+      title: "Permutations",
+      items: jsonSchemaOfNamedConfig,
+      // uniqueItems: true // TODO enforce?
+    },
+  },
+  required: ["reference:", "permutations"],
+} as JSONSchemaType<ExperimentConfigSchema>;
+
+const validateExperimentConfig = ajv.compile(jsonSchemaOfExperimentConfig);
+
+export function parseExperimentConfig(input: unknown): ExperimentConfigSchema {
+  if (!validateExperimentConfig(input)) {
+    throw new ValidationError(validate.errors as DefinedError[]);
+  }
+  return input;
+}

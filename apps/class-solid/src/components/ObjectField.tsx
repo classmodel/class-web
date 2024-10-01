@@ -1,5 +1,5 @@
 import type { JSONSchemaType } from "ajv";
-import { For, Match, Show, Switch, splitProps } from "solid-js";
+import { For, Match, Show, Switch, createMemo, splitProps } from "solid-js";
 import {
   TextField,
   TextFieldDescription,
@@ -22,12 +22,18 @@ export function ObjectField<S>({
   Field,
   // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
 }: { schema: JSONSchemaType<S>; name?: string; value?: any; Field: any }) {
+  if (schema === undefined) {
+    return null;
+  }
   // name can be empty, but only for root, which should be treated differently
   const isRoot = name === "";
 
   function Children() {
+    const props = createMemo(() => {
+      return Object.entries(schema.properties);
+    });
     return (
-      <For each={Object.entries(schema.properties)}>
+      <For each={props()}>
         {([propName, propSchema]) => (
           <PropField
             // Nested fields should be connected with .
@@ -79,7 +85,7 @@ function PropField({
   // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
 }: { name: string; schema: any; value: any; Field: any }) {
   return (
-    <Switch fallback={<p>Unknown type</p>}>
+    <Switch fallback={<p>Unknown type of {schema}</p>}>
       <Match when={schema.type === "object"}>
         <ObjectField name={name} schema={schema} value={value} Field={Field} />
       </Match>

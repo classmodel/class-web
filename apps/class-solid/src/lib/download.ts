@@ -1,17 +1,15 @@
 import type { ClassOutput } from "@classmodel/class/runner";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
-import type { Experiment, ExperimentConfigSchema } from "./store";
+import type { ExperimentConfigSchema } from "~/components/NamedConfig";
+import type { Experiment } from "./store";
 
 function toConfig(experiment: Experiment): ExperimentConfigSchema {
+  const { output: _, ...reference } = experiment.reference;
   return {
-    name: experiment.name,
-    description: experiment.description,
-    reference: experiment.reference.config,
-    permutations: experiment.permutations.map(({ name, config }) => {
-      return {
-        name,
-        config,
-      };
+    reference,
+    permutations: experiment.permutations.map((perm) => {
+      const { output: _, ...config } = perm;
+      return config;
     }),
   };
 }
@@ -44,7 +42,10 @@ export async function createArchive(experiment: Experiment) {
     const csvBlob = new Blob([outputToCsv(experiment.reference.output)], {
       type: "text/csv",
     });
-    await zipWriter.add(`${experiment.name}.csv`, new BlobReader(csvBlob));
+    await zipWriter.add(
+      `${experiment.reference.title}.csv`,
+      new BlobReader(csvBlob),
+    );
   }
 
   for (const permutation of experiment.permutations) {
@@ -53,7 +54,7 @@ export async function createArchive(experiment: Experiment) {
       const csvBlob = new Blob([outputToCsv(output)], {
         type: "text/csv",
       });
-      await zipWriter.add(`${permutation.name}.csv`, new BlobReader(csvBlob));
+      await zipWriter.add(`${permutation.title}.csv`, new BlobReader(csvBlob));
     }
   }
   await zipWriter.close();

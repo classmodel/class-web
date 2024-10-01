@@ -1,7 +1,7 @@
 import { pruneDefaults } from "@classmodel/class/validate";
 import { type SubmitHandler, createForm } from "@modular-forms/solid";
 import { createMemo } from "solid-js";
-import type { Experiment } from "~/lib/store";
+import { type Experiment, stripOutput } from "~/lib/store";
 import {
   type NamedConfig,
   jsonSchemaOfNamedConfig,
@@ -20,11 +20,7 @@ export function ExperimentConfigForm({
   onSubmit: (c: NamedConfig) => void;
 }) {
   const initialValues = createMemo(() => {
-    return {
-      title: experiment.name,
-      description: experiment.description,
-      ...pruneDefaults(experiment.reference.config),
-    };
+    return pruneDefaults(stripOutput(experiment.reference));
   });
   const [_, { Form, Field }] = createForm<NamedConfig>({
     initialValues: initialValues(),
@@ -34,6 +30,7 @@ export function ExperimentConfigForm({
   const handleSubmit: SubmitHandler<NamedConfig> = (values, event) => {
     // Use validate to coerce strings to numbers
     validate(values);
+
     onSubmit(values);
   };
 
@@ -42,12 +39,11 @@ export function ExperimentConfigForm({
       id={id}
       onSubmit={handleSubmit}
       shouldActive={false} // Also return from collapsed fields
-      shouldDirty={true} // Don't return empty strings for unset fields
     >
       <div>
         <ObjectField
           schema={jsonSchemaOfNamedConfig}
-          value={pruneDefaults(experiment.reference.config)}
+          value={initialValues}
           Field={Field}
         />
       </div>

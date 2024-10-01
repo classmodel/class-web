@@ -82,18 +82,30 @@ export function pruneDefaults(config: PartialConfig): PartialConfig {
     if (typeof value === "object") {
       for (const [subKey, subValue] of Object.entries(value)) {
         const defaultParent = defaultConfig[tkey];
-        const defaultValue =
-          defaultParent[subKey as keyof typeof defaultParent];
-        if (subValue !== defaultValue) {
-          if (!newConfig[tkey]) {
-            newConfig[tkey] = {};
+        if (defaultParent === undefined) {
+        } else {
+          const defaultValue =
+            defaultParent[subKey as keyof typeof defaultParent];
+          if (subValue !== defaultValue) {
+            if (!newConfig[tkey]) {
+              newConfig[tkey] = {};
+            }
+            (newConfig[tkey] as Record<string, unknown>)[subKey] = subValue;
           }
-          (newConfig[tkey] as Record<string, unknown>)[subKey] = subValue;
+        }
+      }
+    } else {
+      const defaultParent = defaultConfig[tkey];
+      if (defaultParent === undefined) {
+        newConfig[tkey] = value;
+      } else {
+        const defaultValue = defaultParent[tkey as keyof typeof defaultParent];
+        if (value !== defaultValue) {
+          newConfig[tkey] = value;
         }
       }
     }
   }
-
   return newConfig;
 }
 
@@ -139,6 +151,9 @@ export function overwriteDefaultsInJsonSchema<C>(
     const val = defaults[key as keyof RecursivePartial<C>];
     for (const subkey in val) {
       const subval = val[subkey as keyof typeof val];
+      if (newSchema.properties[key as keyof C].properties === undefined) {
+        continue;
+      }
       const prop =
         newSchema.properties[key as keyof C].properties[
           subkey as keyof typeof val

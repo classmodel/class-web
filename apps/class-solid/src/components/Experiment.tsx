@@ -48,9 +48,10 @@ export function AddExperimentDialog(props: {
 }) {
   const initialExperiment = () => {
     return {
-      name: `My experiment ${props.nextIndex}`,
-      description: "",
-      reference: { config: {} },
+      reference: {
+        title: `My experiment ${props.nextIndex}`,
+        description: "",
+      },
       permutations: [],
       running: false,
     };
@@ -73,12 +74,7 @@ export function AddExperimentDialog(props: {
           experiment={initialExperiment()}
           onSubmit={(newConfig) => {
             props.onClose();
-            const { title, description, ...strippedConfig } = newConfig;
-            addExperiment(
-              strippedConfig,
-              title ?? initialExperiment().name,
-              description ?? initialExperiment().description,
-            );
+            addExperiment(newConfig);
           }}
         />
         <DialogFooter>
@@ -111,13 +107,7 @@ export function ExperimentSettingsDialog(props: {
           experiment={props.experiment}
           onSubmit={(newConfig) => {
             setOpen(false);
-            const { title, description, ...strippedConfig } = newConfig;
-            modifyExperiment(
-              props.experimentIndex,
-              strippedConfig,
-              title ?? props.experiment.name,
-              description ?? props.experiment.description,
-            );
+            modifyExperiment(props.experimentIndex, newConfig);
           }}
         />
         <DialogFooter>
@@ -168,7 +158,7 @@ function DownloadExperimentConfiguration(props: { experiment: Experiment }) {
     URL.revokeObjectURL(downloadUrl());
   });
 
-  const filename = `class-${props.experiment.name}.json`;
+  const filename = `class-${props.experiment.reference.title}.json`;
   return (
     <a href={downloadUrl()} download={filename} type="application/json">
       Configuration
@@ -185,7 +175,7 @@ function DownloadExperimentArchive(props: { experiment: Experiment }) {
     onCleanup(() => URL.revokeObjectURL(objectUrl));
   });
 
-  const filename = `class-${props.experiment.name}.zip`;
+  const filename = `class-${props.experiment.reference.title}.zip`;
   return (
     <a href={url()} download={filename} type="application/json">
       Config + output
@@ -223,8 +213,8 @@ export function ExperimentCard(props: {
   return (
     <Card class="w-[380px]">
       <CardHeader>
-        <CardTitle>{experiment().name}</CardTitle>
-        <CardDescription>{experiment().description}</CardDescription>
+        <CardTitle>{experiment().reference.title}</CardTitle>
+        <CardDescription>{experiment().reference.description}</CardDescription>
       </CardHeader>
       <CardContent>
         <PermutationsList

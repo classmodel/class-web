@@ -54,14 +54,14 @@ export function TimeSeriesPlot() {
         .flatMap((e) => {
           const permutationRuns = e.permutations.map((perm) => {
             return {
-              label: `${e.name}/${perm.name}`,
+              label: `${e.reference.title}/${perm.title}`,
               data: perm.output === undefined ? [null] : perm.output.h,
               fill: false,
             };
           });
           return [
             {
-              label: e.name,
+              label: e.reference.title,
               data:
                 e.reference.output === undefined
                   ? [null]
@@ -89,14 +89,14 @@ function FinalHeights() {
         return (
           <div class="mb-2">
             <p>
-              {experiment.name}: {h.toFixed()} m
+              {experiment.reference.title}: {h.toFixed()} m
             </p>
             <For each={experiment.permutations}>
               {(perm) => {
                 const h = perm.output?.h[perm.output.h.length - 1] || 0;
                 return (
                   <p>
-                    {experiment.name}/{perm.name}: {h.toFixed()} m
+                    {experiment.reference.title}/{perm.title}: {h.toFixed()} m
                   </p>
                 );
               }}
