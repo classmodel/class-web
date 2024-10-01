@@ -1,7 +1,14 @@
 import assert from "node:assert";
 import test, { describe } from "node:test";
 import type { Config } from "./config";
-import { type PartialConfig, parse, pruneDefaults, validate } from "./validate";
+import {
+  type PartialConfig,
+  jsonSchemaOfConfig,
+  overwriteDefaultsInJsonSchema,
+  parse,
+  pruneDefaults,
+  validate,
+} from "./validate";
 
 describe("validate", () => {
   test("should validate a valid config", () => {
@@ -163,5 +170,28 @@ describe("pruneDefaults", () => {
       initialState: { h_0: 300 },
     };
     assert.deepEqual(output, expected);
+  });
+});
+
+describe("overwriteDefaultsInJsonSchema", () => {
+  test("given zero defaults should return original schema", () => {
+    const schema = structuredClone(jsonSchemaOfConfig);
+    const defaults = {};
+
+    const result = overwriteDefaultsInJsonSchema(schema, defaults);
+
+    const expected = structuredClone(jsonSchemaOfConfig);
+    assert.deepEqual(result, expected);
+  });
+
+  test("given default for initialState.h_0 should return schema with given default", () => {
+    const schema = structuredClone(jsonSchemaOfConfig);
+    const defaults = { initialState: { h_0: 42 } };
+
+    const result = overwriteDefaultsInJsonSchema(schema, defaults);
+
+    const expected = structuredClone(jsonSchemaOfConfig);
+    expected.properties.initialState.properties.h_0.default = 42;
+    assert.deepEqual(result, expected);
   });
 });

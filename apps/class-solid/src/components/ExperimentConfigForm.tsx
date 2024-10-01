@@ -3,7 +3,7 @@ import { type SubmitHandler, createForm } from "@modular-forms/solid";
 import type { Experiment } from "~/lib/store";
 import {
   type NamedConfig,
-  NamedConfigAsJsonSchema,
+  jsonSchemaOfNamedConfig,
   validate,
 } from "./NamedConfig";
 import { ObjectField } from "./ObjectField";
@@ -41,7 +41,7 @@ export function ExperimentConfigForm({
     >
       <div>
         <ObjectField
-          schema={NamedConfigAsJsonSchema}
+          schema={jsonSchemaOfNamedConfig}
           value={pruneDefaults(experiment.reference.config)}
           Field={Field}
         />

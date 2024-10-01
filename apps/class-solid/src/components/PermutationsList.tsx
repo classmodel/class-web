@@ -1,4 +1,8 @@
-import { type PartialConfig, pruneDefaults } from "@classmodel/class/validate";
+import {
+  type PartialConfig,
+  overwriteDefaultsInJsonSchema,
+  pruneDefaults,
+} from "@classmodel/class/validate";
 import { type SubmitHandler, createForm } from "@modular-forms/solid";
 import { For, createMemo, createSignal } from "solid-js";
 import { Button } from "~/components/ui/button";
@@ -13,7 +17,7 @@ import {
 } from "~/lib/store";
 import {
   type NamedConfig,
-  NamedConfigAsJsonSchema,
+  jsonSchemaOfNamedConfig,
   validate,
 } from "./NamedConfig";
 import { ObjectField } from "./ObjectField";
@@ -46,8 +50,15 @@ function PermutationConfigForm(props: {
   id: string;
   onSubmit: (config: NamedConfig) => void;
   permutationName?: string;
+  reference: PartialConfig;
   config: PartialConfig;
 }) {
+  const jsonSchemaOfPermutation = createMemo(() => {
+    return overwriteDefaultsInJsonSchema(
+      jsonSchemaOfNamedConfig,
+      props.reference,
+    );
+  });
   const [_, { Form, Field }] = createForm<NamedConfig>({
     initialValues: {
       title: props.permutationName ?? "",
@@ -69,7 +80,7 @@ function PermutationConfigForm(props: {
     >
       <div>
         <ObjectField
-          schema={NamedConfigAsJsonSchema}
+          schema={jsonSchemaOfPermutation()}
           value={pruneDefaults(props.config)}
           Field={Field}
         />
@@ -103,7 +114,8 @@ function AddPermutationButton(props: {
         </DialogHeader>
         <PermutationConfigForm
           id="add-permutation-form"
-          config={props.experiment.reference.config}
+          reference={props.experiment.reference.config}
+          config={{}}
           permutationName={permutationName}
           onSubmit={(config) => {
             const { title, description, ...strippedConfig } = config;
@@ -153,6 +165,7 @@ function EditPermutationButton(props: {
         <PermutationConfigForm
           id="edit-permutation-form"
           permutationName={permutationName}
+          reference={props.experiment.reference.config}
           config={props.experiment.permutations[props.permutationIndex].config}
           onSubmit={(config) => {
             const { title, description, ...strippedConfig } = config;

@@ -7,8 +7,9 @@ import rawConfigJson from "./config.json";
 /**
  * The JSON schema for the configuration object.
  */
-export const ConfigAsJsonSchema =
-  rawConfigJson as unknown as JSONSchemaType<Config>;
+export type JsonSchemaOfConfig = JSONSchemaType<Config>;
+export const jsonSchemaOfConfig =
+  rawConfigJson as unknown as JsonSchemaOfConfig;
 
 export const ajv = new Ajv({
   coerceTypes: true,
@@ -26,7 +27,7 @@ export const ajv = new Ajv({
  * @returns `true` if the input is valid, `false` otherwise.
  *
  */
-export const validate = ajv.compile(ConfigAsJsonSchema);
+export const validate = ajv.compile(jsonSchemaOfConfig);
 
 export class ValidationError extends Error {
   public errors: DefinedError[] | null | undefined;
@@ -94,4 +95,56 @@ export function pruneDefaults(config: PartialConfig): PartialConfig {
   }
 
   return newConfig;
+}
+
+/**
+ * Overwrites the default values in a JSON schema with the provided defaults.
+ *
+ * @param schema - The original JSON schema to be modified.
+ * @param defaults - An object containing the default values to overwrite in the schema.
+ * @returns A new JSON schema with the default values overwritten.
+ *
+ * @remarks
+ * This function currently only handles objects of objects and needs to be made more generic.
+ *
+ * @example
+ * ```typescript
+ * const schema = {
+ *   properties: {
+ *     setting1: {
+ *       properties: {
+ *         subsetting1: { type: 'string', default: 'oldValue' }
+ *       }
+ *     }
+ *   }
+ * };
+ *
+ * const defaults = {
+ *   setting1: {
+ *     subsetting1: 'newValue'
+ *   }
+ * };
+ *
+ * const newSchema = overwriteDefaultsInJsonSchema(schema, defaults);
+ * console.log(newSchema.properties.setting1.properties.subsetting1.default); // 'newValue'
+ * ```
+ */
+export function overwriteDefaultsInJsonSchema<C>(
+  schema: JSONSchemaType<C>,
+  defaults: RecursivePartial<C>,
+) {
+  const newSchema = structuredClone(schema);
+  // TODO make more generic, now only handles object of objects
+  for (const key in defaults) {
+    const val = defaults[key as keyof RecursivePartial<C>];
+    for (const subkey in val) {
+      const subval = val[subkey as keyof typeof val];
+      const prop =
+        newSchema.properties[key as keyof C].properties[
+          subkey as keyof typeof val
+        ];
+      prop.default = subval;
+    }
+  }
+  return newSchema;
 }

@@ -1,7 +1,7 @@
 import {
-  ConfigAsJsonSchema,
   type PartialConfig,
   ajv,
+  jsonSchemaOfConfig,
 } from "@classmodel/class/validate";
 import type { JSONSchemaType } from "ajv";
 
@@ -11,14 +11,14 @@ type NamedAndDescription = {
 };
 export type NamedConfig = NamedAndDescription & PartialConfig;
 
-export const NamedConfigAsJsonSchema = {
-  ...ConfigAsJsonSchema,
+export const jsonSchemaOfNamedConfig = {
+  ...jsonSchemaOfConfig,
   properties: {
     title: { type: "string" },
     description: { type: "string" },
-    ...ConfigAsJsonSchema.properties,
+    ...jsonSchemaOfConfig.properties,
   },
-  required: [...ConfigAsJsonSchema.required, "title"],
+  required: [...jsonSchemaOfConfig.required, "title"],
 } as JSONSchemaType<NamedConfig>;
 
-export const validate = ajv.compile(NamedConfigAsJsonSchema);
+export const validate = ajv.compile(jsonSchemaOfNamedConfig);
