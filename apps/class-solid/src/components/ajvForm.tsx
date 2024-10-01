@@ -26,8 +26,17 @@ export function ajvForm<TFieldValues extends FieldValues>(
         const path = error.instancePath.slice(1).replace("/", ".");
         formErrors[path] = error.message ?? "Invalid value";
       }
-      // TODO convert ajv errors to modular form errors
-      console.error({ values, ajvErrors, formErrors });
+    }
+    // If child has errors, parent should have error
+    for (const key in formErrors) {
+      const path = key.split(".");
+      while (path.length > 0) {
+        path.pop();
+        const parentKey = path.join(".");
+        if (parentKey) {
+          formErrors[parentKey] = "Child properties has one or more errors";
+        }
+      }
     }
     return formErrors as FormErrors<TFieldValues>;
   };
