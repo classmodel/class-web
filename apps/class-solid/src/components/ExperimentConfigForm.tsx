@@ -1,5 +1,6 @@
 import { pruneDefaults } from "@classmodel/class/validate";
 import { type SubmitHandler, createForm } from "@modular-forms/solid";
+import { createMemo } from "solid-js";
 import type { Experiment } from "~/lib/store";
 import {
   type NamedConfig,
@@ -18,17 +19,21 @@ export function ExperimentConfigForm({
   experiment: Experiment;
   onSubmit: (c: NamedConfig) => void;
 }) {
-  const [_, { Form, Field }] = createForm<NamedConfig>({
-    initialValues: {
+  const initialValues = createMemo(() => {
+    return {
       title: experiment.name,
       description: experiment.description,
       ...pruneDefaults(experiment.reference.config),
-    },
+    };
+  });
+  const [_, { Form, Field }] = createForm<NamedConfig>({
+    initialValues: initialValues(),
     validate: ajvForm(validate),
   });
 
   const handleSubmit: SubmitHandler<NamedConfig> = (values, event) => {
-    // TODO if parse fails, show error
+    // Use validate to coerce strings to numbers
+    validate(values);
     onSubmit(values);
   };
 

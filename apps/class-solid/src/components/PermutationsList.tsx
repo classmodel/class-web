@@ -68,6 +68,8 @@ function PermutationConfigForm(props: {
   });
 
   const handleSubmit: SubmitHandler<NamedConfig> = (values: NamedConfig) => {
+    // Use validate to coerce strings to numbers
+    validate(values);
     props.onSubmit(values);
   };
 
