@@ -5,10 +5,12 @@
     ".": "./src/class.ts",
     "./class": "./src/class.ts",
     "./config": "./src/config.ts",
-    "./runner": "./src/runner.ts"
+    "./config.json": "./src/config.json",
+    "./runner": "./src/runner.ts",
+    "./validate": "./src/validate.ts"
   },
   "publish": {
-    "include": ["README.md", "LICENSE", "src/**/*.ts"],
+    "include": ["README.md", "LICENSE", "src/**/*.ts", "src/**/*.json"],
     "exclude": ["src/**/*.test.ts"]
   }
 }

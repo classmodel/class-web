@@ -4,6 +4,7 @@
   "exports": {
     "./class": "./src/class.ts",
     "./config": "./src/config.ts",
+    "./config.json": "./src/config.json",
     "./runner": "./src/runner.ts",
     "./bmi": "./src/bmi.ts",
     "./validate": "./src/validate.ts"
