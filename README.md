@@ -31,9 +31,9 @@ Currently the repo is home to the following:
 
 ### JSON schema
 
-The Class model uses a JSON schema to validate the input configuration. The schema is defined in the `class` package and can be found in `packages/class/src/config.json`. The schema is used to validate the input configuration and to generate a form to input the configuration.
+The Class model uses a JSON schema to validate the input configuration. The schema is defined in the `@classmodel/class` package and can be found in [packages/class/src/config.json](packages/class/src/config.json). The schema is used to validate the input configuration and to generate a form to input the configuration.
 
-If any changes are made to `packages/class/src/config.json` file then the Typescript type needs to be regenerated with the following command:
+If any changes are made to the `packages/class/src/config.json` file then the Typescript type need to be regenerated with the following command:
 
 ```shell
 cd packages/class
@@ -97,17 +97,19 @@ pnpm exec playwright test
 
 ## Tech stack
 
-The CLASS package is written in typescript. It uses [zod](https://zod.dev/) for
-the configuration and runtime validation. Zod can be converted to/from
-[JSONSchema](https://json-schema.org/), which is ideal for sharing the
+The CLASS package is written in typescript.
+It uses a [JSON schema](https://json-schema.org/) to define the shape and constraints of a configuration.
+JSON schema is cross-langanuage and is ideal for sharing the
 configuration between web-app, library code, and perhaps other implementations
 of CLASS as well.
+To validate a configuration it uses the JSON schema together with [ajv](https://ajv.js.org/).
+Ajv is the reference JSON schema validator in then JS ecosystem.
 
 The web application is build with [solid.js](https://docs.solidjs.com/). Solid
 is a relatively simple framework for building reactive web applications. With its
 metaframework [SolidStart](https://docs.solidjs.com/solid-start) it is quite
 easy to pre-render the web application as static pages that can be hosted on
-github pages.
+github pages. To keep track of form state and errors it uses [modular forms](https://modularforms.dev/) package.
 
 We've chosen [SolidUI](https://www.solid-ui.com/) as the basis for the UI. Build
 after [ShadCN](), SolidUI provides good-looking, accessible components (powered
@@ -125,10 +127,8 @@ To format and lint the code, we use [biome](https://biomejs.dev/) as it combines
 
 **Further plans/ideas**
 
-- Use [modular forms](https://modularforms.dev/) for form state management/validation
 - Use [auto](https://intuit.github.io/auto/index) for managing versions/releases
 - Use [d3.js](https://d3js.org/) for more low-level charting
-- Use [web workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) to run CLASS off the main thread
 - Use [AssemblyScript](https://www.assemblyscript.org/) or
   [rust](https://www.rust-lang.org/what/wasm) for a faster implementation of
   CLASS running on web assembly.
