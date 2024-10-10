@@ -57,9 +57,12 @@ export function ObjectField<S>({
                 <span>{schema.title ?? name}</span>
                 {/* TODO after child error has been fixed, this keeps showing, find way to clear it before submit */}
                 <Show when={field.error}>
-                    <span class="ml-auto text-destructive" title="Sub form has errors">
+                  <span
+                    class="ml-auto text-destructive"
+                    title="Sub form has errors"
+                  >
                     <MdiExclamationThick />
-                    </span>
+                  </span>
                 </Show>
               </AccordionTrigger>
             )}

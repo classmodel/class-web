@@ -141,7 +141,11 @@ export function uploadExperiment(rawData: unknown) {
 export function duplicateExperiment(id: number) {
   const original = structuredClone(findExperiment(id));
 
-  addExperiment(original.reference.config, `Copy of ${original.name}`, original.description);
+  addExperiment(
+    original.reference.config,
+    `Copy of ${original.name}`,
+    original.description,
+  );
   let key = 0;
   for (const perm of original.permutations) {
     setPermutationConfigInExperiment(
