@@ -1,0 +1,121 @@
+{
+  "type": "object",
+  "properties": {
+    "initialState": {
+      "type": "object",
+      "properties": {
+        "h_0": {
+          "type": "number",
+          "default": 200,
+          "title": "ABL height [m]"
+        },
+        "theta_0": {
+          "type": "number",
+          "default": 288,
+          "title": "Mixed-layer potential temperature [K]",
+          "minimum": 0,
+          "description": "The potential temperature of the mixed layer at the initial time."
+        },
+        "dtheta_0": {
+          "type": "number",
+          "default": 1,
+          "title": "Temperature jump at h [K]"
+        },
+        "q_0": {
+          "type": "number",
+          "default": 0.008,
+          "title": "Mixed-layer specific humidity [kg kg-1]"
+        },
+        "dq_0": {
+          "type": "number",
+          "default": -0.001,
+          "title": "Specific humidity jump at h [kg kg-1]"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["h_0", "theta_0", "dtheta_0", "q_0", "dq_0"],
+      "title": "Initial State",
+      "default": {}
+    },
+    "timeControl": {
+      "type": "object",
+      "properties": {
+        "dt": {
+          "type": "number",
+          "default": 60,
+          "title": "Time step [s]"
+        },
+        "runtime": {
+          "type": "number",
+          "default": 43200,
+          "title": "Total run time [s]"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["dt", "runtime"],
+      "title": "Time control",
+      "default": {}
+    },
+    "mixedLayer": {
+      "type": "object",
+      "properties": {
+        "wtheta": {
+          "type": "number",
+          "default": 0.1,
+          "title": "Surface kinematic heat flux [K m s-1]"
+        },
+        "advtheta": {
+          "type": "number",
+          "default": 0,
+          "title": "Advection of heat [K s-1]"
+        },
+        "gammatheta": {
+          "type": "number",
+          "default": 0.006,
+          "title": "Free atmosphere potential temperature lapse rate [K m-1]"
+        },
+        "wq": {
+          "type": "number",
+          "default": 0.0001,
+          "title": "Surface kinematic moisture flux [kg kg-1 m s-1]"
+        },
+        "advq": {
+          "type": "number",
+          "default": 0,
+          "title": "Advection of moisture [kg kg-1 s-1]"
+        },
+        "gammaq": {
+          "type": "number",
+          "default": 0,
+          "title": "Free atmosphere specific humidity lapse rate [kg kg-1 m-1]"
+        },
+        "divU": {
+          "type": "number",
+          "default": 0,
+          "title": "Horizontal large-scale divergence of wind [s-1]"
+        },
+        "beta": {
+          "type": "number",
+          "default": 0.2,
+          "title": "Entrainment ratio for virtual heat [-]"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "wtheta",
+        "advtheta",
+        "gammatheta",
+        "wq",
+        "advq",
+        "gammaq",
+        "divU",
+        "beta"
+      ],
+      "title": "Mixed layer",
+      "default": {}
+    }
+  },
+  "additionalProperties": false,
+  "required": ["initialState", "timeControl", "mixedLayer"],
+  "$schema": "https://json-schema.org/draft/2019-09/schema"
+}

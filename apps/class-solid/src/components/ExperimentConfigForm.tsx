@@ -1,13 +1,14 @@
-import {
-  type ClassConfig,
-  classConfig,
-  classDefaultConfigSchema,
-} from "@classmodel/class/config";
+import { pruneDefaults } from "@classmodel/class/validate";
 import { type SubmitHandler, createForm } from "@modular-forms/solid";
+import { createMemo } from "solid-js";
 import type { Experiment } from "~/lib/store";
+import {
+  type NamedConfig,
+  jsonSchemaOfNamedConfig,
+  validate,
+} from "./NamedConfig";
 import { ObjectField } from "./ObjectField";
-
-const ClassConfigJsonSchema = classDefaultConfigSchema.definitions?.classConfig;
+import { ajvForm } from "./ajvForm";
 
 export function ExperimentConfigForm({
   id,
@@ -16,20 +17,23 @@ export function ExperimentConfigForm({
 }: {
   id: string;
   experiment: Experiment;
-  onSubmit: (c: Partial<ClassConfig>) => void;
+  onSubmit: (c: NamedConfig) => void;
 }) {
-  const [_, { Form, Field }] = createForm<ClassConfig>({
-    initialValues: {
+  const initialValues = createMemo(() => {
+    return {
       title: experiment.name,
       description: experiment.description,
-      ...experiment.reference.config,
-    },
+      ...pruneDefaults(experiment.reference.config),
+    };
+  });
+  const [_, { Form, Field }] = createForm<NamedConfig>({
+    initialValues: initialValues(),
+    validate: ajvForm(validate),
   });
 
-  const handleSubmit: SubmitHandler<ClassConfig> = (values, event) => {
-    // Parse only for validation
-    const data = classConfig.parse(values);
-    // TODO if parse fails, show error
+  const handleSubmit: SubmitHandler<NamedConfig> = (values, event) => {
+    // Use validate to coerce strings to numbers
+    validate(values);
     onSubmit(values);
   };
 
@@ -42,8 +46,8 @@ export function ExperimentConfigForm({
     >
       <div>
         <ObjectField
-          schema={ClassConfigJsonSchema}
-          value={experiment.reference.config}
+          schema={jsonSchemaOfNamedConfig}
+          value={pruneDefaults(experiment.reference.config)}
           Field={Field}
         />
       </div>

@@ -1,4 +1,4 @@
-import type { ClassConfig } from "./config";
+import type { Config } from "./config";
 
 // Constants
 const rho = 1.2; /** Density of air [kg m-3] */
@@ -16,7 +16,7 @@ const cp = 1005.0; /** Specific heat of dry air [J kg-1 K-1] */
  */
 
 export class CLASS {
-  _cfg: ClassConfig;
+  _cfg: Config;
   h: number;
   theta: number;
   dtheta: number;
@@ -28,7 +28,7 @@ export class CLASS {
    * Create object and initialize the model state
    * @param config Model settings
    */
-  constructor(config: ClassConfig) {
+  constructor(config: Config) {
     this._cfg = config;
     this.h = config.initialState.h_0;
     this.theta = config.initialState.theta_0;

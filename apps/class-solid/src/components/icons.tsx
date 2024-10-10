@@ -1,3 +1,11 @@
+/**
+ * Icons in this file where created by
+ * 1. Going to https://icones.js.org/collection/mdi
+ * 2. Finding the icon you want
+ * 3. Pressing Solid button in comoonent section
+ * 4. Pasting the clipboard content at bottom of this file
+ * 5. Fix biome error by adding title or ignore
+ */
 import type { JSX } from "solid-js";
 
 export function MdiDownload(props: JSX.IntrinsicElements["svg"]) {
@@ -152,6 +160,21 @@ export function MdiMenu(props: JSX.IntrinsicElements["svg"]) {
       {...props}
     >
       <path fill="currentColor" d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z" />
+    </svg>
+  );
+}
+
+export function MdiExclamationThick(props: JSX.IntrinsicElements["svg"]) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      <path fill="currentColor" d="M10 3h4v11h-4zm0 18v-4h4v4z" />
+      <title>ExclamationThick</title>
     </svg>
   );
 }

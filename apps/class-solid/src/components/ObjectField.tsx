@@ -1,9 +1,13 @@
-import { For, Match, Switch } from "solid-js";
+import type { JSONSchemaType } from "ajv";
+import { For, Match, Show, Switch, splitProps } from "solid-js";
 import {
   TextField,
+  TextFieldDescription,
+  TextFieldErrorMessage,
   TextFieldInput,
   TextFieldLabel,
 } from "~/components/ui/text-field";
+import { MdiExclamationThick } from "./icons";
 import {
   Accordion,
   AccordionContent,
@@ -11,13 +15,13 @@ import {
   AccordionTrigger,
 } from "./ui/accordion";
 
-export function ObjectField({
+export function ObjectField<S>({
   schema,
   name = "",
   value,
   Field,
   // biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex
-}: { schema: any; name?: string; value?: any; Field: any }) {
+}: { schema: JSONSchemaType<S>; name?: string; value?: any; Field: any }) {
   // name can be empty, but only for root, which should be treated differently
   const isRoot = name === "";
 
@@ -46,7 +50,23 @@ export function ObjectField({
       </Match>
       <Match when={!isRoot}>
         <AccordionItem value={name}>
-          <AccordionTrigger>{schema.description ?? name}</AccordionTrigger>
+          <Field name={name}>
+            {/* biome-ignore lint/suspicious/noExplicitAny: json schema types are too complex */}
+            {(field: any) => (
+              <AccordionTrigger>
+                <span>{schema.title ?? name}</span>
+                {/* TODO after child error has been fixed, this keeps showing, find way to clear it before submit */}
+                <Show when={field.error}>
+                  <span
+                    class="ml-auto text-destructive"
+                    title="Sub form has errors"
+                  >
+                    <MdiExclamationThick />
+                  </span>
+                </Show>
+              </AccordionTrigger>
+            )}
+          </Field>
           <AccordionContent>{Children()}</AccordionContent>
         </AccordionItem>
       </Match>
@@ -85,27 +105,42 @@ export function MyTextField({
   // TODO use generics to type more explicitly
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   function myfield(field: any, props: any) {
+    const [rootProps, inputProps] = splitProps(
+      props,
+      ["name", "onChange", "required", "disabled"],
+      ["placeholder", "ref", "onInput", "onBlur"],
+    );
     return (
-      <TextField class="flex items-center gap-2 py-1">
-        <TextFieldLabel for={name} class="basis-1/2">
-          {schema.description ?? name}
-        </TextFieldLabel>
-        <TextFieldInput
-          type="text"
-          id={props.name}
-          name={props.name}
+      <>
+        <TextField
+          class="p-1"
+          {...rootProps}
           value={field.value}
-          placeholder={schema.default}
-          {...props}
-          class="basis-1/2"
-        />
-      </TextField>
+          validationState={field.error ? "invalid" : "valid"}
+        >
+          <div class="flex items-center gap-2">
+            <TextFieldLabel class="basis-1/2">
+              {schema.title ?? name}
+            </TextFieldLabel>
+            <TextFieldInput
+              {...inputProps}
+              placeholder={schema.default}
+              type="text"
+              class="basis-1/2"
+            />
+          </div>
+          <TextFieldErrorMessage class="pt-2">
+            {field.error}
+          </TextFieldErrorMessage>
+          {schema.description && (
+            <TextFieldDescription class="pt-2">
+              {schema.description}
+            </TextFieldDescription>
+          )}
+        </TextField>
+      </>
     );
   }
 
-  return (
-    // TODO: display units after input field?
-    // TODO: add more modularforms functionality
-    <Field name={name}>{myfield}</Field>
-  );
+  return <Field name={name}>{myfield}</Field>;
 }

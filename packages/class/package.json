@@ -4,22 +4,25 @@
   "exports": {
     "./class": "./src/class.ts",
     "./config": "./src/config.ts",
+    "./config.json": "./src/config.json",
     "./runner": "./src/runner.ts",
-    "./bmi": "./src/bmi.ts"
+    "./bmi": "./src/bmi.ts",
+    "./validate": "./src/validate.ts"
   },
   "license": "GPL-3.0-only",
   "scripts": {
     "test": "tsx --test src/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "json2ts": "json2ts src/config.json src/config.ts"
   },
   "devDependencies": {
     "@types/node": "^20.13.1",
+    "json-schema-to-typescript": "^15.0.2",
     "tsx": "^4.16.5",
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "zod": "^3.23.8",
-    "zod-to-json-schema": "^3.23.1"
+    "ajv": "^8.17.1"
   },
   "engines": {
     "node": ">=20.16.0"

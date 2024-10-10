@@ -1,14 +1,14 @@
 import { createStore, produce, unwrap } from "solid-js/store";
-import { z } from "zod";
 
-import { type ClassConfig, classConfig } from "@classmodel/class/config";
 import type { ClassOutput } from "@classmodel/class/runner";
+import {
+  type PartialConfig,
+  parseExperimentConfig,
+} from "@classmodel/class/validate";
 import type { Analysis } from "~/components/Analysis";
 import { runClass } from "./runner";
 
-export interface Permutation<
-  C extends Partial<ClassConfig> = Partial<ClassConfig>,
-> {
+export interface Permutation<C extends PartialConfig = PartialConfig> {
   name: string;
   config: C;
   output?: ClassOutput | undefined;
@@ -20,7 +20,7 @@ export interface Experiment {
   name: string;
   description: string;
   reference: {
-    config: Partial<ClassConfig>;
+    config: PartialConfig;
     output?: ClassOutput | undefined;
   };
   permutations: Permutation[];
@@ -107,7 +107,7 @@ function findExperiment(index: number) {
 }
 
 export async function addExperiment(
-  config: Partial<ClassConfig> = {},
+  config: PartialConfig = {},
   name?: string,
   description?: string,
 ) {
@@ -124,44 +124,27 @@ export async function addExperiment(
   await runExperiment(experiments.length - 1);
 }
 
-const ExperimentConfigSchema = z.object({
-  name: z.string(),
-  description: z.string().default("Standard experiment"),
-  reference: classConfig.partial(),
-  permutations: z.array(
-    z.object({
-      config: classConfig.partial(),
-      name: z.string(),
-    }),
-  ),
-});
-export type ExperimentConfigSchema = z.infer<typeof ExperimentConfigSchema>;
-
 export function uploadExperiment(rawData: unknown) {
-  const upload = ExperimentConfigSchema.parse(rawData);
+  const upload = parseExperimentConfig(rawData);
   const experiment: Experiment = {
     name: upload.name, // TODO check name is not already used
-    description: upload.description,
+    description: upload.description ?? "",
     reference: {
       config: upload.reference,
     },
-    permutations: upload.permutations.map(({ name, config }) => {
-      return { name, config };
-    }),
+    permutations: upload.permutations,
     running: false,
   };
   setExperiments(experiments.length, experiment);
 }
 
 export function duplicateExperiment(id: number) {
-  const original = findExperiment(id);
-  if (!original) {
-    throw new Error("No experiment with id {id}");
-  }
+  const original = structuredClone(findExperiment(id));
 
-  const newExperiment = addExperiment(
-    { ...original.reference.config },
+  addExperiment(
+    original.reference.config,
     `Copy of ${original.name}`,
+    original.description,
   );
   let key = 0;
   for (const perm of original.permutations) {
@@ -181,7 +164,7 @@ export function deleteExperiment(index: number) {
 
 export async function modifyExperiment(
   index: number,
-  newConfig: Partial<ClassConfig>,
+  newConfig: PartialConfig,
   name: string,
   description: string,
 ) {
@@ -197,7 +180,7 @@ export async function modifyExperiment(
 export async function setPermutationConfigInExperiment(
   experimentIndex: number,
   permutationIndex: number,
-  config: Partial<ClassConfig>,
+  config: PartialConfig,
   name: string,
 ) {
   setExperiments(
@@ -249,7 +232,7 @@ export function duplicatePermutation(
   setPermutationConfigInExperiment(
     experimentIndex,
     -1,
-    perm.config,
+    structuredClone(perm.config),
     `Copy of ${perm.name}`,
   );
 }

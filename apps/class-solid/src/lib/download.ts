@@ -1,6 +1,7 @@
 import type { ClassOutput } from "@classmodel/class/runner";
+import type { ExperimentConfigSchema } from "@classmodel/class/validate";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
-import type { Experiment, ExperimentConfigSchema } from "./store";
+import type { Experiment } from "./store";
 
 function toConfig(experiment: Experiment): ExperimentConfigSchema {
   return {

@@ -1,13 +1,14 @@
 import { CLASS } from "./class";
-import { type ClassConfig, classConfig } from "./config";
+import type { Config } from "./config";
+import { parse } from "./validate";
 
 export type ClassOutput = Record<string, number[]>;
 
-export function runClass(config: ClassConfig): ClassOutput {
+export function runClass(config: Config): ClassOutput {
   console.log("CLASS called with the following config", config);
 
   // TODO should we do validation/coercion here, in form, or both?
-  const validatedConfig = classConfig.parse(config);
+  const validatedConfig = parse(config);
   const model = new CLASS(validatedConfig);
   const output: ClassOutput = { t: [], h: [] };
 

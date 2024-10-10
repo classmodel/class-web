@@ -1,10 +1,10 @@
 import {
-  type ClassConfig,
-  classConfig,
-  classDefaultConfigSchema,
-} from "@classmodel/class/config";
+  type PartialConfig,
+  overwriteDefaultsInJsonSchema,
+  pruneDefaults,
+} from "@classmodel/class/validate";
 import { type SubmitHandler, createForm } from "@modular-forms/solid";
-import { For, createSignal } from "solid-js";
+import { For, createMemo, createSignal } from "solid-js";
 import { Button } from "~/components/ui/button";
 import {
   type Experiment,
@@ -15,7 +15,13 @@ import {
   setPermutationConfigInExperiment,
   swapPermutationAndReferenceConfiguration,
 } from "~/lib/store";
+import {
+  type NamedConfig,
+  jsonSchemaOfNamedConfig,
+  validate,
+} from "./NamedConfig";
 import { ObjectField } from "./ObjectField";
+import { ajvForm } from "./ajvForm";
 import {
   MdiCakeVariantOutline,
   MdiCog,
@@ -40,25 +46,30 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
-const ClassConfigJsonSchema = classDefaultConfigSchema.definitions?.classConfig;
-
 function PermutationConfigForm(props: {
   id: string;
-  onSubmit: (config: Partial<ClassConfig>) => void;
+  onSubmit: (config: NamedConfig) => void;
   permutationName?: string;
-  config: Partial<ClassConfig>;
+  reference: PartialConfig;
+  config: PartialConfig;
 }) {
-  const [_, { Form, Field }] = createForm<ClassConfig>({
+  const jsonSchemaOfPermutation = createMemo(() => {
+    return overwriteDefaultsInJsonSchema(
+      jsonSchemaOfNamedConfig,
+      props.reference,
+    );
+  });
+  const [_, { Form, Field }] = createForm<NamedConfig>({
     initialValues: {
       title: props.permutationName ?? "",
-      ...props.config,
+      ...pruneDefaults(props.config),
     },
+    validate: ajvForm(validate),
   });
 
-  const handleSubmit: SubmitHandler<ClassConfig> = (values: ClassConfig) => {
-    // Parse only for validation
-    const data = classConfig.parse(values);
-    // TODO if parse fails, show error
+  const handleSubmit: SubmitHandler<NamedConfig> = (values: NamedConfig) => {
+    // Use validate to coerce strings to numbers
+    validate(values);
     props.onSubmit(values);
   };
 
@@ -71,8 +82,8 @@ function PermutationConfigForm(props: {
     >
       <div>
         <ObjectField
-          schema={ClassConfigJsonSchema}
-          value={props.config}
+          schema={jsonSchemaOfPermutation()}
+          value={pruneDefaults(props.config)}
           Field={Field}
         />
       </div>
@@ -105,7 +116,8 @@ function AddPermutationButton(props: {
         </DialogHeader>
         <PermutationConfigForm
           id="add-permutation-form"
-          config={props.experiment.reference.config}
+          reference={props.experiment.reference.config}
+          config={{}}
           permutationName={permutationName}
           onSubmit={(config) => {
             const { title, description, ...strippedConfig } = config;
@@ -155,6 +167,7 @@ function EditPermutationButton(props: {
         <PermutationConfigForm
           id="edit-permutation-form"
           permutationName={permutationName}
+          reference={props.experiment.reference.config}
           config={props.experiment.permutations[props.permutationIndex].config}
           onSubmit={(config) => {
             const { title, description, ...strippedConfig } = config;
@@ -178,10 +191,16 @@ function EditPermutationButton(props: {
 }
 
 function PermutationDifferenceButton(props: {
-  reference: Partial<ClassConfig>;
-  permutation: Partial<ClassConfig>;
+  reference: PartialConfig;
+  permutation: PartialConfig;
 }) {
   const [open, setOpen] = createSignal(false);
+  const prunedReference = createMemo(() =>
+    JSON.stringify(pruneDefaults(props.reference), null, 2),
+  );
+  const prunedPermutation = createMemo(() =>
+    JSON.stringify(pruneDefaults(props.permutation), null, 2),
+  );
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
       <DialogTrigger
@@ -198,11 +217,11 @@ function PermutationDifferenceButton(props: {
         <div class="grid grid-cols-2">
           <fieldset class="border">
             <legend>Reference configuration</legend>
-            <pre>{JSON.stringify(props.reference, null, 2)}</pre>
+            <pre>{prunedReference()}</pre>
           </fieldset>
           <fieldset class="border">
             <legend>Permutation configuration</legend>
-            <pre>{JSON.stringify(props.permutation, null, 2)}</pre>
+            <pre>{prunedPermutation()}</pre>
           </fieldset>
         </div>
       </DialogContent>
