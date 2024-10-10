@@ -139,12 +139,9 @@ export function uploadExperiment(rawData: unknown) {
 }
 
 export function duplicateExperiment(id: number) {
-  const original = findExperiment(id);
-  if (!original) {
-    throw new Error("No experiment with id {id}");
-  }
+  const original = structuredClone(findExperiment(id));
 
-  addExperiment({ ...original.reference.config }, `Copy of ${original.name}`);
+  addExperiment(original.reference.config, `Copy of ${original.name}`, original.description);
   let key = 0;
   for (const perm of original.permutations) {
     setPermutationConfigInExperiment(
@@ -231,7 +228,7 @@ export function duplicatePermutation(
   setPermutationConfigInExperiment(
     experimentIndex,
     -1,
-    perm.config,
+    structuredClone(perm.config),
     `Copy of ${perm.name}`,
   );
 }
