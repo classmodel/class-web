@@ -1,8 +1,10 @@
 import { createStore, produce, unwrap } from "solid-js/store";
-import { z } from "zod";
 
 import type { ClassOutput } from "@classmodel/class/runner";
-import { type PartialConfig, parse } from "@classmodel/class/validate";
+import {
+  type PartialConfig,
+  parseExperimentConfig,
+} from "@classmodel/class/validate";
 import type { Analysis } from "~/components/Analysis";
 import { runClass } from "./runner";
 
@@ -122,30 +124,15 @@ export async function addExperiment(
   await runExperiment(experiments.length - 1);
 }
 
-const ExperimentConfigSchema = z.object({
-  name: z.string(),
-  description: z.string().default("Standard experiment"),
-  reference: z.object({}), // After zod validation, the config is parsed with ajv
-  permutations: z.array(
-    z.object({
-      config: z.object({}), // After zod validation, the config is parsed with ajv
-      name: z.string(),
-    }),
-  ),
-});
-export type ExperimentConfigSchema = z.infer<typeof ExperimentConfigSchema>;
-
 export function uploadExperiment(rawData: unknown) {
-  const upload = ExperimentConfigSchema.parse(rawData);
+  const upload = parseExperimentConfig(rawData);
   const experiment: Experiment = {
     name: upload.name, // TODO check name is not already used
-    description: upload.description,
+    description: upload.description ?? "",
     reference: {
-      config: parse(upload.reference),
+      config: upload.reference,
     },
-    permutations: upload.permutations.map(({ name, config }) => {
-      return { name, config: parse(config) };
-    }),
+    permutations: upload.permutations,
     running: false,
   };
   setExperiments(experiments.length, experiment);

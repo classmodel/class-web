@@ -148,3 +148,46 @@ export function overwriteDefaultsInJsonSchema<C>(
   }
   return newSchema;
 }
+
+export interface ExperimentConfigSchema {
+  name: string;
+  description?: string;
+  reference: PartialConfig;
+  permutations: {
+    name: string;
+    config: PartialConfig;
+  }[];
+}
+const jsonSchemaOfExperimentConfig = {
+  type: "object",
+  properties: {
+    name: { type: "string" },
+    description: {
+      type: "string",
+    },
+    reference: jsonSchemaOfConfig,
+    permutations: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          config: jsonSchemaOfConfig,
+        },
+      },
+    },
+  },
+  required: ["name", "reference"],
+} as unknown as JSONSchemaType<ExperimentConfigSchema>;
+// TODO remove cast via unknown
+
+const validateExperimentConfig = ajv.compile(jsonSchemaOfExperimentConfig);
+
+export function parseExperimentConfig(input: unknown): ExperimentConfigSchema {
+  if (!validateExperimentConfig(input)) {
+    throw new ValidationError(
+      validateExperimentConfig.errors as DefinedError[],
+    );
+  }
+  return input;
+}
