@@ -24,9 +24,7 @@ export default function Home() {
       <h2 class="my-8 text-4xl">
         Experiments
         <DropdownMenu>
-          <DropdownMenuTrigger
-            title="Add experiment"
-          >
+          <DropdownMenuTrigger title="Add experiment">
             <MdiPlusBox class="ml-2 inline-block align-bottom" />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -65,9 +63,7 @@ export default function Home() {
         Analysis
         <Show when={experiments.length}>
           <DropdownMenu>
-            <DropdownMenuTrigger
-              title="Add analysis"
-            >
+            <DropdownMenuTrigger title="Add analysis">
               <MdiPlusBox class="ml-2 inline-block align-bottom" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>

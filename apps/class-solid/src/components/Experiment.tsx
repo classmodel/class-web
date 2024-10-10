@@ -221,13 +221,20 @@ export function ExperimentCard(props: {
 }) {
   const experiment = () => props.experiment;
   const experimentIndex = () => props.experimentIndex;
-  const id = createUniqueId()
+  const id = createUniqueId();
   const descriptionId = `${id}-description`;
   return (
-    <Card class="w-[380px]" role="article" aria-labelledby={id} aria-describedby={descriptionId}>
+    <Card
+      class="w-[380px]"
+      role="article"
+      aria-labelledby={id}
+      aria-describedby={descriptionId}
+    >
       <CardHeader>
         <CardTitle id={id}>{experiment().name}</CardTitle>
-        <CardDescription id={descriptionId}>{experiment().description}</CardDescription>
+        <CardDescription id={descriptionId}>
+          {experiment().description}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <PermutationsList
