@@ -1,13 +1,14 @@
 import {
+  type Accessor,
   Show,
   createEffect,
   createMemo,
   createSignal,
   onCleanup,
 } from "solid-js";
-
 import { Button, buttonVariants } from "~/components/ui/button";
 import { createArchive, toConfigBlob } from "~/lib/download";
+import { encodeExperiment } from "~/lib/encode";
 import {
   type Experiment,
   addExperiment,
@@ -46,6 +47,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { showToast } from "./ui/toast";
 
 export function AddExperimentDialog(props: {
   nextIndex: number;
@@ -220,6 +222,27 @@ function DownloadExperiment(props: { experiment: Experiment }) {
   );
 }
 
+function ShareExperiment(props: { experiment: Accessor<Experiment> }) {
+  return (
+    <Button
+      variant="outline"
+      title="Share experiment"
+      onClick={() => {
+        const encodedExperiment = encodeExperiment(props.experiment());
+        // TODO how should it be shared: dialog, adresss bar, clipboard, toast?
+        // window.location.hash = encodedExperiment;
+        const url = `${window.location.origin}#${encodedExperiment}`;
+        navigator.clipboard.writeText(url);
+        showToast({
+          title: "Share link copied to clipboard",
+        });
+      }}
+    >
+      <MdiShareVariantOutline />
+    </Button>
+  );
+}
+
 export function ExperimentCard(props: {
   experiment: Experiment;
   experimentIndex: number;
@@ -259,13 +282,7 @@ export function ExperimentCard(props: {
           >
             <MdiDelete />
           </Button>
-          <Button variant="outline" title="Share experiment"
-            onClick={() => {
-              console.log("Share experiment");
-            }}
-          >
-            <MdiShareVariantOutline />
-          </Button>
+          <ShareExperiment experiment={experiment} />
         </Show>
       </CardFooter>
     </Card>
