@@ -231,9 +231,9 @@ export function promotePermutationToExperiment(
   const exp = findExperiment(experimentIndex);
   const perm = exp.permutations[permutationIndex];
 
-  const combinedConfig = mergeConfigurations(exp.reference.config, perm.config);
-  addExperiment(combinedConfig, perm.name);
-  // TODO dont show form of new experiment, just show the new card
+  const newConfig = structuredClone(perm.config);
+  addExperiment(newConfig, perm.name, "");
+  // TODO should permutation be removed from original experiment?
 }
 
 export function duplicatePermutation(
