@@ -96,7 +96,7 @@ function AddPermutationButton(props: {
   experimentIndex: number;
 }) {
   const [open, setOpen] = createSignal(false);
-  const permutationName = `${props.experiment.permutations.length + 1}`;
+  const permutationName = () => `${props.experiment.permutations.length + 1}`;
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
       <DialogTrigger
@@ -118,14 +118,14 @@ function AddPermutationButton(props: {
           id="add-permutation-form"
           reference={props.experiment.reference.config}
           config={{}}
-          permutationName={permutationName}
+          permutationName={permutationName()}
           onSubmit={(config) => {
             const { title, description, ...strippedConfig } = config;
             setPermutationConfigInExperiment(
               props.experimentIndex,
               -1,
               strippedConfig,
-              title ?? permutationName,
+              title ?? permutationName(),
             );
             setOpen(false);
           }}
