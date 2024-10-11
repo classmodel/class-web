@@ -10,6 +10,24 @@ The CLASS web application is available at https://classmodel.github.io/class-web
 
 For more information on CLASS, see https://classmodel.github.io/.
 
+## Command line usage
+
+The class model can be run from the command line.
+The argument is the config file that should adhere to the [JSON schema](./packages/class/src/config.json).
+
+```shell
+pnpx --package=@classmodel/class class config.json
+# Outputs h variable for each timestep
+```
+
+(in development use `pnpx tsx src/cli.ts ./config.json`)
+
+To use the reference configuration of a experiment downloaded from the web application use.
+
+```shell
+jq .reference < ~/Downloads/class-MyExperiment.json  > config.json
+```
+
 ## Developers
 
 This repository is a so-called monorepo, where multiple packages and application
