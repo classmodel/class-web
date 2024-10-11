@@ -32,12 +32,13 @@ export function encodeExperiment(experiment: Experiment) {
  *
  */
 export function decodeExperiment(encoded: string): ExperimentConfigSchema {
-  const decoded = JSON.parse(decodeURIComponent(encoded));
+  const decoded = decodeURIComponent(encoded);
+  const parsed = JSON.parse(decoded);
   const rawExperiment = {
-    name: decoded.n,
-    description: decoded.d,
-    reference: decoded.r,
-    permutations: decoded.p.map((perm: { n: string; c: PartialConfig }) => ({
+    name: parsed.n,
+    description: parsed.d,
+    reference: parsed.r,
+    permutations: parsed.p.map((perm: { n: string; c: PartialConfig }) => ({
       name: perm.n,
       config: perm.c,
     })),

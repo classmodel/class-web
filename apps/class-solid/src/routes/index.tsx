@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Flex } from "~/components/ui/flex";
-import { Toaster } from "~/components/ui/toast";
+import { Toaster, showToast } from "~/components/ui/toast";
 import { decodeExperiment } from "~/lib/encode";
 
 import { experiments, uploadExperiment } from "~/lib/store";
@@ -28,8 +28,17 @@ export default function Home() {
     const navigate = useNavigate();
     const rawExperiment = location.hash.substring(1);
     if (!rawExperiment) return;
-    const experimentConfig = decodeExperiment(rawExperiment);
-    uploadExperiment(experimentConfig);
+    try {
+      const experimentConfig = decodeExperiment(rawExperiment);
+      uploadExperiment(experimentConfig);
+    } catch (error) {
+      console.error(error);
+      showToast({
+        title: "Failed to load experiment from URL",
+        description: `${error}`,
+        variant: "error",
+      });
+    }
     // Remove hash after loading experiment from URL,
     // as after editing the experiment the hash out of sync
     navigate("/");
