@@ -17,7 +17,13 @@ import {
 } from "~/lib/store";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import { PermutationsList } from "./PermutationsList";
-import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
+import {
+  MdiCog,
+  MdiContentCopy,
+  MdiDelete,
+  MdiDownload,
+  MdiShareVariantOutline,
+} from "./icons";
 import {
   Card,
   CardContent,
@@ -252,6 +258,13 @@ export function ExperimentCard(props: {
             onClick={() => deleteExperiment(experimentIndex())}
           >
             <MdiDelete />
+          </Button>
+          <Button variant="outline" title="Share experiment"
+            onClick={() => {
+              console.log("Share experiment");
+            }}
+          >
+            <MdiShareVariantOutline />
           </Button>
         </Show>
       </CardFooter>
