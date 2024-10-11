@@ -4,6 +4,7 @@ import type { ClassOutput } from "@classmodel/class/runner";
 import {
   type PartialConfig,
   parseExperimentConfig,
+  pruneDefaults,
 } from "@classmodel/class/validate";
 import type { Analysis } from "~/components/Analysis";
 import { runClass } from "./runner";
@@ -168,12 +169,24 @@ export async function modifyExperiment(
   name: string,
   description: string,
 ) {
-  setExperiments(index, "reference", "config", newConfig);
-  setExperiments(index, (exp) => ({
-    ...exp,
-    name,
-    description,
-  }));
+  setExperiments(
+    index,
+    produce((e) => {
+      e.reference.config = newConfig;
+      e.name = name;
+      e.description = description;
+      e.permutations = e.permutations.map((perm) => {
+        const config = mergeConfigurations(
+          newConfig,
+          pruneDefaults(perm.config),
+        );
+        return {
+          ...perm,
+          config,
+        };
+      });
+    }),
+  );
   await runExperiment(index);
 }
 

@@ -31,8 +31,7 @@ test("duplicate experiment with a permutation", async ({ page }) => {
   // Make experiment 2 different
   const experiment2 = page.getByLabel("Copy of My experiment 1", {
     exact: true,
-  });
-
+  }); 
   await experiment2.getByRole("button", { name: "Edit", exact: true }).click();
   await page.getByRole("button", { name: "Mixed layer Button" }).click();
   await page.getByLabel("Entrainment ratio for virtual heat [-]").fill("0.3");
