@@ -109,11 +109,12 @@ function FinalHeights() {
 }
 
 export function AnalysisCard(analysis: Analysis) {
+  const id = createUniqueId();
   return (
-    <Card class="w-[500px]">
+    <Card class="w-[500px]" role="article" aria-labelledby={id}>
       <CardHeader>
         {/* TODO: make name & description editable */}
-        <CardTitle>{analysis.name}</CardTitle>
+        <CardTitle id={id}>{analysis.name}</CardTitle>
       </CardHeader>
       <CardContent>
         <Switch fallback={<p>Unknown analysis type</p>}>
@@ -127,18 +128,22 @@ export function AnalysisCard(analysis: Analysis) {
       </CardContent>
       <CardFooter>
         {/* TODO: implement download functionality */}
-        <Button variant="outline">
+        <Button variant="outline" title="Download">
           <MdiDownload />
         </Button>
         {/* TODO: implement "configure" functionality */}
-        <Button variant="outline">
+        <Button variant="outline" title="Configure">
           <MdiCog />
         </Button>
         {/* TODO: implement duplicate functionality */}
-        <Button variant="outline">
+        <Button variant="outline" title="Duplicate">
           <MdiContentCopy />
         </Button>
-        <Button variant="outline" onClick={() => deleteAnalysis(analysis)}>
+        <Button
+          variant="outline"
+          onClick={() => deleteAnalysis(analysis)}
+          title="Delete"
+        >
           <MdiDelete />
         </Button>
       </CardFooter>

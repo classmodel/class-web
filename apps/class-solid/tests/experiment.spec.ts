@@ -57,6 +57,10 @@ test("duplicate experiment with a permutation", async ({ page }) => {
   expect(config2.reference.mixedLayer?.beta).toEqual(0.3);
   expect(config2.permutations[0].config.initialState?.h_0).toEqual(800);
   expect(config2.permutations[0].config.mixedLayer?.beta).toEqual(0.3);
+
+  // visually check that timeseries plot has 4 non-overlapping lines
+  await page.locator("canvas").scrollIntoViewIfNeeded();
+  await expect(page).toHaveScreenshot();
 });
 
 async function parseDownload(
