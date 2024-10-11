@@ -12,9 +12,10 @@
         "theta_0": {
           "type": "number",
           "default": 288,
-          "title": "Mixed-layer potential temperature [K]",
+          "title": "Mixed-layer potential temperature",
           "minimum": 0,
-          "description": "The potential temperature of the mixed layer at the initial time."
+          "description": "The potential temperature of the mixed layer at the initial time.",
+          "unit": "K"
         },
         "dtheta_0": {
           "type": "number",

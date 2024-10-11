@@ -5,11 +5,14 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export type InitialABLHeightM = number;
-export type InitialMixedLayerPotentialTemperatureK = number;
-export type InitialTemperatureJumpAtHK = number;
-export type InitialMixedLayerSpecificHumidityKgKg1 = number;
-export type InitialSpecificHumidityJumpAtHKgKg1 = number;
+export type ABLHeight = number;
+/**
+ * The potential temperature of the mixed layer at the initial time.
+ */
+export type MixedLayerPotentialTemperatureK = number;
+export type TemperatureJumpAtHK = number;
+export type MixedLayerSpecificHumidityKgKg1 = number;
+export type SpecificHumidityJumpAtHKgKg1 = number;
 export type TimeStepS = number;
 export type TotalRunTimeS = number;
 export type SurfaceKinematicHeatFluxKMS1 = number;
@@ -27,11 +30,11 @@ export interface Config {
   mixedLayer: MixedLayer;
 }
 export interface InitialState {
-  h_0: InitialABLHeightM;
-  theta_0: InitialMixedLayerPotentialTemperatureK;
-  dtheta_0: InitialTemperatureJumpAtHK;
-  q_0: InitialMixedLayerSpecificHumidityKgKg1;
-  dq_0: InitialSpecificHumidityJumpAtHKgKg1;
+  h_0: ABLHeight;
+  theta_0: MixedLayerPotentialTemperatureK;
+  dtheta_0: TemperatureJumpAtHK;
+  q_0: MixedLayerSpecificHumidityKgKg1;
+  dq_0: SpecificHumidityJumpAtHKgKg1;
 }
 export interface TimeControl {
   dt: TimeStepS;
