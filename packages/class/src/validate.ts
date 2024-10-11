@@ -149,6 +149,8 @@ export function overwriteDefaultsInJsonSchema<C>(
   return newSchema;
 }
 
+// TODO move below  to app, this is not a general utility
+
 export interface ExperimentConfigSchema {
   name: string;
   description?: string;
