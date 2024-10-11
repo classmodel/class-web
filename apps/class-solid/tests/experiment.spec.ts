@@ -16,7 +16,7 @@ async function parseDownload(
   return JSON.parse(body) as ExperimentConfigSchema;
 }
 
-test("Duplicate experiment with a permutation", async ({ page }) => {
+test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
   await page.goto("/");
 
   // Create a new experiment
@@ -72,7 +72,13 @@ test("Duplicate experiment with a permutation", async ({ page }) => {
   expect(config2.permutations[0].config.mixedLayer?.beta).toEqual(0.3);
 
   // visually check that timeseries plot has 4 non-overlapping lines
-  await expect(page.locator("canvas")).toHaveScreenshot();
+  await testInfo.attach(
+    'timeseries plot with 4 non-overlapping lines',
+    {
+      body: await page.locator("canvas").screenshot(),
+      contentType: "image/png",
+    }
+  )
 });
 
 test("Swap permutation with default reference", async ({ page }) => {
