@@ -27,7 +27,7 @@ export function addAnalysis(type = "default") {
   }[type];
 
   setAnalyses(analyses.length, {
-    name: `${name} ${analyses.length + 1}`,
+    name: name,
     id: createUniqueId(),
     experiments: experiments,
     type: type,
