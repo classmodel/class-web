@@ -14,7 +14,8 @@
   "scripts": {
     "test": "tsx --test src/*.test.ts",
     "typecheck": "tsc --noEmit",
-    "json2ts": "json2ts src/config.json src/config.ts"
+    "json2ts": "json2ts src/config.json src/config.ts",
+    "build": "tsc --outDir dist --module nodenext --target esnext --moduleResolution nodenext --declarationMap false --declaration false"
   },
   "devDependencies": {
     "@types/node": "^20.13.1",
