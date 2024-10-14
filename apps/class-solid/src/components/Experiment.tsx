@@ -249,7 +249,15 @@ export function ExperimentCard(props: {
           <Button
             variant="outline"
             title="Delete experiment"
-            onClick={() => deleteExperiment(experimentIndex())}
+            onClick={() => {
+              if (
+                window.confirm(
+                  "Are you sure you want to delete this experiment?",
+                )
+              ) {
+                deleteExperiment(experimentIndex());
+              }
+            }}
           >
             <MdiDelete />
           </Button>
