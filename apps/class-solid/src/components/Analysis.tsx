@@ -80,31 +80,33 @@ export function TimeSeriesPlot() {
 /** Simply show the final height for each experiment that has output */
 function FinalHeights() {
   return (
-    <For each={experiments}>
-      {(experiment, i) => {
-        const h =
-          experiment.reference.output?.h[
-            experiment.reference.output.h.length - 1
-          ] || 0;
-        return (
-          <div class="mb-2">
-            <p>
-              {experiment.name}: {h.toFixed()} m
-            </p>
-            <For each={experiment.permutations}>
-              {(perm) => {
-                const h = perm.output?.h[perm.output.h.length - 1] || 0;
-                return (
-                  <p>
-                    {experiment.name}/{perm.name}: {h.toFixed()} m
-                  </p>
-                );
-              }}
-            </For>
-          </div>
-        );
-      }}
-    </For>
+    <ul>
+      <For each={experiments}>
+        {(experiment) => {
+          const h = () =>
+            experiment.reference.output?.h[
+              experiment.reference.output.h.length - 1
+            ] || 0;
+          return (
+            <>
+              <li class="mb-2" title={experiment.name}>
+                {experiment.name}: {h().toFixed()} m
+              </li>
+              <For each={experiment.permutations}>
+                {(perm) => {
+                  const h = () => perm.output?.h[perm.output.h.length - 1] || 0;
+                  return (
+                    <li title={`${experiment.name}/${perm.name}`}>
+                      {experiment.name}/{perm.name}: {h().toFixed()} m
+                    </li>
+                  );
+                }}
+              </For>
+            </>
+          );
+        }}
+      </For>
+    </ul>
   );
 }
 

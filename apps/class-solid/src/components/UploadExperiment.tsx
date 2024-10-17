@@ -1,4 +1,5 @@
 import { uploadExperiment } from "~/lib/store";
+import { showToast } from "./ui/toast";
 
 export function UploadExperiment() {
   let ref: HTMLInputElement | undefined;
@@ -17,10 +18,27 @@ export function UploadExperiment() {
       return;
     }
     const file = event.target.files[0];
-    file.text().then((body) => {
-      const rawData = JSON.parse(body);
-      uploadExperiment(rawData);
-    });
+    file
+      .text()
+      .then((body) => {
+        const rawData = JSON.parse(body);
+        return uploadExperiment(rawData);
+      })
+      .then(() => {
+        showToast({
+          title: "Experiment uploaded",
+          variant: "success",
+          duration: 1000,
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+        showToast({
+          title: "Failed to upload experiment",
+          description: `${error}`,
+          variant: "error",
+        });
+      });
   }
   return (
     <>
