@@ -4,7 +4,7 @@ import {
   pruneDefaults,
 } from "@classmodel/class/validate";
 import { type SubmitHandler, createForm } from "@modular-forms/solid";
-import { For, createMemo, createSignal } from "solid-js";
+import { For, createMemo, createSignal, createUniqueId } from "solid-js";
 import { Button } from "~/components/ui/button";
 import {
   type Experiment,
@@ -235,9 +235,13 @@ function PermutationInfo(props: {
   permutationIndex: number;
   perm: Permutation;
 }) {
+  const id = createUniqueId();
   return (
-    <div class="flex flex-row items-center justify-center gap-1 p-2">
-      <span class="">{props.perm.name}</span>
+    <article
+      class="flex flex-row items-center justify-center gap-1 p-2"
+      aria-labelledby={id}
+    >
+      <span id={id}>{props.perm.name}</span>
       <PermutationDifferenceButton
         reference={props.experiment.reference.config}
         permutation={props.perm.config}
@@ -298,7 +302,7 @@ function PermutationInfo(props: {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    </div>
+    </article>
   );
 }
 
