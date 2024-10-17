@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Test
-        run: pnpm test
+        run: pnpm test --filter '{packages/**}'
   e2etest:
     name: end-to-end tests
     timeout-minutes: 60
@@ -43,10 +43,8 @@ jobs:
         run: pnpm install
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps chromium
-        working-directory: ./apps/class-solid
       - name: Run Playwright tests
-        run: pnpm test
-        working-directory: ./apps/class-solid
+        run: pnpm test '{apps/**}'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
