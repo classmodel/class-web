@@ -5,20 +5,23 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export type InitialABLHeightM = number;
-export type InitialMixedLayerPotentialTemperatureK = number;
-export type InitialTemperatureJumpAtHK = number;
-export type InitialMixedLayerSpecificHumidityKgKg1 = number;
-export type InitialSpecificHumidityJumpAtHKgKg1 = number;
-export type TimeStepS = number;
-export type TotalRunTimeS = number;
-export type SurfaceKinematicHeatFluxKMS1 = number;
-export type AdvectionOfHeatKS1 = number;
-export type FreeAtmospherePotentialTemperatureLapseRateKM1 = number;
-export type SurfaceKinematicMoistureFluxKgKg1MS1 = number;
-export type AdvectionOfMoistureKgKg1S1 = number;
-export type FreeAtmosphereSpecificHumidityLapseRateKgKg1M1 = number;
-export type HorizontalLargeScaleDivergenceOfWindS1 = number;
+export type ABLHeight = number;
+/**
+ * The potential temperature of the mixed layer at the initial time.
+ */
+export type MixedLayerPotentialTemperature = number;
+export type TemperatureJumpAtH = number;
+export type MixedLayerSpecificHumidity = number;
+export type SpecificHumidityJumpAtH = number;
+export type TimeStep = number;
+export type TotalRunTime = number;
+export type SurfaceKinematicHeatFlux = number;
+export type AdvectionOfHeat = number;
+export type FreeAtmospherePotentialTemperatureLapseRate = number;
+export type SurfaceKinematicMoistureFlux = number;
+export type AdvectionOfMoisture = number;
+export type FreeAtmosphereSpecificHumidityLapseRate = number;
+export type HorizontalLargeScaleDivergenceOfWind = number;
 export type EntrainmentRatioForVirtualHeat = number;
 
 export interface Config {
@@ -27,23 +30,23 @@ export interface Config {
   mixedLayer: MixedLayer;
 }
 export interface InitialState {
-  h_0: InitialABLHeightM;
-  theta_0: InitialMixedLayerPotentialTemperatureK;
-  dtheta_0: InitialTemperatureJumpAtHK;
-  q_0: InitialMixedLayerSpecificHumidityKgKg1;
-  dq_0: InitialSpecificHumidityJumpAtHKgKg1;
+  h_0: ABLHeight;
+  theta_0: MixedLayerPotentialTemperature;
+  dtheta_0: TemperatureJumpAtH;
+  q_0: MixedLayerSpecificHumidity;
+  dq_0: SpecificHumidityJumpAtH;
 }
 export interface TimeControl {
-  dt: TimeStepS;
-  runtime: TotalRunTimeS;
+  dt: TimeStep;
+  runtime: TotalRunTime;
 }
 export interface MixedLayer {
-  wtheta: SurfaceKinematicHeatFluxKMS1;
-  advtheta: AdvectionOfHeatKS1;
-  gammatheta: FreeAtmospherePotentialTemperatureLapseRateKM1;
-  wq: SurfaceKinematicMoistureFluxKgKg1MS1;
-  advq: AdvectionOfMoistureKgKg1S1;
-  gammaq: FreeAtmosphereSpecificHumidityLapseRateKgKg1M1;
-  divU: HorizontalLargeScaleDivergenceOfWindS1;
+  wtheta: SurfaceKinematicHeatFlux;
+  advtheta: AdvectionOfHeat;
+  gammatheta: FreeAtmospherePotentialTemperatureLapseRate;
+  wq: SurfaceKinematicMoistureFlux;
+  advq: AdvectionOfMoisture;
+  gammaq: FreeAtmosphereSpecificHumidityLapseRate;
+  divU: HorizontalLargeScaleDivergenceOfWind;
   beta: EntrainmentRatioForVirtualHeat;
 }

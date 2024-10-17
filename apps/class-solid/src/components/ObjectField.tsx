@@ -122,12 +122,25 @@ export function MyTextField({
             <TextFieldLabel class="basis-1/2">
               {schema.title ?? name}
             </TextFieldLabel>
-            <TextFieldInput
-              {...inputProps}
-              placeholder={schema.default}
-              type="text"
-              class="basis-1/2"
-            />
+            {schema.unit ? (
+              <div class="relative block basis-1/2">
+                <TextFieldInput
+                  {...inputProps}
+                  placeholder={schema.default}
+                  type="text"
+                />
+                <span class="absolute inset-y-0 right-0 flex items-center bg-muted px-2">
+                  {schema.unit}
+                </span>
+              </div>
+            ) : (
+              <TextFieldInput
+                {...inputProps}
+                placeholder={schema.default}
+                type="text"
+                class="basis-1/2"
+              />
+            )}
           </div>
           <TextFieldErrorMessage class="pt-2">
             {field.error}

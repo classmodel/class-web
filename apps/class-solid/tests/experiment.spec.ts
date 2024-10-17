@@ -17,7 +17,7 @@ test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
     )
     .click();
   await page.getByRole("button", { name: "Initial State" }).click();
-  await page.getByLabel("ABL height [m]").fill("800");
+  await page.getByLabel("ABL height").fill("800");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Add timeseries analysis
@@ -33,7 +33,7 @@ test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
   });
   await experiment2.getByRole("button", { name: "Edit", exact: true }).click();
   await page.getByRole("button", { name: "Mixed layer Button" }).click();
-  await page.getByLabel("Entrainment ratio for virtual heat [-]").fill("0.3");
+  await page.getByLabel("Entrainment ratio for virtual heat").fill("0.3");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Download configuration of experiment 1
@@ -79,7 +79,7 @@ test("Swap permutation with default reference", async ({ page }) => {
     )
     .click();
   await page.getByRole("button", { name: "Initial State" }).click();
-  await page.getByLabel("ABL height [m]").fill("800");
+  await page.getByLabel("ABL height").fill("800");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Do action
@@ -102,8 +102,8 @@ test("Swap permutation with custom reference", async ({ page }) => {
   await page.getByTitle("Add experiment").click();
   await page.getByRole("menuitem", { name: "From scratch" }).click();
   await page.getByRole("button", { name: "Initial State" }).click();
-  await page.getByLabel("ABL height [m]").fill("400");
-  await page.getByLabel("Mixed-layer potential temperature [K]").fill("265");
+  await page.getByLabel("ABL height").fill("400");
+  await page.getByLabel("Mixed-layer potential temperature").fill("265");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Add a permutation
@@ -114,8 +114,8 @@ test("Swap permutation with custom reference", async ({ page }) => {
     )
     .click();
   await page.getByRole("button", { name: "Initial State" }).click();
-  await page.getByLabel("ABL height [m]").fill("800");
-  await page.getByLabel("Temperature jump at h [K]").fill("0.8");
+  await page.getByLabel("ABL height").fill("800");
+  await page.getByLabel("Temperature jump at h").fill("0.8");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Do action
@@ -152,7 +152,7 @@ test("Promote permutation to a new experiment", async ({ page }) => {
     .click();
   await page.getByRole("button", { name: "Initial State" }).click();
   await page.getByLabel("Title").fill("perm1");
-  await page.getByLabel("ABL height [m]").fill("800");
+  await page.getByLabel("ABL height").fill("800");
   await page.getByRole("button", { name: "Run" }).click();
 
   await page.getByRole("button", { name: "Other actions" }).click();
@@ -186,7 +186,7 @@ test("Duplicate permutation", async ({ page }) => {
     )
     .click();
   await page.getByRole("button", { name: "Initial State" }).click();
-  await page.getByLabel("ABL height [m]").fill("800");
+  await page.getByLabel("ABL height").fill("800");
   await page.getByRole("button", { name: "Run" }).click();
   await page.getByRole("button", { name: "Other actions" }).click();
   await page.getByRole("menuitem", { name: "Duplicate permutation" }).click();
@@ -195,7 +195,7 @@ test("Duplicate permutation", async ({ page }) => {
   const perm2 = page.getByLabel("Copy of 1", { exact: true });
   await perm2.getByRole("button", { name: "Edit permutation" }).click();
   await page.getByRole("button", { name: "Initial State" }).click();
-  await page.getByLabel("ABL height [m]").fill("400");
+  await page.getByLabel("ABL height").fill("400");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Check that configurations are correct
