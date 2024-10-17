@@ -125,7 +125,7 @@ export async function addExperiment(
   await runExperiment(experiments.length - 1);
 }
 
-export function uploadExperiment(rawData: unknown) {
+export async function uploadExperiment(rawData: unknown) {
   const upload = parseExperimentConfig(rawData);
   const experiment: Experiment = {
     name: upload.name, // TODO check name is not already used
@@ -137,6 +137,7 @@ export function uploadExperiment(rawData: unknown) {
     running: false,
   };
   setExperiments(experiments.length, experiment);
+  await runExperiment(experiments.length - 1);
 }
 
 export function duplicateExperiment(id: number) {
@@ -248,6 +249,7 @@ export function duplicatePermutation(
     structuredClone(perm.config),
     `Copy of ${perm.name}`,
   );
+  runExperiment(experimentIndex);
 }
 
 export function swapPermutationAndReferenceConfiguration(
