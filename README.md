@@ -86,23 +86,6 @@ node --import tsx --test --experimental-test-coverage --test-reporter=lcov --tes
 genhtml lcov.info --output-directory coverage
 ```
 
-The end-to-end tests are written with [playwright](https://playwright.dev/).
-The tests are in `apps/class-solid/tests/*.spec.ts` and can be run with the following command:
-
-```shell
-cd ./apps/class-solid
-pnpm exec playwright install  # first time only
-pnpm test
-```
-
-To develop and debug end-to-end tests use
-
-```shell
-pnpm test -- --ui --headed
-```
-
-This allows you to trigger tests from the [playwright ui](https://playwright.dev/docs/test-ui-mode) and enable [watch mode](https://playwright.dev/docs/test-ui-mode#watch-mode).
-
 ## Tech stack
 
 The CLASS package is written in typescript.

@@ -29,4 +29,22 @@ Solid apps are built with _presets_, which optimise your project for deployment 
 
 By default, `npm run build` will generate a Node app that you can run with `npm start`. To use a different preset, add it to the `devDependencies` in `package.json` and specify in your `app.config.js`.
 
+## Testing
+
+The end-to-end tests are written with [playwright](https://playwright.dev/).
+The tests are in `tests/*.spec.ts` and can be run with the following command:
+
+```shell
+pnpm exec playwright install  # first time only
+pnpm test
+```
+
+To develop and debug end-to-end tests use
+
+```shell
+pnpm test -- --ui --headed
+```
+
+This allows you to trigger tests from the [playwright ui](https://playwright.dev/docs/test-ui-mode) and enable [watch mode](https://playwright.dev/docs/test-ui-mode#watch-mode).
+
 ## This project was created with the [Solid CLI](https://solid-cli.netlify.app)
