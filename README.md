@@ -92,13 +92,13 @@ The tests are in `apps/class-solid/tests/*.spec.ts` and can be run with the foll
 ```shell
 cd ./apps/class-solid
 pnpm exec playwright install  # first time only
-pnpm exec playwright test
+pnpm test
 ```
 
 To develop and debug end-to-end tests use
 
 ```shell
-pnpm exec playwright test --ui --headed
+pnpm test -- --ui --headed
 ```
 
 This allows you to trigger tests from the [playwright ui](https://playwright.dev/docs/test-ui-mode) and enable [watch mode](https://playwright.dev/docs/test-ui-mode#watch-mode).
