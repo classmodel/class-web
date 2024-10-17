@@ -23,14 +23,19 @@ import { analyses } from "~/lib/store";
 export default function Home() {
   const [openAddDialog, setOpenAddDialog] = createSignal(false);
 
-  onMount(() => {
+  onMount(async () => {
     const location = useLocation();
     const navigate = useNavigate();
     const rawExperiment = location.hash.substring(1);
     if (!rawExperiment) return;
     try {
       const experimentConfig = decodeExperiment(rawExperiment);
-      uploadExperiment(experimentConfig);
+      await uploadExperiment(experimentConfig);
+      showToast({
+        title: "Experiment loaded from URL",
+        variant: "success",
+        duration: 1000,
+      });
     } catch (error) {
       console.error(error);
       showToast({
