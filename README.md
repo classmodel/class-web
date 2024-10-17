@@ -104,15 +104,6 @@ node --import tsx --test --experimental-test-coverage --test-reporter=lcov --tes
 genhtml lcov.info --output-directory coverage
 ```
 
-The end-to-end tests are written with [playwright](https://playwright.dev/).
-The tests are in `apps/class-solid/tests/*.spec.ts` and can be run with the following command:
-
-```shell
-cd ./apps/class-solid
-pnpm exec playwright install  # first time only
-pnpm exec playwright test
-```
-
 ## Tech stack
 
 The CLASS package is written in typescript.

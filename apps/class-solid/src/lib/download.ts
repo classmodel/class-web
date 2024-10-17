@@ -3,7 +3,7 @@ import type { ExperimentConfigSchema } from "@classmodel/class/validate";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
 import type { Experiment } from "./store";
 
-function toConfig(experiment: Experiment): ExperimentConfigSchema {
+export function toConfig(experiment: Experiment): ExperimentConfigSchema {
   return {
     name: experiment.name,
     description: experiment.description,

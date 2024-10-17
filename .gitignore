@@ -11,3 +11,42 @@ server/dist
 public/dist
 apps/class-solid/.vinxi
 apps/class-solid/.output
+
+# packages/class/.gitignore
+lcov.info
+coverage/
+
+# apps/class-solid/.gitignore
+dist
+.solid
+.output
+.vercel
+.netlify
+.vinxi
+
+# Environment
+.env
+.env*.local
+
+# dependencies
+node_modules
+
+# IDEs and editors
+.idea
+.project
+.classpath
+*.launch
+.settings/
+
+# Temp
+gitignore
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
