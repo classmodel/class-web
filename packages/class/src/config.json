@@ -7,7 +7,8 @@
         "h_0": {
           "type": "number",
           "default": 200,
-          "title": "ABL height [m]"
+          "title": "ABL height",
+          "unit": "m"
         },
         "theta_0": {
           "type": "number",
@@ -20,17 +21,20 @@
         "dtheta_0": {
           "type": "number",
           "default": 1,
-          "title": "Temperature jump at h [K]"
+          "title": "Temperature jump at h",
+          "unit": "K"
         },
         "q_0": {
           "type": "number",
           "default": 0.008,
-          "title": "Mixed-layer specific humidity [kg kg-1]"
+          "unit": "kg kg-1",
+          "title": "Mixed-layer specific humidity"
         },
         "dq_0": {
           "type": "number",
           "default": -0.001,
-          "title": "Specific humidity jump at h [kg kg-1]"
+          "unit": "kg kg-1",
+          "title": "Specific humidity jump at h"
         }
       },
       "additionalProperties": false,
@@ -44,12 +48,14 @@
         "dt": {
           "type": "number",
           "default": 60,
-          "title": "Time step [s]"
+          "unit": "s",
+          "title": "Time step"
         },
         "runtime": {
           "type": "number",
           "default": 43200,
-          "title": "Total run time [s]"
+          "unit": "s",
+          "title": "Total run time"
         }
       },
       "additionalProperties": false,
@@ -63,42 +69,49 @@
         "wtheta": {
           "type": "number",
           "default": 0.1,
-          "title": "Surface kinematic heat flux [K m s-1]"
+          "unit": "K m s-1",
+          "title": "Surface kinematic heat flux"
         },
         "advtheta": {
           "type": "number",
           "default": 0,
-          "title": "Advection of heat [K s-1]"
+          "unit": "K s-1",
+          "title": "Advection of heat"
         },
         "gammatheta": {
           "type": "number",
           "default": 0.006,
-          "title": "Free atmosphere potential temperature lapse rate [K m-1]"
+          "unit": "K m-1",
+          "title": "Free atmosphere potential temperature lapse rate"
         },
         "wq": {
           "type": "number",
           "default": 0.0001,
-          "title": "Surface kinematic moisture flux [kg kg-1 m s-1]"
+          "unit": "kg kg-1 m s-1",
+          "title": "Surface kinematic moisture flux"
         },
         "advq": {
           "type": "number",
           "default": 0,
-          "title": "Advection of moisture [kg kg-1 s-1]"
+          "unit": "kg kg-1 s-1",
+          "title": "Advection of moisture"
         },
         "gammaq": {
           "type": "number",
           "default": 0,
-          "title": "Free atmosphere specific humidity lapse rate [kg kg-1 m-1]"
+          "unit": "kg kg-1 m-1",
+          "title": "Free atmosphere specific humidity lapse rate"
         },
         "divU": {
           "type": "number",
           "default": 0,
-          "title": "Horizontal large-scale divergence of wind [s-1]"
+          "unit": "s-1",
+          "title": "Horizontal large-scale divergence of wind"
         },
         "beta": {
           "type": "number",
           "default": 0.2,
-          "title": "Entrainment ratio for virtual heat [-]"
+          "title": "Entrainment ratio for virtual heat"
         }
       },
       "additionalProperties": false,
