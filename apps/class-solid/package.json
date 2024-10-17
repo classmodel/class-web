@@ -7,7 +7,8 @@
     "dev": "vinxi dev",
     "build": "vinxi build",
     "typecheck": "tsc --noEmit",
-    "start": "serve --no-clipboard .output/public"
+    "start": "serve --no-clipboard .output/public",
+    "test": "playwright test"
   },
   "dependencies": {
     "@classmodel/class": "workspace:*",

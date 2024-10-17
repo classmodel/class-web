@@ -4,6 +4,7 @@ import {
   createEffect,
   createMemo,
   createSignal,
+  createUniqueId,
   onCleanup,
 } from "solid-js";
 import { Button, buttonVariants } from "~/components/ui/button";
@@ -249,11 +250,20 @@ export function ExperimentCard(props: {
 }) {
   const experiment = () => props.experiment;
   const experimentIndex = () => props.experimentIndex;
+  const id = createUniqueId();
+  const descriptionId = `${id}-description`;
   return (
-    <Card class="w-[380px]">
+    <Card
+      class="w-[380px]"
+      role="article"
+      aria-labelledby={id}
+      aria-describedby={descriptionId}
+    >
       <CardHeader>
-        <CardTitle>{experiment().name}</CardTitle>
-        <CardDescription>{experiment().description}</CardDescription>
+        <CardTitle id={id}>{experiment().name}</CardTitle>
+        <CardDescription id={descriptionId}>
+          {experiment().description}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <PermutationsList
@@ -278,7 +288,15 @@ export function ExperimentCard(props: {
           <Button
             variant="outline"
             title="Delete experiment"
-            onClick={() => deleteExperiment(experimentIndex())}
+            onClick={() => {
+              if (
+                window.confirm(
+                  "Are you sure you want to delete this experiment?",
+                )
+              ) {
+                deleteExperiment(experimentIndex());
+              }
+            }}
           >
             <MdiDelete />
           </Button>
