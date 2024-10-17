@@ -20,7 +20,7 @@ pnpx --package=@classmodel/class class config.json
 # Outputs h variable for each timestep
 ```
 
-(in development use `pnpx tsx src/cli.ts ./config.json`)
+In development use `pnpx tsx src/cli.ts ./config.json`.
 
 To use the reference configuration of a experiment downloaded from the web application use.
 
