@@ -17,6 +17,12 @@ export const ajv = new Ajv({
   useDefaults: "empty",
   code: { esm: true },
 });
+ajv.addKeyword({
+  keyword: "unit",
+  type: "number",
+  schemaType: "string",
+  // TODO Add validation, like if unit===K then value >= 0
+});
 
 /**
  * Validates the given input against the configuration JSON schema.
