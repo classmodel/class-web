@@ -40,6 +40,19 @@ cd packages/class
 pnpm json2ts
 ```
 
+### Publish package
+
+To publish a new version of the class package:
+
+1. Bump version in `**/package.json` files. They should all have same version.
+2. Commit & push changes to main branch.
+3. Create a new [GitHub release](https://github.com/classmodel/class-web/releases)
+   - Tag version and title should be the same as the version in the package.json file with `v` prefix.
+   - Use `Implementation of the Chemistry Land-surface Atmosphere Soil Slab (CLASS) model that runs entirely in the browser.` as the description with generated release notes.
+4. A GitHub CI workflow will publish the package to [jsr](https://jsr.io/@classmodel/class)
+
+After the workflow has completed the new version will be available on [jsr](https://jsr.io/@classmodel/class).
+
 ## Local build
 
 To run a local development version:
