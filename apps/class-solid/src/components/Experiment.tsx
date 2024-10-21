@@ -3,9 +3,9 @@ import {
   createEffect,
   createMemo,
   createSignal,
+  createUniqueId,
   onCleanup,
 } from "solid-js";
-
 import { Button, buttonVariants } from "~/components/ui/button";
 import { createArchive, toConfigBlob } from "~/lib/download";
 import {
@@ -17,6 +17,7 @@ import {
 } from "~/lib/store";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import { PermutationsList } from "./PermutationsList";
+import { ShareButton } from "./ShareButton";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import {
   Card,
@@ -187,8 +188,8 @@ function DownloadExperimentArchive(props: { experiment: Experiment }) {
 
   const filename = `class-${props.experiment.name}.zip`;
   return (
-    <a href={url()} download={filename} type="application/json">
-      Config + output
+    <a href={url()} download={filename} type="application/zip">
+      Configuration and output
     </a>
   );
 }
@@ -220,11 +221,20 @@ export function ExperimentCard(props: {
 }) {
   const experiment = () => props.experiment;
   const experimentIndex = () => props.experimentIndex;
+  const id = createUniqueId();
+  const descriptionId = `${id}-description`;
   return (
-    <Card class="w-[380px]">
+    <Card
+      class="w-[380px]"
+      role="article"
+      aria-labelledby={id}
+      aria-describedby={descriptionId}
+    >
       <CardHeader>
-        <CardTitle>{experiment().name}</CardTitle>
-        <CardDescription>{experiment().description}</CardDescription>
+        <CardTitle id={id}>{experiment().name}</CardTitle>
+        <CardDescription id={descriptionId}>
+          {experiment().description}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <PermutationsList
@@ -261,6 +271,7 @@ export function ExperimentCard(props: {
           >
             <MdiDelete />
           </Button>
+          <ShareButton experiment={experiment} />
         </Show>
       </CardFooter>
     </Card>

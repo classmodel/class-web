@@ -80,40 +80,43 @@ export function TimeSeriesPlot() {
 /** Simply show the final height for each experiment that has output */
 function FinalHeights() {
   return (
-    <For each={experiments}>
-      {(experiment, i) => {
-        const h =
-          experiment.reference.output?.h[
-            experiment.reference.output.h.length - 1
-          ] || 0;
-        return (
-          <div class="mb-2">
-            <p>
-              {experiment.name}: {h.toFixed()} m
-            </p>
-            <For each={experiment.permutations}>
-              {(perm) => {
-                const h = perm.output?.h[perm.output.h.length - 1] || 0;
-                return (
-                  <p>
-                    {experiment.name}/{perm.name}: {h.toFixed()} m
-                  </p>
-                );
-              }}
-            </For>
-          </div>
-        );
-      }}
-    </For>
+    <ul>
+      <For each={experiments}>
+        {(experiment) => {
+          const h = () =>
+            experiment.reference.output?.h[
+              experiment.reference.output.h.length - 1
+            ] || 0;
+          return (
+            <>
+              <li class="mb-2" title={experiment.name}>
+                {experiment.name}: {h().toFixed()} m
+              </li>
+              <For each={experiment.permutations}>
+                {(perm) => {
+                  const h = () => perm.output?.h[perm.output.h.length - 1] || 0;
+                  return (
+                    <li title={`${experiment.name}/${perm.name}`}>
+                      {experiment.name}/{perm.name}: {h().toFixed()} m
+                    </li>
+                  );
+                }}
+              </For>
+            </>
+          );
+        }}
+      </For>
+    </ul>
   );
 }
 
 export function AnalysisCard(analysis: Analysis) {
+  const id = createUniqueId();
   return (
-    <Card class="w-[500px]">
+    <Card class="w-[500px]" role="article" aria-labelledby={id}>
       <CardHeader>
         {/* TODO: make name & description editable */}
-        <CardTitle>{analysis.name}</CardTitle>
+        <CardTitle id={id}>{analysis.name}</CardTitle>
       </CardHeader>
       <CardContent>
         <Switch fallback={<p>Unknown analysis type</p>}>
@@ -127,18 +130,22 @@ export function AnalysisCard(analysis: Analysis) {
       </CardContent>
       <CardFooter>
         {/* TODO: implement download functionality */}
-        <Button variant="outline">
+        <Button variant="outline" title="Download">
           <MdiDownload />
         </Button>
         {/* TODO: implement "configure" functionality */}
-        <Button variant="outline">
+        <Button variant="outline" title="Configure">
           <MdiCog />
         </Button>
         {/* TODO: implement duplicate functionality */}
-        <Button variant="outline">
+        <Button variant="outline" title="Duplicate">
           <MdiContentCopy />
         </Button>
-        <Button variant="outline" onClick={() => deleteAnalysis(analysis)}>
+        <Button
+          variant="outline"
+          onClick={() => deleteAnalysis(analysis)}
+          title="Delete"
+        >
           <MdiDelete />
         </Button>
       </CardFooter>

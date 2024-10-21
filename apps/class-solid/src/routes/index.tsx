@@ -1,4 +1,5 @@
-import { For, Show, createSignal } from "solid-js";
+import { useLocation, useNavigate } from "@solidjs/router";
+import { For, Show, createSignal, onMount } from "solid-js";
 
 import { AnalysisCard, addAnalysis } from "~/components/Analysis";
 import { AddExperimentDialog, ExperimentCard } from "~/components/Experiment";
@@ -13,18 +14,47 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Flex } from "~/components/ui/flex";
+import { Toaster, showToast } from "~/components/ui/toast";
+import { decodeExperiment } from "~/lib/encode";
 
-import { experiments } from "~/lib/store";
+import { experiments, uploadExperiment } from "~/lib/store";
 import { analyses } from "~/lib/store";
 
 export default function Home() {
   const [openAddDialog, setOpenAddDialog] = createSignal(false);
+
+  onMount(async () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const rawExperiment = location.hash.substring(1);
+    if (!rawExperiment) return;
+    try {
+      const experimentConfig = decodeExperiment(rawExperiment);
+      await uploadExperiment(experimentConfig);
+      showToast({
+        title: "Experiment loaded from URL",
+        variant: "success",
+        duration: 1000,
+      });
+    } catch (error) {
+      console.error(error);
+      showToast({
+        title: "Failed to load experiment from URL",
+        description: `${error}`,
+        variant: "error",
+      });
+    }
+    // Remove hash after loading experiment from URL,
+    // as after editing the experiment the hash out of sync
+    navigate("/");
+  });
+
   return (
     <main class="mx-auto p-4 text-center text-gray-700">
       <h2 class="my-8 text-4xl">
         Experiments
         <DropdownMenu>
-          <DropdownMenuTrigger>
+          <DropdownMenuTrigger title="Add experiment">
             <MdiPlusBox class="ml-2 inline-block align-bottom" />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -63,7 +93,7 @@ export default function Home() {
         Analysis
         <Show when={experiments.length}>
           <DropdownMenu>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger title="Add analysis">
               <MdiPlusBox class="ml-2 inline-block align-bottom" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -90,6 +120,7 @@ export default function Home() {
           <For each={analyses}>{(analysis) => AnalysisCard(analysis)}</For>
         </Flex>
       </Show>
+      <Toaster />
     </main>
   );
 }
