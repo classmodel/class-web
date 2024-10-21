@@ -44,7 +44,7 @@ pnpm json2ts
 
 To publish a new version of the class package:
 
-1. Bump version in `**/package.json` files. They should all have same version.
+1. Bump version in `**/package.json` and `packages/class/jsr.json` files. They should all have same version.
 2. Commit & push changes to main branch.
 3. Create a new [GitHub release](https://github.com/classmodel/class-web/releases)
    - Tag version and title should be the same as the version in the package.json file with `v` prefix.
