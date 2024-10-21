@@ -16,7 +16,7 @@ export type JsonSchemaOfConfig = JSONSchemaType<Config>;
 export const jsonSchemaOfConfig =
   rawConfigJson as unknown as JsonSchemaOfConfig;
 
-const ajv = new Ajv({
+export const ajv = new Ajv({
   coerceTypes: true,
   allErrors: true,
   useDefaults: "empty",
