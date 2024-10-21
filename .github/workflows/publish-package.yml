@@ -1,11 +1,11 @@
-name: Publish class package
+name: Publish class packages
 
 on:
   release:
     types: [published]
 
 jobs:
-  publish:
+  publish-class:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -22,3 +22,27 @@ jobs:
       - run: pnpm install
       - run: npx jsr publish --allow-slow-types
         working-directory: packages/class
+  publish-cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: ./pnpm-lock.yaml
+          registry-url: https://registry.npmjs.org/
+      - run: pnpm install
+      - run: pnpm build
+        working-directory: packages/cli
+      - run: |
+          if [[ $GITHUB_REF_NAME == *next* ]]; then
+            pnpm publish --tag next --no-git-checks
+          else
+            pnpm publish --no-git-checks
+          fi
+        working-directory: packages/cli
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
