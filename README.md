@@ -16,8 +16,18 @@ The class model can be run from the command line.
 The argument is the config file that should adhere to the [JSON schema](./packages/class/src/config.json).
 
 ```shell
-pnpx --package=@classmodel/class class config.json
-# Outputs h variable for each timestep
+# Generate default config file
+pnpx @classmodel/cli generate --output config.json
+
+# Run the model
+pnpx @classmodel/cli run config.json
+# Outputs h variable for each timestep in JSON format
+
+# To output csv use
+pnpx @classmodel/cli run --output output.csv --formtat csv config.json
+
+# To read from stdin use
+cat config.json | pnpx @classmodel/cli -
 ```
 
 In development use `pnpx tsx src/cli.ts ./config.json`.
@@ -113,6 +123,9 @@ configuration between web-app, library code, and perhaps other implementations
 of CLASS as well.
 To validate a configuration it uses the JSON schema together with [ajv](https://ajv.js.org/).
 Ajv is the reference JSON schema validator in then JS ecosystem.
+
+The CLI uses [Commander](https://www.npmjs.com/package/commander) to parse the command line arguments.
+Commander is the most popular package for building command line interfaces with sub-command support in Mode.js.
 
 The web application is build with [solid.js](https://docs.solidjs.com/). Solid
 is a relatively simple framework for building reactive web applications. With its

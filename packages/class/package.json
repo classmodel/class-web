@@ -17,17 +17,17 @@
     "json2ts": "json2ts src/config.json src/config.ts"
   },
   "devDependencies": {
+    "@commander-js/extra-typings": "^12.1.0",
     "@types/node": "^20.13.1",
     "json-schema-to-typescript": "^15.0.2",
     "tsx": "^4.16.5",
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "ajv": "^8.17.1"
+    "ajv": "^8.17.1",
+    "commander": "^12.1.0"
   },
-  "bin": {
-    "class": "./src/cli.ts"
-  },
+  "bin": "./src/cli.ts",
   "engines": {
     "node": ">=20.16.0"
   }
