@@ -5,8 +5,6 @@ import { parse } from "./validate";
 export type ClassOutput = Record<string, number[]>;
 
 export function runClass(config: Config): ClassOutput {
-  console.log("CLASS called with the following config", config);
-
   // TODO should we do validation/coercion here, in form, or both?
   const validatedConfig = parse(config);
   const model = new CLASS(validatedConfig);
