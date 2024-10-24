@@ -11,7 +11,15 @@
     "./bmi": "./src/bmi.ts",
     "./validate": "./src/validate.ts"
   },
-  "files": ["dist"],
+  "homepage": "https://classmodel.github.io/class-web",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/classmodel/class-web.git"
+  },
+  "bugs": {
+    "url": "https://github.com/classmodel/class-web/issues"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
   "license": "GPL-3.0-only",
   "scripts": {
     "dev": "tsc --watch",
