@@ -1,3 +1,8 @@
+/**
+ * Script to run Class model with default configuration.
+ *
+ * @module
+ */
 import { CLASS } from "./class";
 import type { ClassOutput } from "./runner";
 import { parse } from "./validate";
