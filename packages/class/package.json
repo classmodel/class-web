@@ -1,7 +1,7 @@
 {
   "name": "@classmodel/class",
   "version": "0.0.3",
-  "type": "module",  
+  "type": "module",
   "exports": {
     "./class": "./src/class.ts",
     "./cli": "./dist/cli.js",
@@ -19,7 +19,8 @@
     "prepack": "pnpm build",
     "test": "tsx --test src/*.test.ts",
     "typecheck": "tsc --noEmit",
-    "json2ts": "json2ts src/config.json src/config.ts"
+    "json2ts": "json2ts src/config.json src/config.ts",
+    "docs": "typedoc"
   },
   "bin": "./dist/cli.js",
   "devDependencies": {
@@ -27,6 +28,7 @@
     "@types/node": "^20.13.1",
     "json-schema-to-typescript": "^15.0.2",
     "tsx": "^4.16.5",
+    "typedoc": "^0.26.10",
     "typescript": "^5.3.3"
   },
   "dependencies": {

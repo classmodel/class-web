@@ -21,5 +21,17 @@
     "rootDir": "src",
     "noEmit": false,
     "sourceMap": true
+  },
+  "typedocOptions": {
+    "entryPoints": ["src"],
+    "out": "docs",
+    "entryPointStrategy": "expand",
+    "name": "@classmodel/class API documentation",
+    "includeVersion": true,
+    "navigationLinks": {
+      "Application": "/class-web",
+      "GitHub": "https://github.com/classmodel/class-web"
+    },
+    "exclude": ["**/*.test.ts"]
   }
 }

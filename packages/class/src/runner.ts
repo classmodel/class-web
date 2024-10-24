@@ -9,7 +9,6 @@ export function runClass(config: Config): ClassOutput {
   const validatedConfig = parse(config);
   const model = new CLASS(validatedConfig);
   const output: ClassOutput = { t: [], h: [] };
-  const z: string = 1.2;
 
   while (model.t < config.timeControl.runtime) {
     model.update();

@@ -3,12 +3,17 @@
 [![github repo badge](https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue)]([https://github.com//classmodel/class-web](https://github.com//classmodel/class-web))
 [![Code quality](https://github.com/classmodel/class-web/actions/workflows/quality.yml/badge.svg)](https://github.com/classmodel/class-web/actions/workflows/quality.yml)
 [![npmjs.com](https://img.shields.io/npm/v/@classmodel/class.svg?style=flat)](https://www.npmjs.com/package/@classmodel/class)
+[![Checked with Biome](https://img.shields.io/badge/Checked_with-Biome-60a5fa?style=flat&logo=biome)](https://biomejs.dev)
+[![Research Software Directory Badge](https://img.shields.io/badge/rsd-00a3e3.svg)](https://research-software-directory.org/software/class-web)
+[![Documentation](https://img.shields.io/badge/docs-blue)](https://classmodel.github.io/class-web/docs/)
 
 This is an implementation of  the **C**hemistry **L**and-surface **A**tmosphere **S**oil **S**lab (CLASS) model that runs entirely in the browser.
 
-The CLASS web application is available at https://classmodel.github.io/class-web.
-
 For more information on CLASS, see https://classmodel.github.io/.
+
+## Web application
+
+The CLASS web application (from [apps/class-solid](apps/class-solid) directory) is available at https://classmodel.github.io/class-web.
 
 ## Command line usage
 
@@ -113,6 +118,17 @@ node --import tsx --test --experimental-test-coverage --test-reporter=lcov --tes
 # To generate a html report use genhtml which is part of lcov OS package
 genhtml lcov.info --output-directory coverage
 ```
+
+## API Documentation
+
+The API documention of the package can be generated with
+
+```shell
+pnpm run docs
+```
+Which will write HTML files to `docs/` directory.
+
+The documentation of the latest release is published at [https://classmodel.github.io/class-web/docs/](https://classmodel.github.io/class-web/docs/).
 
 ## Tech stack
 
