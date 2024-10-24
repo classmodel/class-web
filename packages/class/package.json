@@ -1,7 +1,7 @@
 {
   "name": "@classmodel/class",
   "type": "module",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "exports": {
     "./class": "./src/class.ts",
     "./cli": "./dist/cli.js",
