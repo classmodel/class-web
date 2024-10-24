@@ -41,6 +41,8 @@ jobs:
           cache-dependency-path: ./pnpm-lock.yaml
       - name: Install dependencies
         run: pnpm install
+      - name: Build packages
+        run: pnpm build --filter '{packages/**}'
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps chromium
         working-directory: apps/class-solid

@@ -5,10 +5,10 @@
 
 import { readFile, writeFile } from "node:fs/promises";
 import { EOL } from "node:os";
-import type { ClassOutput } from "@classmodel/class/runner";
-import { runClass } from "@classmodel/class/runner";
-import { parse } from "@classmodel/class/validate";
 import { Command, Option } from "@commander-js/extra-typings";
+import type { ClassOutput } from "./runner.js";
+import { runClass } from "./runner.js";
+import { parse } from "./validate.js";
 
 /**
  * Reads text input from the standard input (stdin) stream asynchronously.

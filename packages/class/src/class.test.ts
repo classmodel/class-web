@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
-import { CLASS } from "./class";
-import { runClass } from "./runner";
-import { parse } from "./validate";
+import { CLASS } from "./class.js";
+import { runClass } from "./runner.js";
+import { parse } from "./validate.js";
 
 describe("CLASS model", () => {
   test("can be instantiated with default config", () => {

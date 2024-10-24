@@ -2,7 +2,7 @@
 
 [![github repo badge](https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue)]([https://github.com//classmodel/class-web](https://github.com//classmodel/class-web))
 [![Code quality](https://github.com/classmodel/class-web/actions/workflows/quality.yml/badge.svg)](https://github.com/classmodel/class-web/actions/workflows/quality.yml)
-[![JSR](https://jsr.io/badges/@classmodel/class)](https://jsr.io/@classmodel/class)
+[![npmjs.com](https://img.shields.io/npm/v/@classmodel/class.svg?style=flat)](https://www.npmjs.com/package/@classmodel/class)
 
 This is an implementation of  the **C**hemistry **L**and-surface **A**tmosphere **S**oil **S**lab (CLASS) model that runs entirely in the browser.
 
@@ -12,7 +12,31 @@ For more information on CLASS, see https://classmodel.github.io/.
 
 ## Command line usage
 
-See the [CLI documentation](packages/cli/README.md) for more information on how to run the CLASS model from the command line.
+The class model can be run from the command line.
+The argument is the config file that should adhere to the [JSON schema](./packages/class/src/config.json).
+
+```shell
+# Generate default config file
+pnpx @classmodel/cli generate --output config.json
+
+# Run the model
+pnpx @classmodel/cli run config.json
+# Outputs h variable for each timestep in JSON format
+
+# To output csv use
+pnpx @classmodel/cli run --output output.csv --formtat csv config.json
+
+# To read from stdin use
+cat config.json | pnpx @classmodel/cli -
+```
+
+In development use `pnpx tsx src/cli.ts ./config.json`.
+
+To use the reference configuration of a experiment downloaded from the web application use.
+
+```shell
+jq .reference < ~/Downloads/class-MyExperiment.json  > config.json
+```
 
 ## Developers
 

@@ -1,6 +1,6 @@
 import assert from "node:assert";
 import test, { describe } from "node:test";
-import type { Config } from "./config";
+import type { Config } from "./config.js";
 import {
   type PartialConfig,
   jsonSchemaOfConfig,
@@ -8,7 +8,7 @@ import {
   parse,
   pruneDefaults,
   validate,
-} from "./validate";
+} from "./validate.js";
 
 describe("validate", () => {
   test("should validate a valid config", () => {

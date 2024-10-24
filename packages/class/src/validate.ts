@@ -1,7 +1,7 @@
-import Ajv from "ajv/dist/2019";
-import type { DefinedError, JSONSchemaType } from "ajv/dist/2019";
+import { Ajv2019 } from "ajv/dist/2019.js";
+import type { DefinedError, JSONSchemaType } from "ajv/dist/2019.js";
 
-import type { Config } from "./config";
+import type { Config } from "./config.js";
 import rawConfigJson from "./config.json";
 
 /**
@@ -11,7 +11,7 @@ export type JsonSchemaOfConfig = JSONSchemaType<Config>;
 export const jsonSchemaOfConfig =
   rawConfigJson as unknown as JsonSchemaOfConfig;
 
-export const ajv = new Ajv({
+export const ajv = new Ajv2019({
   coerceTypes: true,
   allErrors: true,
   useDefaults: "empty",
