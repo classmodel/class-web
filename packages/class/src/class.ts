@@ -1,7 +1,7 @@
 /**
  * This module contains the CLASS model implementation.
  * @module
-*/
+ */
 import type { Config } from "./config.js";
 
 // Constants
