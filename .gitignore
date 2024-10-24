@@ -11,6 +11,7 @@ server/dist
 public/dist
 apps/class-solid/.vinxi
 apps/class-solid/.output
+packages/class/docs
 
 # packages/class/.gitignore
 lcov.info
