@@ -2,10 +2,9 @@
  * This module contains the Basic Modelling Interface class.
  * @module
  */
-
-import { CLASS } from "./class";
-import type { Config } from "./config";
-import { parse } from "./validate";
+import { CLASS } from "./class.js";
+import type { Config } from "./config.js";
+import { parse } from "./validate.js";
 
 /**
  * A lightweight [Basic Modelling Interface (BMI)](https://bmi.readthedocs.io) like interface for the CLASS model.

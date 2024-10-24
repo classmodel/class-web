@@ -2,13 +2,46 @@
 
 [![github repo badge](https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue)]([https://github.com//classmodel/class-web](https://github.com//classmodel/class-web))
 [![Code quality](https://github.com/classmodel/class-web/actions/workflows/quality.yml/badge.svg)](https://github.com/classmodel/class-web/actions/workflows/quality.yml)
-[![JSR](https://jsr.io/badges/@classmodel/class)](https://jsr.io/@classmodel/class)
+[![npmjs.com](https://img.shields.io/npm/v/@classmodel/class.svg?style=flat)](https://www.npmjs.com/package/@classmodel/class)
+[![Checked with Biome](https://img.shields.io/badge/Checked_with-Biome-60a5fa?style=flat&logo=biome)](https://biomejs.dev)
+[![Research Software Directory Badge](https://img.shields.io/badge/rsd-00a3e3.svg)](https://research-software-directory.org/software/class-web)
+[![Documentation](https://img.shields.io/badge/docs-blue)](https://classmodel.github.io/class-web/docs/)
 
 This is an implementation of  the **C**hemistry **L**and-surface **A**tmosphere **S**oil **S**lab (CLASS) model that runs entirely in the browser.
 
-The CLASS web application is available at https://classmodel.github.io/class-web.
-
 For more information on CLASS, see https://classmodel.github.io/.
+
+## Web application
+
+The CLASS web application (from [apps/class-solid](apps/class-solid) directory) is available at https://classmodel.github.io/class-web.
+
+## Command line usage
+
+The class model can be run from the command line.
+The argument is the config file that should adhere to the [JSON schema](./packages/class/src/config.json).
+
+```shell
+# Generate default config file
+pnpx @classmodel/cli generate --output config.json
+
+# Run the model
+pnpx @classmodel/cli run config.json
+# Outputs h variable for each timestep in JSON format
+
+# To output csv use
+pnpx @classmodel/cli run --output output.csv --formtat csv config.json
+
+# To read from stdin use
+cat config.json | pnpx @classmodel/cli -
+```
+
+In development use `pnpx tsx src/cli.ts ./config.json`.
+
+To use the reference configuration of a experiment downloaded from the web application use.
+
+```shell
+jq .reference < ~/Downloads/class-MyExperiment.json  > config.json
+```
 
 ## Developers
 
@@ -44,14 +77,12 @@ pnpm json2ts
 
 To publish a new version of the class package:
 
-1. Bump version in `**/package.json` and `packages/class/jsr.json` files. They should all have same version.
+1. Bump version in `**/package.json` files. They should all have same version.
 2. Commit & push changes to main branch.
 3. Create a new [GitHub release](https://github.com/classmodel/class-web/releases)
    - Tag version and title should be the same as the version in the package.json file with `v` prefix.
    - Use `Implementation of the Chemistry Land-surface Atmosphere Soil Slab (CLASS) model that runs entirely in the browser.` as the description with generated release notes.
-4. A GitHub CI workflow will publish the package to [jsr](https://jsr.io/@classmodel/class)
-
-After the workflow has completed the new version will be available on [jsr](https://jsr.io/@classmodel/class).
+4. A GitHub CI workflow will publish the package to [npmjs](https://www.npmjs.com/package/@classmodel/class)
 
 ## Local build
 
@@ -99,6 +130,17 @@ node --import tsx --test --experimental-test-coverage --test-reporter=lcov --tes
 genhtml lcov.info --output-directory coverage
 ```
 
+## API Documentation
+
+The API documention of the package can be generated with
+
+```shell
+pnpm run docs
+```
+Which will write HTML files to `docs/` directory.
+
+The documentation of the latest release is published at [https://classmodel.github.io/class-web/docs/](https://classmodel.github.io/class-web/docs/).
+
 ## Tech stack
 
 The CLASS package is written in typescript.
@@ -108,6 +150,9 @@ configuration between web-app, library code, and perhaps other implementations
 of CLASS as well.
 To validate a configuration it uses the JSON schema together with [ajv](https://ajv.js.org/).
 Ajv is the reference JSON schema validator in then JS ecosystem.
+
+The CLI uses [Commander](https://www.npmjs.com/package/commander) to parse the command line arguments.
+Commander is the most popular package for building command line interfaces with sub-command support in Mode.js.
 
 The web application is build with [solid.js](https://docs.solidjs.com/). Solid
 is a relatively simple framework for building reactive web applications. With its

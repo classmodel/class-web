@@ -2,7 +2,7 @@
  * This module contains the CLASS model implementation.
  * @module
  */
-import type { Config } from "./config";
+import type { Config } from "./config.js";
 
 // Constants
 const rho = 1.2; /** Density of air [kg m-3] */

@@ -1,4 +1,4 @@
-name: Publish class package
+name: Publish class packages
 
 on:
   release:
@@ -7,18 +7,25 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write # The OIDC ID token is used for authentication with JSR.
     steps:
-      - uses: pnpm/action-setup@v2
-        with:
-          version: latest
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: ./pnpm-lock.yaml
+          registry-url: https://registry.npmjs.org/
       - run: pnpm install
-      - run: npx jsr publish --allow-slow-types
+      - run: pnpm build
         working-directory: packages/class
+      - run: |
+          if [[ $GITHUB_REF_NAME == *next* ]]; then
+            pnpm publish --tag next --no-git-checks
+          else
+            pnpm publish --no-git-checks
+          fi
+        working-directory: packages/class
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

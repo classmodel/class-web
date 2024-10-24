@@ -3,15 +3,13 @@
  *
  * @module
  */
-import { CLASS } from "./class";
-import type { Config } from "./config";
-import { parse } from "./validate";
+import { CLASS } from "./class.js";
+import type { Config } from "./config.js";
+import { parse } from "./validate.js";
 
 export type ClassOutput = Record<string, number[]>;
 
 export function runClass(config: Config): ClassOutput {
-  console.log("CLASS called with the following config", config);
-
   // TODO should we do validation/coercion here, in form, or both?
   const validatedConfig = parse(config);
   const model = new CLASS(validatedConfig);

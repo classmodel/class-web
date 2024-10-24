@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { before, describe, test } from "node:test";
-import { BmiClass } from "./bmi";
+import { BmiClass } from "./bmi.js";
 
 describe("BmiClass", () => {
   let bmi: BmiClass;

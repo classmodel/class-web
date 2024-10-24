@@ -28,11 +28,18 @@ jobs:
       - name: install
         run: pnpm install --frozen-lockfile
 
-      - name: build
+      - name: Build app
         run: pnpm build
         working-directory: ./apps/class-solid
         env:
           BASE_PATH: "/class-web"
+
+      - name: Build package API docs
+        run: pnpm run docs
+        working-directory: ./packages/class
+      
+      - name: Combine web app with api docs
+        run: cp -r ./packages/class/docs ./apps/class-solid/.output/public/docs
 
       - name: upload artifact
         uses: actions/upload-pages-artifact@v3
