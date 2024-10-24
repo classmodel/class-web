@@ -22,17 +22,17 @@ The argument is the config file that should adhere to the [JSON schema](./packag
 
 ```shell
 # Generate default config file
-pnpx @classmodel/cli generate --output config.json
+pnpx @classmodel/class generate --output config.json
 
 # Run the model
-pnpx @classmodel/cli run config.json
+pnpx @classmodel/class run config.json
 # Outputs h variable for each timestep in JSON format
 
 # To output csv use
-pnpx @classmodel/cli run --output output.csv --formtat csv config.json
+pnpx @classmodel/class run --output output.csv --formtat csv config.json
 
 # To read from stdin use
-cat config.json | pnpx @classmodel/cli -
+cat config.json | pnpx @classmodel/class -
 ```
 
 In development use `pnpx tsx src/cli.ts ./config.json`.
