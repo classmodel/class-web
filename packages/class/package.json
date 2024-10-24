@@ -1,5 +1,6 @@
 {
   "name": "@classmodel/class",
+  "description": "Chemistry Land-surface Atmosphere Soil Slab (CLASS) model",
   "type": "module",
   "version": "0.0.7",
   "exports": {
@@ -22,7 +23,7 @@
         "types": "./dist/config.d.ts"
       }
     },
-    "./config.json": "./src/config.json",
+    "./config.json": "./dist/config.json",
     "./runner": {
       "import": {
         "default": "./dist/runner.js",
@@ -50,7 +51,7 @@
   "bugs": {
     "url": "https://github.com/classmodel/class-web/issues"
   },
-  "files": ["dist", "src/config.json", "README.md", "LICENSE"],
+  "files": ["dist"],
   "license": "GPL-3.0-only",
   "scripts": {
     "dev": "tsc --watch",
@@ -62,7 +63,6 @@
     "docs": "typedoc",
     "check-exports": "attw --pack ."
   },
-  "main": "./dist/class.js",
   "bin": "./dist/cli.js",
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.16.4",
