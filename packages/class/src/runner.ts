@@ -1,6 +1,11 @@
-import { CLASS } from "./class";
-import type { Config } from "./config";
-import { parse } from "./validate";
+/**
+ * This module contains the `runClass` function
+ *
+ * @module
+ */
+import { CLASS } from "./class.js";
+import type { Config } from "./config.js";
+import { parse } from "./validate.js";
 
 export type ClassOutput = Record<string, number[]>;
 

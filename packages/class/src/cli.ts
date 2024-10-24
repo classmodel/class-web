@@ -6,8 +6,9 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { EOL } from "node:os";
 import { Command, Option } from "@commander-js/extra-typings";
-import { type ClassOutput, runClass } from "./runner";
-import { parse } from "./validate";
+import type { ClassOutput } from "./runner.js";
+import { runClass } from "./runner.js";
+import { parse } from "./validate.js";
 
 /**
  * Reads text input from the standard input (stdin) stream asynchronously.
@@ -152,6 +153,4 @@ function main() {
   program.parse();
 }
 
-if (require.main === module) {
-  main();
-}
+main();

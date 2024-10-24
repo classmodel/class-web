@@ -1,33 +1,40 @@
 {
   "name": "@classmodel/class",
-  "version": "0.0.3",
+  "type": "module",
+  "version": "0.0.5",
   "exports": {
     "./class": "./src/class.ts",
-    "./cli": "./src/cli.ts",
+    "./cli": "./dist/cli.js",
     "./config": "./src/config.ts",
     "./config.json": "./src/config.json",
     "./runner": "./src/runner.ts",
     "./bmi": "./src/bmi.ts",
     "./validate": "./src/validate.ts"
   },
+  "files": ["dist"],
   "license": "GPL-3.0-only",
   "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "prepack": "pnpm build",
     "test": "tsx --test src/*.test.ts",
     "typecheck": "tsc --noEmit",
-    "json2ts": "json2ts src/config.json src/config.ts"
+    "json2ts": "json2ts src/config.json src/config.ts",
+    "docs": "typedoc"
   },
+  "bin": "./dist/cli.js",
   "devDependencies": {
     "@commander-js/extra-typings": "^12.1.0",
     "@types/node": "^20.13.1",
     "json-schema-to-typescript": "^15.0.2",
     "tsx": "^4.16.5",
+    "typedoc": "^0.26.10",
     "typescript": "^5.3.3"
   },
   "dependencies": {
     "ajv": "^8.17.1",
     "commander": "^12.1.0"
   },
-  "bin": "./src/cli.ts",
   "engines": {
     "node": ">=20.16.0"
   }
