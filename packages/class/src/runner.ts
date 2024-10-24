@@ -1,3 +1,8 @@
+/**
+ * This module contains the `runClass` function
+ *
+ * @module
+ */
 import { CLASS } from "./class.js";
 import type { Config } from "./config.js";
 import { parse } from "./validate.js";

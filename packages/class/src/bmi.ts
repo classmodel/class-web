@@ -1,9 +1,13 @@
+/**
+ * This module contains the Basic Modelling Interface class.
+ * @module
+ */
 import { CLASS } from "./class.js";
 import type { Config } from "./config.js";
 import { parse } from "./validate.js";
 
 /**
- * A lightweight [BMI](https://bmi.readthedocs.io) like interface for the CLASS model.
+ * A lightweight [Basic Modelling Interface (BMI)](https://bmi.readthedocs.io) like interface for the CLASS model.
  *
  * Inspiration https://github.com/uihilab/BMI-JS/blob/main/bmijs/bmi.js
  *
@@ -11,6 +15,7 @@ import { parse } from "./validate.js";
  * - accessors do not use dest argument
  * - initialize() accepts object instead of string
  * - parameters() returns default config
+ * - run() as extra method
  */
 interface BmiLight<Config> {
   initialize(config: Config): void;
@@ -31,6 +36,10 @@ interface BmiLight<Config> {
 
 const ouput_var_names: string[] = ["h", "theta", "dtheta", "q", "dq"] as const;
 
+/**
+ * Class representing a BMI (Basic Model Interface) implementation for the CLASS model.
+ * This class provides methods to initialize, update, and retrieve information from the model.
+ */
 export class BmiClass implements BmiLight<Config> {
   config: Config = parse({});
   model: CLASS = new CLASS(this.config);

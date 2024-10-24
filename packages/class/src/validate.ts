@@ -1,3 +1,8 @@
+/**
+ * This module contains functions to validate and parse configuration objects.
+ *
+ * @module
+ */
 import { Ajv2019 } from "ajv/dist/2019.js";
 import type { DefinedError, JSONSchemaType } from "ajv/dist/2019.js";
 
@@ -155,8 +160,14 @@ export function overwriteDefaultsInJsonSchema<C>(
   return newSchema;
 }
 
+<<<<<<< HEAD
 // TODO move below  to app, this is not a general utility
 
+=======
+/**
+ * An experiment configuration is a combination of a reference configuration and a set of permutation configurations.
+ */
+>>>>>>> origin/main
 export interface ExperimentConfigSchema {
   name: string;
   description?: string;
@@ -191,6 +202,12 @@ const jsonSchemaOfExperimentConfig = {
 
 const validateExperimentConfig = ajv.compile(jsonSchemaOfExperimentConfig);
 
+/** Parse unknown input into a Experiment configuration
+ *
+ * @param input - The input to be parsed.
+ * @returns The validated input as a Experiment configuration object.
+ * @throws {ValidationError} If the input is not valid according to the validation rules.
+ */
 export function parseExperimentConfig(input: unknown): ExperimentConfigSchema {
   if (!validateExperimentConfig(input)) {
     throw new ValidationError(

@@ -1,3 +1,7 @@
+/**
+ * This module contains the CLASS model implementation.
+ * @module
+*/
 import type { Config } from "./config.js";
 
 // Constants
@@ -14,7 +18,6 @@ const cp = 1005.0; /** Specific heat of dry air [J kg-1 K-1] */
  * @property dq: Specific humidity jump at h [kg kg-1]
  * @property t: Model time [s]
  */
-
 export class CLASS {
   _cfg: Config;
   h: number;
