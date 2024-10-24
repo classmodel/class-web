@@ -160,14 +160,10 @@ export function overwriteDefaultsInJsonSchema<C>(
   return newSchema;
 }
 
-<<<<<<< HEAD
-// TODO move below  to app, this is not a general utility
-
-=======
+// TODO move below to app, this is not a general utility, unless cli can run experiment
 /**
  * An experiment configuration is a combination of a reference configuration and a set of permutation configurations.
  */
->>>>>>> origin/main
 export interface ExperimentConfigSchema {
   name: string;
   description?: string;
