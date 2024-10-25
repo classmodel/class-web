@@ -18,7 +18,6 @@ The CLASS web application that uses this package is available at https://classmo
 ## Command line usage
 
 The class model can be run from the command line.
-The argument is the config file that should adhere to the [JSON schema](./packages/class/src/config.json).
 
 ```shell
 # Generate default config file
@@ -34,10 +33,11 @@ pnpx @classmodel/class run --output output.csv --formtat csv config.json
 # To read from stdin use
 cat config.json | pnpx @classmodel/class -
 ```
+If you do not have `pnpx` installed you can use `npx` instead.
 
 In development use `pnpx tsx src/cli.ts ./config.json`.
 
-To use the reference configuration of a experiment downloaded from the web application use.
+To use the reference configuration of a experiment downloaded from the web application extract it with [jq](https://stedolan.github.io/jq/) using
 
 ```shell
 jq .reference < ~/Downloads/class-MyExperiment.json  > config.json
@@ -62,13 +62,13 @@ console.log(output)
 
 ## Developers
 
-This package is part of a [monorepo](https://github.com//classmodel/class-web) with other packages and applications.
+This package is part of a [monorepo](https://github.com/classmodel/class-web) with other packages and applications.
 
 ### JSON schema
 
-The Class model uses a JSON schema to validate the input configuration. The schema is defined in the `@classmodel/class` package and can be found in [packages/class/src/config.json](packages/class/src/config.json). The schema is used to validate the input configuration and to generate a form to input the configuration.
+The Class model uses a JSON schema to validate the input configuration. The schema is defined in the `@classmodel/class` package and can be found at [src/config.json](https://github.com/classmodel/class-web/blob/main/packages/class/src/config.json) (in [repo](./src/config.json)). The schema is used to validate the input configuration and to generate a form to input the configuration.
 
-If any changes are made to the `packages/class/src/config.json` file then the Typescript type need to be regenerated with the following command:
+If any changes are made to the `src/config.json` file then the Typescript type need to be regenerated with the following command:
 
 ```shell
 pnpm json2ts
