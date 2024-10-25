@@ -35,12 +35,9 @@ jobs:
           BASE_PATH: "/class-web"
 
       - name: Build package API docs
-        run: pnpm run docs
+        run: pnpm run docs --out ../../apps/class-solid/.output/public/docs
         working-directory: ./packages/class
       
-      - name: Combine web app with api docs
-        run: cp -r ./packages/class/docs ./apps/class-solid/.output/public/docs
-
       - name: upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
