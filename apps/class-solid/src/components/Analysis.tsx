@@ -1,5 +1,5 @@
 import { For, Match, Switch, createMemo, createUniqueId } from "solid-js";
-import { getProfileData } from "~/lib/profiles";
+import { getExperimentVerticalProfiles } from "~/lib/profiles";
 import { analyses, experiments, setAnalyses } from "~/lib/store";
 import type { Experiment } from "~/lib/store";
 import LinePlot from "./LinePlot";
@@ -80,10 +80,13 @@ export function TimeSeriesPlot() {
 }
 
 export function VerticalProfiles() {
-  const profileData = getProfileData(experiments[0].reference, -1);
+  const profileData = getExperimentVerticalProfiles(experiments[0], -1);
   return (
     <div>
-      <LinePlot x={profileData.theta} y={profileData.h} />
+      <LinePlot x={profileData.reference.theta} y={profileData.reference.h} />
+      <For each={profileData.permutations}>
+        {(perm) => <LinePlot x={perm.theta} y={perm.h} />}
+      </For>
     </div>
   );
 }
