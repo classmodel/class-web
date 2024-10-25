@@ -17,31 +17,11 @@ The CLASS web application (from [apps/class-solid](apps/class-solid) directory) 
 
 ## Command line usage
 
-The class model can be run from the command line.
-The argument is the config file that should adhere to the [JSON schema](./packages/class/src/config.json).
+The class model can be run from the command line, see [packages/class/README.md](packages/class/README.md#command-line-usage) for more information.
 
-```shell
-# Generate default config file
-pnpx @classmodel/cli generate --output config.json
+## Package usage
 
-# Run the model
-pnpx @classmodel/cli run config.json
-# Outputs h variable for each timestep in JSON format
-
-# To output csv use
-pnpx @classmodel/cli run --output output.csv --formtat csv config.json
-
-# To read from stdin use
-cat config.json | pnpx @classmodel/cli -
-```
-
-In development use `pnpx tsx src/cli.ts ./config.json`.
-
-To use the reference configuration of a experiment downloaded from the web application use.
-
-```shell
-jq .reference < ~/Downloads/class-MyExperiment.json  > config.json
-```
+The class model can be used a package or library, see [packages/class/README.md](packages/class/README.md#package-usage) for more information.
 
 ## Developers
 
@@ -61,17 +41,6 @@ Currently the repo is home to the following:
   - class: reimplementation of CLASS in typescript
 - apps/
   - class-solid: web application with a graphical user interface for CLASS
-
-### JSON schema
-
-The Class model uses a JSON schema to validate the input configuration. The schema is defined in the `@classmodel/class` package and can be found in [packages/class/src/config.json](packages/class/src/config.json). The schema is used to validate the input configuration and to generate a form to input the configuration.
-
-If any changes are made to the `packages/class/src/config.json` file then the Typescript type need to be regenerated with the following command:
-
-```shell
-cd packages/class
-pnpm json2ts
-```
 
 ### Publish package
 
@@ -113,33 +82,12 @@ To check types, you can run the `pnpm typecheck` command as other commands ignor
 
 ## Tests
 
-The unit tests are written with [node:test](https://nodejs.org/api/test.html) and [node:assert](https://nodejs.org/api/assert.html).
 
-The unit tests can be run with the following command:
+The tests can be run with the following command:
 
 ```shell
 pnpm test
 ```
-
-To get test coverage
-
-```shell
-# Does not work via pnpm script so need to call node directly
-node --import tsx --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=lcov.info src/*.test.ts
-# To generate a html report use genhtml which is part of lcov OS package
-genhtml lcov.info --output-directory coverage
-```
-
-## API Documentation
-
-The API documention of the package can be generated with
-
-```shell
-pnpm run docs
-```
-Which will write HTML files to `docs/` directory.
-
-The documentation of the latest release is published at [https://classmodel.github.io/class-web/docs/](https://classmodel.github.io/class-web/docs/).
 
 ## Tech stack
 

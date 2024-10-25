@@ -1,15 +1,55 @@
 {
   "name": "@classmodel/class",
+  "description": "Chemistry Land-surface Atmosphere Soil Slab (CLASS) model",
   "type": "module",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "exports": {
-    "./class": "./src/class.ts",
-    "./cli": "./dist/cli.js",
-    "./config": "./src/config.ts",
-    "./config.json": "./src/config.json",
-    "./runner": "./src/runner.ts",
-    "./bmi": "./src/bmi.ts",
-    "./validate": "./src/validate.ts"
+    "./package.json": "./package.json",
+    "./class": {
+      "import": {
+        "default": "./dist/class.js",
+        "types": "./dist/class.d.ts"
+      }
+    },
+    "./cli": {
+      "import": {
+        "default": "./dist/cli.js",
+        "types": "./dist/cli.d.ts"
+      }
+    },
+    "./config": {
+      "import": {
+        "default": "./dist/config.js",
+        "types": "./dist/config.d.ts"
+      }
+    },
+    "./config.json": "./dist/config.json",
+    "./runner": {
+      "import": {
+        "default": "./dist/runner.js",
+        "types": "./dist/runner.d.ts"
+      }
+    },
+    "./bmi": {
+      "import": {
+        "default": "./dist/bmi.js",
+        "types": "./dist/bmi.d.ts"
+      }
+    },
+    "./validate": {
+      "import": {
+        "default": "./dist/validate.js",
+        "types": "./dist/validate.d.ts"
+      }
+    }
+  },
+  "homepage": "https://classmodel.github.io/class-web",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/classmodel/class-web.git"
+  },
+  "bugs": {
+    "url": "https://github.com/classmodel/class-web/issues"
   },
   "files": ["dist"],
   "license": "GPL-3.0-only",
@@ -24,7 +64,6 @@
   },
   "bin": "./dist/cli.js",
   "devDependencies": {
-    "@commander-js/extra-typings": "^12.1.0",
     "@types/node": "^20.13.1",
     "json-schema-to-typescript": "^15.0.2",
     "tsx": "^4.16.5",
@@ -32,6 +71,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "@commander-js/extra-typings": "^12.1.0",
     "ajv": "^8.17.1",
     "commander": "^12.1.0"
   },
