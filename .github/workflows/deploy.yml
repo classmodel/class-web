@@ -30,14 +30,13 @@ jobs:
 
       - name: Build app
         run: pnpm build
-        working-directory: ./apps/class-solid
         env:
           BASE_PATH: "/class-web"
 
       - name: Build package API docs
         run: pnpm run docs --out ../../apps/class-solid/.output/public/docs
         working-directory: ./packages/class
-      
+
       - name: upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
