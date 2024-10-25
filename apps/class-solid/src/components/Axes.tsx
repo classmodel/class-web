@@ -38,7 +38,7 @@ export const AxisBottom = (props: AxisProps) => {
           <g transform={`translate(${tick.position}, 0)`}>
             <line y2="6" stroke="black" />
             <text y="9" dy="0.71em" text-anchor="middle">
-              {tick.value}
+              {tick.value.toFixed()}
             </text>
           </g>
         )}
@@ -76,7 +76,7 @@ export const AxisLeft = (props: AxisProps) => {
           <g transform={`translate(0, ${tick.position})`}>
             <line x2="-6" stroke="black" />
             <text x="-9" dy="0.32em" text-anchor="end">
-              {tick.value}
+              {tick.value.toFixed()}
             </text>
           </g>
         )}

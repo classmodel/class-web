@@ -18,8 +18,20 @@ export default function LinePlot(props: LinePlotProps) {
     50, 50, 50, 50,
   ];
 
-  const scaleX = d3.scaleLinear([0, 10], [marginLeft, width - marginRight]);
-  const scaleY = d3.scaleLinear([0, 2000], [height - marginBottom, marginTop]);
+  function safeExtent(
+    array: number[],
+    fallback: [number, number] = [0, 1],
+  ): [number, number] {
+    const extent = d3.extent(array);
+    return extent[0] == null || extent[1] == null ? fallback : extent;
+  }
+
+  // TODO: modify extent to give a bit of spacing to both sides and have logical tick labels
+  const extentX = safeExtent(x);
+  const extentY = safeExtent(y, [0, 2000]);
+
+  const scaleX = d3.scaleLinear(extentX, [marginLeft, width - marginRight]);
+  const scaleY = d3.scaleLinear(extentY, [height - marginBottom, marginTop]);
 
   const l = d3.line((d, i) => scaleX(x[i]), scaleY);
 
