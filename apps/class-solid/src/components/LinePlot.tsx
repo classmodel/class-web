@@ -27,8 +27,8 @@ export default function LinePlot({
         transform={`translate(0, ${height - marginBottom})`}
       />
       <AxisLeft scale={scaleY} transform={`translate(${marginLeft}, 0)`} />
-      <path fill="none" stroke="currentColor" strokeWidth="1.5" d={l(y)} />
-      <g fill="white" stroke="currentColor" strokeWidth="1.5">
+      <path fill="none" stroke="currentColor" stroke-width="1.5" d={l(y)} />
+      <g fill="white" stroke="currentColor" stroke-width="1.5">
         {y.map((d, i) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
           <circle key={i} cx={scaleX(x[i])} cy={scaleY(d)} r="2.5" />
