@@ -79,9 +79,11 @@ export function TimeSeriesPlot() {
 }
 
 export function VerticalProfiles() {
+  const x = [10, 10, 5, 4, 3, 2, 1]; // Dummy theta
+  const y = [0, 1000, 1000, 1100, 1200, 1300, 1400]; // Dummy height
   return (
     <div>
-      <LinePlot />
+      <LinePlot x={x} y={y} />
     </div>
   );
 }

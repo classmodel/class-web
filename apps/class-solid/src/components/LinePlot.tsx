@@ -1,18 +1,22 @@
 import * as d3 from "d3";
 import { AxisBottom, AxisLeft } from "./Axes";
 
-export default function LinePlot({
-  // x,  # TODO pass data into plot
-  // y,
-  width = 450,
-  height = 400,
-  marginTop = 50,
-  marginRight = 50,
-  marginBottom = 50,
-  marginLeft = 50,
-}) {
-  const x = [10, 10, 5, 4, 3, 2, 1]; // Dummy theta
-  const y = [0, 1000, 1000, 1100, 1200, 1300, 1400]; // Dummy height
+interface LinePlotProps {
+  x: number[];
+  y: number[];
+  width?: number;
+  height?: number;
+  margin?: number[];
+}
+
+export default function LinePlot(props: LinePlotProps) {
+  const x = props.x;
+  const y = props.y;
+  const width = props.width || 450;
+  const height = props.height || 400;
+  const [marginTop, marginRight, marginBottom, marginLeft] = props.margin || [
+    50, 50, 50, 50,
+  ];
 
   const scaleX = d3.scaleLinear([0, 10], [marginLeft, width - marginRight]);
   const scaleY = d3.scaleLinear([0, 2000], [height - marginBottom, marginTop]);
