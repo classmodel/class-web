@@ -60,12 +60,10 @@
     "test": "tsx --test src/*.test.ts",
     "typecheck": "tsc --noEmit",
     "json2ts": "json2ts src/config.json src/config.ts",
-    "docs": "typedoc",
-    "check-exports": "attw --pack ."
+    "docs": "typedoc"
   },
   "bin": "./dist/cli.js",
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.16.4",
     "@types/node": "^20.13.1",
     "json-schema-to-typescript": "^15.0.2",
     "tsx": "^4.16.5",
