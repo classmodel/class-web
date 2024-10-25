@@ -74,17 +74,6 @@ If any changes are made to the `packages/class/src/config.json` file then the Ty
 pnpm json2ts
 ```
 
-## Local build
-
-To run a local development version:
-
-```sh
-git clone git@github.com:classmodel/class-web.git
-cd class-web
-pnpm install
-pnpm dev
-```
-
 ## Linter
 
 To check types, you can run the `pnpm typecheck` command as other commands ignore types.
