@@ -99,33 +99,34 @@ const linestyles = ["none", "5,5", "10,10", "15,5,5,5", "20,10,5,5,5,10"];
 export function VerticalProfilePlot() {
   const variable = "theta";
   const time = -1;
-  const profileData = experiments.flatMap((e, i) => {
-    const permutations = e.permutations.map((p, j) => {
-      // TODO get additional config info from reference
-      // permutations probably usually don't have gammaq/gammatetha set?
-      return {
-        color: colors[(j + 1) % 10],
-        linestyle: linestyles[i % 5],
-        label: `${e.name}/${p.name}`,
-        ...getVerticalProfiles(p.output, p.config, variable, time),
-      };
-    });
+  const profileData = () =>
+    experiments.flatMap((e, i) => {
+      const permutations = e.permutations.map((p, j) => {
+        // TODO get additional config info from reference
+        // permutations probably usually don't have gammaq/gammatetha set?
+        return {
+          color: colors[(j + 1) % 10],
+          linestyle: linestyles[i % 5],
+          label: `${e.name}/${p.name}`,
+          ...getVerticalProfiles(p.output, p.config, variable, time),
+        };
+      });
 
-    return [
-      {
-        label: e.name,
-        color: colors[0],
-        linestyle: linestyles[i],
-        ...getVerticalProfiles(
-          e.reference.output,
-          e.reference.config,
-          variable,
-          time,
-        ),
-      },
-      ...permutations,
-    ];
-  });
+      return [
+        {
+          label: e.name,
+          color: colors[0],
+          linestyle: linestyles[i],
+          ...getVerticalProfiles(
+            e.reference.output,
+            e.reference.config,
+            variable,
+            time,
+          ),
+        },
+        ...permutations,
+      ];
+    });
   return <LinePlot data={profileData} />;
 }
 

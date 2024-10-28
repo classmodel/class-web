@@ -34,28 +34,30 @@ function zipXY(data: ChartData): [number, number][] {
   return Array.from({ length }, (_, i) => [data.x[i], data.y[i]]);
 }
 
-export default function LinePlot({ data }: { data: ChartData[] }) {
+export default function LinePlot({ data }: { data: () => ChartData[] }) {
   // TODO: Make responsive
   const width = 450;
   const height = 400;
   const [marginTop, marginRight, marginBottom, marginLeft] = [15, 50, 50, 50];
 
-  const xLim = getNiceAxisLimits(data.flatMap((d) => d.x));
-  const yLim = getNiceAxisLimits(data.flatMap((d) => d.y));
-  const scaleX = d3.scaleLinear(xLim, [marginLeft, width - marginRight]);
-  const scaleY = d3.scaleLinear(yLim, [height - marginBottom, marginTop]);
+  const xLim = () => getNiceAxisLimits(data().flatMap((d) => d.x));
+  const yLim = () => getNiceAxisLimits(data().flatMap((d) => d.y));
+  const scaleX = () =>
+    d3.scaleLinear(xLim(), [marginLeft, width - marginRight]);
+  const scaleY = () =>
+    d3.scaleLinear(yLim(), [height - marginBottom, marginTop]);
 
   // const l = d3.line((d, i) => scaleX(x[i]), scaleY);
   const l = d3.line(
-    (d) => scaleX(d[0]),
-    (d) => scaleY(d[1]),
+    (d) => scaleX()(d[0]),
+    (d) => scaleY()(d[1]),
   );
 
   return (
     <>
       {/* Legend */}
       <div class="flex flex-wrap justify-end">
-        <For each={data}>
+        <For each={data()}>
           {(d) => (
             <>
               <span class="flex items-center">
@@ -86,13 +88,13 @@ export default function LinePlot({ data }: { data: ChartData[] }) {
         <title>Vertical profile plot</title>
         {/* Axes */}
         <AxisBottom
-          scale={scaleX}
+          scale={scaleX()}
           transform={`translate(0, ${height - marginBottom})`}
         />
-        <AxisLeft scale={scaleY} transform={`translate(${marginLeft}, 0)`} />
+        <AxisLeft scale={scaleY()} transform={`translate(${marginLeft}, 0)`} />
 
         {/* Line */}
-        <For each={data}>
+        <For each={data()}>
           {(d) => (
             <path
               fill="none"
