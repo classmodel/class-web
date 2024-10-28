@@ -9,6 +9,15 @@ interface LinePlotProps {
   margin?: number[];
 }
 
+//** Wrap d3.extent to always return a defined extent. */
+function safeExtent(
+  array: number[],
+  fallback: [number, number] = [0, 1],
+): [number, number] {
+  const extent = d3.extent(array);
+  return extent[0] == null || extent[1] == null ? fallback : extent;
+}
+
 export default function LinePlot(props: LinePlotProps) {
   const x = props.x;
   const y = props.y;
@@ -17,14 +26,6 @@ export default function LinePlot(props: LinePlotProps) {
   const [marginTop, marginRight, marginBottom, marginLeft] = props.margin || [
     50, 50, 50, 50,
   ];
-
-  function safeExtent(
-    array: number[],
-    fallback: [number, number] = [0, 1],
-  ): [number, number] {
-    const extent = d3.extent(array);
-    return extent[0] == null || extent[1] == null ? fallback : extent;
-  }
 
   // TODO: modify extent to give a bit of spacing to both sides and have logical tick labels
   const extentX = safeExtent(x);
@@ -38,12 +39,18 @@ export default function LinePlot(props: LinePlotProps) {
   return (
     <svg width={width} height={height} class="">
       <title>Vertical profile plot</title>
+
+      {/* Axes */}
       <AxisBottom
         scale={scaleX}
         transform={`translate(0, ${height - marginBottom})`}
       />
       <AxisLeft scale={scaleY} transform={`translate(${marginLeft}, 0)`} />
+
+      {/* Line */}
       <path fill="none" stroke="currentColor" stroke-width="1.5" d={l(y)} />
+
+      {/* Points */}
       <g fill="white" stroke="currentColor" stroke-width="1.5">
         {y.map((d, i) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>

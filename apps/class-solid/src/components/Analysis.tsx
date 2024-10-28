@@ -83,10 +83,11 @@ export function VerticalProfiles() {
   const profileData = getExperimentVerticalProfiles(experiments[0], -1);
   return (
     <div>
-      <LinePlot x={profileData.reference.theta} y={profileData.reference.h} />
-      <For each={profileData.permutations}>
-        {(perm) => <LinePlot x={perm.theta} y={perm.h} />}
-      </For>
+      <LinePlot x={profileData.reference.q} y={profileData.reference.h} />
+      {/* TODO: render all experiments and all permutations */}
+      {/* <For each={profileData.permutations}>
+        {(perm) => <LinePlot x={perm.q} y={perm.h} />}
+      </For> */}
     </div>
   );
 }
