@@ -32,10 +32,6 @@ function zipXY(data: ChartData): [number, number][] {
   return Array.from({ length }, (_, i) => [data.x[i], data.y[i]]);
 }
 
-interface ChartProps {
-  data: ChartData;
-}
-
 export default function LinePlot({ data }: { data: ChartData[] }) {
   console.log(data);
   // TODO: Make responsive

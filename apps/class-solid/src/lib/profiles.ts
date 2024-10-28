@@ -1,12 +1,5 @@
 import type { ClassOutput } from "@classmodel/class/runner";
 import type { PartialConfig } from "@classmodel/class/validate";
-import type { ChartData } from "../components/LinePlot";
-import type { Experiment } from "./store";
-
-interface ChartDataXY {
-  x: number[];
-  y: number[];
-}
 
 // Get vertical profiles for a single class run
 export function getVerticalProfiles(
@@ -14,7 +7,7 @@ export function getVerticalProfiles(
   config: PartialConfig,
   variable: "theta" | "q" = "theta",
   t = -1
-): ChartDataXY {
+): { x: number[]; y: number[] } {
   // Guard against undefined output
   if (output === undefined) {
     return { y: [], x: [] };
@@ -49,29 +42,4 @@ export function getVerticalProfiles(
   }
 
   return { y: [], x: [] };
-}
-
-// Get vertical profiles for reference + all permutations of experiment
-export function getExperimentVerticalProfiles(
-  experiment: Experiment,
-  variable: "theta" | "q" = "theta",
-  t = -1
-): ChartData[] {
-  const reference = experiment.reference;
-  const permutations = experiment.permutations.map((p) => {
-    // TODO get additional config info from reference
-    // permutations probably usually don't have gammaq/gammatetha set?
-    return {
-      label: `${experiment.name}/${p.name}`,
-      ...getVerticalProfiles(p.output, p.config, variable, t),
-    };
-  });
-
-  return [
-    {
-      label: experiment.name,
-      ...getVerticalProfiles(reference.output, reference.config, variable, t),
-    },
-    ...permutations,
-  ];
 }

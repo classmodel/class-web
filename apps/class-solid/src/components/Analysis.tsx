@@ -1,5 +1,5 @@
 import { For, Match, Switch, createMemo, createUniqueId } from "solid-js";
-import { getExperimentVerticalProfiles } from "~/lib/profiles";
+import { getVerticalProfiles } from "~/lib/profiles";
 import { analyses, experiments, setAnalyses } from "~/lib/store";
 import type { Experiment } from "~/lib/store";
 import LinePlot from "./LinePlot";
@@ -79,10 +79,32 @@ export function TimeSeriesPlot() {
   return <LineChart data={chartData()} />;
 }
 
-export function VerticalProfiles() {
-  const profileData = experiments.flatMap((e) =>
-    getExperimentVerticalProfiles(e, "theta", -1),
-  );
+export function VerticalProfilePlot() {
+  const variable = "theta";
+  const time = -1;
+  const profileData = experiments.flatMap((e) => {
+    const permutations = e.permutations.map((p) => {
+      // TODO get additional config info from reference
+      // permutations probably usually don't have gammaq/gammatetha set?
+      return {
+        label: `${e.name}/${p.name}`,
+        ...getVerticalProfiles(p.output, p.config, variable, time),
+      };
+    });
+
+    return [
+      {
+        label: e.name,
+        ...getVerticalProfiles(
+          e.reference.output,
+          e.reference.config,
+          variable,
+          time,
+        ),
+      },
+      ...permutations,
+    ];
+  });
   return <LinePlot data={profileData} />;
 }
 
@@ -136,7 +158,7 @@ export function AnalysisCard(analysis: Analysis) {
             <TimeSeriesPlot />
           </Match>
           <Match when={analysis.type === "profiles"}>
-            <VerticalProfiles />
+            <VerticalProfilePlot />
           </Match>
         </Switch>
       </CardContent>
