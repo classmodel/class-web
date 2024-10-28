@@ -99,8 +99,8 @@ const linestyles = ["none", "5,5", "10,10", "15,5,5,5", "20,10,5,5,5,10"];
 export function VerticalProfilePlot() {
   const variable = "theta";
   const time = -1;
-  const profileData = () =>
-    experiments.flatMap((e, i) => {
+  const profileData = createMemo(() => {
+    return experiments.flatMap((e, i) => {
       const permutations = e.permutations.map((p, j) => {
         // TODO get additional config info from reference
         // permutations probably usually don't have gammaq/gammatetha set?
@@ -127,6 +127,7 @@ export function VerticalProfilePlot() {
         ...permutations,
       ];
     });
+  });
   return <LinePlot data={profileData} />;
 }
 
