@@ -4,6 +4,8 @@ import { AxisBottom, AxisLeft } from "./Axes";
 
 export interface ChartData {
   label: string;
+  color: string;
+  linestyle: string;
   x: number[];
   y: number[];
 }
@@ -66,8 +68,9 @@ export default function LinePlot({ data }: { data: ChartData[] }) {
         {(d) => (
           <path
             fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
+            stroke={d.color}
+            stroke-dasharray={d.linestyle}
+            stroke-width="3"
             d={l(zipXY(d))}
           />
         )}

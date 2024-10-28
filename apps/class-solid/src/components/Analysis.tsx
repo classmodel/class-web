@@ -79,14 +79,33 @@ export function TimeSeriesPlot() {
   return <LineChart data={chartData()} />;
 }
 
+/** https://github.com/d3/d3-scale-chromatic/blob/main/src/categorical/Tableau10.js */
+const colors = [
+  "#4e79a7",
+  "#f28e2c",
+  "#e15759",
+  "#76b7b2",
+  "#59a14f",
+  "#edc949",
+  "#af7aa1",
+  "#ff9da7",
+  "#9da79c",
+  "#755fba",
+  "#b0ab0b",
+];
+
+const linestyles = ["none", "5,5", "10,10", "35,10", "20,10,5,5,5,10"];
+
 export function VerticalProfilePlot() {
   const variable = "theta";
   const time = -1;
-  const profileData = experiments.flatMap((e) => {
-    const permutations = e.permutations.map((p) => {
+  const profileData = experiments.flatMap((e, i) => {
+    const permutations = e.permutations.map((p, j) => {
       // TODO get additional config info from reference
       // permutations probably usually don't have gammaq/gammatetha set?
       return {
+        color: colors[(j + 1) % 10],
+        linestyle: linestyles[i % 5],
         label: `${e.name}/${p.name}`,
         ...getVerticalProfiles(p.output, p.config, variable, time),
       };
@@ -95,6 +114,8 @@ export function VerticalProfilePlot() {
     return [
       {
         label: e.name,
+        color: colors[0],
+        linestyle: linestyles[i],
         ...getVerticalProfiles(
           e.reference.output,
           e.reference.config,
