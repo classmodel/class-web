@@ -12,7 +12,23 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { LineChart } from "./ui/charts";
+
+/** https://github.com/d3/d3-scale-chromatic/blob/main/src/categorical/Tableau10.js */
+const colors = [
+  "#4e79a7",
+  "#f28e2c",
+  "#e15759",
+  "#76b7b2",
+  "#59a14f",
+  "#edc949",
+  "#af7aa1",
+  "#ff9da7",
+  "#9da79c",
+  "#755fba",
+  "#b0ab0b",
+];
+
+const linestyles = ["none", "5,5", "10,10", "15,5,5,5", "20,10,5,5,5,10"];
 
 export interface Analysis {
   name: string;
@@ -46,55 +62,39 @@ function deleteAnalysis(analysis: Analysis) {
  */
 export function TimeSeriesPlot() {
   const chartData = createMemo(() => {
-    return {
-      labels:
-        experiments[0].reference.output === undefined
-          ? undefined
-          : experiments[0].reference.output.t,
-      datasets: experiments
-        .filter((e) => e.reference.output)
-        .flatMap((e) => {
-          const permutationRuns = e.permutations.map((perm) => {
-            return {
-              label: `${e.name}/${perm.name}`,
-              data: perm.output === undefined ? [null] : perm.output.h,
-              fill: false,
-            };
-          });
-          return [
-            {
-              label: e.name,
-              data:
-                e.reference.output === undefined
-                  ? [null]
-                  : e.reference.output.h,
-              fill: false,
-            },
-            ...permutationRuns,
-          ];
-        }),
-    };
+    return experiments
+      .filter((e) => e.reference.output)
+      .flatMap((e, i) => {
+        const permutationRuns = e.permutations.map((perm, j) => {
+          return {
+            label: `${e.name}/${perm.name}`,
+            y: perm.output === undefined ? [] : perm.output.h,
+            x: perm.output === undefined ? [] : perm.output.t,
+            color: colors[(j + 1) % 10],
+            linestyle: linestyles[i % 5],
+          };
+        });
+        return [
+          {
+            y: e.reference.output === undefined ? [] : e.reference.output.h,
+            x: e.reference.output === undefined ? [] : e.reference.output.t,
+            label: e.name,
+            color: colors[0],
+            linestyle: linestyles[i],
+          },
+          ...permutationRuns,
+        ];
+      });
   });
 
-  return <LineChart data={chartData()} />;
+  return (
+    <LinePlot
+      data={chartData}
+      xlabel="Time [s]"
+      ylabel="Mixed-layer height [m]"
+    />
+  );
 }
-
-/** https://github.com/d3/d3-scale-chromatic/blob/main/src/categorical/Tableau10.js */
-const colors = [
-  "#4e79a7",
-  "#f28e2c",
-  "#e15759",
-  "#76b7b2",
-  "#59a14f",
-  "#edc949",
-  "#af7aa1",
-  "#ff9da7",
-  "#9da79c",
-  "#755fba",
-  "#b0ab0b",
-];
-
-const linestyles = ["none", "5,5", "10,10", "15,5,5,5", "20,10,5,5,5,10"];
 
 export function VerticalProfilePlot() {
   const variable = "theta";
