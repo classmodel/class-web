@@ -1,7 +1,7 @@
-import { type Accessor, Show, createMemo, createSignal } from "solid-js";
+import { Show, createMemo, createSignal } from "solid-js";
 import { Button } from "~/components/ui/button";
-import { encodeExperiment } from "~/lib/encode";
-import type { Experiment } from "~/lib/store";
+import { encodeAppState } from "~/lib/encode";
+import { analyses, experiments } from "~/lib/store";
 import {
   MdiClipboard,
   MdiClipboardCheck,
@@ -18,7 +18,7 @@ import {
 import { TextField, TextFieldInput } from "./ui/text-field";
 import { showToast } from "./ui/toast";
 
-export function ShareButton(props: { experiment: Accessor<Experiment> }) {
+export function ShareButton() {
   const [open, setOpen] = createSignal(false);
   const [isCopied, setIsCopied] = createSignal(false);
   let inputRef: HTMLInputElement | undefined;
@@ -26,8 +26,9 @@ export function ShareButton(props: { experiment: Accessor<Experiment> }) {
     if (!open()) {
       return "";
     }
-    const encodedExperiment = encodeExperiment(props.experiment());
-    const url = `${window.location.origin}#${encodedExperiment}`;
+
+    const appState = encodeAppState(experiments, analyses);
+    const url = `${window.location.origin}#${appState}`;
     return url;
   });
 
@@ -57,8 +58,9 @@ export function ShareButton(props: { experiment: Accessor<Experiment> }) {
 
   return (
     <Dialog open={open()} onOpenChange={handleOpenChange}>
-      <DialogTrigger variant="outline" as={Button<"button">}>
-        <MdiShareVariantOutline />
+      {/* TODO disable when there are zero experiments or analyses */}
+      <DialogTrigger class="flex items-center gap-2 border-transparent border-b-2 hover:border-sky-600">
+        Share <MdiShareVariantOutline />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -73,7 +75,8 @@ export function ShareButton(props: { experiment: Accessor<Experiment> }) {
             >
               this link
             </a>{" "}
-            will be able to view the current experiment in their web browser.
+            will be able to view the current application state in their web
+            browser.
           </DialogDescription>
         </DialogHeader>
 
@@ -84,7 +87,7 @@ export function ShareButton(props: { experiment: Accessor<Experiment> }) {
               type="text"
               readonly
               class="w-full"
-              aria-label="Shareable link for current experiment"
+              aria-label="Shareable link for current application state"
             />
           </TextField>
           <Button

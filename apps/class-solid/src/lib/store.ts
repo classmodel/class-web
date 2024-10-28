@@ -7,6 +7,7 @@ import {
   pruneDefaults,
 } from "@classmodel/class/validate";
 import type { Analysis } from "~/components/Analysis";
+import { decodeAppState } from "./encode";
 import { runClass } from "./runner";
 
 export interface Permutation<C extends PartialConfig = PartialConfig> {
@@ -271,4 +272,11 @@ export function swapPermutationAndReferenceConfiguration(
   );
   // TODO should names also be swapped?
   runExperiment(experimentIndex);
+}
+
+export async function loadStateFromString(rawState: string): Promise<void> {
+  const [loadedExperiments, loadedAnalyses] = decodeAppState(rawState);
+  setExperiments(loadedExperiments);
+  await Promise.all(loadedExperiments.map((_, i) => runExperiment(i)));
+  setAnalyses(loadedAnalyses);
 }

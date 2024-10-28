@@ -1,4 +1,5 @@
 import { useLocation } from "@solidjs/router";
+import { ShareButton } from "./ShareButton";
 
 export default function Nav() {
   const location = useLocation();
@@ -14,6 +15,10 @@ export default function Nav() {
         </li>
         <li class={`border-b-2 ${active("/about")} mx-1.5 sm:mx-6`}>
           <a href="/about">About</a>
+        </li>
+        <li>
+          {/* TODO move right */}
+          <ShareButton />
         </li>
       </ul>
     </nav>

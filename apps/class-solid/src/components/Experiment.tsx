@@ -17,7 +17,6 @@ import {
 } from "~/lib/store";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import { PermutationsList } from "./PermutationsList";
-import { ShareButton } from "./ShareButton";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import {
   Card,
@@ -271,7 +270,6 @@ export function ExperimentCard(props: {
           >
             <MdiDelete />
           </Button>
-          <ShareButton experiment={experiment} />
         </Show>
       </CardFooter>
     </Card>

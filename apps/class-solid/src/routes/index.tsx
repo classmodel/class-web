@@ -1,5 +1,4 @@
-import { useLocation, useNavigate } from "@solidjs/router";
-import { For, Show, createSignal, onMount } from "solid-js";
+import { For, Show, createSignal, onCleanup, onMount } from "solid-js";
 
 import { AnalysisCard, addAnalysis } from "~/components/Analysis";
 import { AddExperimentDialog, ExperimentCard } from "~/components/Experiment";
@@ -14,40 +13,17 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Flex } from "~/components/ui/flex";
-import { Toaster, showToast } from "~/components/ui/toast";
-import { decodeExperiment } from "~/lib/encode";
+import { Toaster } from "~/components/ui/toast";
+import { onPageLeave, onPageLoad } from "~/lib/onPageTransition";
 
-import { experiments, uploadExperiment } from "~/lib/store";
+import { experiments } from "~/lib/store";
 import { analyses } from "~/lib/store";
 
 export default function Home() {
   const [openAddDialog, setOpenAddDialog] = createSignal(false);
 
-  onMount(async () => {
-    const location = useLocation();
-    const navigate = useNavigate();
-    const rawExperiment = location.hash.substring(1);
-    if (!rawExperiment) return;
-    try {
-      const experimentConfig = decodeExperiment(rawExperiment);
-      await uploadExperiment(experimentConfig);
-      showToast({
-        title: "Experiment loaded from URL",
-        variant: "success",
-        duration: 1000,
-      });
-    } catch (error) {
-      console.error(error);
-      showToast({
-        title: "Failed to load experiment from URL",
-        description: `${error}`,
-        variant: "error",
-      });
-    }
-    // Remove hash after loading experiment from URL,
-    // as after editing the experiment the hash out of sync
-    navigate("/");
-  });
+  onMount(onPageLoad);
+  onCleanup(onPageLeave);
 
   return (
     <main class="mx-auto p-4 text-center text-gray-700">
