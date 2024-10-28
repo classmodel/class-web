@@ -37,7 +37,7 @@ export const AxisBottom = (props: AxisProps) => {
       <For each={ticks()}>
         {(tick) => (
           <g transform={`translate(${tick.position}, 0)`}>
-            <line y2="6" stroke="black" />
+            <line y2="6" stroke="currentColor" />
             <text y="9" dy="0.71em" text-anchor="middle">
               {d3.format(".3g")(tick.value)}
             </text>
@@ -70,12 +70,12 @@ export const AxisLeft = (props: AxisProps) => {
         x2={0}
         y1={props.scale.range()[0]}
         y2={props.scale.range()[1]}
-        stroke="black"
+        stroke="currentColor"
       />
       <For each={ticks()}>
         {(tick) => (
           <g transform={`translate(0, ${tick.position})`}>
-            <line x2="-6" stroke="black" />
+            <line x2="-6" stroke="currentColor" />
             <text x="-9" dy="0.32em" text-anchor="end">
               {tick.value.toFixed()}
             </text>

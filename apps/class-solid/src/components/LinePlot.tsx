@@ -56,7 +56,7 @@ export default function LinePlot({ data }: { data: () => ChartData[] }) {
   return (
     <>
       {/* Legend */}
-      <div class="flex flex-wrap justify-end">
+      <div class="flex flex-wrap justify-end text-sm tracking-tight">
         <For each={data()}>
           {(d) => (
             <>
@@ -84,7 +84,11 @@ export default function LinePlot({ data }: { data: () => ChartData[] }) {
       </div>
 
       {/* Plot */}
-      <svg width={width} height={height} class="">
+      <svg
+        width={width}
+        height={height}
+        class="text-xs tracking-wide text-slate-500"
+      >
         <title>Vertical profile plot</title>
         {/* Axes */}
         <AxisBottom
