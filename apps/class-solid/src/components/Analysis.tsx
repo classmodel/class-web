@@ -174,9 +174,31 @@ export function AnalysisCard(analysis: Analysis) {
   const id = createUniqueId();
   return (
     <Card class="w-[500px]" role="article" aria-labelledby={id}>
-      <CardHeader>
+      <CardHeader class="flex-row justify-between items-center py-2 pb-6">
         {/* TODO: make name & description editable */}
         <CardTitle id={id}>{analysis.name}</CardTitle>
+
+        <div class="flex">
+          {/* TODO: implement download functionality */}
+          <Button variant="outline" title="Download">
+            <MdiDownload />
+          </Button>
+          {/* TODO: implement "configure" functionality */}
+          <Button variant="outline" title="Configure">
+            <MdiCog />
+          </Button>
+          {/* TODO: implement duplicate functionality */}
+          <Button variant="outline" title="Duplicate">
+            <MdiContentCopy />
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => deleteAnalysis(analysis)}
+            title="Delete"
+          >
+            <MdiDelete />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent class="min-h-[450px]">
         <Switch fallback={<p>Unknown analysis type</p>}>
@@ -191,27 +213,6 @@ export function AnalysisCard(analysis: Analysis) {
           </Match>
         </Switch>
       </CardContent>
-      <CardFooter>
-        {/* TODO: implement download functionality */}
-        <Button variant="outline" title="Download">
-          <MdiDownload />
-        </Button>
-        {/* TODO: implement "configure" functionality */}
-        <Button variant="outline" title="Configure">
-          <MdiCog />
-        </Button>
-        {/* TODO: implement duplicate functionality */}
-        <Button variant="outline" title="Duplicate">
-          <MdiContentCopy />
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => deleteAnalysis(analysis)}
-          title="Delete"
-        >
-          <MdiDelete />
-        </Button>
-      </CardFooter>
     </Card>
   );
 }
