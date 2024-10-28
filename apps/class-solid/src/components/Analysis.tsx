@@ -80,10 +80,8 @@ export function TimeSeriesPlot() {
 }
 
 export function VerticalProfiles() {
-  const profileData = getExperimentVerticalProfiles(
-    experiments[0],
-    "theta",
-    -1,
+  const profileData = experiments.flatMap((e) =>
+    getExperimentVerticalProfiles(e, "theta", -1),
   );
   return <LinePlot data={profileData} />;
 }
