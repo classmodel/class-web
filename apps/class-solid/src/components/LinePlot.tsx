@@ -91,7 +91,7 @@ export default function LinePlot({
       <svg
         width={width}
         height={height}
-        class="text-xs tracking-wide text-slate-500"
+        class="text-slate-500 text-xs tracking-wide"
       >
         <title>Vertical profile plot</title>
         {/* Axes */}

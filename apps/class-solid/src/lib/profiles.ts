@@ -6,7 +6,7 @@ export function getVerticalProfiles(
   output: ClassOutput | undefined,
   config: PartialConfig,
   variable: "theta" | "q" = "theta",
-  t = -1
+  t = -1,
 ): { x: number[]; y: number[] } {
   // Guard against undefined output
   if (output === undefined) {

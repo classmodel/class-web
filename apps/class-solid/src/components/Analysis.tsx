@@ -5,13 +5,7 @@ import type { Experiment } from "~/lib/store";
 import LinePlot from "./LinePlot";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import { Button } from "./ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 /** https://github.com/d3/d3-scale-chromatic/blob/main/src/categorical/Tableau10.js */
 const colors = [
@@ -174,7 +168,7 @@ export function AnalysisCard(analysis: Analysis) {
   const id = createUniqueId();
   return (
     <Card class="w-[500px]" role="article" aria-labelledby={id}>
-      <CardHeader class="flex-row justify-between items-center py-2 pb-6">
+      <CardHeader class="flex-row items-center justify-between py-2 pb-6">
         {/* TODO: make name & description editable */}
         <CardTitle id={id}>{analysis.name}</CardTitle>
 
