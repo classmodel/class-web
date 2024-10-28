@@ -68,7 +68,10 @@ This package is part of a [monorepo](https://github.com/classmodel/class-web) wi
 
 The Class model uses a JSON schema to validate the input configuration. The schema is defined in the `@classmodel/class` package and can be found at [src/config.json](https://github.com/classmodel/class-web/blob/main/packages/class/src/config.json) (in [repo](./src/config.json)). The schema is used to validate the input configuration and to generate a form to input the configuration.
 
-If any changes are made to the `src/config.json` file then the Typescript type need to be regenerated with the following command:
+The `src/config.ts` file contains the embedded JSON schema and its Typescript type definition.
+When runnning `pnpm dev` or `pnpm build` the `src/config.ts` file is generated from the `src/config.json` file.
+
+To manually generate the `src/config.ts` file run the following command:
 
 ```shell
 pnpm json2ts
