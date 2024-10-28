@@ -72,7 +72,9 @@ export default function LinePlot({ data }: { data: ChartData[] }) {
             stroke-dasharray={d.linestyle}
             stroke-width="3"
             d={l(zipXY(d))}
-          />
+          >
+            <title>{d.label}</title>
+          </path>
         )}
       </For>
 
