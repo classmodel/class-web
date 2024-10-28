@@ -128,7 +128,13 @@ export function VerticalProfilePlot() {
       ];
     });
   });
-  return <LinePlot data={profileData} />;
+  return (
+    <LinePlot
+      data={profileData}
+      xlabel="Potential temperature [K]"
+      ylabel="Height [m]"
+    />
+  );
 }
 
 /** Simply show the final height for each experiment that has output */

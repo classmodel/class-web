@@ -8,6 +8,7 @@ interface AxisProps {
   scale: ScaleLinear<number, number>;
   transform?: string;
   tickCount?: number;
+  label?: string;
 }
 
 export const AxisBottom = (props: AxisProps) => {
@@ -44,6 +45,9 @@ export const AxisBottom = (props: AxisProps) => {
           </g>
         )}
       </For>
+      <text x={props.scale.range()[1]} y="9" dy="2em" text-anchor="end">
+        {props.label}
+      </text>
     </g>
   );
 };
@@ -63,6 +67,7 @@ export const AxisLeft = (props: AxisProps) => {
     });
   };
 
+  const labelpos = props.scale.range().reduce((a, b) => a + b) / 2;
   return (
     <g transform={props.transform}>
       <line
@@ -82,6 +87,13 @@ export const AxisLeft = (props: AxisProps) => {
           </g>
         )}
       </For>
+      <text
+        y={props.scale.range()[1]}
+        text-anchor="end"
+        transform="translate(-65, 20) rotate(-90)"
+      >
+        {props.label}
+      </text>
     </g>
   );
 };

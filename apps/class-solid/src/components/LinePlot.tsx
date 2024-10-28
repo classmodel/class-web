@@ -34,11 +34,15 @@ function zipXY(data: ChartData): [number, number][] {
   return Array.from({ length }, (_, i) => [data.x[i], data.y[i]]);
 }
 
-export default function LinePlot({ data }: { data: () => ChartData[] }) {
+export default function LinePlot({
+  data,
+  xlabel,
+  ylabel,
+}: { data: () => ChartData[]; xlabel?: string; ylabel?: string }) {
   // TODO: Make responsive
   const width = 450;
   const height = 400;
-  const [marginTop, marginRight, marginBottom, marginLeft] = [15, 50, 50, 50];
+  const [marginTop, marginRight, marginBottom, marginLeft] = [25, 50, 50, 50];
 
   const xLim = () => getNiceAxisLimits(data().flatMap((d) => d.x));
   const yLim = () => getNiceAxisLimits(data().flatMap((d) => d.y));
@@ -94,8 +98,13 @@ export default function LinePlot({ data }: { data: () => ChartData[] }) {
         <AxisBottom
           scale={scaleX()}
           transform={`translate(0, ${height - marginBottom})`}
+          label={xlabel}
         />
-        <AxisLeft scale={scaleY()} transform={`translate(${marginLeft}, 0)`} />
+        <AxisLeft
+          scale={scaleY()}
+          transform={`translate(${marginLeft}, 0)`}
+          label={ylabel}
+        />
 
         {/* Line */}
         <For each={data()}>
