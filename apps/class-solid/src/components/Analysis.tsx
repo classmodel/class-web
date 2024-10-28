@@ -76,7 +76,7 @@ export function TimeSeriesPlot() {
     };
   });
 
-  return <LinePlot data={chartData()} />;
+  return <LineChart data={chartData()} />;
 }
 
 export function VerticalProfiles() {
