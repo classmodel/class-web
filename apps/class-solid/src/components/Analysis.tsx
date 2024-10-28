@@ -94,7 +94,7 @@ const colors = [
   "#b0ab0b",
 ];
 
-const linestyles = ["none", "5,5", "10,10", "35,10", "20,10,5,5,5,10"];
+const linestyles = ["none", "5,5", "10,10", "15,5,5,5", "20,10,5,5,5,10"];
 
 export function VerticalProfilePlot() {
   const variable = "theta";
@@ -170,7 +170,7 @@ export function AnalysisCard(analysis: Analysis) {
         {/* TODO: make name & description editable */}
         <CardTitle id={id}>{analysis.name}</CardTitle>
       </CardHeader>
-      <CardContent class="h-[450px]">
+      <CardContent class="min-h-[450px]">
         <Switch fallback={<p>Unknown analysis type</p>}>
           <Match when={analysis.type === "default"}>
             <FinalHeights />

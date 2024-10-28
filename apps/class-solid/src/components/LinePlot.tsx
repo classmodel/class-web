@@ -35,11 +35,10 @@ function zipXY(data: ChartData): [number, number][] {
 }
 
 export default function LinePlot({ data }: { data: ChartData[] }) {
-  console.log(data);
   // TODO: Make responsive
   const width = 450;
   const height = 400;
-  const [marginTop, marginRight, marginBottom, marginLeft] = [50, 50, 50, 50];
+  const [marginTop, marginRight, marginBottom, marginLeft] = [15, 50, 50, 50];
 
   const xLim = getNiceAxisLimits(data.flatMap((d) => d.x));
   const yLim = getNiceAxisLimits(data.flatMap((d) => d.y));
@@ -53,38 +52,60 @@ export default function LinePlot({ data }: { data: ChartData[] }) {
   );
 
   return (
-    <svg width={width} height={height} class="">
-      <title>Vertical profile plot</title>
+    <>
+      {/* Legend */}
+      <div class="flex flex-wrap justify-end">
+        <For each={data}>
+          {(d) => (
+            <>
+              <span class="flex items-center">
+                <svg
+                  width="1.5rem"
+                  height="1rem"
+                  overflow="visible"
+                  viewBox="0 0 50 20"
+                >
+                  <title>legend</title>
+                  <path
+                    fill="none"
+                    stroke={d.color}
+                    stroke-dasharray={d.linestyle}
+                    stroke-width="4"
+                    d="M 0 12 L 45 12"
+                  />
+                </svg>
+                <p style={`color: ${d.color}`}>{d.label}</p>
+              </span>
+            </>
+          )}
+        </For>
+      </div>
 
-      {/* Axes */}
-      <AxisBottom
-        scale={scaleX}
-        transform={`translate(0, ${height - marginBottom})`}
-      />
-      <AxisLeft scale={scaleY} transform={`translate(${marginLeft}, 0)`} />
+      {/* Plot */}
+      <svg width={width} height={height} class="">
+        <title>Vertical profile plot</title>
+        {/* Axes */}
+        <AxisBottom
+          scale={scaleX}
+          transform={`translate(0, ${height - marginBottom})`}
+        />
+        <AxisLeft scale={scaleY} transform={`translate(${marginLeft}, 0)`} />
 
-      {/* Line */}
-      <For each={data}>
-        {(d) => (
-          <path
-            fill="none"
-            stroke={d.color}
-            stroke-dasharray={d.linestyle}
-            stroke-width="3"
-            d={l(zipXY(d))}
-          >
-            <title>{d.label}</title>
-          </path>
-        )}
-      </For>
-
-      {/* Points */}
-      {/* <g fill="white" stroke="currentColor" stroke-width="1.5">
-        {y.map((d, i) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-          <circle key={i} cx={scaleX(x[i])} cy={scaleY(d)} r="2.5" />
-        ))}
-      </g> */}
-    </svg>
+        {/* Line */}
+        <For each={data}>
+          {(d) => (
+            <path
+              fill="none"
+              stroke={d.color}
+              stroke-dasharray={d.linestyle}
+              stroke-width="3"
+              d={l(zipXY(d))}
+            >
+              <title>{d.label}</title>
+            </path>
+          )}
+        </For>
+      </svg>
+    </>
   );
 }
