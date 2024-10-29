@@ -28,27 +28,16 @@ async function format(schemaTsPath) {
 }
 
 async function readJsonSchema(jsonSchemaPath) {
+  const jsonSchema = await readFile(jsonSchemaPath, "utf-8");
+  const trimmedJsonSchema = jsonSchema.trim();
+  return trimmedJsonSchema;
+}
+
+function prefixOfJsonSchema(jsonSchemaPath) {
   const fn = basename(jsonSchemaPath, extname(jsonSchemaPath));
   // json-schema-to-typescript generates type names with base of filename with the first letter capitalized
   const prefix = fn.charAt(0).toUpperCase() + fn.slice(1);
-  const jsonSchema = await readFile(jsonSchemaPath, "utf-8");
-  const trimmedJsonSchema = jsonSchema.trim();
-  return { prefix, trimmedJsonSchema };
-}
-
-function watchJsonSchema(jsonSchemaPath, schemaTsPath) {
-  console.log(`Watching ${jsonSchemaPath} for changes`);
-  watch(jsonSchemaPath, (event) => {
-    if (event !== "change") {
-      return;
-    }
-    console.log(
-      `File ${jsonSchemaPath} has been changed, regenerating ${schemaTsPath}`,
-    );
-    json2ts(jsonSchemaPath, schemaTsPath).catch((err) => {
-      console.error(err);
-    });
-  });
+  return prefix;
 }
 
 /**
@@ -63,8 +52,10 @@ async function json2ts(jsonSchemaPath, schemaTsPath) {
     bannerComment: "",
   });
 
+  const prefix = prefixOfJsonSchema(jsonSchemaPath);
+
   // Read JSON schema file
-  const { prefix, trimmedJsonSchema } = await readJsonSchema(jsonSchemaPath);
+  const trimmedJsonSchema = await readJsonSchema(jsonSchemaPath);
 
   // Combine types and JSON schema into a single TypeScript file
   const body = `\
@@ -84,6 +75,21 @@ export const jsonSchemaOf${prefix} = ${trimmedJsonSchema} as unknown as JsonSche
   await writeFile(schemaTsPath, body, { flag: "w" });
 
   await format(schemaTsPath);
+}
+
+function watchJsonSchema(jsonSchemaPath, schemaTsPath) {
+  console.log(`Watching ${jsonSchemaPath} for changes`);
+  watch(jsonSchemaPath, (event) => {
+    if (event !== "change") {
+      return;
+    }
+    console.log(
+      `File ${jsonSchemaPath} has been changed, regenerating ${schemaTsPath}`,
+    );
+    json2ts(jsonSchemaPath, schemaTsPath).catch((err) => {
+      console.error(err);
+    });
+  });
 }
 
 function main() {
