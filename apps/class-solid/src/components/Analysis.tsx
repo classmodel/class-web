@@ -4,6 +4,7 @@ import { analyses, experiments, setAnalyses } from "~/lib/store";
 import type { Experiment } from "~/lib/store";
 import LinePlot from "./LinePlot";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
+import { SkewTPlot } from "./skewTlogP";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
@@ -204,6 +205,9 @@ export function AnalysisCard(analysis: Analysis) {
           </Match>
           <Match when={analysis.type === "profiles"}>
             <VerticalProfilePlot />
+          </Match>
+          <Match when={analysis.type === "skewT"}>
+            <SkewTPlot />
           </Match>
         </Switch>
       </CardContent>

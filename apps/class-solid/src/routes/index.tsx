@@ -108,8 +108,8 @@ export default function Home() {
               <DropdownMenuItem onClick={() => addAnalysis("profiles")}>
                 Vertical profile
               </DropdownMenuItem>
-              <DropdownMenuItem class="text-gray-400">
-                Skew-T diagram (not implemented)
+              <DropdownMenuItem onClick={() => addAnalysis("skewT")}>
+                Skew-T log-p diagram
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
