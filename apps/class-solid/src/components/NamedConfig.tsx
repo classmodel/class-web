@@ -1,8 +1,5 @@
-import {
-  type PartialConfig,
-  ajv,
-  jsonSchemaOfConfig,
-} from "@classmodel/class/validate";
+import { jsonSchemaOfConfig } from "@classmodel/class/config";
+import { type PartialConfig, ajv } from "@classmodel/class/validate";
 import type { JSONSchemaType } from "ajv";
 
 type NamedAndDescription = {
