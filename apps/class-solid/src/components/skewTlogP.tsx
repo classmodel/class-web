@@ -134,7 +134,7 @@ export function SkewTPlot() {
     <div id="mainbox">
       {/* Create svg container for sounding */}
       <svg width={w + m[1] + m[3]} height={h + m[0] + m[2]}>
-        <title>Skew-T log(p) plot</title>
+        <title>Thermodynamic diagram</title>
         <g transform={`translate(${m[3]},${m[0]})`}>
           <g class="skewtbg">
             <clipPath id="clipper">
@@ -199,12 +199,14 @@ export function SkewTPlot() {
               transform={`translate(0,${h - 0.5})`}
               tickValues={temperatureLines}
               tickFormat={d3.format(".0d")}
+              //   label="Temperature [deg C]"
             />
             <AxisLeft
               scale={y}
               transform="translate(-0.5,0)"
               tickValues={pressureLines}
               tickFormat={d3.format(".0d")}
+              //   label="Pressure [hPa]"
             />
           </g>
           <g class="skewt">

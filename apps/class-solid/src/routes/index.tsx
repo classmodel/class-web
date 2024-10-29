@@ -109,7 +109,7 @@ export default function Home() {
                 Vertical profile
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => addAnalysis("skewT")}>
-                Skew-T log-p diagram
+                Thermodynamic diagram
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

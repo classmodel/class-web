@@ -38,6 +38,7 @@ export function addAnalysis(type = "default") {
     default: "Final height",
     timeseries: "Timeseries",
     profiles: "Vertical profiles",
+    skewT: "Thermodynamic diagram",
   }[type];
 
   setAnalyses(analyses.length, {
