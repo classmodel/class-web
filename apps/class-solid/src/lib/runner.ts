@@ -13,7 +13,8 @@ export async function runClass(config: PartialConfig) {
   const model = await new AsyncBmiClass();
   await model.initialize(parsedConfig);
   const output = await model.run({
-    var_names: ["h"],
+    var_names: ["h", "theta", "q", "dtheta", "dq"],
   });
+  console.log(output);
   return output;
 }

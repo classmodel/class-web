@@ -81,8 +81,8 @@ export default function Home() {
               <DropdownMenuItem onClick={() => addAnalysis("timeseries")}>
                 Timeseries
               </DropdownMenuItem>
-              <DropdownMenuItem class="text-gray-400">
-                Vertical profile (not implemented)
+              <DropdownMenuItem onClick={() => addAnalysis("profiles")}>
+                Vertical profile
               </DropdownMenuItem>
               <DropdownMenuItem class="text-gray-400">
                 Skew-T diagram (not implemented)

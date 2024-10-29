@@ -1,9 +1,9 @@
 import assert from "node:assert";
 import test, { describe } from "node:test";
-import type { Config } from "./config.js";
+
+import { type Config, jsonSchemaOfConfig } from "./config.js";
 import {
   type PartialConfig,
-  jsonSchemaOfConfig,
   overwriteDefaultsInJsonSchema,
   parse,
   pruneDefaults,

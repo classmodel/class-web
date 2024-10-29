@@ -5,16 +5,7 @@
  */
 import { Ajv2019 } from "ajv/dist/2019.js";
 import type { DefinedError, JSONSchemaType } from "ajv/dist/2019.js";
-
-import type { Config } from "./config.js";
-import rawConfigJson from "./config.json";
-
-/**
- * The JSON schema for the configuration object.
- */
-export type JsonSchemaOfConfig = JSONSchemaType<Config>;
-export const jsonSchemaOfConfig =
-  rawConfigJson as unknown as JsonSchemaOfConfig;
+import { type Config, jsonSchemaOfConfig } from "./config.js";
 
 export const ajv = new Ajv2019({
   coerceTypes: true,
@@ -36,7 +27,6 @@ ajv.addKeyword({
  *
  * @param input - The input to be validated.
  * @returns `true` if the input is valid, `false` otherwise.
- *
  */
 export const validate = ajv.compile(jsonSchemaOfConfig);
 

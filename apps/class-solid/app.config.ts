@@ -1,5 +1,7 @@
 import { defineConfig } from "@solidjs/start/config";
 
+console.log("process.env.BASE_PATH", process.env.BASE_PATH);
+
 export default defineConfig({
   ssr: false,
   server: {
