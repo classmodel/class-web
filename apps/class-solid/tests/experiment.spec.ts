@@ -58,7 +58,7 @@ test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
 
   // visually check that timeseries plot has 4 non-overlapping lines
   await testInfo.attach("timeseries plot with 4 non-overlapping lines", {
-    body: await page.locator("canvas").screenshot(),
+    body: await page.locator("figure").screenshot(),
     contentType: "image/png",
   });
 });

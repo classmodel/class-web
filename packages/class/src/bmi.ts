@@ -126,7 +126,7 @@ export class BmiClass implements BmiLight<Config> {
    * @returns The output data, including the time values in t key and the values of the output variables.
    */
   run<T extends string[]>({
-    freq = 60,
+    freq = 600,
     var_names = ouput_var_names as T,
   }: {
     freq?: number;
