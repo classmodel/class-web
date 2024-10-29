@@ -53,9 +53,6 @@ importers:
       autoprefixer:
         specifier: ^10.4.19
         version: 10.4.19(postcss@8.4.39)
-      chart.js:
-        specifier: ^4.4.3
-        version: 4.4.3
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.0
@@ -663,9 +660,6 @@ packages:
     resolution: {integrity: sha512-TYVCpQcpqo1+0HBn3NXoGEBzxd4tH6Um1oc07nrYw1V7Qq0qbMaYAOnfBc1qhlh7sGV4XZldmb0j13Of0FrZQg==}
     peerDependencies:
       solid-js: ^1.7.11
-
-  '@kurkle/color@0.3.2':
-    resolution: {integrity: sha512-fuscdXJ9G1qb7W8VdHi+IwRqij3lBkosAm4ydQtEmbY58OzHXqQhvlxqEkoz0yssNVn38bcpRWgA9PP+OGoisw==}
 
   '@mapbox/node-pre-gyp@1.0.11':
     resolution: {integrity: sha512-Yhlar6v9WQgUp/He7BdgzOz8lqMQ8sU+jkCq7Wx8Myc5YFJLbEe7lgui/V7G1qB1DJykHSGwreceSaD60Y0PUQ==}
@@ -1468,10 +1462,6 @@ packages:
 
   character-entities-legacy@3.0.0:
     resolution: {integrity: sha512-RpPp0asT/6ufRm//AJVwpViZbGM/MkjQFxJccQRHmISF/22NBtsHqAWmL+/pmkPWoIUJdWyeVleTl1wydHATVQ==}
-
-  chart.js@4.4.3:
-    resolution: {integrity: sha512-qK1gkGSRYcJzqrrzdR6a+I0vQ4/R+SoODXyAjscQ/4mzuNzySaMCd+hyVxitSY1+L2fjPD1Gbn+ibNqRmwQeLw==}
-    engines: {pnpm: '>=8'}
 
   chokidar@3.6.0:
     resolution: {integrity: sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==}
@@ -4054,8 +4044,6 @@ snapshots:
       '@solid-primitives/utils': 6.2.3(solid-js@1.8.18)
       solid-js: 1.8.18
 
-  '@kurkle/color@0.3.2': {}
-
   '@mapbox/node-pre-gyp@1.0.11':
     dependencies:
       detect-libc: 2.0.3
@@ -4931,10 +4919,6 @@ snapshots:
   character-entities-html4@2.1.0: {}
 
   character-entities-legacy@3.0.0: {}
-
-  chart.js@4.4.3:
-    dependencies:
-      '@kurkle/color': 0.3.2
 
   chokidar@3.6.0:
     dependencies:
