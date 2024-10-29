@@ -26,19 +26,97 @@ export function SkewTPlot() {
   const x = d3.scaleLinear().range([0, w]).domain([-45, 50]);
   const y = d3.scaleLog().range([0, h]).domain([topPressure, basep]);
 
-  //   // various path generators
-  //   const line = d3
-  //     .line()
-  //     // .interpolate("linear")
-  //     .x((d, i) => x(d.temp) + (y(basep) - y(d.press)) / tan)
-  //     //.x(function(d,i) { return x(d.temp); })
-  //     .y((d, i) => y(d.press));
+  // Dummy data from https://github.com/rsobash/d3-skewt/blob/master/data_OUN.js
+  const temperature: [number, number][] = [
+    [962, 280],
+    [954, 276],
+    [944, 269],
+    [931, 258],
+    [915, 244],
+    [896, 224],
+    [874, 221],
+    [845, 239],
+    [814, 229],
+    [779, 196],
+    [741, 160],
+    [701, 119],
+    [658, 71],
+    [614, 17],
+    [569, -40],
+    [526, -86],
+    [488, -134],
+    [451, -175],
+    [416, -217],
+    [383, -261],
+    [353, -302],
+    [325, -347],
+    [298, -396],
+    [272, -444],
+    [249, -489],
+    [227, -533],
+    [206, -576],
+    [186, -609],
+    [171, -625],
+    [156, -593],
+    [140, -577],
+    [126, -593],
+    [114, -621],
+    [102, -638],
+    [91, -644],
+    [80, -645],
+    [70, -638],
+    [62, -626],
+    [53, -59],
+  ]; // Dummy data from https://github.com/rsobash/d3-skewt/blob/master/data_OUN.js
 
-  //   const line2 = d3
-  //     .line()
-  //     // .interpolate("linear")
-  //     .x((d, i) => x(d.dwpt) + (y(basep) - y(d.press)) / tan)
-  //     .y((d, i) => y(d.press));
+  const dewpoint: [number, number][] = [
+    [962, 219],
+    [954, 215],
+    [944, 211],
+    [931, 208],
+    [915, 205],
+    [896, 201],
+    [874, 178],
+    [845, 37],
+    [814, -42],
+    [779, -25],
+    [741, -41],
+    [701, -70],
+    [658, -104],
+    [614, -115],
+    [569, -86],
+    [526, -107],
+    [488, -162],
+    [451, -244],
+    [416, -297],
+    [383, -334],
+    [353, -387],
+    [325, -407],
+    [298, -463],
+    [272, -512],
+    [249, -551],
+    [227, -594],
+    [206, -628],
+    [186, -655],
+    [171, -679],
+    [156, -703],
+    [140, -752],
+    [126, -788],
+    [114, -804],
+    [102, -804],
+    [91, -804],
+    [80, -804],
+    [70, -804],
+    [62, -804],
+    [53, -804],
+  ]; // Dummy data from https://github.com/rsobash/d3-skewt/blob/master/data_OUN.js
+
+  // TODO: temperature divided by 10 because sample data comes with 1 decimal but without decimal comma/point
+  // Is that standard (e.g. also for EWED)? Should CLASS also provide data like this? Or modify the data instead?
+  const temperatureLine = d3
+    .line()
+    .x((d) => x(d[1] / 10) + (y(basep) - y(d[0])) / tan)
+    .y((d) => y(d[0]));
 
   //   // bisector function for tooltips
   //   const bisectTemp = d3.bisector((d) => d.press).left;
@@ -127,6 +205,22 @@ export function SkewTPlot() {
               transform="translate(-0.5,0)"
               tickValues={pressureLines}
               tickFormat={d3.format(".0d")}
+            />
+          </g>
+          <g class="skewt">
+            <path
+              d={temperatureLine(temperature) || ""}
+              clip-path="url(#clipper)"
+              stroke="red"
+              stroke-width="2.5px"
+              fill="none"
+            />
+            <path
+              d={temperatureLine(dewpoint) || ""}
+              clip-path="url(#clipper)"
+              stroke="green"
+              stroke-width="2.5px"
+              fill="none"
             />
           </g>
         </g>
