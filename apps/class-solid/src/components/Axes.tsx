@@ -56,7 +56,7 @@ export const AxisBottom = (props: AxisProps) => {
 
 export const AxisLeft = (props: AxisProps) => {
   const labelpos = props.scale.range().reduce((a, b) => a + b) / 2;
-  const format = props.tickFormat ? props.tickFormat : d3.format("f");
+  const format = props.tickFormat ? props.tickFormat : d3.format(".0f");
   return (
     <g transform={props.transform}>
       <line
