@@ -168,7 +168,7 @@ function FinalHeights() {
 export function AnalysisCard(analysis: Analysis) {
   const id = createUniqueId();
   return (
-    <Card class="w-[500px]" role="article" aria-labelledby={id}>
+    <Card class="min-w-[500px]" role="article" aria-labelledby={id}>
       <CardHeader class="flex-row items-center justify-between py-2 pb-6">
         {/* TODO: make name & description editable */}
         <CardTitle id={id}>{analysis.name}</CardTitle>

@@ -9,23 +9,25 @@ interface AxisProps {
   transform?: string;
   tickCount?: number;
   label?: string;
+  tickValues?: number[];
+  tickFormat?: (n: number | { valueOf(): number }) => string;
 }
 
-export const AxisBottom = (props: AxisProps) => {
-  const ticks = () => {
-    const domain = props.scale.domain();
-    const tickCount = props.tickCount || 5;
+const ticks = (props: AxisProps) => {
+  const domain = props.scale.domain();
+  const generateTicks = (domain = [0, 1], tickCount = 5) => {
     const step = (domain[1] - domain[0]) / (tickCount - 1);
-
-    return [...Array(tickCount).keys()].map((i) => {
-      const value = domain[0] + i * step;
-      return {
-        value,
-        position: props.scale(value),
-      };
-    });
+    return [...Array(10).keys()].map((i) => domain[0] + i * step);
   };
 
+  const values = props.tickValues
+    ? props.tickValues.filter((x) => x >= domain[0] && x <= domain[1])
+    : generateTicks(domain, props.tickCount);
+  return values.map((value) => ({ value, position: props.scale(value) }));
+};
+
+export const AxisBottom = (props: AxisProps) => {
+  const format = props.tickFormat ? props.tickFormat : d3.format(".3g");
   return (
     <g transform={props.transform}>
       <line
@@ -35,12 +37,12 @@ export const AxisBottom = (props: AxisProps) => {
         y2="0"
         stroke="currentColor"
       />
-      <For each={ticks()}>
+      <For each={ticks(props)}>
         {(tick) => (
           <g transform={`translate(${tick.position}, 0)`}>
             <line y2="6" stroke="currentColor" />
             <text y="9" dy="0.71em" text-anchor="middle">
-              {d3.format(".3g")(tick.value)}
+              {format(tick.value)}
             </text>
           </g>
         )}
@@ -53,21 +55,8 @@ export const AxisBottom = (props: AxisProps) => {
 };
 
 export const AxisLeft = (props: AxisProps) => {
-  const ticks = () => {
-    const domain = props.scale.domain();
-    const tickCount = props.tickCount || 5;
-    const step = (domain[1] - domain[0]) / (tickCount - 1);
-
-    return [...Array(tickCount).keys()].map((i) => {
-      const value = domain[0] + i * step;
-      return {
-        value,
-        position: props.scale(value),
-      };
-    });
-  };
-
   const labelpos = props.scale.range().reduce((a, b) => a + b) / 2;
+  const format = props.tickFormat ? props.tickFormat : d3.format("f");
   return (
     <g transform={props.transform}>
       <line
@@ -77,12 +66,12 @@ export const AxisLeft = (props: AxisProps) => {
         y2={props.scale.range()[1]}
         stroke="currentColor"
       />
-      <For each={ticks()}>
+      <For each={ticks(props)}>
         {(tick) => (
           <g transform={`translate(0, ${tick.position})`}>
             <line x2="-6" stroke="currentColor" />
             <text x="-9" dy="0.32em" text-anchor="end">
-              {tick.value.toFixed()}
+              {format(tick.value)}
             </text>
           </g>
         )}
