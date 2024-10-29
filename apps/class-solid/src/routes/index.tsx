@@ -1,9 +1,10 @@
-import { For, Show, createSignal, onCleanup, onMount } from "solid-js";
+import { For, Show, createSignal, onMount } from "solid-js";
 
 import { AnalysisCard, addAnalysis } from "~/components/Analysis";
 import { AddExperimentDialog, ExperimentCard } from "~/components/Experiment";
 import { UploadExperiment } from "~/components/UploadExperiment";
 import { MdiPlusBox } from "~/components/icons";
+import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +15,11 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { Flex } from "~/components/ui/flex";
 import { Toaster } from "~/components/ui/toast";
-import { onPageLeave, onPageLoad } from "~/lib/onPageTransition";
+import {
+  hasLocalStorage,
+  loadFromLocalStorage,
+  onPageLoad,
+} from "~/lib/onPageTransition";
 
 import { experiments } from "~/lib/store";
 import { analyses } from "~/lib/store";
@@ -23,7 +28,6 @@ export default function Home() {
   const [openAddDialog, setOpenAddDialog] = createSignal(false);
 
   onMount(onPageLoad);
-  onCleanup(onPageLeave);
 
   return (
     <main class="mx-auto p-4 text-center text-gray-700">
@@ -58,6 +62,11 @@ export default function Home() {
       />
 
       <Flex justifyContent="center" class="flex-wrap gap-4">
+        <Show when={!experiments.length && hasLocalStorage()}>
+          <Button variant="outline" onClick={loadFromLocalStorage}>
+            Resume from previous session
+          </Button>
+        </Show>
         <For each={experiments}>
           {(experiment, index) => (
             <ExperimentCard experiment={experiment} experimentIndex={index()} />

@@ -1,4 +1,4 @@
-import { type PartialConfig, pruneDefaults } from "@classmodel/class/validate";
+import { parse, pruneDefaults } from "@classmodel/class/validate";
 import { unwrap } from "solid-js/store";
 import type { Analysis } from "~/components/Analysis";
 import type { Experiment } from "./store";
@@ -11,15 +11,17 @@ export function decodeAppState(encoded: string): [Experiment[], Analysis[]] {
     (exp: {
       name: string;
       description: string;
-      reference: PartialConfig;
-      permutations: Record<string, PartialConfig>;
+      reference: unknown;
+      permutations: Record<string, unknown>;
     }) => ({
       name: exp.name,
       description: exp.description,
-      reference: exp.reference,
+      reference: {
+        config: parse(exp.reference),
+      },
       permutations: Object.entries(exp.permutations).map(([name, config]) => ({
         name,
-        config,
+        config: parse(config),
       })),
     }),
   );

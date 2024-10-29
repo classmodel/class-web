@@ -1,5 +1,8 @@
 import { useLocation } from "@solidjs/router";
+import { saveAppState } from "~/lib/onPageTransition";
 import { ShareButton } from "./ShareButton";
+import { MdiContentSave } from "./icons";
+import { Button } from "./ui/button";
 
 export default function Nav() {
   const location = useLocation();
@@ -19,6 +22,12 @@ export default function Nav() {
         <li>
           {/* TODO move right */}
           <ShareButton />
+        </li>
+        <li>
+          {/* TODO style button same as other menu items */}
+          <Button variant="ghost" onClick={() => saveAppState()}>
+            <MdiContentSave /> Save
+          </Button>
         </li>
       </ul>
     </nav>

@@ -3,23 +3,42 @@ import { showToast } from "~/components/ui/toast";
 import { encodeAppState } from "./encode";
 import { analyses, experiments, loadStateFromString } from "./store";
 
+const localStorageName = "class-state";
+
+export function hasLocalStorage() {
+  const state = localStorage.getItem(localStorageName);
+  return (
+    state !== null &&
+    state !== "%7B%22experiments%22%3A%5B%5D%2C%22analyses%22%3A%5B%5D%7D"
+  );
+}
+
+export function loadFromLocalStorage() {
+  const rawState = localStorage.getItem(localStorageName);
+  if (!rawState) {
+    return;
+  }
+  try {
+    loadStateFromString(rawState);
+    showToast({
+      title: "State loaded from local storage",
+      variant: "success",
+      duration: 1000,
+    });
+  } catch (error) {
+    console.error(error);
+    showToast({
+      title: "Failed to load state from local storage",
+      description: `${error}`,
+      variant: "error",
+    });
+  }
+}
+
 export async function onPageLoad() {
   const location = useLocation();
   const navigate = useNavigate();
-  let rawState = location.hash.substring(1);
-  if (!rawState) {
-    // If no state in URL, check if there is a state in local storage
-    const rawStateFromLocalStorage = localStorage.getItem(localStorageName);
-    if (
-      rawStateFromLocalStorage &&
-      rawStateFromLocalStorage !==
-        "%7B%22experiments%22%3A%5B%5D%2C%22analyses%22%3A%5B%5D%7D" &&
-      // TODO prompt is annoying when developing, disable during development?
-      window.confirm("Would you like to resume from the previous session?")
-    ) {
-      rawState = rawStateFromLocalStorage;
-    }
-  }
+  const rawState = location.hash.substring(1);
   if (!rawState) {
     return;
   }
@@ -44,9 +63,15 @@ export async function onPageLoad() {
   navigate("/");
 }
 
-const localStorageName = "class-state";
-
-export function onPageLeave() {
+export function saveAppState() {
   const appState = encodeAppState(experiments, analyses);
+  if (
+    appState === "%7B%22experiments%22%3A%5B%5D%2C%22analyses%22%3A%5B%5D%7D"
+  ) {
+    localStorage.removeItem(localStorageName);
+  }
+  // TODO instead of storing to local storage store to url
+  // pro: multiple tabs will not share state
+  // con: ugly urls
   localStorage.setItem(localStorageName, appState);
 }
