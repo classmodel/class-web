@@ -114,7 +114,7 @@ export default function LinePlot({
               stroke={d.color}
               stroke-dasharray={d.linestyle}
               stroke-width="3"
-              d={l(zipXY(d))}
+              d={l(zipXY(d)) || ""}
             >
               <title>{d.label}</title>
             </path>

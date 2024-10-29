@@ -22,7 +22,7 @@ export function getVerticalProfiles(
     // Extract potential temperature profile
     const thetas = output.theta.slice(t)[0];
     const dtheta = output.dtheta.slice(t)[0];
-    const gammatheta = config.mixedLayer?.gammatheta;
+    const gammatheta = config.mixedLayer?.gammatheta ?? 0;
     const theta = [
       thetas,
       thetas,
@@ -36,7 +36,7 @@ export function getVerticalProfiles(
     // Extract humidity profile
     const qs = output.q.slice(t)[0];
     const dq = output.dq.slice(t)[0];
-    const gammaq = config.mixedLayer?.gammaq;
+    const gammaq = config.mixedLayer?.gammaq ?? 0;
     const q = [qs, qs, qs + dq, qs + dq + dh * gammaq];
     return { y: h, x: q };
   }
