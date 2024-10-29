@@ -58,7 +58,7 @@ export default function LinePlot({
   );
 
   return (
-    <>
+    <figure>
       {/* Legend */}
       <div class="flex flex-wrap justify-end text-sm tracking-tight">
         <For each={data()}>
@@ -121,6 +121,6 @@ export default function LinePlot({
           )}
         </For>
       </svg>
-    </>
+    </figure>
   );
 }
