@@ -1,5 +1,3 @@
-import { A } from "@solidjs/router";
-
 export default function About() {
   return (
     <main class="mx-auto p-4 text-center text-gray-700">
@@ -21,13 +19,6 @@ export default function About() {
         >
           classmodel.github.io
         </a>{" "}
-      </p>
-      <p class="my-4">
-        <A href="/" class="text-sky-600 hover:underline">
-          Home
-        </A>
-        {" - "}
-        <span>About Page</span>
       </p>
     </main>
   );
