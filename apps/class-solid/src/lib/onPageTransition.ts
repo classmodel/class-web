@@ -70,8 +70,5 @@ export function saveAppState() {
   ) {
     localStorage.removeItem(localStorageName);
   }
-  // TODO instead of storing to local storage store to url
-  // pro: multiple tabs will not share state
-  // con: ugly urls
   localStorage.setItem(localStorageName, appState);
 }

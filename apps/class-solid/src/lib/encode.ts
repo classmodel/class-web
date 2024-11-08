@@ -3,7 +3,7 @@ import { unwrap } from "solid-js/store";
 import type { Analysis, Experiment } from "./store";
 
 export function decodeAppState(encoded: string): [Experiment[], Analysis[]] {
-  const decoded = decodeURIComponent(encoded);
+  const decoded = decodeURI(encoded);
   const parsed = JSON.parse(decoded);
   // TODO use ajv to validate experiment, permutation, config and analysis
   const experiments: Experiment[] = parsed.experiments.map(
@@ -69,5 +69,5 @@ export function encodeAppState(
       type: ana.type,
     })),
   };
-  return encodeURIComponent(JSON.stringify(minimizedState, undefined, 0));
+  return encodeURI(JSON.stringify(minimizedState, undefined, 0));
 }
