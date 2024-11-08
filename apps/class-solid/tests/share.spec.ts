@@ -12,10 +12,7 @@ test("Create share link from an experiment", async ({ page }) => {
   await page.getByRole("button", { name: "Run" }).click();
 
   // Open share dialog
-  const origExperiment = page.getByLabel("My experiment 1", { exact: true });
-  await origExperiment
-    .getByRole("button", { name: "Share experiment" })
-    .click();
+  await page.getByRole("button", { name: "Share" }).click();
   // Open link, in a new popup window
   const sharedPagePromise = page.waitForEvent("popup");
   await page.getByRole("link", { name: "this link" }).click();
