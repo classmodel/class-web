@@ -2,7 +2,6 @@ import { useLocation } from "@solidjs/router";
 import { saveAppState } from "~/lib/onPageTransition";
 import { ShareButton } from "./ShareButton";
 import { MdiContentSave } from "./icons";
-import { Button } from "./ui/button";
 
 export default function Nav() {
   const location = useLocation();
@@ -12,22 +11,26 @@ export default function Nav() {
       : "border-transparent hover:border-sky-600";
   return (
     <nav class="bg-sky-800">
-      <ul class="container flex items-center p-3 text-gray-200">
-        <li class={`border-b-2 ${active("/")} mx-1.5 sm:mx-6`}>
+      <ul class="container flex items-center gap-4 p-3 text-gray-200">
+        <li class={`border-b-2 ${active("/")}l`}>
           <a href="/">CLASS</a>
         </li>
-        <li class={`border-b-2 ${active("/about")} mx-1.5 sm:mx-6`}>
+        <li class=" w-full" />
+        <li class={`border-b-2 ${active("/about")}`}>
           <a href="/about">About</a>
         </li>
         <li>
-          {/* TODO move right */}
-          <ShareButton />
+          <button
+            type="button"
+            class="flex items-center gap-2 border-transparent border-b-2 hover:border-sky-600"
+            onClick={() => saveAppState()}
+            title="Save application state, so when visiting the page again, the state can be restored"
+          >
+            Save <MdiContentSave />
+          </button>
         </li>
         <li>
-          {/* TODO style button same as other menu items */}
-          <Button variant="ghost" onClick={() => saveAppState()}>
-            <MdiContentSave /> Save
-          </Button>
+          <ShareButton />
         </li>
       </ul>
     </nav>
