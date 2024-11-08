@@ -1,0 +1,304 @@
+{
+  "name": "My experiment 1",
+  "description": "",
+  "reference": {
+    "initialState": {
+      "h_0": 200,
+      "theta_0": 288,
+      "dtheta_0": 1,
+      "q_0": 0.008,
+      "dq_0": -0.001
+    },
+    "timeControl": {
+      "dt": 60,
+      "runtime": 43200
+    },
+    "mixedLayer": {
+      "wtheta": 0.1,
+      "advtheta": 0,
+      "gammatheta": 0.006,
+      "wq": 0.0001,
+      "advq": 0,
+      "gammaq": 0,
+      "divU": 0,
+      "beta": 0.2
+    }
+  },
+  "permutations": [
+    {
+      "name": "h_0=100, beta=0.1",
+      "config": {
+        "initialState": {
+          "h_0": 100
+        },
+        "mixedLayer": {
+          "beta": 0.1
+        }
+      }
+    },
+    {
+      "name": "h_0=100, beta=0.3",
+      "config": {
+        "initialState": {
+          "h_0": 100
+        },
+        "mixedLayer": {
+          "beta": 0.3
+        }
+      }
+    },
+    {
+      "name": "h_0=100, beta=0.4",
+      "config": {
+        "initialState": {
+          "h_0": 100
+        },
+        "mixedLayer": {
+          "beta": 0.4
+        }
+      }
+    },
+    {
+      "name": "h_0=100, beta=0.5",
+      "config": {
+        "initialState": {
+          "h_0": 100
+        },
+        "mixedLayer": {
+          "beta": 0.5
+        }
+      }
+    },
+    {
+      "name": "h_0=100, beta=0.6",
+      "config": {
+        "initialState": {
+          "h_0": 100
+        },
+        "mixedLayer": {
+          "beta": 0.6
+        }
+      }
+    },
+    {
+      "name": "h_0=300, beta=0.1",
+      "config": {
+        "initialState": {
+          "h_0": 300
+        },
+        "mixedLayer": {
+          "beta": 0.1
+        }
+      }
+    },
+    {
+      "name": "h_0=300, beta=0.3",
+      "config": {
+        "initialState": {
+          "h_0": 300
+        },
+        "mixedLayer": {
+          "beta": 0.3
+        }
+      }
+    },
+    {
+      "name": "h_0=300, beta=0.4",
+      "config": {
+        "initialState": {
+          "h_0": 300
+        },
+        "mixedLayer": {
+          "beta": 0.4
+        }
+      }
+    },
+    {
+      "name": "h_0=300, beta=0.5",
+      "config": {
+        "initialState": {
+          "h_0": 300
+        },
+        "mixedLayer": {
+          "beta": 0.5
+        }
+      }
+    },
+    {
+      "name": "h_0=300, beta=0.6",
+      "config": {
+        "initialState": {
+          "h_0": 300
+        },
+        "mixedLayer": {
+          "beta": 0.6
+        }
+      }
+    },
+    {
+      "name": "h_0=400, beta=0.1",
+      "config": {
+        "initialState": {
+          "h_0": 400
+        },
+        "mixedLayer": {
+          "beta": 0.1
+        }
+      }
+    },
+    {
+      "name": "h_0=400, beta=0.3",
+      "config": {
+        "initialState": {
+          "h_0": 400
+        },
+        "mixedLayer": {
+          "beta": 0.3
+        }
+      }
+    },
+    {
+      "name": "h_0=400, beta=0.4",
+      "config": {
+        "initialState": {
+          "h_0": 400
+        },
+        "mixedLayer": {
+          "beta": 0.4
+        }
+      }
+    },
+    {
+      "name": "h_0=400, beta=0.5",
+      "config": {
+        "initialState": {
+          "h_0": 400
+        },
+        "mixedLayer": {
+          "beta": 0.5
+        }
+      }
+    },
+    {
+      "name": "h_0=400, beta=0.6",
+      "config": {
+        "initialState": {
+          "h_0": 400
+        },
+        "mixedLayer": {
+          "beta": 0.6
+        }
+      }
+    },
+    {
+      "name": "h_0=500, beta=0.1",
+      "config": {
+        "initialState": {
+          "h_0": 500
+        },
+        "mixedLayer": {
+          "beta": 0.1
+        }
+      }
+    },
+    {
+      "name": "h_0=500, beta=0.3",
+      "config": {
+        "initialState": {
+          "h_0": 500
+        },
+        "mixedLayer": {
+          "beta": 0.3
+        }
+      }
+    },
+    {
+      "name": "h_0=500, beta=0.4",
+      "config": {
+        "initialState": {
+          "h_0": 500
+        },
+        "mixedLayer": {
+          "beta": 0.4
+        }
+      }
+    },
+    {
+      "name": "h_0=500, beta=0.5",
+      "config": {
+        "initialState": {
+          "h_0": 500
+        },
+        "mixedLayer": {
+          "beta": 0.5
+        }
+      }
+    },
+    {
+      "name": "h_0=500, beta=0.6",
+      "config": {
+        "initialState": {
+          "h_0": 500
+        },
+        "mixedLayer": {
+          "beta": 0.6
+        }
+      }
+    },
+    {
+      "name": "h_0=600, beta=0.1",
+      "config": {
+        "initialState": {
+          "h_0": 600
+        },
+        "mixedLayer": {
+          "beta": 0.1
+        }
+      }
+    },
+    {
+      "name": "h_0=600, beta=0.3",
+      "config": {
+        "initialState": {
+          "h_0": 600
+        },
+        "mixedLayer": {
+          "beta": 0.3
+        }
+      }
+    },
+    {
+      "name": "h_0=600, beta=0.4",
+      "config": {
+        "initialState": {
+          "h_0": 600
+        },
+        "mixedLayer": {
+          "beta": 0.4
+        }
+      }
+    },
+    {
+      "name": "h_0=600, beta=0.5",
+      "config": {
+        "initialState": {
+          "h_0": 600
+        },
+        "mixedLayer": {
+          "beta": 0.5
+        }
+      }
+    },
+    {
+      "name": "h_0=600, beta=0.6",
+      "config": {
+        "initialState": {
+          "h_0": 600
+        },
+        "mixedLayer": {
+          "beta": 0.6
+        }
+      }
+    }
+  ]
+}
