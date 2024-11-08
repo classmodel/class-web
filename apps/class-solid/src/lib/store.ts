@@ -6,7 +6,7 @@ import {
   parseExperimentConfig,
   pruneDefaults,
 } from "@classmodel/class/validate";
-import type { Analysis } from "~/components/Analysis";
+import { createUniqueId } from "solid-js";
 import { decodeAppState } from "./encode";
 import { runClass } from "./runner";
 
@@ -97,6 +97,13 @@ export async function runExperiment(id: number) {
       e.running = false;
     }),
   );
+
+  // If no analyis are set then add all of them
+  if (analyses.length === 0) {
+    for (const key of Object.keys(analysisNames) as AnalysisType[]) {
+      addAnalysis(key);
+    }
+  }
 }
 
 function findExperiment(index: number) {
@@ -279,4 +286,34 @@ export async function loadStateFromString(rawState: string): Promise<void> {
   setExperiments(loadedExperiments);
   await Promise.all(loadedExperiments.map((_, i) => runExperiment(i)));
   setAnalyses(loadedAnalyses);
+}
+
+const analysisNames = {
+  profiles: "Vertical profiles",
+  timeseries: "Timeseries",
+  finalheight: "Final height",
+} as const;
+type AnalysisType = keyof typeof analysisNames;
+
+export interface Analysis {
+  name: string;
+  description: string;
+  id: string;
+  experiments: Experiment[] | undefined;
+  type: AnalysisType;
+}
+
+export function addAnalysis(type: AnalysisType) {
+  const name = analysisNames[type];
+
+  setAnalyses(analyses.length, {
+    name,
+    id: createUniqueId(),
+    experiments: experiments,
+    type,
+  });
+}
+
+export function deleteAnalysis(analysis: Analysis) {
+  setAnalyses(analyses.filter((ana) => ana.id !== analysis.id));
 }

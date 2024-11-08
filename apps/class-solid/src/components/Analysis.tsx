@@ -1,7 +1,6 @@
 import { For, Match, Switch, createMemo, createUniqueId } from "solid-js";
 import { getVerticalProfiles } from "~/lib/profiles";
-import { analyses, experiments, setAnalyses } from "~/lib/store";
-import type { Experiment } from "~/lib/store";
+import { type Analysis, deleteAnalysis, experiments } from "~/lib/store";
 import LinePlot from "./LinePlot";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import { Button } from "./ui/button";
@@ -23,33 +22,6 @@ const colors = [
 ];
 
 const linestyles = ["none", "5,5", "10,10", "15,5,5,5", "20,10,5,5,5,10"];
-
-export interface Analysis {
-  name: string;
-  description: string;
-  id: string;
-  experiments: Experiment[] | undefined;
-  type: string;
-}
-
-export function addAnalysis(type = "default") {
-  const name = {
-    default: "Final height",
-    timeseries: "Timeseries",
-    profiles: "Vertical profiles",
-  }[type];
-
-  setAnalyses(analyses.length, {
-    name: name,
-    id: createUniqueId(),
-    experiments: experiments,
-    type: type,
-  });
-}
-
-function deleteAnalysis(analysis: Analysis) {
-  setAnalyses(analyses.filter((ana) => ana.id !== analysis.id));
-}
 
 /** Very rudimentary plot showing time series of each experiment globally available
  * It only works if the time axes are equal
@@ -196,7 +168,7 @@ export function AnalysisCard(analysis: Analysis) {
       </CardHeader>
       <CardContent class="min-h-[450px]">
         <Switch fallback={<p>Unknown analysis type</p>}>
-          <Match when={analysis.type === "default"}>
+          <Match when={analysis.type === "finalheight"}>
             <FinalHeights />
           </Match>
           <Match when={analysis.type === "timeseries"}>

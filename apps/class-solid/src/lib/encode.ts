@@ -1,7 +1,6 @@
 import { parse, pruneDefaults } from "@classmodel/class/validate";
 import { unwrap } from "solid-js/store";
-import type { Analysis } from "~/components/Analysis";
-import type { Experiment } from "./store";
+import type { Analysis, Experiment } from "./store";
 
 export function decodeAppState(encoded: string): [Experiment[], Analysis[]] {
   const decoded = decodeURIComponent(encoded);

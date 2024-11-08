@@ -33,9 +33,7 @@ test("Create share link from an experiment", async ({ page }) => {
   expect(config1.reference.initialState?.h_0).toEqual(800);
 
   // Check that shared experiment has been run by
-  // adding Final Height analysis and checking height is non-zero
-  await sharedPage.getByRole("button", { name: "Add analysis" }).click();
-  await sharedPage.getByRole("menuitem", { name: "Final height" }).click();
+  // checking height in final height analysis
   const finalHeightAnalysis = sharedPage.getByRole("article", {
     name: "Final height",
   });

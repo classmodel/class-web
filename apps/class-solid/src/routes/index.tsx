@@ -1,6 +1,6 @@
 import { For, Show, createSignal, onMount } from "solid-js";
 
-import { AnalysisCard, addAnalysis } from "~/components/Analysis";
+import { AnalysisCard } from "~/components/Analysis";
 import { AddExperimentDialog, ExperimentCard } from "~/components/Experiment";
 import { UploadExperiment } from "~/components/UploadExperiment";
 import { MdiPlusBox } from "~/components/icons";
@@ -21,7 +21,7 @@ import {
   onPageLoad,
 } from "~/lib/onPageTransition";
 
-import { experiments } from "~/lib/store";
+import { addAnalysis, experiments } from "~/lib/store";
 import { analyses } from "~/lib/store";
 
 export default function Home() {
@@ -84,7 +84,7 @@ export default function Home() {
             <DropdownMenuContent>
               <DropdownMenuLabel>Add analysis</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => addAnalysis()}>
+              <DropdownMenuItem onClick={() => addAnalysis("finalheight")}>
                 Final height
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => addAnalysis("timeseries")}>

@@ -20,10 +20,6 @@ test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
   await page.getByLabel("ABL height").fill("800");
   await page.getByRole("button", { name: "Run" }).click();
 
-  // Add timeseries analysis
-  await page.getByTitle("Add analysis").click();
-  await page.getByRole("menuitem", { name: "Timeseries" }).click();
-
   // Duplicate experiment
   await page.getByTitle("Duplicate experiment").click();
 
@@ -58,7 +54,10 @@ test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
 
   // visually check that timeseries plot has 4 non-overlapping lines
   await testInfo.attach("timeseries plot with 4 non-overlapping lines", {
-    body: await page.locator("figure").screenshot(),
+    body: await page
+      .getByRole("article", { name: "Timeseries" })
+      .locator("figure")
+      .screenshot(),
     contentType: "image/png",
   });
 });
