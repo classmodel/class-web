@@ -1,5 +1,6 @@
 import type { BmiClass } from "@classmodel/class/bmi";
 import type { Config } from "@classmodel/class/config";
+import type { ClassOutput } from "@classmodel/class/runner";
 import { type PartialConfig, parse } from "@classmodel/class/validate";
 import { wrap } from "comlink";
 
@@ -8,13 +9,18 @@ const worker = new Worker(new URL("./worker.ts", import.meta.url), {
 });
 export const AsyncBmiClass = wrap<typeof BmiClass>(worker);
 
-export async function runClass(config: PartialConfig) {
-  const parsedConfig: Config = parse(config);
-  const model = await new AsyncBmiClass();
-  await model.initialize(parsedConfig);
-  const output = await model.run({
-    var_names: ["h", "theta", "q", "dtheta", "dq"],
-  });
-  console.log(output);
-  return output;
+export async function runClass(config: PartialConfig): Promise<ClassOutput> {
+  try {
+    const parsedConfig: Config = parse(config);
+    const model = await new AsyncBmiClass();
+    await model.initialize(parsedConfig);
+    const output = await model.run({
+      var_names: ["h", "theta", "q", "dtheta", "dq"],
+    });
+    return output;
+  } catch (error) {
+    console.error({ config, error });
+    // TODO use toast to give feedback to the user
+  }
+  throw new Error("Model run failed");
 }
