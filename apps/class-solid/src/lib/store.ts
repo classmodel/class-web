@@ -13,7 +13,6 @@ import { runClass } from "./runner";
 export interface Permutation<C extends PartialConfig = PartialConfig> {
   name: string;
   config: C;
-  output?: ClassOutput | undefined;
   // TODO Could use per run state to show progress of run of reference and each permutation
   // running: boolean;
 }
@@ -22,15 +21,43 @@ export interface Experiment {
   name: string;
   description: string;
   reference: {
+    // TODO change reference.config to config, as there are no other keys in reference
     config: PartialConfig;
-    output?: ClassOutput | undefined;
   };
   permutations: Permutation[];
-  running: boolean;
+  running: number | false;
 }
 
 export const [experiments, setExperiments] = createStore<Experiment[]>([]);
 export const [analyses, setAnalyses] = createStore<Analysis[]>([]);
+
+interface ExperimentOutput {
+  reference: ClassOutput;
+  permutations: ClassOutput[];
+}
+
+// Outputs must store outside store as they are too big to wrap in proxy
+export const outputs: ExperimentOutput[] = [];
+
+export function outputForExperiment(
+  index: number | Experiment,
+): ExperimentOutput | undefined {
+  if (typeof index === "object") {
+    const i = experiments.indexOf(index);
+    return outputs[i];
+  }
+  return outputs[index];
+}
+
+export function outputForPermutation(
+  experiment: ExperimentOutput | undefined,
+  permutationIndex: number,
+) {
+  if (!experiment || experiment.permutations.length <= permutationIndex) {
+    return { t: [], h: [], theta: [], dtheta: [] };
+  }
+  return experiment.permutations[permutationIndex];
+}
 
 // biome-ignore lint/suspicious/noExplicitAny: recursion is hard to type
 function mergeConfigurations(reference: any, permutation: any) {
@@ -52,51 +79,59 @@ function mergeConfigurations(reference: any, permutation: any) {
 }
 
 export async function runExperiment(id: number) {
-  const exp = findExperiment(id);
+  const exp = experiments[id];
 
-  setExperiments(
-    id,
-    produce((e) => {
-      e.running = true;
-    }),
-  );
+  setExperiments(id, "running", 0);
 
   // TODO make lazy, if config does not change do not rerun
   // or make more specific like runReference and runPermutation
+  console.time("Running experiment");
+
+  // TODO figure out why duplicating experiment with permutation sweep takes to so long
+  // slowest item now is updating progress in running
+  // as it most likely triggering a rerender of the most of the app
+  // if I remove the timeseries analysis it is much faster
 
   // Run reference
-  const newOutput = await runClass(exp.reference.config);
+  console.time("Running reference");
+  const referenceConfig = unwrap(exp.reference.config);
+  const newOutput = await runClass(referenceConfig);
+  console.timeEnd("Running reference");
 
-  setExperiments(
-    id,
-    produce((e) => {
-      e.reference.output = newOutput;
-    }),
-  );
+  console.time("Store reference output");
+  setExperiments(id, "running", 1 / (exp.permutations.length + 1));
+
+  outputs[id] = {
+    reference: newOutput,
+    permutations: [],
+  };
+  console.timeEnd("Store reference output");
 
   // Run permutations
-  for (const key in exp.permutations) {
-    const perm = exp.permutations[key];
-    const combinedConfig = mergeConfigurations(
-      exp.reference.config,
-      perm.config,
-    );
+  let permCounter = 0;
+  for (const proxiedPerm of exp.permutations) {
+    const permConfig = unwrap(proxiedPerm.config);
+    const combinedConfig = mergeConfigurations(referenceConfig, permConfig);
+    console.time(`Running permutation ${permCounter}`);
     const newOutput = await runClass(combinedConfig);
+    console.timeEnd(`Running permutation ${permCounter}`);
 
+    console.time(`Store permutation ${permCounter} progress`);
     setExperiments(
       id,
-      produce((e) => {
-        e.permutations[key].output = newOutput;
-      }),
+      "running",
+      (1 + permCounter) / (exp.permutations.length + 1),
     );
+    console.timeEnd(`Store permutation ${permCounter} progress`);
+    console.time(`Store permutation ${permCounter} output`);
+    outputs[id].permutations[permCounter] = newOutput;
+    console.timeEnd(`Store permutation ${permCounter} output`);
+    permCounter++;
   }
 
-  setExperiments(
-    id,
-    produce((e) => {
-      e.running = false;
-    }),
-  );
+  console.timeEnd("Running experiment");
+
+  setExperiments(id, "running", false);
 
   // If no analyis are set then add all of them
   if (analyses.length === 0) {
@@ -151,25 +186,19 @@ export async function uploadExperiment(rawData: unknown) {
 export function duplicateExperiment(id: number) {
   const original = structuredClone(findExperiment(id));
 
-  addExperiment(
-    original.reference.config,
-    `Copy of ${original.name}`,
-    original.description,
-  );
-  let key = 0;
-  for (const perm of original.permutations) {
-    setPermutationConfigInExperiment(
-      experiments.length - 1,
-      key++,
-      perm.config,
-      perm.name,
-    );
-  }
+  const newExperiment = {
+    ...original,
+    name: `Copy of ${original.name}`,
+    description: original.description,
+    running: 0,
+  };
+  setExperiments(experiments.length, newExperiment);
   runExperiment(experiments.length - 1);
 }
 
 export function deleteExperiment(index: number) {
   setExperiments(experiments.filter((_, i) => i !== index));
+  outputs.splice(index, 1);
 }
 
 export async function modifyExperiment(
@@ -223,6 +252,7 @@ export async function deletePermutationFromExperiment(
   setExperiments(experimentIndex, "permutations", (perms) =>
     perms.filter((_, i) => i !== permutationIndex),
   );
+  outputs[experimentIndex].permutations.splice(permutationIndex, 1);
 }
 
 export function findPermutation(exp: Experiment, permutationName: string) {

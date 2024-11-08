@@ -52,7 +52,7 @@ export function AddExperimentDialog(props: {
       description: "",
       reference: { config: {} },
       permutations: [],
-      running: false,
+      running: false as const,
     };
   };
 
@@ -130,14 +130,15 @@ export function ExperimentSettingsDialog(props: {
   );
 }
 
-function RunningIndicator() {
+function RunningIndicator(props: { progress: number | false }) {
   return (
-    <div class="flex">
+    <div class="flex" role="status" aria-live="polite">
       <svg
         class="-ml-1 mr-3 h-5 w-5 animate-spin"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
+        aria-hidden="true"
       >
         <title>Running</title>
         <circle
@@ -154,7 +155,9 @@ function RunningIndicator() {
           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
         />
       </svg>
-      <span>Running ...</span>
+      <span>
+        Running {props.progress ? (props.progress * 100).toFixed() : 100}% ...
+      </span>
     </div>
   );
 }
@@ -180,6 +183,9 @@ function DownloadExperimentArchive(props: { experiment: Experiment }) {
   const [url, setUrl] = createSignal<string>("");
   createEffect(async () => {
     const archive = await createArchive(props.experiment);
+    if (!archive) {
+      return;
+    }
     const objectUrl = URL.createObjectURL(archive);
     setUrl(objectUrl);
     onCleanup(() => URL.revokeObjectURL(objectUrl));
@@ -242,7 +248,10 @@ export function ExperimentCard(props: {
         />
       </CardContent>
       <CardFooter>
-        <Show when={!experiment().running} fallback={<RunningIndicator />}>
+        <Show
+          when={!experiment().running}
+          fallback={<RunningIndicator progress={experiment().running} />}
+        >
           <DownloadExperiment experiment={experiment()} />
           <ExperimentSettingsDialog
             experiment={experiment()}

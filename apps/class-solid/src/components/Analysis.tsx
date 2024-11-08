@@ -1,6 +1,12 @@
-import { For, Match, Switch, createMemo, createUniqueId } from "solid-js";
+import { For, Match, Show, Switch, createMemo, createUniqueId } from "solid-js";
 import { getVerticalProfiles } from "~/lib/profiles";
-import { type Analysis, deleteAnalysis, experiments } from "~/lib/store";
+import {
+  type Analysis,
+  deleteAnalysis,
+  experiments,
+  outputForExperiment,
+  outputForPermutation,
+} from "~/lib/store";
 import LinePlot from "./LinePlot";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import { Button } from "./ui/button";
@@ -29,21 +35,23 @@ const linestyles = ["none", "5,5", "10,10", "15,5,5,5", "20,10,5,5,5,10"];
 export function TimeSeriesPlot() {
   const chartData = createMemo(() => {
     return experiments
-      .filter((e) => e.reference.output)
+      .filter((e) => e.running === false) // Skip running experiments
       .flatMap((e, i) => {
+        const experimentOutput = outputForExperiment(e);
         const permutationRuns = e.permutations.map((perm, j) => {
+          const permOutput = outputForPermutation(experimentOutput, j);
           return {
             label: `${e.name}/${perm.name}`,
-            y: perm.output === undefined ? [] : perm.output.h,
-            x: perm.output === undefined ? [] : perm.output.t,
+            y: permOutput.h ?? [],
+            x: permOutput.t ?? [],
             color: colors[(j + 1) % 10],
             linestyle: linestyles[i % 5],
           };
         });
         return [
           {
-            y: e.reference.output === undefined ? [] : e.reference.output.h,
-            x: e.reference.output === undefined ? [] : e.reference.output.t,
+            y: experimentOutput?.reference.h ?? [],
+            x: experimentOutput?.reference.t ?? [],
             label: e.name,
             color: colors[0],
             linestyle: linestyles[i],
@@ -66,33 +74,42 @@ export function VerticalProfilePlot() {
   const variable = "theta";
   const time = -1;
   const profileData = createMemo(() => {
-    return experiments.flatMap((e, i) => {
-      const permutations = e.permutations.map((p, j) => {
-        // TODO get additional config info from reference
-        // permutations probably usually don't have gammaq/gammatetha set?
-        return {
-          color: colors[(j + 1) % 10],
-          linestyle: linestyles[i % 5],
-          label: `${e.name}/${p.name}`,
-          ...getVerticalProfiles(p.output, p.config, variable, time),
-        };
-      });
+    return experiments
+      .filter((e) => e.running === false) // Skip running experiments
+      .flatMap((e, i) => {
+        const experimentOutput = outputForExperiment(e);
+        const permutations = e.permutations.map((p, j) => {
+          // TODO get additional config info from reference
+          // permutations probably usually don't have gammaq/gammatetha set?
+          const permOutput = outputForPermutation(experimentOutput, j);
+          return {
+            color: colors[(j + 1) % 10],
+            linestyle: linestyles[i % 5],
+            label: `${e.name}/${p.name}`,
+            ...getVerticalProfiles(permOutput, p.config, variable, time),
+          };
+        });
 
-      return [
-        {
-          label: e.name,
-          color: colors[0],
-          linestyle: linestyles[i],
-          ...getVerticalProfiles(
-            e.reference.output,
-            e.reference.config,
-            variable,
-            time,
-          ),
-        },
-        ...permutations,
-      ];
-    });
+        return [
+          {
+            label: e.name,
+            color: colors[0],
+            linestyle: linestyles[i],
+            ...getVerticalProfiles(
+              experimentOutput?.reference ?? {
+                t: [],
+                h: [],
+                theta: [],
+                dtheta: [],
+              },
+              e.reference.config,
+              variable,
+              time,
+            ),
+          },
+          ...permutations,
+        ];
+      });
   });
   return (
     <LinePlot
@@ -109,18 +126,31 @@ function FinalHeights() {
     <ul>
       <For each={experiments}>
         {(experiment) => {
-          const h = () =>
-            experiment.reference.output?.h[
-              experiment.reference.output.h.length - 1
-            ] || 0;
+          const h = () => {
+            const experimentOutput = outputForExperiment(experiment);
+            return (
+              experimentOutput?.reference.h[
+                experimentOutput.reference.h.length - 1
+              ] || 0
+            );
+          };
           return (
-            <>
+            <Show when={!experiment.running}>
               <li class="mb-2" title={experiment.name}>
                 {experiment.name}: {h().toFixed()} m
               </li>
               <For each={experiment.permutations}>
-                {(perm) => {
-                  const h = () => perm.output?.h[perm.output.h.length - 1] || 0;
+                {(perm, permIndex) => {
+                  const h = () => {
+                    const experimentOutput = outputForExperiment(experiment);
+                    const permOutput = outputForPermutation(
+                      experimentOutput,
+                      permIndex(),
+                    );
+                    return permOutput.h?.length
+                      ? permOutput.h[permOutput.h.length - 1]
+                      : 0;
+                  };
                   return (
                     <li title={`${experiment.name}/${perm.name}`}>
                       {experiment.name}/{perm.name}: {h().toFixed()} m
@@ -128,7 +158,7 @@ function FinalHeights() {
                   );
                 }}
               </For>
-            </>
+            </Show>
           );
         }}
       </For>
