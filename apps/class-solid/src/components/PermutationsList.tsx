@@ -21,6 +21,7 @@ import {
   validate,
 } from "./NamedConfig";
 import { ObjectField } from "./ObjectField";
+import { PermutationSweepButton } from "./PermutationSweepButton";
 import { ajvForm } from "./ajvForm";
 import {
   MdiCakeVariantOutline,
@@ -318,8 +319,12 @@ export function PermutationsList(props: {
           experiment={props.experiment}
           experimentIndex={props.experimentIndex}
         />
+        <PermutationSweepButton
+          experiment={props.experiment}
+          experimentIndex={props.experimentIndex}
+        />
       </legend>
-      <ul>
+      <ul class="max-h-40 overflow-auto">
         <For each={props.experiment.permutations}>
           {(perm, permutationIndex) => (
             <li>

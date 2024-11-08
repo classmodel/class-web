@@ -41,6 +41,12 @@
         "default": "./dist/validate.js",
         "types": "./dist/validate.d.ts"
       }
+    },
+    "./sweep": {
+      "import": {
+        "default": "./dist/sweep.js",
+        "types": "./dist/sweep.d.ts"
+      }
     }
   },
   "homepage": "https://classmodel.github.io/class-web",
