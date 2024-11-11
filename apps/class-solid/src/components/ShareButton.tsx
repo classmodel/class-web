@@ -10,13 +10,14 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
 import { TextField, TextFieldInput } from "./ui/text-field";
 import { showToast } from "./ui/toast";
+
+const MAX_SHAREABLE_LINK_LENGTH = 32_000;
 
 export function ShareButton() {
   const [open, setOpen] = createSignal(false);
@@ -65,7 +66,18 @@ export function ShareButton() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle class="mr-10">Share link</DialogTitle>
-          <DialogDescription>
+        </DialogHeader>
+        <Show
+          when={shareableLink().length < MAX_SHAREABLE_LINK_LENGTH}
+          fallback={
+            <p>
+              Cannot share application state, it is too large. Please download
+              each experiment by itself or make it smaller by removing
+              permutations and/or experiments.
+            </p>
+          }
+        >
+          <div>
             Anyone with{" "}
             <a
               target="_blank"
@@ -77,33 +89,32 @@ export function ShareButton() {
             </a>{" "}
             will be able to view the current application state in their web
             browser.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div class="flex items-center space-x-2">
-          <TextField class="w-full" defaultValue={shareableLink()}>
-            <TextFieldInput
-              ref={inputRef}
-              type="text"
-              readonly
-              class="w-full"
-              aria-label="Shareable link for current application state"
-            />
-          </TextField>
-          <Button
-            type="submit"
-            variant="outline"
-            size="icon"
-            class="px-3"
-            onClick={copyToClipboard}
-            aria-label={isCopied() ? "Link copied" : "Copy link"}
-          >
-            <span class="sr-only">Copy</span>
-            <Show when={isCopied()} fallback={<MdiClipboard />}>
-              <MdiClipboardCheck />
-            </Show>
-          </Button>
-        </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <TextField class="w-full" defaultValue={shareableLink()}>
+              <TextFieldInput
+                ref={inputRef}
+                type="text"
+                readonly
+                class="w-full"
+                aria-label="Shareable link for current application state"
+              />
+            </TextField>
+            <Button
+              type="submit"
+              variant="outline"
+              size="icon"
+              class="px-3"
+              onClick={copyToClipboard}
+              aria-label={isCopied() ? "Link copied" : "Copy link"}
+            >
+              <span class="sr-only">Copy</span>
+              <Show when={isCopied()} fallback={<MdiClipboard />}>
+                <MdiClipboardCheck />
+              </Show>
+            </Button>
+          </div>
+        </Show>
         <div aria-live="polite" class="sr-only">
           <Show when={isCopied()}>Link copied to clipboard</Show>
         </div>
