@@ -286,15 +286,17 @@ export function ExperimentCard(props: {
             <MdiDelete />
           </Button>
           <Show when={experiment().preset}>
-            <a
-              href={`?preset=${encodeURI(experiment().preset ?? "")}`}
-              target="_blank"
-              rel="noreferrer"
-              class={buttonVariants({ variant: "outline" })}
-              title="Preset of experiment"
-            >
-              <MdiStar />
-            </a>
+            <div class="text-[#888]">
+              <a
+                href={`?preset=${encodeURI(experiment().preset ?? "")}`}
+                target="_blank"
+                rel="noreferrer"
+                class={buttonVariants({ variant: "outline" })}
+                title="Preset link of experiment"
+              >
+                <MdiStar />
+              </a>
+            </div>
           </Show>
         </Show>
       </CardFooter>
