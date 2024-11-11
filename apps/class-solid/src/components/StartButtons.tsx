@@ -1,4 +1,5 @@
-import { Show, createSignal } from "solid-js";
+import { For, Show, createResource, createSignal } from "solid-js";
+import { presetCatalog } from "~/lib/presets";
 import { hasLocalStorage, loadFromLocalStorage } from "~/lib/state";
 import { experiments, uploadExperiment } from "~/lib/store";
 import {
@@ -16,6 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import { Flex } from "./ui/flex";
 import { showToast } from "./ui/toast";
 
 function ResumeSessionButton(props: { afterClick: () => void }) {
@@ -144,6 +146,9 @@ function StartFromUploadButton(props: {
   );
 }
 
+// Only load presets once and keep them in memory
+const [presets] = createResource(() => presetCatalog());
+
 function PresetPicker(props: {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -154,7 +159,38 @@ function PresetPicker(props: {
         <DialogHeader>
           <DialogTitle class="mr-10">Pick a preset</DialogTitle>
         </DialogHeader>
-        <p>Presets are not implemented yet</p>
+        <Flex justifyContent="center" class="flex-wrap gap-4">
+          <For each={presets()}>
+            {(preset) => (
+              <Button
+                variant="outline"
+                class="flex h-44 w-56 flex-col gap-2 border border-dashed"
+                onClick={() => {
+                  props.setOpen(false);
+                  uploadExperiment(preset)
+                    .then(() => {
+                      showToast({
+                        title: "Experiment preset loaded",
+                        variant: "success",
+                        duration: 1000,
+                      });
+                    })
+                    .catch((error) => {
+                      console.error(error);
+                      showToast({
+                        title: "Failed to load preset",
+                        description: `${error}`,
+                        variant: "error",
+                      });
+                    });
+                }}
+              >
+                <h1 class="text-xl">{preset.name}</h1>
+                <div>{preset.description}</div>
+              </Button>
+            )}
+          </For>
+        </Flex>
       </DialogContent>
     </Dialog>
   );

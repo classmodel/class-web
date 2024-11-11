@@ -48,3 +48,14 @@ pnpm test -- --ui --headed
 This allows you to trigger tests from the [playwright ui](https://playwright.dev/docs/test-ui-mode) and enable [watch mode](https://playwright.dev/docs/test-ui-mode#watch-mode).
 
 ## This project was created with the [Solid CLI](https://solid-cli.netlify.app)
+
+## Presets
+
+An experiment can get started from a preset.
+
+The presets are stored in the `public/presets/` directory.
+The format is JSON with title, desscription, reference, permutations keys.
+It is the same format as downloading a configuration file from an existing experiment.
+
+The `public/presets/index.json` is used as an index of presets.
+If you add or rename a preset the `public/presets/index.json` file needs to be updated.

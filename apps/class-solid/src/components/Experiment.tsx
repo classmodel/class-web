@@ -17,7 +17,13 @@ import {
 } from "~/lib/store";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import { PermutationsList } from "./PermutationsList";
-import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
+import {
+  MdiCog,
+  MdiContentCopy,
+  MdiDelete,
+  MdiDownload,
+  MdiStar,
+} from "./icons";
 import {
   Card,
   CardContent,
@@ -279,6 +285,17 @@ export function ExperimentCard(props: {
           >
             <MdiDelete />
           </Button>
+          <Show when={experiment().preset}>
+            <a
+              href={`?preset=${encodeURI(experiment().preset ?? "")}`}
+              target="_blank"
+              rel="noreferrer"
+              class={buttonVariants({ variant: "outline" })}
+              title="Preset of experiment"
+            >
+              <MdiStar />
+            </a>
+          </Show>
         </Show>
       </CardFooter>
     </Card>

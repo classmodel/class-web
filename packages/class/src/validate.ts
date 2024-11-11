@@ -157,6 +157,7 @@ export function overwriteDefaultsInJsonSchema<C>(
 export interface ExperimentConfigSchema {
   name: string;
   description?: string;
+  preset?: string;
   reference: PartialConfig;
   permutations: {
     name: string;
