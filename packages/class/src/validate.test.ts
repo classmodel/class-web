@@ -6,6 +6,7 @@ import {
   type PartialConfig,
   overwriteDefaultsInJsonSchema,
   parse,
+  pruneConfig,
   pruneDefaults,
   validate,
 } from "./validate.js";
@@ -192,6 +193,47 @@ describe("overwriteDefaultsInJsonSchema", () => {
 
     const expected = structuredClone(jsonSchemaOfConfig);
     expected.properties.initialState.properties.h_0.default = 42;
+    assert.deepEqual(result, expected);
+  });
+});
+
+describe("pruneConfig()", () => {
+  test("given equal and unequal parameter, should keep unequal", () => {
+    const first: PartialConfig = {
+      initialState: { h_0: 100, theta_0: 288 },
+    };
+    const second: PartialConfig = {
+      initialState: { h_0: 100, theta_0: 308 },
+    };
+
+    const result = pruneConfig(first, second);
+
+    const expected: PartialConfig = {
+      initialState: { theta_0: 288 },
+    };
+    assert.deepEqual(result, expected);
+  });
+
+  test("given equal, should return empty object", () => {
+    const first: PartialConfig = {
+      initialState: { h_0: 100 },
+    };
+    const second: PartialConfig = {
+      initialState: { h_0: 100 },
+    };
+
+    const result = pruneConfig(first, second);
+
+    const expected: PartialConfig = {};
+    assert.deepEqual(result, expected);
+  });
+
+  test("given all defaults, should return empty object", () => {
+    const first = parse({});
+    const second = parse({});
+    const result = pruneConfig(first, second);
+
+    const expected: PartialConfig = {};
     assert.deepEqual(result, expected);
   });
 });

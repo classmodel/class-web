@@ -203,3 +203,38 @@ export function parseExperimentConfig(input: unknown): ExperimentConfigSchema {
   }
   return input;
 }
+
+/**
+ *
+ * From first config remove all parameters that are the same as in the second config or third config.
+ *
+ * @param permutation
+ * @param reference
+ * @param preset
+ * @returns Pruned permutation configuration
+ */
+export function pruneConfig(
+  permutation: PartialConfig,
+  reference: PartialConfig,
+  preset?: PartialConfig,
+): PartialConfig {
+  const config = structuredClone(permutation);
+  for (const section in config) {
+    const s = config[section as keyof typeof config];
+    const s2 = reference[section as keyof typeof reference];
+    if (s === undefined || s2 === undefined) {
+      continue;
+    }
+    for (const key in s) {
+      const k = key as keyof typeof s;
+      const k2 = key as keyof typeof s2;
+      if (s[k] === s2[k2]) {
+        delete s[k];
+      }
+    }
+    if (Object.keys(s).length === 0) {
+      delete config[section as keyof typeof config];
+    }
+  }
+  return config;
+}
