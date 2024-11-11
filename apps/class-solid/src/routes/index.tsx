@@ -37,7 +37,12 @@ export default function Home() {
       />
 
       <Flex justifyContent="center" class="flex-wrap gap-4">
-        <StartButtons onFromSratchClick={() => setOpenAddDialog(true)} />
+        <Show when={!experiments.length}>
+          <StartButtons
+            onFromSratchClick={() => setOpenAddDialog(true)}
+            afterClick={() => {}}
+          />
+        </Show>
         <For each={experiments}>
           {(experiment, index) => (
             <ExperimentCard experiment={experiment} experimentIndex={index()} />

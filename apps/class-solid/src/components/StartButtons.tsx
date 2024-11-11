@@ -9,48 +9,77 @@ import {
   MdiUpload,
 } from "./icons";
 import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 import { showToast } from "./ui/toast";
 
-function ResumeSessionButton() {
+function ResumeSessionButton(props: { afterClick: () => void }) {
   return (
     <Show when={hasLocalStorage()}>
       <Button
         variant="outline"
-        onClick={loadFromLocalStorage}
+        onClick={() => {
+          loadFromLocalStorage();
+          props.afterClick();
+        }}
         class="flex h-44 w-56 flex-col gap-2 border border-dashed"
       >
         <MdiBackupRestore class="h-32 w-32" />
-        <p>Resume from</p>
-        <p>previous session</p>
+        <Show
+          when={experiments.length}
+          fallback={
+            <>
+              <p>Resume from</p>
+              <p>previous session</p>
+            </>
+          }
+        >
+          <p>Restore</p>
+          <p>previous session</p>
+        </Show>
       </Button>
     </Show>
   );
 }
 
-function StartFromSratchButton(props: { onClick: () => void }) {
+function StartFromSratchButton(props: {
+  onClick: () => void;
+  afterClick: () => void;
+}) {
   return (
     <Button
       variant="outline"
       class="flex h-44 w-56 flex-col gap-2 border border-dashed"
-      onClick={props.onClick}
+      onClick={() => {
+        props.onClick();
+        props.afterClick();
+      }}
     >
       <MdiBeakerPlus class="h-32 w-32" />
-      <p>Start from scratch</p>
-      <p>(default config)</p>
+      <Show
+        when={experiments.length}
+        fallback={
+          <>
+            <p>Start from scratch</p>
+            <p>(default config)</p>
+          </>
+        }
+      >
+        <p>From scratch</p>
+        <p>(default config)</p>
+      </Show>
     </Button>
   );
 }
 
-function StartFromUploadButton() {
+function StartFromUploadButton(props: {
+  afterClick: () => void;
+}) {
   let ref: HTMLInputElement | undefined;
 
   function openFilePicker() {
@@ -74,6 +103,7 @@ function StartFromUploadButton() {
         return uploadExperiment(rawData);
       })
       .then(() => {
+        props.afterClick();
         showToast({
           title: "Experiment uploaded",
           variant: "success",
@@ -81,6 +111,7 @@ function StartFromUploadButton() {
         });
       })
       .catch((error) => {
+        props.afterClick();
         console.error(error);
         showToast({
           title: "Failed to upload experiment",
@@ -98,7 +129,9 @@ function StartFromUploadButton() {
         class="flex h-44 w-56 flex-col gap-2 border border-dashed"
       >
         <MdiUpload class="h-32 w-32" />
-        <p>Start from upload</p>
+        <Show when={experiments.length} fallback={<p>Start from upload</p>}>
+          <p>From upload</p>
+        </Show>
       </Button>
       <input
         ref={ref}
@@ -127,18 +160,30 @@ function PresetPicker(props: {
   );
 }
 
-function StartFromPresetButton() {
+function StartFromPresetButton(props: {
+  afterClick: () => void;
+}) {
   const [open, setOpen] = createSignal(false);
   return (
     <>
-      <PresetPicker open={open()} setOpen={setOpen} />
+      <PresetPicker
+        open={open()}
+        setOpen={(v) => {
+          if (!v) {
+            props.afterClick();
+          }
+          setOpen(v);
+        }}
+      />
       <Button
         variant="outline"
         class="flex h-44 w-56 flex-col gap-2 border border-dashed"
         onClick={() => setOpen(true)}
       >
         <MdiFileDocumentOutline class="h-32 w-32" />
-        <p>From preset</p>
+        <Show when={experiments.length} fallback={<p>Start from preset</p>}>
+          <p>From preset</p>
+        </Show>
       </Button>
     </>
   );
@@ -146,14 +191,18 @@ function StartFromPresetButton() {
 
 export function StartButtons(props: {
   onFromSratchClick: () => void;
+  afterClick: () => void;
 }) {
   return (
-    <Show when={!experiments.length}>
-      <ResumeSessionButton />
-      <StartFromSratchButton onClick={props.onFromSratchClick} />
-      <StartFromUploadButton />
-      <StartFromPresetButton />
-    </Show>
+    <>
+      <StartFromSratchButton
+        onClick={props.onFromSratchClick}
+        afterClick={props.afterClick}
+      />
+      <StartFromUploadButton afterClick={props.afterClick} />
+      <ResumeSessionButton afterClick={props.afterClick} />
+      <StartFromPresetButton afterClick={props.afterClick} />
+    </>
   );
 }
 
@@ -218,28 +267,26 @@ export function StartMenu(props: {
   const [open, setOpen] = createSignal(false);
   return (
     <Show when={experiments.length}>
-      <DropdownMenu>
-        <DropdownMenuTrigger title="Add experiment">
-          <MdiPlusBox class="ml-2 inline-block align-bottom" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuLabel>Add experiment</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={props.onFromSratchClick}
-            class="cursor-pointer"
-          >
-            From scratch
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <UploadExperiment />
-          </DropdownMenuItem>
-          <DropdownMenuItem class="text-gray-400">
-            <PresetPicker open={open()} setOpen={setOpen} />
-            From preset
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Dialog open={open()} onOpenChange={setOpen}>
+        <DialogTrigger
+          as={Button<"button">}
+          variant="ghost"
+          class="align-middle"
+        >
+          <MdiPlusBox class="h-10 w-10" />
+        </DialogTrigger>
+        <DialogContent class="">
+          <DialogHeader>
+            <DialogTitle>Add experiment</DialogTitle>
+          </DialogHeader>
+          <div class="flex gap-4">
+            <StartButtons
+              afterClick={() => setOpen(false)}
+              onFromSratchClick={props.onFromSratchClick}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </Show>
   );
 }
