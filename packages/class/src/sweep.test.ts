@@ -107,4 +107,60 @@ describe("performSweep", () => {
     ];
     assert.deepEqual(perms, expected);
   });
+
+  test("3 uneven sweeps", () => {
+    const sweeps = [
+      {
+        section: "initialState",
+        parameter: "h_0",
+        start: 100,
+        step: 100,
+        steps: 2,
+      },
+      {
+        section: "mixedLayer",
+        parameter: "beta",
+        start: 0.1,
+        step: 0.1,
+        steps: 3,
+      },
+      {
+        section: "initialState",
+        parameter: "theta_0",
+        start: 268,
+        step: 5,
+        steps: 4,
+      },
+    ];
+
+    const perms = performSweep(sweeps);
+
+    const expected = [
+      { initialState: { h_0: 100, theta_0: 268 }, mixedLayer: { beta: 0.1 } },
+      { initialState: { h_0: 100, theta_0: 273 }, mixedLayer: { beta: 0.1 } },
+      { initialState: { h_0: 100, theta_0: 278 }, mixedLayer: { beta: 0.1 } },
+      { initialState: { h_0: 100, theta_0: 283 }, mixedLayer: { beta: 0.1 } },
+      { initialState: { h_0: 100, theta_0: 268 }, mixedLayer: { beta: 0.2 } },
+      { initialState: { h_0: 100, theta_0: 273 }, mixedLayer: { beta: 0.2 } },
+      { initialState: { h_0: 100, theta_0: 278 }, mixedLayer: { beta: 0.2 } },
+      { initialState: { h_0: 100, theta_0: 283 }, mixedLayer: { beta: 0.2 } },
+      { initialState: { h_0: 100, theta_0: 268 }, mixedLayer: { beta: 0.3 } },
+      { initialState: { h_0: 100, theta_0: 273 }, mixedLayer: { beta: 0.3 } },
+      { initialState: { h_0: 100, theta_0: 278 }, mixedLayer: { beta: 0.3 } },
+      { initialState: { h_0: 100, theta_0: 283 }, mixedLayer: { beta: 0.3 } },
+      { initialState: { h_0: 200, theta_0: 268 }, mixedLayer: { beta: 0.1 } },
+      { initialState: { h_0: 200, theta_0: 273 }, mixedLayer: { beta: 0.1 } },
+      { initialState: { h_0: 200, theta_0: 278 }, mixedLayer: { beta: 0.1 } },
+      { initialState: { h_0: 200, theta_0: 283 }, mixedLayer: { beta: 0.1 } },
+      { initialState: { h_0: 200, theta_0: 268 }, mixedLayer: { beta: 0.2 } },
+      { initialState: { h_0: 200, theta_0: 273 }, mixedLayer: { beta: 0.2 } },
+      { initialState: { h_0: 200, theta_0: 278 }, mixedLayer: { beta: 0.2 } },
+      { initialState: { h_0: 200, theta_0: 283 }, mixedLayer: { beta: 0.2 } },
+      { initialState: { h_0: 200, theta_0: 268 }, mixedLayer: { beta: 0.3 } },
+      { initialState: { h_0: 200, theta_0: 273 }, mixedLayer: { beta: 0.3 } },
+      { initialState: { h_0: 200, theta_0: 278 }, mixedLayer: { beta: 0.3 } },
+      { initialState: { h_0: 200, theta_0: 283 }, mixedLayer: { beta: 0.3 } },
+    ];
+    assert.deepEqual(perms, expected);
+  });
 });
