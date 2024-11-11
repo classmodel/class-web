@@ -2,9 +2,8 @@ import { For, Show, createSignal, onMount } from "solid-js";
 
 import { AnalysisCard } from "~/components/Analysis";
 import { AddExperimentDialog, ExperimentCard } from "~/components/Experiment";
-import { UploadExperiment } from "~/components/UploadExperiment";
+import { StartButtons, StartMenu } from "~/components/StartButtons";
 import { MdiPlusBox } from "~/components/icons";
-import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,11 +14,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { Flex } from "~/components/ui/flex";
 import { Toaster } from "~/components/ui/toast";
-import {
-  hasLocalStorage,
-  loadFromLocalStorage,
-  onPageLoad,
-} from "~/lib/onPageTransition";
+import { onPageLoad } from "~/lib/state";
 
 import { addAnalysis, experiments } from "~/lib/store";
 import { analyses } from "~/lib/store";
@@ -33,27 +28,7 @@ export default function Home() {
     <main class="mx-auto p-4 text-center text-gray-700">
       <h2 class="my-8 text-4xl">
         Experiments
-        <DropdownMenu>
-          <DropdownMenuTrigger title="Add experiment">
-            <MdiPlusBox class="ml-2 inline-block align-bottom" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel>Add experiment</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => setOpenAddDialog(true)}
-              class="cursor-pointer"
-            >
-              From scratch
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <UploadExperiment />
-            </DropdownMenuItem>
-            <DropdownMenuItem class="text-gray-400">
-              Preset (not implemented)
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <StartMenu onFromSratchClick={() => setOpenAddDialog(true)} />
       </h2>
       <AddExperimentDialog
         nextIndex={experiments.length + 1}
@@ -62,11 +37,7 @@ export default function Home() {
       />
 
       <Flex justifyContent="center" class="flex-wrap gap-4">
-        <Show when={!experiments.length && hasLocalStorage()}>
-          <Button variant="outline" onClick={loadFromLocalStorage}>
-            Resume from previous session
-          </Button>
-        </Show>
+        <StartButtons onFromSratchClick={() => setOpenAddDialog(true)} />
         <For each={experiments}>
           {(experiment, index) => (
             <ExperimentCard experiment={experiment} experimentIndex={index()} />

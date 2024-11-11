@@ -1,5 +1,5 @@
 import { useLocation } from "@solidjs/router";
-import { saveAppState } from "~/lib/onPageTransition";
+import { saveToLocalStorage } from "~/lib/state";
 import { ShareButton } from "./ShareButton";
 import { MdiContentSave } from "./icons";
 
@@ -23,7 +23,7 @@ export default function Nav() {
           <button
             type="button"
             class="flex items-center gap-2 border-transparent border-b-2 hover:border-sky-600"
-            onClick={() => saveAppState()}
+            onClick={() => saveToLocalStorage()}
             title="Save application state, so when visiting the page again, the state can be restored"
           >
             Save <MdiContentSave />

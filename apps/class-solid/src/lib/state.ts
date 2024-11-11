@@ -63,7 +63,7 @@ export async function onPageLoad() {
   navigate("/");
 }
 
-export function saveAppState() {
+export function saveToLocalStorage() {
   const appState = encodeAppState(experiments, analyses);
   if (
     appState === "%7B%22experiments%22%3A%5B%5D%2C%22analyses%22%3A%5B%5D%7D"
@@ -71,4 +71,9 @@ export function saveAppState() {
     localStorage.removeItem(localStorageName);
   }
   localStorage.setItem(localStorageName, appState);
+  showToast({
+    title: "State saved to local storage",
+    variant: "success",
+    duration: 1000,
+  });
 }
