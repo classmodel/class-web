@@ -5,8 +5,7 @@ test("Create share link from an experiment", async ({ page }) => {
   await page.goto("/");
 
   // Create a new experiment
-  await page.getByTitle("Add experiment").click();
-  await page.getByRole("menuitem", { name: "From scratch" }).click();
+  await page.getByRole("button", { name: "Start from scratch" }).click();
   await page.getByRole("button", { name: "Initial State" }).click();
   await page.getByLabel("ABL height").fill("800");
   await page.getByRole("button", { name: "Run" }).click();
@@ -54,8 +53,7 @@ test("Given large app state, sharing is not possible", async ({ page }) => {
   await page.goto("/");
 
   // Create a new experiment
-  await page.getByTitle("Add experiment").click();
-  await page.getByRole("menuitem", { name: "From scratch" }).click();
+  await page.getByRole("button", { name: "Start from scratch" }).click();
   await page.getByRole("button", { name: "Run" }).click();
   // Add permutation sweep
   await page.getByRole("button", { name: "S", exact: true }).click();

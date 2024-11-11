@@ -5,8 +5,7 @@ test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
   await page.goto("/");
 
   // Create a new experiment
-  await page.getByTitle("Add experiment").click();
-  await page.getByRole("menuitem", { name: "From scratch" }).click();
+  await page.getByRole("button", { name: "Start from scratch" }).click();
   await page.getByRole("button", { name: "Run" }).click();
 
   // Add a permutation
@@ -66,8 +65,7 @@ test("Swap permutation with default reference", async ({ page }) => {
   await page.goto("/");
 
   // Create a new experiment
-  await page.getByTitle("Add experiment").click();
-  await page.getByRole("menuitem", { name: "From scratch" }).click();
+  await page.getByRole("button", { name: "Start from scratch" }).click();
   await page.getByRole("button", { name: "Run" }).click();
 
   // Add a permutation
@@ -98,8 +96,7 @@ test("Swap permutation with custom reference", async ({ page }) => {
   await page.goto("/");
 
   // Create a new experiment
-  await page.getByTitle("Add experiment").click();
-  await page.getByRole("menuitem", { name: "From scratch" }).click();
+  await page.getByRole("button", { name: "Start from scratch" }).click();
   await page.getByRole("button", { name: "Initial State" }).click();
   await page.getByLabel("ABL height").fill("400");
   await page.getByLabel("Mixed-layer potential temperature").fill("265");
@@ -138,8 +135,7 @@ test("Promote permutation to a new experiment", async ({ page }) => {
   await page.goto("/");
 
   // Create a new experiment
-  await page.getByTitle("Add experiment").click();
-  await page.getByRole("menuitem", { name: "From scratch" }).click();
+  await page.getByRole("button", { name: "Start from scratch" }).click();
   await page.getByRole("button", { name: "Run" }).click();
 
   // Add a permutation
@@ -173,8 +169,7 @@ test("Duplicate permutation", async ({ page }) => {
   await page.goto("/");
 
   // Create a new experiment
-  await page.getByTitle("Add experiment").click();
-  await page.getByRole("menuitem", { name: "From scratch" }).click();
+  await page.getByRole("button", { name: "Start from scratch" }).click();
   await page.getByRole("button", { name: "Run" }).click();
 
   // Add a permutation
