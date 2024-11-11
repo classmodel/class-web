@@ -85,7 +85,6 @@ export async function runExperiment(id: number) {
 
   // TODO make lazy, if config does not change do not rerun
   // or make more specific like runReference and runPermutation
-  console.time("Running experiment");
 
   // TODO figure out why duplicating experiment with permutation sweep takes to so long
   // slowest item now is updating progress in running
@@ -93,43 +92,35 @@ export async function runExperiment(id: number) {
   // if I remove the timeseries analysis it is much faster
 
   // Run reference
-  console.time("Running reference");
   const referenceConfig = unwrap(exp.reference.config);
   const newOutput = await runClass(referenceConfig);
-  console.timeEnd("Running reference");
 
-  console.time("Store reference output");
-  setExperiments(id, "running", 1 / (exp.permutations.length + 1));
+  // TODO updating progress, triggers cascade of rerenders causing slow down
+  // for now disable progress updates
+  // console.time("Store reference output");
+  // setExperiments(id, "running", 1 / (exp.permutations.length + 1));
 
   outputs[id] = {
     reference: newOutput,
     permutations: [],
   };
-  console.timeEnd("Store reference output");
 
   // Run permutations
   let permCounter = 0;
   for (const proxiedPerm of exp.permutations) {
     const permConfig = unwrap(proxiedPerm.config);
     const combinedConfig = mergeConfigurations(referenceConfig, permConfig);
-    console.time(`Running permutation ${permCounter}`);
     const newOutput = await runClass(combinedConfig);
-    console.timeEnd(`Running permutation ${permCounter}`);
 
-    console.time(`Store permutation ${permCounter} progress`);
-    setExperiments(
-      id,
-      "running",
-      (1 + permCounter) / (exp.permutations.length + 1),
-    );
-    console.timeEnd(`Store permutation ${permCounter} progress`);
-    console.time(`Store permutation ${permCounter} output`);
+    // setExperiments(
+    //   id,
+    //   "running",
+    //   (1 + permCounter) / (exp.permutations.length + 1),
+    // );
     outputs[id].permutations[permCounter] = newOutput;
-    console.timeEnd(`Store permutation ${permCounter} output`);
     permCounter++;
   }
 
-  console.timeEnd("Running experiment");
 
   setExperiments(id, "running", false);
 
