@@ -86,19 +86,9 @@ export async function runExperiment(id: number) {
   // TODO make lazy, if config does not change do not rerun
   // or make more specific like runReference and runPermutation
 
-  // TODO figure out why duplicating experiment with permutation sweep takes to so long
-  // slowest item now is updating progress in running
-  // as it most likely triggering a rerender of the most of the app
-  // if I remove the timeseries analysis it is much faster
-
   // Run reference
   const referenceConfig = unwrap(exp.reference.config);
   const newOutput = await runClass(referenceConfig);
-
-  // TODO updating progress, triggers cascade of rerenders causing slow down
-  // for now disable progress updates
-  // console.time("Store reference output");
-  // setExperiments(id, "running", 1 / (exp.permutations.length + 1));
 
   outputs[id] = {
     reference: newOutput,
@@ -111,16 +101,9 @@ export async function runExperiment(id: number) {
     const permConfig = unwrap(proxiedPerm.config);
     const combinedConfig = mergeConfigurations(referenceConfig, permConfig);
     const newOutput = await runClass(combinedConfig);
-
-    // setExperiments(
-    //   id,
-    //   "running",
-    //   (1 + permCounter) / (exp.permutations.length + 1),
-    // );
     outputs[id].permutations[permCounter] = newOutput;
     permCounter++;
   }
-
 
   setExperiments(id, "running", false);
 

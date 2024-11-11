@@ -13,7 +13,7 @@ function cartesianProduct(values: PartialConfig[][]): PartialConfig[] {
     (acc, curr) => {
       return acc.flatMap((a) =>
         curr.map((b) => {
-          // TODO move config merging to a separate function
+          // TODO move config merging to a separate function or reuse
           // TODO make recursive and handle literals and arrays
           const merged = { ...a };
           for (const [section, params] of Object.entries(b)) {

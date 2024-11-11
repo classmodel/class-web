@@ -78,7 +78,6 @@ export function PermutationSweepButton(props: {
     const configs = performSweep(sweeps);
     const perms = configs2Permutations(configs);
     setOpen(false);
-    // TODO overwrite or append to existing permutations?
     setExperiments(props.experimentIndex, "permutations", perms);
     runExperiment(props.experimentIndex);
   }
@@ -99,7 +98,6 @@ export function PermutationSweepButton(props: {
             Perform a sweep over parameters
           </DialogTitle>
         </DialogHeader>
-        {/* TODO make configure by user, using a form with user can pick the parameter, start, step, and steps. */}
         <div class="p-4">
           <p class="mb-4">
             This will create a set of permutations, for combination of the

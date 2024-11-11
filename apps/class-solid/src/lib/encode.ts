@@ -5,7 +5,8 @@ import type { Analysis, Experiment } from "./store";
 export function decodeAppState(encoded: string): [Experiment[], Analysis[]] {
   const decoded = decodeURI(encoded);
   const parsed = JSON.parse(decoded);
-  // TODO use ajv to validate experiment, permutation, config and analysis
+  // TODO use ajv to validate experiment, permutation, and analysis
+  // now only config is validated
   const experiments: Experiment[] = parsed.experiments.map(
     (exp: {
       name: string;
