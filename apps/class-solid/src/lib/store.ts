@@ -154,7 +154,9 @@ export async function uploadExperiment(rawData: unknown) {
     permutations: upload.permutations,
     running: false,
   };
-  experiment.preset = upload.preset;
+  if (upload.preset) {
+    experiment.preset = upload.preset;
+  }
   setExperiments(experiments.length, experiment);
   await runExperiment(experiments.length - 1);
 }

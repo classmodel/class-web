@@ -4,7 +4,7 @@ import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
 import { type Experiment, outputForExperiment } from "./store";
 
 export function toConfig(experiment: Experiment): ExperimentConfigSchema {
-  return {
+  const e: ExperimentConfigSchema = {
     name: experiment.name,
     description: experiment.description,
     reference: experiment.reference.config,
@@ -15,6 +15,10 @@ export function toConfig(experiment: Experiment): ExperimentConfigSchema {
       };
     }),
   };
+  if (experiment.preset) {
+    e.preset = experiment.preset;
+  }
+  return e;
 }
 
 export function toConfigBlob(experiment: Experiment) {

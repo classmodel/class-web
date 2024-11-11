@@ -11,12 +11,14 @@ export function decodeAppState(encoded: string): [Experiment[], Analysis[]] {
   const experiments: Experiment[] = parsed.experiments.map(
     (exp: {
       name: string;
-      description: string;
+      description?: string;
+      preset?: string;
       reference: unknown;
       permutations: Record<string, unknown>;
     }) => ({
       name: exp.name,
       description: exp.description,
+      preset: exp.preset,
       reference: {
         config: parse(exp.reference),
       },
@@ -54,6 +56,7 @@ export function encodeAppState(
       name: exp.name,
       description: exp.description,
       reference: pruneDefaults(exp.reference.config),
+      preset: exp.preset,
       permutations: Object.fromEntries(
         exp.permutations.map((perm) => [
           perm.name,
