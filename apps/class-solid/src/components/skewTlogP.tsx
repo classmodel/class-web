@@ -3,7 +3,54 @@ import * as d3 from "d3";
 import { For } from "solid-js";
 import { AxisBottom, AxisLeft } from "./Axes";
 
-export function SkewTPlot() {
+type SoundingRecord = { p: number; T: number; Td: number };
+
+// Dummy data from https://github.com/rsobash/d3-skewt/blob/master/data_OUN.js
+const exampleSounding: SoundingRecord[] = [
+  { p: 962, T: 280, Td: 219 },
+  { p: 954, T: 276, Td: 215 },
+  { p: 944, T: 269, Td: 211 },
+  { p: 931, T: 258, Td: 208 },
+  { p: 915, T: 244, Td: 205 },
+  { p: 896, T: 224, Td: 201 },
+  { p: 874, T: 221, Td: 178 },
+  { p: 845, T: 239, Td: 37 },
+  { p: 814, T: 229, Td: -42 },
+  { p: 779, T: 196, Td: -25 },
+  { p: 741, T: 160, Td: -41 },
+  { p: 701, T: 119, Td: -70 },
+  { p: 658, T: 71, Td: -104 },
+  { p: 614, T: 17, Td: -115 },
+  { p: 569, T: -40, Td: -86 },
+  { p: 526, T: -86, Td: -107 },
+  { p: 488, T: -134, Td: -162 },
+  { p: 451, T: -175, Td: -244 },
+  { p: 416, T: -217, Td: -297 },
+  { p: 383, T: -261, Td: -334 },
+  { p: 353, T: -302, Td: -387 },
+  { p: 325, T: -347, Td: -407 },
+  { p: 298, T: -396, Td: -463 },
+  { p: 272, T: -444, Td: -512 },
+  { p: 249, T: -489, Td: -551 },
+  { p: 227, T: -533, Td: -594 },
+  { p: 206, T: -576, Td: -628 },
+  { p: 186, T: -609, Td: -655 },
+  { p: 171, T: -625, Td: -679 },
+  { p: 156, T: -593, Td: -703 },
+  { p: 140, T: -577, Td: -752 },
+  { p: 126, T: -593, Td: -788 },
+  { p: 114, T: -621, Td: -804 },
+  { p: 102, T: -638, Td: -804 },
+  { p: 91, T: -644, Td: -804 },
+  { p: 80, T: -645, Td: -804 },
+  { p: 70, T: -638, Td: -804 },
+  { p: 62, T: -626, Td: -804 },
+  { p: 53, T: -59, Td: -804 },
+];
+
+export function SkewTPlot({
+  soundingData,
+}: { soundingData: SoundingRecord[] }) {
   const m = [30, 40, 20, 45];
   const w = 500 - m[1] - m[3];
   const h = 500 - m[0] - m[2];
@@ -26,60 +73,18 @@ export function SkewTPlot() {
   const x = d3.scaleLinear().range([0, w]).domain([-45, 50]);
   const y = d3.scaleLog().range([0, h]).domain([topPressure, basep]);
 
-  // Dummy data from https://github.com/rsobash/d3-skewt/blob/master/data_OUN.js
-  type SoundingRecord = { p: number; T: number; Td: number };
-  const sounding: SoundingRecord[] = [
-    { p: 962, T: 280, Td: 219 },
-    { p: 954, T: 276, Td: 215 },
-    { p: 944, T: 269, Td: 211 },
-    { p: 931, T: 258, Td: 208 },
-    { p: 915, T: 244, Td: 205 },
-    { p: 896, T: 224, Td: 201 },
-    { p: 874, T: 221, Td: 178 },
-    { p: 845, T: 239, Td: 37 },
-    { p: 814, T: 229, Td: -42 },
-    { p: 779, T: 196, Td: -25 },
-    { p: 741, T: 160, Td: -41 },
-    { p: 701, T: 119, Td: -70 },
-    { p: 658, T: 71, Td: -104 },
-    { p: 614, T: 17, Td: -115 },
-    { p: 569, T: -40, Td: -86 },
-    { p: 526, T: -86, Td: -107 },
-    { p: 488, T: -134, Td: -162 },
-    { p: 451, T: -175, Td: -244 },
-    { p: 416, T: -217, Td: -297 },
-    { p: 383, T: -261, Td: -334 },
-    { p: 353, T: -302, Td: -387 },
-    { p: 325, T: -347, Td: -407 },
-    { p: 298, T: -396, Td: -463 },
-    { p: 272, T: -444, Td: -512 },
-    { p: 249, T: -489, Td: -551 },
-    { p: 227, T: -533, Td: -594 },
-    { p: 206, T: -576, Td: -628 },
-    { p: 186, T: -609, Td: -655 },
-    { p: 171, T: -625, Td: -679 },
-    { p: 156, T: -593, Td: -703 },
-    { p: 140, T: -577, Td: -752 },
-    { p: 126, T: -593, Td: -788 },
-    { p: 114, T: -621, Td: -804 },
-    { p: 102, T: -638, Td: -804 },
-    { p: 91, T: -644, Td: -804 },
-    { p: 80, T: -645, Td: -804 },
-    { p: 70, T: -638, Td: -804 },
-    { p: 62, T: -626, Td: -804 },
-    { p: 53, T: -59, Td: -804 },
-  ]; // Dummy data from https://github.com/rsobash/d3-skewt/blob/master/data_OUN.js
-
   // TODO: temperature divided by 10 because sample data comes with 1 decimal but without decimal comma/point
   // Is that standard (e.g. also for EWED)? Should CLASS also provide data like this? Or modify the data instead?
   const temperatureLine = d3
     .line<SoundingRecord>()
-    .x((d) => x(d.T / 10) + (y(basep) - y(d.p)) / tan)
+    // TODO what should be the units of temperature? K, or C, or C/10?
+    .x((d) => x(d.T - 273.15) + (y(basep) - y(d.p)) / tan)
     .y((d) => y(d.p));
 
   const dewpointLine = d3
     .line<SoundingRecord>()
-    .x((d) => x(d.Td / 10) + (y(basep) - y(d.p)) / tan)
+    // TODO what should be the units of temperature? K, or C, or C/10?
+    .x((d) => x(d.Td - 273.15) + (y(basep) - y(d.p)) / tan)
     .y((d) => y(d.p));
 
   //   // bisector function for tooltips
@@ -175,14 +180,14 @@ export function SkewTPlot() {
           </g>
           <g class="skewt">
             <path
-              d={temperatureLine(sounding) || ""}
+              d={temperatureLine(soundingData) || ""}
               clip-path="url(#clipper)"
               stroke="red"
               stroke-width="2.5px"
               fill="none"
             />
             <path
-              d={dewpointLine(sounding) || ""}
+              d={dewpointLine(soundingData) || ""}
               clip-path="url(#clipper)"
               stroke="green"
               stroke-width="2.5px"

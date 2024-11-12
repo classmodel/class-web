@@ -1,5 +1,5 @@
 import { For, Match, Switch, createMemo, createUniqueId } from "solid-js";
-import { getVerticalProfiles } from "~/lib/profiles";
+import { getThermodynamicProfiles, getVerticalProfiles } from "~/lib/profiles";
 import { analyses, experiments, setAnalyses } from "~/lib/store";
 import type { Experiment } from "~/lib/store";
 import LinePlot from "./LinePlot";
@@ -133,6 +133,45 @@ export function VerticalProfilePlot() {
   );
 }
 
+export function ThermodynamicPlot() {
+  const time = -1;
+  const skewTData = createMemo(() => {
+    return experiments.flatMap((e, i) => {
+      const permutations = e.permutations.map((p, j) => {
+        // TODO get additional config info from reference
+        // permutations probably usually don't have gammaq/gammatetha set?
+        return {
+          color: colors[(j + 1) % 10],
+          linestyle: linestyles[i % 5],
+          label: `${e.name}/${p.name}`,
+          soundingData: getThermodynamicProfiles(p.output, p.config, time),
+        };
+      });
+
+      return [
+        {
+          label: e.name,
+          color: colors[0],
+          linestyle: linestyles[i],
+          soundingData: getThermodynamicProfiles(
+            e.reference.output,
+            e.reference.config,
+            time,
+          ),
+        },
+        ...permutations,
+      ];
+    });
+  });
+  // const soundingData = skewTData()[0].soundingData;
+  const soundingData = getThermodynamicProfiles(
+    experiments[0].reference.output,
+    experiments[0].reference.config,
+  );
+  console.log(soundingData);
+  return <SkewTPlot soundingData={soundingData} />;
+}
+
 /** Simply show the final height for each experiment that has output */
 function FinalHeights() {
   return (
@@ -208,7 +247,7 @@ export function AnalysisCard(analysis: Analysis) {
             <VerticalProfilePlot />
           </Match>
           <Match when={analysis.type === "skewT"}>
-            <SkewTPlot />
+            <ThermodynamicPlot />
           </Match>
         </Switch>
       </CardContent>
