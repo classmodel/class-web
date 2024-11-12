@@ -144,7 +144,7 @@ export function ThermodynamicPlot() {
           color: colors[(j + 1) % 10],
           linestyle: linestyles[i % 5],
           label: `${e.name}/${p.name}`,
-          soundingData: getThermodynamicProfiles(p.output, p.config, time),
+          data: getThermodynamicProfiles(p.output, p.config, time),
         };
       });
 
@@ -153,7 +153,7 @@ export function ThermodynamicPlot() {
           label: e.name,
           color: colors[0],
           linestyle: linestyles[i],
-          soundingData: getThermodynamicProfiles(
+          data: getThermodynamicProfiles(
             e.reference.output,
             e.reference.config,
             time,
@@ -163,12 +163,7 @@ export function ThermodynamicPlot() {
       ];
     });
   });
-  // const soundingData = skewTData()[0].soundingData;
-  const soundingData = getThermodynamicProfiles(
-    experiments[0].reference.output,
-    experiments[0].reference.config,
-  );
-  return <SkewTPlot soundingData={soundingData} />;
+  return <SkewTPlot data={skewTData} />;
 }
 
 /** Simply show the final height for each experiment that has output */

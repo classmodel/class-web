@@ -4,6 +4,12 @@ import { For } from "solid-js";
 import { AxisBottom, AxisLeft } from "./Axes";
 
 type SoundingRecord = { p: number; T: number; Td: number };
+interface SkewTData {
+  label: string;
+  color: string;
+  linestyle: string;
+  data: SoundingRecord[];
+}
 
 const deg2rad = Math.PI / 180;
 const tan = Math.tan(55 * deg2rad);
@@ -157,9 +163,7 @@ function SkewTBackGround({
   );
 }
 
-export function SkewTPlot({
-  soundingData,
-}: { soundingData: SoundingRecord[] }) {
+export function SkewTPlot({ data }: { data: () => SkewTData[] }) {
   const m = [30, 40, 20, 45];
   const w = 500 - m[1] - m[3];
   const h = 500 - m[0] - m[2];
@@ -192,22 +196,28 @@ export function SkewTPlot({
         <title>Thermodynamic diagram</title>
         <g transform={`translate(${m[3]},${m[0]})`}>
           <SkewTBackGround w={w} h={h} x={x} y={y} />
-          <g class="skewt">
-            <path
-              d={temperatureLine(soundingData) || ""}
-              clip-path="url(#clipper)"
-              stroke="red"
-              stroke-width="2.5px"
-              fill="none"
-            />
-            <path
-              d={dewpointLine(soundingData) || ""}
-              clip-path="url(#clipper)"
-              stroke="green"
-              stroke-width="2.5px"
-              fill="none"
-            />
-          </g>
+          <For each={data()}>
+            {(d) => (
+              <g class="skewt">
+                <path
+                  d={temperatureLine(d.data) || ""}
+                  clip-path="url(#clipper)"
+                  stroke={d.color}
+                  stroke-dasharray={d.linestyle}
+                  stroke-width="3"
+                  fill="none"
+                />
+                <path
+                  d={dewpointLine(d.data) || ""}
+                  clip-path="url(#clipper)"
+                  stroke={d.color}
+                  stroke-dasharray={d.linestyle}
+                  stroke-width="3"
+                  fill="none"
+                />
+              </g>
+            )}
+          </For>
         </g>
       </svg>
     </div>
