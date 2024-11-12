@@ -27,96 +27,60 @@ export function SkewTPlot() {
   const y = d3.scaleLog().range([0, h]).domain([topPressure, basep]);
 
   // Dummy data from https://github.com/rsobash/d3-skewt/blob/master/data_OUN.js
-  const temperature: [number, number][] = [
-    [962, 280],
-    [954, 276],
-    [944, 269],
-    [931, 258],
-    [915, 244],
-    [896, 224],
-    [874, 221],
-    [845, 239],
-    [814, 229],
-    [779, 196],
-    [741, 160],
-    [701, 119],
-    [658, 71],
-    [614, 17],
-    [569, -40],
-    [526, -86],
-    [488, -134],
-    [451, -175],
-    [416, -217],
-    [383, -261],
-    [353, -302],
-    [325, -347],
-    [298, -396],
-    [272, -444],
-    [249, -489],
-    [227, -533],
-    [206, -576],
-    [186, -609],
-    [171, -625],
-    [156, -593],
-    [140, -577],
-    [126, -593],
-    [114, -621],
-    [102, -638],
-    [91, -644],
-    [80, -645],
-    [70, -638],
-    [62, -626],
-    [53, -59],
-  ]; // Dummy data from https://github.com/rsobash/d3-skewt/blob/master/data_OUN.js
-
-  const dewpoint: [number, number][] = [
-    [962, 219],
-    [954, 215],
-    [944, 211],
-    [931, 208],
-    [915, 205],
-    [896, 201],
-    [874, 178],
-    [845, 37],
-    [814, -42],
-    [779, -25],
-    [741, -41],
-    [701, -70],
-    [658, -104],
-    [614, -115],
-    [569, -86],
-    [526, -107],
-    [488, -162],
-    [451, -244],
-    [416, -297],
-    [383, -334],
-    [353, -387],
-    [325, -407],
-    [298, -463],
-    [272, -512],
-    [249, -551],
-    [227, -594],
-    [206, -628],
-    [186, -655],
-    [171, -679],
-    [156, -703],
-    [140, -752],
-    [126, -788],
-    [114, -804],
-    [102, -804],
-    [91, -804],
-    [80, -804],
-    [70, -804],
-    [62, -804],
-    [53, -804],
+  type SoundingRecord = { p: number; T: number; Td: number };
+  const sounding: SoundingRecord[] = [
+    { p: 962, T: 280, Td: 219 },
+    { p: 954, T: 276, Td: 215 },
+    { p: 944, T: 269, Td: 211 },
+    { p: 931, T: 258, Td: 208 },
+    { p: 915, T: 244, Td: 205 },
+    { p: 896, T: 224, Td: 201 },
+    { p: 874, T: 221, Td: 178 },
+    { p: 845, T: 239, Td: 37 },
+    { p: 814, T: 229, Td: -42 },
+    { p: 779, T: 196, Td: -25 },
+    { p: 741, T: 160, Td: -41 },
+    { p: 701, T: 119, Td: -70 },
+    { p: 658, T: 71, Td: -104 },
+    { p: 614, T: 17, Td: -115 },
+    { p: 569, T: -40, Td: -86 },
+    { p: 526, T: -86, Td: -107 },
+    { p: 488, T: -134, Td: -162 },
+    { p: 451, T: -175, Td: -244 },
+    { p: 416, T: -217, Td: -297 },
+    { p: 383, T: -261, Td: -334 },
+    { p: 353, T: -302, Td: -387 },
+    { p: 325, T: -347, Td: -407 },
+    { p: 298, T: -396, Td: -463 },
+    { p: 272, T: -444, Td: -512 },
+    { p: 249, T: -489, Td: -551 },
+    { p: 227, T: -533, Td: -594 },
+    { p: 206, T: -576, Td: -628 },
+    { p: 186, T: -609, Td: -655 },
+    { p: 171, T: -625, Td: -679 },
+    { p: 156, T: -593, Td: -703 },
+    { p: 140, T: -577, Td: -752 },
+    { p: 126, T: -593, Td: -788 },
+    { p: 114, T: -621, Td: -804 },
+    { p: 102, T: -638, Td: -804 },
+    { p: 91, T: -644, Td: -804 },
+    { p: 80, T: -645, Td: -804 },
+    { p: 70, T: -638, Td: -804 },
+    { p: 62, T: -626, Td: -804 },
+    { p: 53, T: -59, Td: -804 },
   ]; // Dummy data from https://github.com/rsobash/d3-skewt/blob/master/data_OUN.js
 
   // TODO: temperature divided by 10 because sample data comes with 1 decimal but without decimal comma/point
   // Is that standard (e.g. also for EWED)? Should CLASS also provide data like this? Or modify the data instead?
   const temperatureLine = d3
-    .line()
-    .x((d) => x(d[1] / 10) + (y(basep) - y(d[0])) / tan)
-    .y((d) => y(d[0]));
+    .line<SoundingRecord>()
+    .x((d) => x(d.T / 10) + (y(basep) - y(d.p)) / tan)
+    .y((d) => y(d.p));
+
+  const dewpointLine = d3
+    .line<SoundingRecord>()
+    .x((d) => x(d.Td / 10) + (y(basep) - y(d.p)) / tan)
+    .y((d) => y(d.p));
 
   //   // bisector function for tooltips
   //   const bisectTemp = d3.bisector((d) => d.press).left;
@@ -211,14 +175,14 @@ export function SkewTPlot() {
           </g>
           <g class="skewt">
             <path
-              d={temperatureLine(temperature) || ""}
+              d={temperatureLine(sounding) || ""}
               clip-path="url(#clipper)"
               stroke="red"
               stroke-width="2.5px"
               fill="none"
             />
             <path
-              d={temperatureLine(dewpoint) || ""}
+              d={dewpointLine(sounding) || ""}
               clip-path="url(#clipper)"
               stroke="green"
               stroke-width="2.5px"
