@@ -171,6 +171,7 @@ const jsonSchemaOfExperimentConfig = {
     description: {
       type: "string",
     },
+    preset: { type: "string" },
     reference: jsonSchemaOfConfig,
     permutations: {
       type: "array",
@@ -219,9 +220,13 @@ export function pruneConfig(
   preset?: PartialConfig,
 ): PartialConfig {
   const config = structuredClone(permutation);
+  let config2 = reference;
+  if (preset) {
+    config2 = pruneConfig(reference, preset);
+  }
   for (const section in config) {
     const s = config[section as keyof typeof config];
-    const s2 = reference[section as keyof typeof reference];
+    const s2 = config2[section as keyof typeof config2];
     if (s === undefined || s2 === undefined) {
       continue;
     }
