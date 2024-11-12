@@ -293,7 +293,6 @@ export async function loadStateFromString(rawState: string): Promise<void> {
   const [loadedExperiments, loadedAnalyses] = decodeAppState(rawState);
   setExperiments(loadedExperiments);
   await Promise.all(loadedExperiments.map((_, i) => runExperiment(i)));
-  setAnalyses(loadedAnalyses);
 }
 
 const analysisNames = {

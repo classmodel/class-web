@@ -28,21 +28,7 @@ export function decodeAppState(encoded: string): [Experiment[], Analysis[]] {
       })),
     }),
   );
-  const analyses: Analysis[] = parsed.analyses.map(
-    (ana: {
-      name: string;
-      id: string;
-      experiments: string[];
-      type: string;
-    }) => ({
-      name: ana.name,
-      id: ana.id,
-      experiments: experiments.filter((exp) =>
-        ana.experiments.includes(exp.name),
-      ),
-      type: ana.type,
-    }),
-  );
+  const analyses: Analysis[] = [];
   return [experiments, analyses];
 }
 
@@ -64,14 +50,6 @@ export function encodeAppState(
           pruneDefaults(perm.config),
         ]),
       ),
-    })),
-    analyses: unwrap(analyses).map((ana) => ({
-      name: ana.name,
-      id: ana.id,
-      experiments: ana.experiments
-        ? ana.experiments.map((exp) => exp.name)
-        : [],
-      type: ana.type,
     })),
   };
   return encodeURI(JSON.stringify(minimizedState, undefined, 0));
