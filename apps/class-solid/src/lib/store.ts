@@ -13,6 +13,7 @@ import { runClass } from "./runner";
 export interface Permutation<C extends PartialConfig = PartialConfig> {
   name: string;
   config: C;
+  output?: ClassOutput | undefined;
   // TODO Could use per run state to show progress of run of reference and each permutation
   // running: boolean;
 }
@@ -23,6 +24,7 @@ export interface Experiment {
   reference: {
     // TODO change reference.config to config, as there are no other keys in reference
     config: PartialConfig;
+    output?: ClassOutput | undefined;
   };
   permutations: Permutation[];
   running: number | false;
@@ -30,34 +32,6 @@ export interface Experiment {
 
 export const [experiments, setExperiments] = createStore<Experiment[]>([]);
 export const [analyses, setAnalyses] = createStore<Analysis[]>([]);
-
-interface ExperimentOutput {
-  reference: ClassOutput;
-  permutations: ClassOutput[];
-}
-
-// Outputs must store outside store as they are too big to wrap in proxy
-export const outputs: ExperimentOutput[] = [];
-
-export function outputForExperiment(
-  index: number | Experiment,
-): ExperimentOutput | undefined {
-  if (typeof index === "object") {
-    const i = experiments.indexOf(index);
-    return outputs[i];
-  }
-  return outputs[index];
-}
-
-export function outputForPermutation(
-  experiment: ExperimentOutput | undefined,
-  permutationIndex: number,
-) {
-  if (!experiment || experiment.permutations.length <= permutationIndex) {
-    return { t: [], h: [], theta: [], dtheta: [] };
-  }
-  return experiment.permutations[permutationIndex];
-}
 
 // biome-ignore lint/suspicious/noExplicitAny: recursion is hard to type
 function mergeConfigurations(reference: any, permutation: any) {
@@ -81,7 +55,7 @@ function mergeConfigurations(reference: any, permutation: any) {
 export async function runExperiment(id: number) {
   const exp = experiments[id];
 
-  setExperiments(id, "running", 0);
+  setExperiments(id, "running", 0.0001);
 
   // TODO make lazy, if config does not change do not rerun
   // or make more specific like runReference and runPermutation
@@ -90,10 +64,7 @@ export async function runExperiment(id: number) {
   const referenceConfig = unwrap(exp.reference.config);
   const newOutput = await runClass(referenceConfig);
 
-  outputs[id] = {
-    reference: newOutput,
-    permutations: [],
-  };
+  setExperiments(id, "reference", "output", newOutput);
 
   // Run permutations
   let permCounter = 0;
@@ -101,7 +72,7 @@ export async function runExperiment(id: number) {
     const permConfig = unwrap(proxiedPerm.config);
     const combinedConfig = mergeConfigurations(referenceConfig, permConfig);
     const newOutput = await runClass(combinedConfig);
-    outputs[id].permutations[permCounter] = newOutput;
+    setExperiments(id, "permutations", permCounter, "output", newOutput);
     permCounter++;
   }
 
@@ -172,7 +143,6 @@ export function duplicateExperiment(id: number) {
 
 export function deleteExperiment(index: number) {
   setExperiments(experiments.filter((_, i) => i !== index));
-  outputs.splice(index, 1);
 }
 
 export async function modifyExperiment(
@@ -226,7 +196,6 @@ export async function deletePermutationFromExperiment(
   setExperiments(experimentIndex, "permutations", (perms) =>
     perms.filter((_, i) => i !== permutationIndex),
   );
-  outputs[experimentIndex].permutations.splice(permutationIndex, 1);
 }
 
 export function findPermutation(exp: Experiment, permutationName: string) {

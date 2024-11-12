@@ -1,7 +1,7 @@
 import type { ClassOutput } from "@classmodel/class/runner";
 import type { ExperimentConfigSchema } from "@classmodel/class/validate";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
-import { type Experiment, outputForExperiment } from "./store";
+import type { Experiment } from "./store";
 
 export function toConfig(experiment: Experiment): ExperimentConfigSchema {
   return {
@@ -40,29 +40,22 @@ export async function createArchive(experiment: Experiment) {
     type: "application/json",
   });
   await zipWriter.add("config.json", new BlobReader(configBlob));
-  const output = outputForExperiment(experiment);
-  if (!output) {
-    return;
-  }
 
-  if (output.reference) {
-    const csvBlob = new Blob([outputToCsv(output.reference)], {
+  if (experiment.reference.output) {
+    const csvBlob = new Blob([outputToCsv(experiment.reference.output)], {
       type: "text/csv",
     });
     await zipWriter.add(`${experiment.name}.csv`, new BlobReader(csvBlob));
   }
 
-  let permIndex = 0;
-  for (const perm of experiment.permutations) {
-    const name = perm.name;
-    const permutationOutput = output.permutations[permIndex];
-    if (output && name) {
+  for (const permutation of experiment.permutations) {
+    const permutationOutput = permutation.output;
+    if (permutationOutput) {
       const csvBlob = new Blob([outputToCsv(permutationOutput)], {
         type: "text/csv",
       });
-      await zipWriter.add(`${name}.csv`, new BlobReader(csvBlob));
+      await zipWriter.add(`${permutation.name}.csv`, new BlobReader(csvBlob));
     }
-    permIndex++;
   }
   await zipWriter.close();
   return await zipFileWriter.getData();

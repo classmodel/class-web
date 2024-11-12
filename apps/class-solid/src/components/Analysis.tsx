@@ -1,12 +1,6 @@
 import { For, Match, Show, Switch, createMemo, createUniqueId } from "solid-js";
 import { getVerticalProfiles } from "~/lib/profiles";
-import {
-  type Analysis,
-  deleteAnalysis,
-  experiments,
-  outputForExperiment,
-  outputForPermutation,
-} from "~/lib/store";
+import { type Analysis, deleteAnalysis, experiments } from "~/lib/store";
 import LinePlot from "./LinePlot";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import { Button } from "./ui/button";
@@ -37,21 +31,22 @@ export function TimeSeriesPlot() {
     return experiments
       .filter((e) => e.running === false) // Skip running experiments
       .flatMap((e, i) => {
-        const experimentOutput = outputForExperiment(e);
-        const permutationRuns = e.permutations.map((perm, j) => {
-          const permOutput = outputForPermutation(experimentOutput, j);
-          return {
-            label: `${e.name}/${perm.name}`,
-            y: permOutput.h ?? [],
-            x: permOutput.t ?? [],
-            color: colors[(j + 1) % 10],
-            linestyle: linestyles[i % 5],
-          };
-        });
+        const experimentOutput = e.reference.output;
+        const permutationRuns = e.permutations
+          .filter((perm) => perm.output !== undefined)
+          .map((perm, j) => {
+            return {
+              label: `${e.name}/${perm.name}`,
+              y: perm.output?.h ?? [],
+              x: perm.output?.t ?? [],
+              color: colors[(j + 1) % 10],
+              linestyle: linestyles[i % 5],
+            };
+          });
         return [
           {
-            y: experimentOutput?.reference.h ?? [],
-            x: experimentOutput?.reference.t ?? [],
+            y: experimentOutput?.h ?? [],
+            x: experimentOutput?.t ?? [],
             label: e.name,
             color: colors[0],
             linestyle: linestyles[i],
@@ -77,16 +72,14 @@ export function VerticalProfilePlot() {
     return experiments
       .filter((e) => e.running === false) // Skip running experiments
       .flatMap((e, i) => {
-        const experimentOutput = outputForExperiment(e);
         const permutations = e.permutations.map((p, j) => {
           // TODO get additional config info from reference
           // permutations probably usually don't have gammaq/gammatetha set?
-          const permOutput = outputForPermutation(experimentOutput, j);
           return {
             color: colors[(j + 1) % 10],
             linestyle: linestyles[i % 5],
             label: `${e.name}/${p.name}`,
-            ...getVerticalProfiles(permOutput, p.config, variable, time),
+            ...getVerticalProfiles(p.output, p.config, variable, time),
           };
         });
 
@@ -96,7 +89,7 @@ export function VerticalProfilePlot() {
             color: colors[0],
             linestyle: linestyles[i],
             ...getVerticalProfiles(
-              experimentOutput?.reference ?? {
+              e.reference.output ?? {
                 t: [],
                 h: [],
                 theta: [],
@@ -127,12 +120,8 @@ function FinalHeights() {
       <For each={experiments}>
         {(experiment) => {
           const h = () => {
-            const experimentOutput = outputForExperiment(experiment);
-            return (
-              experimentOutput?.reference.h[
-                experimentOutput.reference.h.length - 1
-              ] || 0
-            );
+            const experimentOutput = experiment.reference.output;
+            return experimentOutput?.h[experimentOutput?.h.length - 1] || 0;
           };
           return (
             <Show when={!experiment.running}>
@@ -140,14 +129,10 @@ function FinalHeights() {
                 {experiment.name}: {h().toFixed()} m
               </li>
               <For each={experiment.permutations}>
-                {(perm, permIndex) => {
+                {(perm) => {
                   const h = () => {
-                    const experimentOutput = outputForExperiment(experiment);
-                    const permOutput = outputForPermutation(
-                      experimentOutput,
-                      permIndex(),
-                    );
-                    return permOutput.h?.length
+                    const permOutput = perm.output;
+                    return permOutput?.h?.length
                       ? permOutput.h[permOutput.h.length - 1]
                       : 0;
                   };
