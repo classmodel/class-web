@@ -59,6 +59,8 @@ export function AddExperimentDialog(props: {
       reference: { config: {} },
       permutations: [],
       running: false as const,
+      // TODO make sure preset ends up in store
+      preset: "/presets/default.v1.0.0.json",
     };
   };
 
