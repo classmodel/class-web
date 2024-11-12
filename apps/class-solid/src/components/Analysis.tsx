@@ -168,7 +168,6 @@ export function ThermodynamicPlot() {
     experiments[0].reference.output,
     experiments[0].reference.config,
   );
-  console.log(soundingData);
   return <SkewTPlot soundingData={soundingData} />;
 }
 
