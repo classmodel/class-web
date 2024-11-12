@@ -35,12 +35,12 @@ function ResumeSessionButton(props: { afterClick: () => void }) {
           fallback={
             <>
               <p>Resume from</p>
-              <p>previous session</p>
+              <p>saved session</p>
             </>
           }
         >
           <p>Restore</p>
-          <p>previous session</p>
+          <p>saved session</p>
         </Show>
       </Button>
     </Show>
