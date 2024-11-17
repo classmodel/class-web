@@ -21,6 +21,7 @@ export interface Permutation<C extends PartialConfig = PartialConfig> {
 export interface Experiment {
   name: string;
   description: string;
+  preset?: string;
   reference: {
     // TODO change reference.config to config, as there are no other keys in reference
     config: PartialConfig;
@@ -124,6 +125,9 @@ export async function uploadExperiment(rawData: unknown) {
     permutations: upload.permutations,
     running: false,
   };
+  if (upload.preset) {
+    experiment.preset = upload.preset;
+  }
   setExperiments(experiments.length, experiment);
   await runExperiment(experiments.length - 1);
 }

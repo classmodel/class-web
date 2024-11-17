@@ -157,6 +157,7 @@ export function overwriteDefaultsInJsonSchema<C>(
 export interface ExperimentConfigSchema {
   name: string;
   description?: string;
+  preset?: string;
   reference: PartialConfig;
   permutations: {
     name: string;
@@ -170,6 +171,7 @@ const jsonSchemaOfExperimentConfig = {
     description: {
       type: "string",
     },
+    preset: { type: "string" },
     reference: jsonSchemaOfConfig,
     permutations: {
       type: "array",
@@ -201,4 +203,43 @@ export function parseExperimentConfig(input: unknown): ExperimentConfigSchema {
     );
   }
   return input;
+}
+
+/**
+ *
+ * From first config remove all parameters that are the same as in the second config or third config.
+ *
+ * @param permutation
+ * @param reference
+ * @param preset
+ * @returns Pruned permutation configuration
+ */
+export function pruneConfig(
+  permutation: PartialConfig,
+  reference: PartialConfig,
+  preset?: PartialConfig,
+): PartialConfig {
+  const config = structuredClone(permutation);
+  let config2 = reference;
+  if (preset) {
+    config2 = pruneConfig(reference, preset);
+  }
+  for (const section in config) {
+    const s = config[section as keyof typeof config];
+    const s2 = config2[section as keyof typeof config2];
+    if (s === undefined || s2 === undefined) {
+      continue;
+    }
+    for (const key in s) {
+      const k = key as keyof typeof s;
+      const k2 = key as keyof typeof s2;
+      if (s[k] === s2[k2]) {
+        delete s[k];
+      }
+    }
+    if (Object.keys(s).length === 0) {
+      delete config[section as keyof typeof config];
+    }
+  }
+  return config;
 }

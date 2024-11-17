@@ -20,8 +20,10 @@ The CLASS web application that uses this package is available at https://classmo
 The class model can be run from the command line.
 
 ```shell
-# Generate default config file
-pnpx @classmodel/class generate --output config.json
+# Fetch default config file
+wget https://classmodel.github.io/class-web/presets/default.v1.0.0.json
+
+# Edit the config file
 
 # Run the model
 pnpx @classmodel/class run config.json

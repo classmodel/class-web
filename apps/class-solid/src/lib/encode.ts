@@ -4,18 +4,21 @@ import type { Analysis, Experiment } from "./store";
 
 export function decodeAppState(encoded: string): [Experiment[], Analysis[]] {
   const decoded = decodeURI(encoded);
+
   const parsed = JSON.parse(decoded);
   // TODO use ajv to validate experiment, permutation, and analysis
   // now only config is validated
   const experiments: Experiment[] = parsed.experiments.map(
     (exp: {
       name: string;
-      description: string;
+      description?: string;
+      preset?: string;
       reference: unknown;
       permutations: Record<string, unknown>;
     }) => ({
       name: exp.name,
       description: exp.description,
+      preset: exp.preset,
       reference: {
         config: parse(exp.reference),
       },
@@ -39,6 +42,7 @@ export function encodeAppState(
       name: exp.name,
       description: exp.description,
       reference: pruneDefaults(exp.reference.config),
+      preset: exp.preset,
       permutations: Object.fromEntries(
         exp.permutations.map((perm) => [
           perm.name,

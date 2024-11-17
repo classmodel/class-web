@@ -17,7 +17,13 @@ import {
 } from "~/lib/store";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import { PermutationsList } from "./PermutationsList";
-import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
+import {
+  MdiCog,
+  MdiContentCopy,
+  MdiDelete,
+  MdiDownload,
+  MdiStar,
+} from "./icons";
 import {
   Card,
   CardContent,
@@ -53,6 +59,8 @@ export function AddExperimentDialog(props: {
       reference: { config: {} },
       permutations: [],
       running: false as const,
+      // TODO make sure preset ends up in store
+      preset: "/presets/default.v1.0.0.json",
     };
   };
 
@@ -279,6 +287,19 @@ export function ExperimentCard(props: {
           >
             <MdiDelete />
           </Button>
+          <Show when={experiment().preset}>
+            <div class="text-[#888]">
+              <a
+                href={`?preset=${encodeURI(experiment().preset ?? "")}`}
+                target="_blank"
+                rel="noreferrer"
+                class={buttonVariants({ variant: "outline" })}
+                title="Preset link of experiment"
+              >
+                <MdiStar />
+              </a>
+            </div>
+          </Show>
         </Show>
       </CardFooter>
     </Card>
