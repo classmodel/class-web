@@ -232,3 +232,90 @@ export function MdiClipboardCheck(props: JSX.IntrinsicElements["svg"]) {
     </svg>
   );
 }
+
+export function MdiContentSave(props: JSX.IntrinsicElements["svg"]) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      <path
+        fill="currentColor"
+        d="M15 9H5V5h10m-3 14a3 3 0 0 1-3-3a3 3 0 0 1 3-3a3 3 0 0 1 3 3a3 3 0 0 1-3 3m5-16H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7z"
+      />
+      <title>Save</title>
+    </svg>
+  );
+}
+
+export function MdiBackupRestore(props: JSX.IntrinsicElements["svg"]) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      <title>Restore</title>
+      <path
+        fill="currentColor"
+        d="M12 3a9 9 0 0 0-9 9H0l4 4l4-4H5a7 7 0 0 1 7-7a7 7 0 0 1 7 7a7 7 0 0 1-7 7c-1.5 0-2.91-.5-4.06-1.3L6.5 19.14A9.1 9.1 0 0 0 12 21a9 9 0 0 0 9-9a9 9 0 0 0-9-9m2 9a2 2 0 0 0-2-2a2 2 0 0 0-2 2a2 2 0 0 0 2 2a2 2 0 0 0 2-2"
+      />
+    </svg>
+  );
+}
+
+export function MdiUpload(props: JSX.IntrinsicElements["svg"]) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      <title>Upload</title>
+      <path fill="currentColor" d="M9 16v-6H5l7-7l7 7h-4v6zm-4 4v-2h14v2z" />
+    </svg>
+  );
+}
+
+export function MdiBeakerPlus(props: JSX.IntrinsicElements["svg"]) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      <title>Add</title>
+      <path
+        fill="currentColor"
+        d="M18 14h2v3h3v2h-3v3h-2v-3h-3v-2h3zM3 3h18v2c-1.1 0-2 .9-2 2v5a6.005 6.005 0 0 0-5.2 9H7c-1.1 0-2-.9-2-2V7c0-1.1-.9-2-2-2zm4 6v1h3V9zm0 2v1h3v-1zm3 5v-1H7v1zm2-2v-1H7v1zm0-6V7H7v1z"
+      />
+    </svg>
+  );
+}
+
+export function MdiFileDocumentOutline(props: JSX.IntrinsicElements["svg"]) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      <title>Preset</title>
+      <path
+        fill="currentColor"
+        d="M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm0 2h7v5h5v11H6zm2 8v2h8v-2zm0 4v2h5v-2z"
+      />
+    </svg>
+  );
+}

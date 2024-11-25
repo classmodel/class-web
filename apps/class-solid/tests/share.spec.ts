@@ -5,17 +5,13 @@ test("Create share link from an experiment", async ({ page }) => {
   await page.goto("/");
 
   // Create a new experiment
-  await page.getByTitle("Add experiment").click();
-  await page.getByRole("menuitem", { name: "From scratch" }).click();
+  await page.getByRole("button", { name: "Start from scratch" }).click();
   await page.getByRole("button", { name: "Initial State" }).click();
   await page.getByLabel("ABL height").fill("800");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Open share dialog
-  const origExperiment = page.getByLabel("My experiment 1", { exact: true });
-  await origExperiment
-    .getByRole("button", { name: "Share experiment" })
-    .click();
+  await page.getByRole("button", { name: "Share" }).click();
   // Open link, in a new popup window
   const sharedPagePromise = page.waitForEvent("popup");
   await page.getByRole("link", { name: "this link" }).click();
@@ -36,9 +32,7 @@ test("Create share link from an experiment", async ({ page }) => {
   expect(config1.reference.initialState?.h_0).toEqual(800);
 
   // Check that shared experiment has been run by
-  // adding Final Height analysis and checking height is non-zero
-  await sharedPage.getByRole("button", { name: "Add analysis" }).click();
-  await sharedPage.getByRole("menuitem", { name: "Final height" }).click();
+  // checking height in final height analysis
   const finalHeightAnalysis = sharedPage.getByRole("article", {
     name: "Final height",
   });
@@ -48,5 +42,34 @@ test("Create share link from an experiment", async ({ page }) => {
   });
   expect(await finalHeightOfExperiment.textContent()).toMatch(
     /My experiment 1: \d+ m/,
+  );
+});
+
+test("Given large app state, sharing is not possible", async ({ page }) => {
+  test.skip(
+    true,
+    "Plotting is too slow, to render 13 experiments with 24 permuations each",
+  );
+  await page.goto("/");
+
+  // Create a new experiment
+  await page.getByRole("button", { name: "Start from scratch" }).click();
+  await page.getByRole("button", { name: "Run" }).click();
+  // Add permutation sweep
+  await page.getByRole("button", { name: "S", exact: true }).click();
+  await page.getByRole("button", { name: "Perform sweep" }).click();
+
+  // Duplicate the experiment 12 times
+  const times = 12;
+  for (let i = 0; i < times; i++) {
+    await page
+      .getByLabel("My experiment 1", { exact: true })
+      .getByRole("button", { name: "Duplicate experiment" })
+      .click();
+  }
+
+  await page.getByRole("button", { name: "Share" }).click();
+  await page.waitForSelector(
+    "text=Cannot share application state, it is too large. Please download each experiment by itself or make it smaller by removing permutations and/or experiments.",
   );
 });

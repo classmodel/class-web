@@ -49,9 +49,9 @@ export async function createArchive(experiment: Experiment) {
   }
 
   for (const permutation of experiment.permutations) {
-    const output = permutation.output;
-    if (output) {
-      const csvBlob = new Blob([outputToCsv(output)], {
+    const permutationOutput = permutation.output;
+    if (permutationOutput) {
+      const csvBlob = new Blob([outputToCsv(permutationOutput)], {
         type: "text/csv",
       });
       await zipWriter.add(`${permutation.name}.csv`, new BlobReader(csvBlob));
