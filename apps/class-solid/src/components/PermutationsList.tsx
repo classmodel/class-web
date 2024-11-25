@@ -222,7 +222,7 @@ function PermutationDifferenceButton(props: {
           </fieldset>
           <fieldset class="border">
             <legend>Permutation configuration</legend>
-            <pre>{prunedPermutation()}</pre>
+            <pre title="PermutationConfig">{prunedPermutation()}</pre>
           </fieldset>
         </div>
       </DialogContent>
