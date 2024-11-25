@@ -34,6 +34,38 @@ function zipXY(data: ChartData): [number, number][] {
   return Array.from({ length }, (_, i) => [data.x[i], data.y[i]]);
 }
 
+export function Legend({ data }: { data: () => ChartData[] }) {
+  return (
+    // {/* Legend */}
+    <div class="flex flex-wrap justify-end text-sm tracking-tight">
+      <For each={data()}>
+        {(d) => (
+          <>
+            <span class="flex items-center">
+              <svg
+                width="1.5rem"
+                height="1rem"
+                overflow="visible"
+                viewBox="0 0 50 20"
+              >
+                <title>legend</title>
+                <path
+                  fill="none"
+                  stroke={d.color}
+                  stroke-dasharray={d.linestyle}
+                  stroke-width="4"
+                  d="M 0 12 L 45 12"
+                />
+              </svg>
+              <p style={`color: ${d.color}`}>{d.label}</p>
+            </span>
+          </>
+        )}
+      </For>
+    </div>
+  );
+}
+
 export default function LinePlot({
   data,
   xlabel,
@@ -59,34 +91,7 @@ export default function LinePlot({
 
   return (
     <figure>
-      {/* Legend */}
-      <div class="flex flex-wrap justify-end text-sm tracking-tight">
-        <For each={data()}>
-          {(d) => (
-            <>
-              <span class="flex items-center">
-                <svg
-                  width="1.5rem"
-                  height="1rem"
-                  overflow="visible"
-                  viewBox="0 0 50 20"
-                >
-                  <title>legend</title>
-                  <path
-                    fill="none"
-                    stroke={d.color}
-                    stroke-dasharray={d.linestyle}
-                    stroke-width="4"
-                    d="M 0 12 L 45 12"
-                  />
-                </svg>
-                <p style={`color: ${d.color}`}>{d.label}</p>
-              </span>
-            </>
-          )}
-        </For>
-      </div>
-
+      <Legend data={data} />
       {/* Plot */}
       <svg
         width={width}
