@@ -2,13 +2,12 @@
 import * as d3 from "d3";
 import { For, createSignal } from "solid-js";
 import { AxisBottom, AxisLeft } from "./Axes";
+import { type ChartData, Legend } from "./LinePlot";
 
-type SoundingRecord = { p: number; T: number; Td: number };
-interface SkewTData {
-  label: string;
-  color: string;
-  linestyle: string;
-  data: SoundingRecord[];
+interface SoundingRecord {
+  p: number;
+  T: number;
+  Td: number;
 }
 
 const deg2rad = Math.PI / 180;
@@ -122,7 +121,9 @@ function SkewTBackGround({
 
 // Note: using temperatures in Kelvin as that's easiest to get from CLASS, but
 // perhaps not the most interoperable with other sounding data sources.
-export function SkewTPlot({ data }: { data: () => SkewTData[] }) {
+export function SkewTPlot({
+  data,
+}: { data: () => ChartData<SoundingRecord>[] }) {
   const [hovered, setHovered] = createSignal<number | null>(null);
   const m = [30, 40, 20, 45];
   const w = 500 - m[1] - m[3];
@@ -147,6 +148,7 @@ export function SkewTPlot({ data }: { data: () => SkewTData[] }) {
 
   return (
     <div id="mainbox">
+      <Legend entries={data} />
       {/* Create svg container for sounding */}
       <svg
         width={w + m[1] + m[3]}

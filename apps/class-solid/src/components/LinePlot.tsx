@@ -2,12 +2,16 @@ import * as d3 from "d3";
 import { For } from "solid-js";
 import { AxisBottom, AxisLeft } from "./Axes";
 
-export interface ChartData {
+export interface ChartData<T> {
   label: string;
   color: string;
   linestyle: string;
-  x: number[];
-  y: number[];
+  data: T[];
+}
+
+export interface Point {
+  x: number;
+  y: number;
 }
 
 /**
@@ -26,19 +30,15 @@ function getNiceAxisLimits(data: number[]): [number, number] {
   return [niceMin, niceMax];
 }
 
-/**
- * Zip x and y such that we can iterate over pairs of [x, y] in d3.line
- */
-function zipXY(data: ChartData): [number, number][] {
-  const length = data.x.length;
-  return Array.from({ length }, (_, i) => [data.x[i], data.y[i]]);
+export interface LegendProps<T> {
+  entries: () => ChartData<T>[];
 }
 
-export function Legend({ data }: { data: () => ChartData[] }) {
+export function Legend<T>({ entries }: LegendProps<T>) {
   return (
     // {/* Legend */}
     <div class="flex flex-wrap justify-end text-sm tracking-tight">
-      <For each={data()}>
+      <For each={entries()}>
         {(d) => (
           <>
             <span class="flex items-center">
@@ -70,28 +70,29 @@ export default function LinePlot({
   data,
   xlabel,
   ylabel,
-}: { data: () => ChartData[]; xlabel?: string; ylabel?: string }) {
+}: { data: () => ChartData<Point>[]; xlabel?: string; ylabel?: string }) {
   // TODO: Make responsive
   const width = 500;
   const height = 500;
   const [marginTop, marginRight, marginBottom, marginLeft] = [25, 50, 50, 50];
 
-  const xLim = () => getNiceAxisLimits(data().flatMap((d) => d.x));
-  const yLim = () => getNiceAxisLimits(data().flatMap((d) => d.y));
+  const xLim = () =>
+    getNiceAxisLimits(data().flatMap((d) => d.data.flatMap((d) => d.x)));
+  const yLim = () =>
+    getNiceAxisLimits(data().flatMap((d) => d.data.flatMap((d) => d.y)));
   const scaleX = () =>
     d3.scaleLinear(xLim(), [marginLeft, width - marginRight]);
   const scaleY = () =>
     d3.scaleLinear(yLim(), [height - marginBottom, marginTop]);
 
-  // const l = d3.line((d, i) => scaleX(x[i]), scaleY);
-  const l = d3.line(
-    (d) => scaleX()(d[0]),
-    (d) => scaleY()(d[1]),
+  const l = d3.line<Point>(
+    (d) => scaleX()(d.x),
+    (d) => scaleY()(d.y),
   );
 
   return (
     <figure>
-      <Legend data={data} />
+      <Legend entries={data} />
       {/* Plot */}
       <svg
         width={width}
@@ -119,7 +120,7 @@ export default function LinePlot({
               stroke={d.color}
               stroke-dasharray={d.linestyle}
               stroke-width="3"
-              d={l(zipXY(d)) || ""}
+              d={l(d.data) || ""}
             >
               <title>{d.label}</title>
             </path>
