@@ -1,6 +1,6 @@
 // Code modified from https://github.com/rsobash/d3-skewt/ (MIT license)
 import * as d3 from "d3";
-import { Accessor, For, Show, createSignal } from "solid-js";
+import { For, createSignal } from "solid-js";
 import { AxisBottom, AxisLeft } from "./Axes";
 
 type SoundingRecord = { p: number; T: number; Td: number };
