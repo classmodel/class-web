@@ -1,8 +1,9 @@
 import { For, Match, Show, Switch, createMemo, createUniqueId } from "solid-js";
-import { getVerticalProfiles } from "~/lib/profiles";
+import { getThermodynamicProfiles, getVerticalProfiles } from "~/lib/profiles";
 import { type Analysis, deleteAnalysis, experiments } from "~/lib/store";
-import LinePlot from "./LinePlot";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
+import LinePlot from "./plots/LinePlot";
+import { SkewTPlot } from "./plots/skewTlogP";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
@@ -37,19 +38,25 @@ export function TimeSeriesPlot() {
           .map((perm, j) => {
             return {
               label: `${e.name}/${perm.name}`,
-              y: perm.output?.h ?? [],
-              x: perm.output?.t ?? [],
               color: colors[(j + 1) % 10],
               linestyle: linestyles[i % 5],
+              data:
+                perm.output?.t.map((tVal, i) => ({
+                  x: tVal,
+                  y: perm.output?.h[i] || Number.NaN,
+                })) || [],
             };
           });
         return [
           {
-            y: experimentOutput?.h ?? [],
-            x: experimentOutput?.t ?? [],
             label: e.name,
             color: colors[0],
             linestyle: linestyles[i],
+            data:
+              experimentOutput?.t.map((tVal, i) => ({
+                x: tVal,
+                y: experimentOutput?.h[i] || Number.NaN,
+              })) || [],
           },
           ...permutationRuns,
         ];
@@ -79,7 +86,7 @@ export function VerticalProfilePlot() {
             color: colors[(j + 1) % 10],
             linestyle: linestyles[i % 5],
             label: `${e.name}/${p.name}`,
-            ...getVerticalProfiles(p.output, p.config, variable, time),
+            data: getVerticalProfiles(p.output, p.config, variable, time),
           };
         });
 
@@ -88,7 +95,7 @@ export function VerticalProfilePlot() {
             label: e.name,
             color: colors[0],
             linestyle: linestyles[i],
-            ...getVerticalProfiles(
+            data: getVerticalProfiles(
               e.reference.output ?? {
                 t: [],
                 h: [],
@@ -111,6 +118,39 @@ export function VerticalProfilePlot() {
       ylabel="Height [m]"
     />
   );
+}
+
+export function ThermodynamicPlot() {
+  const time = -1;
+  const skewTData = createMemo(() => {
+    return experiments.flatMap((e, i) => {
+      const permutations = e.permutations.map((p, j) => {
+        // TODO get additional config info from reference
+        // permutations probably usually don't have gammaq/gammatetha set?
+        return {
+          color: colors[(j + 1) % 10],
+          linestyle: linestyles[i % 5],
+          label: `${e.name}/${p.name}`,
+          data: getThermodynamicProfiles(p.output, p.config, time),
+        };
+      });
+
+      return [
+        {
+          label: e.name,
+          color: colors[0],
+          linestyle: linestyles[i],
+          data: getThermodynamicProfiles(
+            e.reference.output,
+            e.reference.config,
+            time,
+          ),
+        },
+        ...permutations,
+      ];
+    });
+  });
+  return <SkewTPlot data={skewTData} />;
 }
 
 /** Simply show the final height for each experiment that has output */
@@ -154,7 +194,7 @@ function FinalHeights() {
 export function AnalysisCard(analysis: Analysis) {
   const id = createUniqueId();
   return (
-    <Card class="w-[500px]" role="article" aria-labelledby={id}>
+    <Card class="min-w-[500px]" role="article" aria-labelledby={id}>
       <CardHeader class="flex-row items-center justify-between py-2 pb-6">
         {/* TODO: make name & description editable */}
         <CardTitle id={id}>{analysis.name}</CardTitle>
@@ -183,6 +223,7 @@ export function AnalysisCard(analysis: Analysis) {
       </CardHeader>
       <CardContent class="min-h-[450px]">
         <Switch fallback={<p>Unknown analysis type</p>}>
+          {/* @ts-ignore: kept for developers, but not included in production */}
           <Match when={analysis.type === "finalheight"}>
             <FinalHeights />
           </Match>
@@ -191,6 +232,9 @@ export function AnalysisCard(analysis: Analysis) {
           </Match>
           <Match when={analysis.type === "profiles"}>
             <VerticalProfilePlot />
+          </Match>
+          <Match when={analysis.type === "skewT"}>
+            <ThermodynamicPlot />
           </Match>
         </Switch>
       </CardContent>

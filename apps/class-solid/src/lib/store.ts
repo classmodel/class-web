@@ -260,12 +260,13 @@ export async function loadStateFromString(rawState: string): Promise<void> {
   await Promise.all(loadedExperiments.map((_, i) => runExperiment(i)));
 }
 
-const analysisNames = {
+export const analysisNames = {
   profiles: "Vertical profiles",
   timeseries: "Timeseries",
-  finalheight: "Final height",
+  skewT: "Thermodynamic diagram",
+  // finalheight: "Final height",  // keep for development but not in production
 } as const;
-type AnalysisType = keyof typeof analysisNames;
+export type AnalysisType = keyof typeof analysisNames;
 
 export interface Analysis {
   name: string;
