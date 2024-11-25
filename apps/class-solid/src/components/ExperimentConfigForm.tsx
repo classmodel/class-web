@@ -42,7 +42,7 @@ export function ExperimentConfigForm({
       id={id}
       onSubmit={handleSubmit}
       shouldActive={false} // Also return from collapsed fields
-      shouldDirty={true} // Don't return empty strings for unset fields
+      shouldDirty={false} // ~Don't return empty strings for unset fields~
     >
       <div>
         <ObjectField
