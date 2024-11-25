@@ -16,7 +16,12 @@ import { Flex } from "~/components/ui/flex";
 import { Toaster } from "~/components/ui/toast";
 import { onPageLoad } from "~/lib/state";
 
-import { addAnalysis, experiments } from "~/lib/store";
+import {
+  type AnalysisType,
+  addAnalysis,
+  analysisNames,
+  experiments,
+} from "~/lib/store";
 import { analyses } from "~/lib/store";
 
 export default function Home() {
@@ -60,18 +65,15 @@ export default function Home() {
             <DropdownMenuContent>
               <DropdownMenuLabel>Add analysis</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => addAnalysis("finalheight")}>
-                Final height
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => addAnalysis("timeseries")}>
-                Timeseries
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => addAnalysis("profiles")}>
-                Vertical profile
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => addAnalysis("skewT")}>
-                Thermodynamic diagram
-              </DropdownMenuItem>
+              <For
+                each={Object.entries(analysisNames) as [AnalysisType, string][]}
+              >
+                {([key, value]) => (
+                  <DropdownMenuItem onClick={() => addAnalysis(key)}>
+                    {value}
+                  </DropdownMenuItem>
+                )}
+              </For>
             </DropdownMenuContent>
           </DropdownMenu>
         </Show>

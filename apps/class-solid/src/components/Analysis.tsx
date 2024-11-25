@@ -223,6 +223,7 @@ export function AnalysisCard(analysis: Analysis) {
       </CardHeader>
       <CardContent class="min-h-[450px]">
         <Switch fallback={<p>Unknown analysis type</p>}>
+          {/* @ts-ignore: kept for developers, but not included in production */}
           <Match when={analysis.type === "finalheight"}>
             <FinalHeights />
           </Match>
