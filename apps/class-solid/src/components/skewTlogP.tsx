@@ -148,7 +148,11 @@ export function SkewTPlot({ data }: { data: () => SkewTData[] }) {
   return (
     <div id="mainbox">
       {/* Create svg container for sounding */}
-      <svg width={w + m[1] + m[3]} height={h + m[0] + m[2]}>
+      <svg
+        width={w + m[1] + m[3]}
+        height={h + m[0] + m[2]}
+        class="text-slate-500 text-xs tracking-wide"
+      >
         <title>Thermodynamic diagram</title>
         <g transform={`translate(${m[3]},${m[0]})`}>
           <SkewTBackGround w={w} h={h} x={x} y={y} />
