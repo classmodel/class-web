@@ -108,12 +108,15 @@ function SkewTBackGround({
         transform={`translate(0,${h - 0.5})`}
         tickValues={temperatureLines}
         tickFormat={d3.format(".0d")}
+        label="Temperature [°C]"
       />
       <AxisLeft
         scale={y}
         transform="translate(-0.5,0)"
         tickValues={pressureLines}
         tickFormat={d3.format(".0d")}
+        label="Pressure [hPa]"
+        decreasing
       />
     </g>
   );
@@ -125,9 +128,11 @@ export function SkewTPlot({
   data,
 }: { data: () => ChartData<SoundingRecord>[] }) {
   const [hovered, setHovered] = createSignal<number | null>(null);
-  const m = [30, 40, 20, 45];
-  const w = 500 - m[1] - m[3];
-  const h = 500 - m[0] - m[2];
+  const width = 500;
+  const height = 500;
+  const [marginTop, marginRight, marginBottom, marginLeft] = [20, 20, 35, 55];
+  const w = 500 - marginRight - marginLeft;
+  const h = 500 - marginTop - marginBottom;
 
   // Scales and axes. Note the inverted domain for the y-scale: bigger is up!
   const x = d3.scaleLinear().range([0, w]).domain([-45, 50]);
@@ -147,16 +152,16 @@ export function SkewTPlot({
   //   const bisectTemp = d3.bisector((d) => d.press).left;
 
   return (
-    <div id="mainbox">
-      <Legend entries={data} />
+    <figure>
+      <Legend entries={data} width={`w-[${width}px]`} />
       {/* Create svg container for sounding */}
       <svg
-        width={w + m[1] + m[3]}
-        height={h + m[0] + m[2]}
+        width={width}
+        height={height}
         class="text-slate-500 text-xs tracking-wide"
       >
         <title>Thermodynamic diagram</title>
-        <g transform={`translate(${m[3]},${m[0]})`}>
+        <g transform={`translate(${marginLeft},${marginTop})`}>
           <SkewTBackGround w={w} h={h} x={x} y={y} />
           <For each={data()}>
             {(d, index) => (
@@ -187,6 +192,6 @@ export function SkewTPlot({
           </For>
         </g>
       </svg>
-    </div>
+    </figure>
   );
 }

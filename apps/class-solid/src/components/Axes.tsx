@@ -11,6 +11,7 @@ interface AxisProps {
   label?: string;
   tickValues?: number[];
   tickFormat?: (n: number | { valueOf(): number }) => string;
+  decreasing?: boolean;
 }
 
 const ticks = (props: AxisProps) => {
@@ -57,6 +58,7 @@ export const AxisBottom = (props: AxisProps) => {
 export const AxisLeft = (props: AxisProps) => {
   const labelpos = props.scale.range().reduce((a, b) => a + b) / 2;
   const format = props.tickFormat ? props.tickFormat : d3.format(".0f");
+  const yAnchor = props.decreasing ? 0 : 1;
   return (
     <g transform={props.transform}>
       <line
@@ -77,9 +79,9 @@ export const AxisLeft = (props: AxisProps) => {
         )}
       </For>
       <text
-        y={props.scale.range()[1]}
+        y={props.scale.range()[yAnchor]}
         text-anchor="end"
-        transform="translate(-65, 20) rotate(-90)"
+        transform="translate(-45, 0) rotate(-90)"
       >
         {props.label}
       </text>

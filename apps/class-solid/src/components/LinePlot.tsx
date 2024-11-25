@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import { For } from "solid-js";
+import { cn } from "~/lib/utils";
 import { AxisBottom, AxisLeft } from "./Axes";
 
 export interface ChartData<T> {
@@ -32,13 +33,19 @@ function getNiceAxisLimits(data: number[]): [number, number] {
 
 export interface LegendProps<T> {
   entries: () => ChartData<T>[];
+  width: string;
 }
 
-export function Legend<T>({ entries }: LegendProps<T>) {
+export function Legend<T>(props: LegendProps<T>) {
   return (
     // {/* Legend */}
-    <div class="flex flex-wrap justify-end text-sm tracking-tight">
-      <For each={entries()}>
+    <div
+      class={cn(
+        "flex flex-wrap justify-end text-sm tracking-tight",
+        props.width,
+      )}
+    >
+      <For each={props.entries()}>
         {(d) => (
           <>
             <span class="flex items-center">
@@ -72,18 +79,19 @@ export default function LinePlot({
   ylabel,
 }: { data: () => ChartData<Point>[]; xlabel?: string; ylabel?: string }) {
   // TODO: Make responsive
+  // const margin = [30, 40, 20, 45]; // reference from skew-T
+  const [marginTop, marginRight, marginBottom, marginLeft] = [20, 20, 35, 55];
   const width = 500;
   const height = 500;
-  const [marginTop, marginRight, marginBottom, marginLeft] = [25, 50, 50, 50];
+  const w = 500 - marginRight - marginLeft;
+  const h = 500 - marginTop - marginBottom;
 
   const xLim = () =>
     getNiceAxisLimits(data().flatMap((d) => d.data.flatMap((d) => d.x)));
   const yLim = () =>
     getNiceAxisLimits(data().flatMap((d) => d.data.flatMap((d) => d.y)));
-  const scaleX = () =>
-    d3.scaleLinear(xLim(), [marginLeft, width - marginRight]);
-  const scaleY = () =>
-    d3.scaleLinear(yLim(), [height - marginBottom, marginTop]);
+  const scaleX = () => d3.scaleLinear(xLim(), [0, w]);
+  const scaleY = () => d3.scaleLinear(yLim(), [h, 0]);
 
   const l = d3.line<Point>(
     (d) => scaleX()(d.x),
@@ -92,40 +100,42 @@ export default function LinePlot({
 
   return (
     <figure>
-      <Legend entries={data} />
+      <Legend entries={data} width={`w-[${width}px]`} />
       {/* Plot */}
       <svg
         width={width}
         height={height}
         class="text-slate-500 text-xs tracking-wide"
       >
-        <title>Vertical profile plot</title>
-        {/* Axes */}
-        <AxisBottom
-          scale={scaleX()}
-          transform={`translate(0, ${height - marginBottom})`}
-          label={xlabel}
-        />
-        <AxisLeft
-          scale={scaleY()}
-          transform={`translate(${marginLeft}, 0)`}
-          label={ylabel}
-        />
+        <g transform={`translate(${marginLeft},${marginTop})`}>
+          <title>Vertical profile plot</title>
+          {/* Axes */}
+          <AxisBottom
+            scale={scaleX()}
+            transform={`translate(0,${h - 0.5})`}
+            label={xlabel}
+          />
+          <AxisLeft
+            scale={scaleY()}
+            transform="translate(-0.5,0)"
+            label={ylabel}
+          />
 
-        {/* Line */}
-        <For each={data()}>
-          {(d) => (
-            <path
-              fill="none"
-              stroke={d.color}
-              stroke-dasharray={d.linestyle}
-              stroke-width="3"
-              d={l(d.data) || ""}
-            >
-              <title>{d.label}</title>
-            </path>
-          )}
-        </For>
+          {/* Line */}
+          <For each={data()}>
+            {(d) => (
+              <path
+                fill="none"
+                stroke={d.color}
+                stroke-dasharray={d.linestyle}
+                stroke-width="3"
+                d={l(d.data) || ""}
+              >
+                <title>{d.label}</title>
+              </path>
+            )}
+          </For>
+        </g>
       </svg>
     </figure>
   );
