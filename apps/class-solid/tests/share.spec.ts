@@ -49,7 +49,7 @@ test("Create share link from an experiment", async ({ page }) => {
 test("Given large app state, sharing is not possible", async ({ page }) => {
   test.skip(
     true,
-    "Plotting is too slow, to render 13 experiments with 24 permuations each"
+    "Plotting is too slow, to render 13 experiments with 24 permuations each",
   );
   await page.goto("/");
 
@@ -71,6 +71,6 @@ test("Given large app state, sharing is not possible", async ({ page }) => {
 
   await page.getByRole("button", { name: "Share" }).click();
   await page.waitForSelector(
-    "text=Cannot share application state, it is too large. Please download each experiment by itself or make it smaller by removing permutations and/or experiments."
+    "text=Cannot share application state, it is too large. Please download each experiment by itself or make it smaller by removing permutations and/or experiments.",
   );
 });
