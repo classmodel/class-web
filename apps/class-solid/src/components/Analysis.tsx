@@ -1,9 +1,9 @@
 import { For, Match, Show, Switch, createMemo, createUniqueId } from "solid-js";
 import { getThermodynamicProfiles, getVerticalProfiles } from "~/lib/profiles";
 import { type Analysis, deleteAnalysis, experiments } from "~/lib/store";
-import LinePlot from "./LinePlot";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
-import { SkewTPlot } from "./skewTlogP";
+import LinePlot from "./plots/LinePlot";
+import { SkewTPlot } from "./plots/skewTlogP";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 

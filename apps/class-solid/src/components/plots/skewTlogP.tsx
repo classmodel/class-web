@@ -2,7 +2,8 @@
 import * as d3 from "d3";
 import { For, createSignal } from "solid-js";
 import { AxisBottom, AxisLeft } from "./Axes";
-import { type ChartData, Legend } from "./LinePlot";
+import type { ChartData } from "./Base";
+import { Legend } from "./Legend";
 
 interface SoundingRecord {
   p: number;

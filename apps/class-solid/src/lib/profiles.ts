@@ -1,13 +1,13 @@
 import type { ClassOutput } from "@classmodel/class/runner";
 import type { PartialConfig } from "@classmodel/class/validate";
-import type { Point } from "~/components/LinePlot";
+import type { Point } from "~/components/plots/LinePlot";
 
 // Get vertical profiles for a single class run
 export function getVerticalProfiles(
   output: ClassOutput | undefined,
   config: PartialConfig,
   variable: "theta" | "q" = "theta",
-  t = -1,
+  t = -1
 ): Point[] {
   // Guard against undefined output
   if (output === undefined) {
@@ -102,7 +102,7 @@ const thickness = (T: number, q: number, p: number, dp: number) => {
 export function getThermodynamicProfiles(
   output: ClassOutput | undefined,
   config: PartialConfig,
-  t = -1,
+  t = -1
 ) {
   // Guard against undefined output
   if (output === undefined) {

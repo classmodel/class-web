@@ -1,76 +1,12 @@
 import * as d3 from "d3";
 import { For } from "solid-js";
-import { cn } from "~/lib/utils";
-import { AxisBottom, AxisLeft } from "./Axes";
-
-export interface ChartData<T> {
-  label: string;
-  color: string;
-  linestyle: string;
-  data: T[];
-}
+import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./Axes";
+import type { ChartData } from "./Base";
+import { Legend } from "./Legend";
 
 export interface Point {
   x: number;
   y: number;
-}
-
-/**
- * Calculate a "nice" step size by rounding up to the nearest power of 10
- * Snap the min and max to the nearest multiple of step
- */
-function getNiceAxisLimits(data: number[]): [number, number] {
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const range = max - min;
-  const step = 10 ** Math.floor(Math.log10(range));
-
-  const niceMin = Math.floor(min / step) * step;
-  const niceMax = Math.ceil(max / step) * step;
-
-  return [niceMin, niceMax];
-}
-
-export interface LegendProps<T> {
-  entries: () => ChartData<T>[];
-  width: string;
-}
-
-export function Legend<T>(props: LegendProps<T>) {
-  return (
-    // {/* Legend */}
-    <div
-      class={cn(
-        "flex flex-wrap justify-end text-sm tracking-tight",
-        props.width,
-      )}
-    >
-      <For each={props.entries()}>
-        {(d) => (
-          <>
-            <span class="flex items-center">
-              <svg
-                width="1.5rem"
-                height="1rem"
-                overflow="visible"
-                viewBox="0 0 50 20"
-              >
-                <title>legend</title>
-                <path
-                  fill="none"
-                  stroke={d.color}
-                  stroke-dasharray={d.linestyle}
-                  stroke-width="4"
-                  d="M 0 12 L 45 12"
-                />
-              </svg>
-              <p style={`color: ${d.color}`}>{d.label}</p>
-            </span>
-          </>
-        )}
-      </For>
-    </div>
-  );
 }
 
 export default function LinePlot({

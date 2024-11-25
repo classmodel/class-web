@@ -56,7 +56,6 @@ export const AxisBottom = (props: AxisProps) => {
 };
 
 export const AxisLeft = (props: AxisProps) => {
-  const labelpos = props.scale.range().reduce((a, b) => a + b) / 2;
   const format = props.tickFormat ? props.tickFormat : d3.format(".0f");
   const yAnchor = props.decreasing ? 0 : 1;
   return (
@@ -88,3 +87,19 @@ export const AxisLeft = (props: AxisProps) => {
     </g>
   );
 };
+
+/**
+ * Calculate a "nice" step size by rounding up to the nearest power of 10
+ * Snap the min and max to the nearest multiple of step
+ */
+export function getNiceAxisLimits(data: number[]): [number, number] {
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min;
+  const step = 10 ** Math.floor(Math.log10(range));
+
+  const niceMin = Math.floor(min / step) * step;
+  const niceMax = Math.ceil(max / step) * step;
+
+  return [niceMin, niceMax];
+}
