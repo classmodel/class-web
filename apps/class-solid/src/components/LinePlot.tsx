@@ -40,8 +40,8 @@ export default function LinePlot({
   ylabel,
 }: { data: () => ChartData[]; xlabel?: string; ylabel?: string }) {
   // TODO: Make responsive
-  const width = 450;
-  const height = 400;
+  const width = 500;
+  const height = 500;
   const [marginTop, marginRight, marginBottom, marginLeft] = [25, 50, 50, 50];
 
   const xLim = () => getNiceAxisLimits(data().flatMap((d) => d.x));
