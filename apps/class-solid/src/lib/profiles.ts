@@ -7,7 +7,7 @@ export function getVerticalProfiles(
   output: ClassOutput | undefined,
   config: PartialConfig,
   variable: "theta" | "q" = "theta",
-  t = -1
+  t = -1,
 ): Point[] {
   // Guard against undefined output
   if (output === undefined) {
@@ -102,7 +102,7 @@ const thickness = (T: number, q: number, p: number, dp: number) => {
 export function getThermodynamicProfiles(
   output: ClassOutput | undefined,
   config: PartialConfig,
-  t = -1
+  t = -1,
 ) {
   // Guard against undefined output
   if (output === undefined) {
