@@ -98,7 +98,7 @@ function findExperiment(index: number) {
 export async function addExperiment(
   config: PartialConfig = {},
   name?: string,
-  description?: string,
+  description?: string
 ) {
   const newExperiment: Experiment = {
     name: name ?? `My experiment ${experiments.length}`,
@@ -149,7 +149,7 @@ export async function modifyExperiment(
   index: number,
   newConfig: PartialConfig,
   name: string,
-  description: string,
+  description: string
 ) {
   setExperiments(
     index,
@@ -160,14 +160,14 @@ export async function modifyExperiment(
       e.permutations = e.permutations.map((perm) => {
         const config = mergeConfigurations(
           newConfig,
-          pruneDefaults(perm.config),
+          pruneDefaults(perm.config)
         );
         return {
           ...perm,
           config,
         };
       });
-    }),
+    })
   );
   await runExperiment(index);
 }
@@ -176,7 +176,7 @@ export async function setPermutationConfigInExperiment(
   experimentIndex: number,
   permutationIndex: number,
   config: PartialConfig,
-  name: string,
+  name: string
 ) {
   setExperiments(
     experimentIndex,
@@ -184,17 +184,17 @@ export async function setPermutationConfigInExperiment(
     permutationIndex === -1
       ? findExperiment(experimentIndex).permutations.length
       : permutationIndex,
-    { config, name },
+    { config, name }
   );
   await runExperiment(experimentIndex);
 }
 
 export async function deletePermutationFromExperiment(
   experimentIndex: number,
-  permutationIndex: number,
+  permutationIndex: number
 ) {
   setExperiments(experimentIndex, "permutations", (perms) =>
-    perms.filter((_, i) => i !== permutationIndex),
+    perms.filter((_, i) => i !== permutationIndex)
   );
 }
 
@@ -208,7 +208,7 @@ export function findPermutation(exp: Experiment, permutationName: string) {
 
 export function promotePermutationToExperiment(
   experimentIndex: number,
-  permutationIndex: number,
+  permutationIndex: number
 ) {
   const exp = findExperiment(experimentIndex);
   const perm = exp.permutations[permutationIndex];
@@ -220,7 +220,7 @@ export function promotePermutationToExperiment(
 
 export function duplicatePermutation(
   experimentIndex: number,
-  permutationIndex: number,
+  permutationIndex: number
 ) {
   const exp = findExperiment(experimentIndex);
   const perm = exp.permutations[permutationIndex];
@@ -228,14 +228,14 @@ export function duplicatePermutation(
     experimentIndex,
     -1,
     structuredClone(perm.config),
-    `Copy of ${perm.name}`,
+    `Copy of ${perm.name}`
   );
   runExperiment(experimentIndex);
 }
 
 export function swapPermutationAndReferenceConfiguration(
   experimentIndex: number,
-  permutationIndex: number,
+  permutationIndex: number
 ) {
   const exp = findExperiment(experimentIndex);
   const refConfig = structuredClone(exp.reference.config);
@@ -248,7 +248,7 @@ export function swapPermutationAndReferenceConfiguration(
     "permutations",
     permutationIndex,
     "config",
-    refConfig,
+    refConfig
   );
   // TODO should names also be swapped?
   runExperiment(experimentIndex);
@@ -263,7 +263,7 @@ export async function loadStateFromString(rawState: string): Promise<void> {
 export const analysisNames = {
   profiles: "Vertical profiles",
   timeseries: "Timeseries",
-  skewT: "Thermodynamic diagram",
+  // skewT: "Thermodynamic diagram",
   // finalheight: "Final height",  // keep for development but not in production
 } as const;
 export type AnalysisType = keyof typeof analysisNames;

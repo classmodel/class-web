@@ -1,6 +1,7 @@
 import { For } from "solid-js";
 import { cn } from "~/lib/utils";
 import type { ChartData } from "./Base";
+import { useChartContext } from "./ChartContainer";
 
 export interface LegendProps<T> {
   entries: () => ChartData<T>[];
@@ -8,12 +9,13 @@ export interface LegendProps<T> {
 }
 
 export function Legend<T>(props: LegendProps<T>) {
+  const [chart, updateChart] = useChartContext();
+
   return (
-    // {/* Legend */}
     <div
       class={cn(
         "flex flex-wrap justify-end text-sm tracking-tight",
-        props.width,
+        chart.width,
       )}
     >
       <For each={props.entries()}>
