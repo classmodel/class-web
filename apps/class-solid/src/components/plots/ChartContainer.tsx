@@ -32,27 +32,16 @@ function Child() {
   return <p>test</p>;
 }
 
-export function ChartContainer({
-  width = 500,
-  height = 500,
-  margin = [20, 20, 35, 55],
-  title = "Default chart",
-  children,
-}: {
-  width?: number;
-  height?: number;
-  margin?: [number, number, number, number];
-  title?: string;
-  children: JSX.Element;
-}) {
+export function ChartContainer(props: { children: JSX.Element }) {
+  const width = 500;
+  const height = 500;
+  const margin: [number, number, number, number] = [20, 20, 35, 55];
+  const title = "Default chart";
   const [marginTop, marginRight, marginBottom, marginLeft] = margin;
   const innerHeight = height - marginTop - marginBottom;
   const innerWidth = width - marginRight - marginLeft;
-  const dummy = [
-    { color: "blue", label: "blue", linestyle: "--", data: [{ x: 10, y: 10 }] },
-  ];
   const [chart, updateChart] = createStore<Chart>({
-    width: width,
+    width,
     height,
     margin,
     innerHeight,
@@ -71,10 +60,22 @@ export function ChartContainer({
           <title>{title}</title>
           <g transform={`translate(${marginLeft},${marginTop})`}>
             <Child />
-            {children}
+            {props.children}
           </g>
         </svg>
       </figure>
     </ChartContext.Provider>
   );
 }
+
+export function Chart() {
+  return (
+    <ChartContainer>
+      <Child />
+    </ChartContainer>
+  );
+}
+
+const dummy = [
+  { color: "blue", label: "blue", linestyle: "--", data: [{ x: 10, y: 10 }] },
+];

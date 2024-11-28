@@ -42,9 +42,9 @@ export default function LinePlot({
   return (
     <ChartContainer title="Vertical profile plot">
       <Legend entries={data} />
-      {/* <AxisBottom domain={xLim} label={xlabel} /> */}
-      {/* <AxisLeft domain={yLim} label={ylabel} /> */}
-      {/* <For each={data()}>{(d) => Line(d)}</For> */}
+      <AxisBottom domain={xLim} label={xlabel} />
+      <AxisLeft domain={yLim} label={ylabel} />
+      <For each={data()}>{(d) => Line(d)}</For>
     </ChartContainer>
   );
 }
