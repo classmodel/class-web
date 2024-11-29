@@ -8,33 +8,31 @@ type AxisProps = {
   type?: "linear" | "log";
   domain?: () => [number, number]; // TODO: is this needed for reactivity?
   label?: string;
-  inverted?: boolean;
-  tickFormat?: (n: number | { valueOf(): number }) => string;
   tickValues?: number[];
+  tickFormat?: (n: number | { valueOf(): number }) => string;
 };
 
 export const AxisBottom = (props: AxisProps) => {
   const [chart, updateChart] = useChartContext();
+  props.domain && chart.scaleX.domain(props.domain());
 
   if (props.type === "log") {
-    const range = chart.scaleX.range;
-    updateChart("scaleX", d3.scaleLog().range(range));
+    const range = chart.scaleX.range();
+    const domain = chart.scaleX.range();
+    updateChart("scaleX", d3.scaleLog().domain(domain).range(range));
   }
 
-  const scale = chart.scaleX.domain(props.domain); // does that update inplace?
-  console.log(chart.scaleX.domain());
-  updateChart("scaleX", scale);
-
   const format = props.tickFormat ? props.tickFormat : d3.format(".3g");
+  const ticks = props.tickValues || generateTicks(chart.scaleX.domain());
   return (
     <g transform={`translate(0,${chart.innerHeight - 0.5})`}>
       <line x1="0" x2={chart.innerWidth} y1="0" y2="0" stroke="currentColor" />
-      <For each={ticks(props)}>
+      <For each={ticks}>
         {(tick) => (
-          <g transform={`translate(${tick.position}, 0)`}>
+          <g transform={`translate(${chart.scaleX(tick)}, 0)`}>
             <line y2="6" stroke="currentColor" />
             <text y="9" dy="0.71em" text-anchor="middle">
-              {format(tick.value)}
+              {format(tick)}
             </text>
           </g>
         )}
@@ -47,32 +45,37 @@ export const AxisBottom = (props: AxisProps) => {
 };
 
 export const AxisLeft = (props: AxisProps) => {
+  const [chart, updateChart] = useChartContext();
+  props.domain && chart.scaleY.domain(props.domain());
+
+  if (props.type === "log") {
+    const range = chart.scaleY.range();
+    const domain = chart.scaleY.range();
+    updateChart("scaleY", d3.scaleLog().domain(domain).range(range));
+  }
+
+  const ticks = props.tickValues || generateTicks(chart.scaleY.domain());
   const format = props.tickFormat ? props.tickFormat : d3.format(".0f");
-  const yAnchor = props.decreasing ? 0 : 1;
   return (
-    <g transform={props.transform}>
+    <g transform="translate(-0.5,0)">
       <line
         x1={0}
         x2={0}
-        y1={props.scale.range()[0]}
-        y2={props.scale.range()[1]}
+        y1={chart.scaleY.range()[0]}
+        y2={chart.scaleY.range()[1]}
         stroke="currentColor"
       />
-      <For each={ticks(props)}>
+      <For each={ticks}>
         {(tick) => (
-          <g transform={`translate(0, ${tick.position})`}>
+          <g transform={`translate(0, ${chart.scaleY(tick)})`}>
             <line x2="-6" stroke="currentColor" />
             <text x="-9" dy="0.32em" text-anchor="end">
-              {format(tick.value)}
+              {format(tick)}
             </text>
           </g>
         )}
       </For>
-      <text
-        y={props.scale.range()[yAnchor]}
-        text-anchor="end"
-        transform="translate(-45, 0) rotate(-90)"
-      >
+      <text y="0" text-anchor="end" transform="translate(-45, 0) rotate(-90)">
         {props.label}
       </text>
     </g>
@@ -95,15 +98,8 @@ export function getNiceAxisLimits(data: number[]): [number, number] {
   return [niceMin, niceMax];
 }
 
-const ticks = (props: AxisProps) => {
-  const domain = props.scale.domain();
-  const generateTicks = (domain = [0, 1], tickCount = 5) => {
-    const step = (domain[1] - domain[0]) / (tickCount - 1);
-    return [...Array(10).keys()].map((i) => domain[0] + i * step);
-  };
-
-  const values = props.tickValues
-    ? props.tickValues.filter((x) => x >= domain[0] && x <= domain[1])
-    : generateTicks(domain, props.tickCount);
-  return values.map((value) => ({ value, position: props.scale(value) }));
+/** Generate evenly space tick values for a linear scale */
+const generateTicks = (domain = [0, 1], tickCount = 5) => {
+  const step = (domain[1] - domain[0]) / (tickCount - 1);
+  return [...Array(10).keys()].map((i) => domain[0] + i * step);
 };

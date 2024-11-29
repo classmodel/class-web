@@ -78,7 +78,6 @@ export default function Home() {
             </DropdownMenuContent>
           </DropdownMenu>
         </Show>
-        <Chart />
       </h2>
       <Show when={experiments.length} fallback={<p>Add an experiment first</p>}>
         <Flex justifyContent="center" class="flex-wrap gap-4">

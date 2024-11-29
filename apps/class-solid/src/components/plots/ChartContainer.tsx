@@ -25,18 +25,15 @@ export function useChartContext() {
   return context;
 }
 
-function Child() {
-  const [chart, updateChart] = useChartContext();
-  console.log(chart);
-  console.log("test");
-  return <p>test</p>;
-}
-
-export function ChartContainer(props: { children: JSX.Element }) {
-  const width = 500;
-  const height = 500;
-  const margin: [number, number, number, number] = [20, 20, 35, 55];
-  const title = "Default chart";
+export function ChartContainer(props: {
+  children: JSX.Element;
+  width?: number;
+  height?: number;
+  margin?: [number, number, number, number];
+}) {
+  const width = props.width || 500;
+  const height = props.height || 500;
+  const margin = props.margin || [20, 20, 35, 55];
   const [marginTop, marginRight, marginBottom, marginLeft] = margin;
   const innerHeight = height - marginTop - marginBottom;
   const innerWidth = width - marginRight - marginLeft;
@@ -51,31 +48,26 @@ export function ChartContainer(props: { children: JSX.Element }) {
   });
   return (
     <ChartContext.Provider value={[chart, updateChart]}>
-      <figure>
-        <svg
-          width={width}
-          height={height}
-          class="text-slate-500 text-xs tracking-wide"
-        >
-          <title>{title}</title>
-          <g transform={`translate(${marginLeft},${marginTop})`}>
-            <Child />
-            {props.children}
-          </g>
-        </svg>
-      </figure>
+      <figure>{props.children}</figure>
     </ChartContext.Provider>
   );
 }
 
-export function Chart() {
+export function Chart(props: { children: JSX.Element; title?: string }) {
+  const [chart, updateChart] = useChartContext();
+  const title = props.title || "Default chart";
+  const [marginTop, _, __, marginLeft] = chart.margin;
+
   return (
-    <ChartContainer>
-      <Child />
-    </ChartContainer>
+    <svg
+      width={chart.width}
+      height={chart.height}
+      class="text-slate-500 text-xs tracking-wide"
+    >
+      <title>{title}</title>
+      <g transform={`translate(${marginLeft},${marginTop})`}>
+        {props.children}
+      </g>
+    </svg>
   );
 }
-
-const dummy = [
-  { color: "blue", label: "blue", linestyle: "--", data: [{ x: 10, y: 10 }] },
-];

@@ -5,7 +5,6 @@ import { useChartContext } from "./ChartContainer";
 
 export interface LegendProps<T> {
   entries: () => ChartData<T>[];
-  width: string;
 }
 
 export function Legend<T>(props: LegendProps<T>) {

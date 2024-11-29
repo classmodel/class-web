@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import { For } from "solid-js";
 import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./Axes";
 import type { ChartData } from "./Base";
-import { ChartContainer, useChartContext } from "./ChartContainer";
+import { Chart, ChartContainer, useChartContext } from "./ChartContainer";
 import { Legend } from "./Legend";
 
 export interface Point {
@@ -40,11 +40,13 @@ export default function LinePlot({
   const yLim = () =>
     getNiceAxisLimits(data().flatMap((d) => d.data.flatMap((d) => d.y)));
   return (
-    <ChartContainer title="Vertical profile plot">
+    <ChartContainer>
       <Legend entries={data} />
-      <AxisBottom domain={xLim} label={xlabel} />
-      <AxisLeft domain={yLim} label={ylabel} />
-      <For each={data()}>{(d) => Line(d)}</For>
+      <Chart title="Vertical profile plot">
+        <AxisBottom domain={xLim} label={xlabel} />
+        <AxisLeft domain={yLim} label={ylabel} />
+        <For each={data()}>{(d) => Line(d)}</For>
+      </Chart>
     </ChartContainer>
   );
 }
