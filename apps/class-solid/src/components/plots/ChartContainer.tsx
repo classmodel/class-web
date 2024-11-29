@@ -15,16 +15,7 @@ interface Chart {
 type SetChart = SetStoreFunction<Chart>;
 const ChartContext = createContext<[Chart, SetChart]>();
 
-export function useChartContext() {
-  const context = useContext(ChartContext);
-  if (!context) {
-    throw new Error(
-      "useChartContext must be used within a ChartProvider; typically by wrapping your components in a ChartContainer.",
-    );
-  }
-  return context;
-}
-
+/** Container and context manager for chart + legend */
 export function ChartContainer(props: {
   children: JSX.Element;
   width?: number;
@@ -53,6 +44,7 @@ export function ChartContainer(props: {
   );
 }
 
+/** Container for chart elements such as axes and lines */
 export function Chart(props: { children: JSX.Element; title?: string }) {
   const [chart, updateChart] = useChartContext();
   const title = props.title || "Default chart";
@@ -67,7 +59,27 @@ export function Chart(props: { children: JSX.Element; title?: string }) {
       <title>{title}</title>
       <g transform={`translate(${marginLeft},${marginTop})`}>
         {props.children}
+        {/* Line along right edge of plot
+        <line
+          x1={chart.innerWidth - 0.5}
+          x2={chart.innerWidth - 0.5}
+          y1="0"
+          y2={chart.innerHeight}
+          stroke="#dfdfdf"
+          stroke-width="0.75px"
+          fill="none"
+        /> */}
       </g>
     </svg>
   );
+}
+
+export function useChartContext() {
+  const context = useContext(ChartContext);
+  if (!context) {
+    throw new Error(
+      "useChartContext must be used within a ChartProvider; typically by wrapping your components in a ChartContainer.",
+    );
+  }
+  return context;
 }

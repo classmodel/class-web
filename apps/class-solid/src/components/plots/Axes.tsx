@@ -50,8 +50,8 @@ export const AxisLeft = (props: AxisProps) => {
 
   if (props.type === "log") {
     const range = chart.scaleY.range();
-    const domain = chart.scaleY.range();
-    updateChart("scaleY", d3.scaleLog().domain(domain).range(range));
+    const domain = chart.scaleY.domain();
+    updateChart("scaleY", () => d3.scaleLog().range(range).domain(domain));
   }
 
   const ticks = props.tickValues || generateTicks(chart.scaleY.domain());

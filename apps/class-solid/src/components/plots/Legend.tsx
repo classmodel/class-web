@@ -14,7 +14,7 @@ export function Legend<T>(props: LegendProps<T>) {
     <div
       class={cn(
         "flex flex-wrap justify-end text-sm tracking-tight",
-        chart.width,
+        `w-[${chart.width}px]`,
       )}
     >
       <For each={props.entries()}>

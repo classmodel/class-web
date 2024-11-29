@@ -233,9 +233,9 @@ export function AnalysisCard(analysis: Analysis) {
           <Match when={analysis.type === "profiles"}>
             <VerticalProfilePlot />
           </Match>
-          {/* <Match when={analysis.type === "skewT"}>
+          <Match when={analysis.type === "skewT"}>
             <ThermodynamicPlot />
-          </Match> */}
+          </Match>
         </Switch>
       </CardContent>
     </Card>

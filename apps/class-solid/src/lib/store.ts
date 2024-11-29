@@ -263,7 +263,7 @@ export async function loadStateFromString(rawState: string): Promise<void> {
 export const analysisNames = {
   profiles: "Vertical profiles",
   timeseries: "Timeseries",
-  // skewT: "Thermodynamic diagram",
+  skewT: "Thermodynamic diagram",
   // finalheight: "Final height",  // keep for development but not in production
 } as const;
 export type AnalysisType = keyof typeof analysisNames;

@@ -4,7 +4,6 @@ import { AnalysisCard } from "~/components/Analysis";
 import { AddExperimentDialog, ExperimentCard } from "~/components/Experiment";
 import { StartButtons, StartMenu } from "~/components/StartButtons";
 import { MdiPlusBox } from "~/components/icons";
-import { Chart } from "~/components/plots/ChartContainer";
 import {
   DropdownMenu,
   DropdownMenuContent,
