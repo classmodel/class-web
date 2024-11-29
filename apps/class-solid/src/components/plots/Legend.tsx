@@ -1,6 +1,6 @@
 import { For } from "solid-js";
 import { cn } from "~/lib/utils";
-import type { ChartData } from "./Base";
+import type { ChartData } from "./ChartContainer";
 import { useChartContext } from "./ChartContainer";
 
 export interface LegendProps<T> {

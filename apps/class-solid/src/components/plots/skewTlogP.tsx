@@ -2,7 +2,7 @@
 import * as d3 from "d3";
 import { For, createSignal } from "solid-js";
 import { AxisBottom, AxisLeft } from "./Axes";
-import type { ChartData } from "./Base";
+import type { ChartData } from "./ChartContainer";
 import { Chart, ChartContainer, useChartContext } from "./ChartContainer";
 import { Legend } from "./Legend";
 
