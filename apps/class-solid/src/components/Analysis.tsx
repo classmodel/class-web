@@ -45,6 +45,11 @@ const linestyles = ["none", "5,5", "10,10", "15,5,5,5", "20,10,5,5,5,10"];
  * It only works if the time axes are equal
  */
 export function TimeSeriesPlot() {
+  const [xVariable, setXVariable] = createSignal("t");
+  const [yVariable, setYVariable] = createSignal("theta");
+  const xVariableOptions = ["t"]; // TODO: separate plot types for timeseries and x-vs-y? Use time axis?
+  const yVariableOptions = ["h", "theta", "q", "dtheta", "dq"];
+
   const chartData = createMemo(() => {
     return experiments
       .filter((e) => e.running === false) // Skip running experiments
@@ -58,9 +63,9 @@ export function TimeSeriesPlot() {
               color: colors[(j + 1) % 10],
               linestyle: linestyles[i % 5],
               data:
-                perm.output?.t.map((tVal, i) => ({
-                  x: tVal,
-                  y: perm.output?.h[i] || Number.NaN,
+                perm.output?.t.map((tVal, ti) => ({
+                  x: perm.output ? perm.output[xVariable()][ti] : Number.NaN,
+                  y: perm.output ? perm.output[yVariable()][ti] : Number.NaN,
                 })) || [],
             };
           });
@@ -70,9 +75,13 @@ export function TimeSeriesPlot() {
             color: colors[0],
             linestyle: linestyles[i],
             data:
-              experimentOutput?.t.map((tVal, i) => ({
-                x: tVal,
-                y: experimentOutput?.h[i] || Number.NaN,
+              experimentOutput?.t.map((tVal, ti) => ({
+                x: experimentOutput
+                  ? experimentOutput[xVariable()][ti]
+                  : Number.NaN,
+                y: experimentOutput
+                  ? experimentOutput[yVariable()][ti]
+                  : Number.NaN,
               })) || [],
           },
           ...permutationRuns,
@@ -81,11 +90,24 @@ export function TimeSeriesPlot() {
   });
 
   return (
-    <LinePlot
-      data={chartData}
-      xlabel={() => "Time [s]"}
-      ylabel={() => "Mixed-layer height [m]"}
-    />
+    <>
+      {/* TODO: get label for yVariable from model config */}
+      <LinePlot data={chartData} xlabel={() => "Time [s]"} ylabel={yVariable} />
+      <div class="flex justify-around">
+        <Picker
+          value={xVariable}
+          setValue={setXVariable as Setter<string>}
+          options={xVariableOptions}
+          label="x-axis"
+        />
+        <Picker
+          value={yVariable}
+          setValue={setYVariable as Setter<string>}
+          options={yVariableOptions}
+          label="y-axis"
+        />
+      </div>
+    </>
   );
 }
 
@@ -143,17 +165,18 @@ export function VerticalProfilePlot() {
   });
   return (
     <>
-      <Picker
-        value={variable}
-        setValue={setVariable as Setter<string>}
-        options={Object.keys(variableOptions)}
-      />
       <LinePlot
         data={profileData}
         xlabel={() =>
           variableOptions[variable() as keyof typeof variableOptions]
         }
         ylabel={() => "Height [m]"}
+      />
+      <Picker
+        value={variable}
+        setValue={setVariable as Setter<string>}
+        options={Object.keys(variableOptions)}
+        label="variable: "
       />
     </>
   );
@@ -163,24 +186,28 @@ type PickerProps = {
   value: Accessor<string>;
   setValue: Setter<string>;
   options: string[];
+  label?: string;
 };
 
 function Picker(props: PickerProps) {
   return (
-    <Select
-      value={props.value()}
-      onChange={props.setValue}
-      options={props.options}
-      placeholder="Select value..."
-      itemComponent={(props) => (
-        <SelectItem item={props.item}>{props.item.rawValue}</SelectItem>
-      )}
-    >
-      <SelectTrigger aria-label="Variable" class="w-[180px]">
-        <SelectValue<string>>{(state) => state.selectedOption()}</SelectValue>
-      </SelectTrigger>
-      <SelectContent />
-    </Select>
+    <div class="flex items-center gap-2">
+      <p>{props.label}</p>
+      <Select
+        value={props.value()}
+        onChange={props.setValue}
+        options={props.options}
+        placeholder="Select value..."
+        itemComponent={(props) => (
+          <SelectItem item={props.item}>{props.item.rawValue}</SelectItem>
+        )}
+      >
+        <SelectTrigger aria-label="Variable" class="w-[180px]">
+          <SelectValue<string>>{(state) => state.selectedOption()}</SelectValue>
+        </SelectTrigger>
+        <SelectContent />
+      </Select>
+    </div>
   );
 }
 
