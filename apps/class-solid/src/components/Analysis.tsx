@@ -1,4 +1,12 @@
-import { For, Match, Show, Switch, createMemo, createUniqueId } from "solid-js";
+import {
+  For,
+  Match,
+  Show,
+  Switch,
+  createMemo,
+  createSignal,
+  createUniqueId,
+} from "solid-js";
 import { getThermodynamicProfiles, getVerticalProfiles } from "~/lib/profiles";
 import { type Analysis, deleteAnalysis, experiments } from "~/lib/store";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
@@ -6,6 +14,13 @@ import LinePlot from "./plots/LinePlot";
 import { SkewTPlot } from "./plots/skewTlogP";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 /** https://github.com/d3/d3-scale-chromatic/blob/main/src/categorical/Tableau10.js */
 const colors = [
@@ -73,8 +88,20 @@ export function TimeSeriesPlot() {
 }
 
 export function VerticalProfilePlot() {
-  const variable = "theta";
+  // const variable = "theta";
   const time = -1;
+
+  // TODO: make variable picker its own component
+  const variableOptions = {
+    theta: "Potential temperature [K]",
+    q: "Specific humidity [kg/kg]",
+  };
+  const [variable, setVariable] =
+    createSignal<keyof typeof variableOptions>("theta");
+
+  // TODO: refactor this? We could have a function that creates shared ChartData
+  // props (linestyle, color, label) generic for each plot type, and custom data
+  // formatting as required by specific chart
   const profileData = createMemo(() => {
     return experiments
       .filter((e) => e.running === false) // Skip running experiments
@@ -86,7 +113,7 @@ export function VerticalProfilePlot() {
             color: colors[(j + 1) % 10],
             linestyle: linestyles[i % 5],
             label: `${e.name}/${p.name}`,
-            data: getVerticalProfiles(p.output, p.config, variable, time),
+            data: getVerticalProfiles(p.output, p.config, variable(), time),
           };
         });
 
@@ -103,7 +130,7 @@ export function VerticalProfilePlot() {
                 dtheta: [],
               },
               e.reference.config,
-              variable,
+              variable(),
               time,
             ),
           },
@@ -112,11 +139,27 @@ export function VerticalProfilePlot() {
       });
   });
   return (
-    <LinePlot
-      data={profileData}
-      xlabel="Potential temperature [K]"
-      ylabel="Height [m]"
-    />
+    <>
+      <Select
+        value={variable()}
+        onChange={setVariable}
+        options={Object.keys(variableOptions)}
+        placeholder="Select variable..."
+        itemComponent={(props) => (
+          <SelectItem item={props.item}>{props.item.rawValue}</SelectItem>
+        )}
+      >
+        <SelectTrigger aria-label="Variable" class="w-[180px]">
+          <SelectValue<string>>{(state) => state.selectedOption()}</SelectValue>
+        </SelectTrigger>
+        <SelectContent />
+      </Select>
+      <LinePlot
+        data={profileData}
+        xlabel={variableOptions[variable()]}
+        ylabel="Height [m]"
+      />
+    </>
   );
 }
 
