@@ -81,8 +81,8 @@ export function TimeSeriesPlot() {
   return (
     <LinePlot
       data={chartData}
-      xlabel="Time [s]"
-      ylabel="Mixed-layer height [m]"
+      xlabel={() => "Time [s]"}
+      ylabel={() => "Mixed-layer height [m]"}
     />
   );
 }
@@ -156,8 +156,8 @@ export function VerticalProfilePlot() {
       </Select>
       <LinePlot
         data={profileData}
-        xlabel={variableOptions[variable()]}
-        ylabel="Height [m]"
+        xlabel={() => variableOptions[variable()]}
+        ylabel={() => "Height [m]"}
       />
     </>
   );
