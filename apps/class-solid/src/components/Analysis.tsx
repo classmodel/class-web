@@ -23,6 +23,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import {
+  Slider,
+  SliderFill,
+  SliderLabel,
+  SliderThumb,
+  SliderTrack,
+  SliderValueLabel,
+} from "./ui/slider";
 
 /** https://github.com/d3/d3-scale-chromatic/blob/main/src/categorical/Tableau10.js */
 const colors = [
@@ -112,13 +120,14 @@ export function TimeSeriesPlot() {
 }
 
 export function VerticalProfilePlot() {
-  const [time, setTime] = createSignal<number>(-1);
-  const [variable, setVariable] = createSignal("theta");
-
   // TODO also check time of permutations.
   const timeOptions = experiments
     .filter((e) => e.running === false)
     .flatMap((e) => (e.reference.output ? e.reference.output.t : []));
+
+  const [time, setTime] = createSignal<number>(timeOptions.length - 1);
+  const [variable, setVariable] = createSignal("theta");
+
   const variableOptions = {
     theta: "Potential temperature [K]",
     q: "Specific humidity [kg/kg]",
@@ -165,19 +174,22 @@ export function VerticalProfilePlot() {
   });
   return (
     <>
-      <LinePlot
-        data={profileData}
-        xlabel={() =>
-          variableOptions[variable() as keyof typeof variableOptions]
-        }
-        ylabel={() => "Height [m]"}
-      />
-      <Picker
-        value={variable}
-        setValue={setVariable as Setter<string>}
-        options={Object.keys(variableOptions)}
-        label="variable: "
-      />
+      <div class="flex flex-col gap-2">
+        <LinePlot
+          data={profileData}
+          xlabel={() =>
+            variableOptions[variable() as keyof typeof variableOptions]
+          }
+          ylabel={() => "Height [m]"}
+        />
+        <Picker
+          value={variable}
+          setValue={setVariable as Setter<string>}
+          options={Object.keys(variableOptions)}
+          label="variable: "
+        />
+        {TimeSlider(time, timeOptions, setTime)}
+      </div>
     </>
   );
 }
@@ -188,6 +200,37 @@ type PickerProps = {
   options: string[];
   label?: string;
 };
+
+/** format a number in seconds as HH:MM */
+function formatSeconds(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+}
+
+function TimeSlider(
+  time: Accessor<number>,
+  timeOptions: number[],
+  setTime: Setter<number>,
+) {
+  return (
+    <Slider
+      value={[time()]}
+      maxValue={timeOptions.length - 1}
+      onChange={(value) => setTime(value[0])}
+      class="w-full max-w-md"
+    >
+      <div class="flex w-full gap-5 items-center">
+        <p>Time: </p>
+        <SliderTrack>
+          <SliderFill />
+          <SliderThumb />
+        </SliderTrack>
+        <p>{formatSeconds(timeOptions[time()])}</p>
+      </div>
+    </Slider>
+  );
+}
 
 function Picker(props: PickerProps) {
   return (
