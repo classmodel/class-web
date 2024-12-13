@@ -19,17 +19,17 @@ export const AxisBottom = (props: AxisProps) => {
     props.type && updateChart("scalePropsX", { type: props.type });
   });
 
-  const format = props.tickFormat ? props.tickFormat : d3.format(".3g");
-  const ticks = props.tickValues || generateTicks(chart.scaleX.domain());
+  const format = () => (props.tickFormat ? props.tickFormat : d3.format(".3g"));
+  const ticks = () => props.tickValues || generateTicks(chart.scaleX.domain());
   return (
     <g transform={`translate(0,${chart.innerHeight - 0.5})`}>
       <line x1="0" x2={chart.innerWidth} y1="0" y2="0" stroke="currentColor" />
-      <For each={ticks}>
+      <For each={ticks()}>
         {(tick) => (
           <g transform={`translate(${chart.scaleX(tick)}, 0)`}>
             <line y2="6" stroke="currentColor" />
             <text y="9" dy="0.71em" text-anchor="middle">
-              {format(tick)}
+              {format()(tick)}
             </text>
           </g>
         )}
@@ -48,10 +48,8 @@ export const AxisLeft = (props: AxisProps) => {
     props.type && updateChart("scalePropsY", { type: props.type });
   });
 
-  console.log(chart);
-
-  const ticks = props.tickValues || generateTicks(chart.scaleY.domain());
-  const format = props.tickFormat ? props.tickFormat : d3.format(".0f");
+  const ticks = () => props.tickValues || generateTicks(chart.scaleY.domain());
+  const format = () => (props.tickFormat ? props.tickFormat : d3.format(".0f"));
   return (
     <g transform="translate(-0.5,0)">
       <line
@@ -61,12 +59,12 @@ export const AxisLeft = (props: AxisProps) => {
         y2={chart.scaleY.range()[1]}
         stroke="currentColor"
       />
-      <For each={ticks}>
+      <For each={ticks()}>
         {(tick) => (
           <g transform={`translate(0, ${chart.scaleY(tick)})`}>
             <line x2="-6" stroke="currentColor" />
             <text x="-9" dy="0.32em" text-anchor="end">
-              {format(tick)}
+              {format()(tick)}
             </text>
           </g>
         )}

@@ -61,6 +61,7 @@ export function ChartContainer(props: {
     const scaleX = supportedScales[chart.scalePropsX.type]()
       .range(chart.scalePropsX.range)
       .domain(chart.scalePropsX.domain);
+    // .nice(); // TODO: could use this instead of getNiceAxisLimits
     updateChart("scaleX", () => scaleX);
   });
 
@@ -69,6 +70,7 @@ export function ChartContainer(props: {
     const scaleY = supportedScales[chart.scalePropsY.type]()
       .range(chart.scalePropsY.range)
       .domain(chart.scalePropsY.domain);
+    // .nice();
     updateChart("scaleY", () => scaleY);
   });
   return (
@@ -123,10 +125,3 @@ export interface ChartData<T> {
   linestyle: string;
   data: T[];
 }
-
-// export function scale(props: ScaleProps): SupportedScaleTypes {
-//   const scale = supportedScales[props.type]()
-//     .range(props.range)
-//     .domain(props.domain);
-//   return scale;
-// }
