@@ -1,6 +1,8 @@
 import {
+  Accessor,
   For,
   Match,
+  Setter,
   Show,
   Switch,
   createMemo,
@@ -140,26 +142,42 @@ export function VerticalProfilePlot() {
   });
   return (
     <>
-      <Select
-        value={variable()}
-        onChange={setVariable}
+      <Picker
+        value={variable}
+        setValue={setVariable as Setter<string>}
         options={Object.keys(variableOptions)}
-        placeholder="Select variable..."
-        itemComponent={(props) => (
-          <SelectItem item={props.item}>{props.item.rawValue}</SelectItem>
-        )}
-      >
-        <SelectTrigger aria-label="Variable" class="w-[180px]">
-          <SelectValue<string>>{(state) => state.selectedOption()}</SelectValue>
-        </SelectTrigger>
-        <SelectContent />
-      </Select>
+      />
       <LinePlot
         data={profileData}
         xlabel={() => variableOptions[variable()]}
         ylabel={() => "Height [m]"}
       />
     </>
+  );
+}
+
+type PickerProps = {
+  value: Accessor<string>;
+  setValue: Setter<string>;
+  options: string[];
+};
+
+function Picker(props: PickerProps) {
+  return (
+    <Select
+      value={props.value()}
+      onChange={props.setValue}
+      options={props.options}
+      placeholder="Select value..."
+      itemComponent={(props) => (
+        <SelectItem item={props.item}>{props.item.rawValue}</SelectItem>
+      )}
+    >
+      <SelectTrigger aria-label="Variable" class="w-[180px]">
+        <SelectValue<string>>{(state) => state.selectedOption()}</SelectValue>
+      </SelectTrigger>
+      <SelectContent />
+    </Select>
   );
 }
 
