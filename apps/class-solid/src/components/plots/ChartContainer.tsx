@@ -1,11 +1,21 @@
 import * as d3 from "d3";
 import type { JSX } from "solid-js";
-import { createContext, useContext } from "solid-js";
+import { createContext, createEffect, useContext } from "solid-js";
 import { type SetStoreFunction, createStore } from "solid-js/store";
 
-export type SupportedScales =
-  | d3.ScaleLinear<number, number>
-  | d3.ScaleLogarithmic<number, number>;
+type SupportedScaleTypes =
+  | d3.ScaleLinear<number, number, never>
+  | d3.ScaleLogarithmic<number, number, never>;
+const supportedScales = {
+  linear: d3.scaleLinear<number, number, never>,
+  log: d3.scaleLog<number, number, never>,
+};
+
+type ScaleProps = {
+  domain: [number, number];
+  range: [number, number];
+  type: keyof typeof supportedScales;
+};
 
 interface Chart {
   width: number;
@@ -13,8 +23,10 @@ interface Chart {
   margin: [number, number, number, number];
   innerWidth: number;
   innerHeight: number;
-  scaleX: SupportedScales;
-  scaleY: SupportedScales;
+  scalePropsX: ScaleProps;
+  scalePropsY: ScaleProps;
+  scaleX: SupportedScaleTypes;
+  scaleY: SupportedScaleTypes;
 }
 type SetChart = SetStoreFunction<Chart>;
 const ChartContext = createContext<[Chart, SetChart]>();
@@ -32,14 +44,32 @@ export function ChartContainer(props: {
   const [marginTop, marginRight, marginBottom, marginLeft] = margin;
   const innerHeight = height - marginTop - marginBottom;
   const innerWidth = width - marginRight - marginLeft;
+  const initialScale = d3.scaleLinear<number, number, never>();
   const [chart, updateChart] = createStore<Chart>({
     width,
     height,
     margin,
     innerHeight,
     innerWidth,
-    scaleX: d3.scaleLinear().range([0, innerWidth]),
-    scaleY: d3.scaleLinear().range([innerHeight, 0]),
+    scalePropsX: { type: "linear", domain: [0, 1], range: [0, innerWidth] },
+    scalePropsY: { type: "linear", domain: [0, 1], range: [innerHeight, 0] },
+    scaleX: initialScale,
+    scaleY: initialScale,
+  });
+  createEffect(() => {
+    // Update scaleXInstance when scaleX props change
+    const scaleX = supportedScales[chart.scalePropsX.type]()
+      .range(chart.scalePropsX.range)
+      .domain(chart.scalePropsX.domain);
+    updateChart("scaleX", () => scaleX);
+  });
+
+  createEffect(() => {
+    // Update scaleYInstance when scaleY props change
+    const scaleY = supportedScales[chart.scalePropsY.type]()
+      .range(chart.scalePropsY.range)
+      .domain(chart.scalePropsY.domain);
+    updateChart("scaleY", () => scaleY);
   });
   return (
     <ChartContext.Provider value={[chart, updateChart]}>
@@ -93,3 +123,10 @@ export interface ChartData<T> {
   linestyle: string;
   data: T[];
 }
+
+// export function scale(props: ScaleProps): SupportedScaleTypes {
+//   const scale = supportedScales[props.type]()
+//     .range(props.range)
+//     .domain(props.domain);
+//   return scale;
+// }

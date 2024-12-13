@@ -12,25 +12,12 @@ type AxisProps = {
   tickFormat?: (n: number | { valueOf(): number }) => string;
 };
 
-function updateScale(newDomain: [number, number]) {
-  const [chart, updateChart] = useChartContext();
-  chart.scaleX.domain(newDomain);
-  // updateChart("scaleX", () => chart.scaleX.copy().domain(newDomain));
-
-  // Verify update:
-  console.log(newDomain);
-  console.log(chart.scaleX.domain());
-}
-
 export const AxisBottom = (props: AxisProps) => {
   const [chart, updateChart] = useChartContext();
-  createEffect(() => props.domain && updateScale(props.domain()));
-
-  if (props.type === "log") {
-    const range = chart.scaleX.range();
-    const domain = chart.scaleX.range();
-    updateChart("scaleX", d3.scaleLog().domain(domain).range(range));
-  }
+  createEffect(() => {
+    props.domain && updateChart("scalePropsX", { domain: props.domain() });
+    props.type && updateChart("scalePropsX", { type: props.type });
+  });
 
   const format = props.tickFormat ? props.tickFormat : d3.format(".3g");
   const ticks = props.tickValues || generateTicks(chart.scaleX.domain());
@@ -56,13 +43,12 @@ export const AxisBottom = (props: AxisProps) => {
 
 export const AxisLeft = (props: AxisProps) => {
   const [chart, updateChart] = useChartContext();
-  props.domain && chart.scaleY.domain(props.domain());
+  createEffect(() => {
+    props.domain && updateChart("scalePropsY", { domain: props.domain() });
+    props.type && updateChart("scalePropsY", { type: props.type });
+  });
 
-  if (props.type === "log") {
-    const range = chart.scaleY.range();
-    const domain = chart.scaleY.domain();
-    updateChart("scaleY", () => d3.scaleLog().range(range).domain(domain));
-  }
+  console.log(chart);
 
   const ticks = props.tickValues || generateTicks(chart.scaleY.domain());
   const format = props.tickFormat ? props.tickFormat : d3.format(".0f");
