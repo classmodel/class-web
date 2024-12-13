@@ -3,14 +3,18 @@ import type { JSX } from "solid-js";
 import { createContext, useContext } from "solid-js";
 import { type SetStoreFunction, createStore } from "solid-js/store";
 
+export type SupportedScales =
+  | d3.ScaleLinear<number, number>
+  | d3.ScaleLogarithmic<number, number>;
+
 interface Chart {
   width: number;
   height: number;
   margin: [number, number, number, number];
   innerWidth: number;
   innerHeight: number;
-  scaleX: d3.ScaleLinear<number, number> | d3.ScaleLogarithmic<number, number>;
-  scaleY: d3.ScaleLinear<number, number> | d3.ScaleLogarithmic<number, number>;
+  scaleX: SupportedScales;
+  scaleY: SupportedScales;
 }
 type SetChart = SetStoreFunction<Chart>;
 const ChartContext = createContext<[Chart, SetChart]>();
