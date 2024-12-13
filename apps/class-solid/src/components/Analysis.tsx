@@ -1,8 +1,8 @@
 import {
-  Accessor,
+  type Accessor,
   For,
   Match,
-  Setter,
+  type Setter,
   Show,
   Switch,
   createMemo,
@@ -90,16 +90,17 @@ export function TimeSeriesPlot() {
 }
 
 export function VerticalProfilePlot() {
-  // const variable = "theta";
-  const time = -1;
+  const [time, setTime] = createSignal<number>(-1);
+  const [variable, setVariable] = createSignal("theta");
 
-  // TODO: make variable picker its own component
+  // TODO also check time of permutations.
+  const timeOptions = experiments
+    .filter((e) => e.running === false)
+    .flatMap((e) => (e.reference.output ? e.reference.output.t : []));
   const variableOptions = {
     theta: "Potential temperature [K]",
     q: "Specific humidity [kg/kg]",
   };
-  const [variable, setVariable] =
-    createSignal<keyof typeof variableOptions>("theta");
 
   // TODO: refactor this? We could have a function that creates shared ChartData
   // props (linestyle, color, label) generic for each plot type, and custom data
@@ -115,7 +116,7 @@ export function VerticalProfilePlot() {
             color: colors[(j + 1) % 10],
             linestyle: linestyles[i % 5],
             label: `${e.name}/${p.name}`,
-            data: getVerticalProfiles(p.output, p.config, variable(), time),
+            data: getVerticalProfiles(p.output, p.config, variable(), time()),
           };
         });
 
@@ -133,7 +134,7 @@ export function VerticalProfilePlot() {
               },
               e.reference.config,
               variable(),
-              time,
+              time(),
             ),
           },
           ...permutations,
@@ -149,7 +150,9 @@ export function VerticalProfilePlot() {
       />
       <LinePlot
         data={profileData}
-        xlabel={() => variableOptions[variable()]}
+        xlabel={() =>
+          variableOptions[variable() as keyof typeof variableOptions]
+        }
         ylabel={() => "Height [m]"}
       />
     </>
