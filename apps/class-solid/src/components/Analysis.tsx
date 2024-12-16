@@ -1,3 +1,5 @@
+import type { ClassOutput } from "@classmodel/class/runner";
+import type { PartialConfig } from "@classmodel/class/validate";
 import {
   type Accessor,
   For,
@@ -41,6 +43,38 @@ const colors = [
 ];
 
 const linestyles = ["none", "5,5", "10,10", "15,5,5,5", "20,10,5,5,5,10"];
+
+interface FlatExperiment {
+  label: string;
+  color: string;
+  linestyle: string;
+  config: PartialConfig;
+  output?: ClassOutput;
+}
+
+// Create a derived store for looping over all outputs:
+const flatExperiments: () => FlatExperiment[] = createMemo(() => {
+  return experiments
+    .filter((e) => e.running === false) // skip running experiments
+    .flatMap((e, i) => {
+      const reference = {
+        color: colors[0],
+        linestyle: linestyles[i % 5],
+        label: e.name,
+        config: e.reference.config,
+        output: e.reference.output,
+      };
+
+      const permutations = e.permutations.map((p, j) => ({
+        label: `${e.name}/${p.name}`,
+        color: colors[(j + 1) % 10],
+        linestyle: linestyles[i % 5],
+        config: p.config,
+        output: p.output,
+      }));
+      return [reference, ...permutations];
+    });
+});
 
 /** Very rudimentary plot showing time series of each experiment globally available
  * It only works if the time axes are equal
@@ -113,47 +147,29 @@ export function TimeSeriesPlot() {
 }
 
 export function VerticalProfilePlot() {
-  // TODO also check time of permutations.
-  const timeOptions = experiments
-    .filter((e) => e.running === false)
-    .flatMap((e) => (e.reference.output ? e.reference.output.t : []));
-
-  const [time, setTime] = createSignal<number>(timeOptions.length - 1);
-  const [variable, setVariable] = createSignal("theta");
-
   const variableOptions = {
     theta: "Potential temperature [K]",
     q: "Specific humidity [kg/kg]",
   };
+  const allTimes = new Set(flatExperiments().flatMap((e) => e.output?.t ?? []));
+  const uniqueTimeValues = [...new Set(allTimes)].sort((a, b) => a - b);
 
-  // TODO: refactor this? We could have a function that creates shared ChartData
-  // props (linestyle, color, label) generic for each plot type, and custom data
-  // formatting as required by specific chart
-  const profileData = () => {
-    return experiments
-      .filter((e) => e.running === false) // Skip running experiments
-      .flatMap((e, i) => {
-        const r = e.reference;
-        const reference = {
-          label: e.name,
-          color: colors[0],
-          linestyle: linestyles[i],
-          data: getVerticalProfiles(r.output, r.config, variable(), time()),
-        };
+  const [time, setTime] = createSignal<number>(uniqueTimeValues.length - 1);
+  const [variable, setVariable] = createSignal("theta");
 
-        const permutations = e.permutations.map((p, j) => {
-          // TODO make sure config gammaq/gammatetha are available for all reference/permutations
-          return {
-            color: colors[(j + 1) % 10],
-            linestyle: linestyles[i % 5],
-            label: `${e.name}/${p.name}`,
-            data: getVerticalProfiles(p.output, p.config, variable(), time()),
-          };
-        });
+  const profileData = () =>
+    flatExperiments().map((e) => {
+      const { config, output, ...formatting } = e;
+      const t = e.output?.t.indexOf(uniqueTimeValues[time()]);
+      return {
+        ...formatting,
+        data:
+          t !== -1
+            ? getVerticalProfiles(e.output, e.config, variable(), t)
+            : [],
+      };
+    });
 
-        return [reference, ...permutations];
-      });
-  };
   return (
     <>
       <div class="flex flex-col gap-2">
@@ -170,7 +186,7 @@ export function VerticalProfilePlot() {
           options={Object.keys(variableOptions)}
           label="variable: "
         />
-        {TimeSlider(time, timeOptions, setTime)}
+        {TimeSlider(time, uniqueTimeValues, setTime)}
       </div>
     </>
   );
