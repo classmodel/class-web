@@ -79,6 +79,10 @@ const flatExperiments: () => FlatExperiment[] = createMemo(() => {
     });
 });
 
+const _allTimes = () =>
+  new Set(flatExperiments().flatMap((e) => e.output?.t ?? []));
+const uniqueTimes = () => [...new Set(_allTimes())].sort((a, b) => a - b);
+
 // TODO: could memoize all reactive elements here, would it make a difference?
 export function TimeSeriesPlot() {
   const [xVariable, setXVariable] = createSignal("t");
@@ -142,10 +146,8 @@ export function VerticalProfilePlot() {
     theta: "Potential temperature [K]",
     q: "Specific humidity [kg/kg]",
   };
-  const allTimes = new Set(flatExperiments().flatMap((e) => e.output?.t ?? []));
-  const uniqueTimes = [...new Set(allTimes)].sort((a, b) => a - b);
 
-  const [time, setTime] = createSignal<number>(uniqueTimes.length - 1);
+  const [time, setTime] = createSignal<number>(uniqueTimes().length - 1);
   const [variable, setVariable] = createSignal("theta");
 
   const allValues = () =>
@@ -159,7 +161,7 @@ export function VerticalProfilePlot() {
   const profileData = () =>
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
-      const t = e.output?.t.indexOf(uniqueTimes[time()]);
+      const t = output?.t.indexOf(uniqueTimes()[time()]);
       return {
         ...formatting,
         data:
@@ -191,7 +193,7 @@ export function VerticalProfilePlot() {
           options={Object.keys(variableOptions)}
           label="variable: "
         />
-        {TimeSlider(time, uniqueTimes, setTime)}
+        {TimeSlider(time, uniqueTimes(), setTime)}
       </div>
     </>
   );
@@ -258,18 +260,27 @@ function Picker(props: PickerProps) {
 }
 
 export function ThermodynamicPlot() {
-  const time = -1;
+  const [time, setTime] = createSignal<number>(uniqueTimes().length - 1);
 
   const skewTData = () =>
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
+      const t = output?.t.indexOf(uniqueTimes()[time()]);
       return {
         ...formatting,
-        data: getThermodynamicProfiles(e.output, e.config, time),
+        data:
+          t !== -1 // -1 now means "not found in array" rather than last index
+            ? getThermodynamicProfiles(e.output, e.config, t)
+            : [],
       };
     });
 
-  return <SkewTPlot data={skewTData} />;
+  return (
+    <>
+      <SkewTPlot data={skewTData} />
+      {TimeSlider(time, uniqueTimes(), setTime)}
+    </>
+  );
 }
 
 /** Simply show the final height for each experiment that has output */
