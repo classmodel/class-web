@@ -1,3 +1,5 @@
+import type { ClassOutput } from "@classmodel/class/runner";
+import type { PartialConfig } from "@classmodel/class/validate";
 import {
   type Accessor,
   For,
@@ -12,7 +14,10 @@ import {
 import { getThermodynamicProfiles, getVerticalProfiles } from "~/lib/profiles";
 import { type Analysis, deleteAnalysis, experiments } from "~/lib/store";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
-import LinePlot from "./plots/LinePlot";
+import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./plots/Axes";
+import { Chart, ChartContainer } from "./plots/ChartContainer";
+import { Legend } from "./plots/Legend";
+import { Line } from "./plots/LinePlot";
 import { SkewTPlot } from "./plots/skewTlogP";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -23,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Slider, SliderFill, SliderThumb, SliderTrack } from "./ui/slider";
 
 /** https://github.com/d3/d3-scale-chromatic/blob/main/src/categorical/Tableau10.js */
 const colors = [
@@ -41,68 +47,92 @@ const colors = [
 
 const linestyles = ["none", "5,5", "10,10", "15,5,5,5", "20,10,5,5,5,10"];
 
-/** Very rudimentary plot showing time series of each experiment globally available
- * It only works if the time axes are equal
- */
+interface FlatExperiment {
+  label: string;
+  color: string;
+  linestyle: string;
+  config: PartialConfig;
+  output?: ClassOutput;
+}
+
+// Create a derived store for looping over all outputs:
+const flatExperiments: () => FlatExperiment[] = createMemo(() => {
+  return experiments
+    .filter((e) => e.running === false) // skip running experiments
+    .flatMap((e, i) => {
+      const reference = {
+        color: colors[0],
+        linestyle: linestyles[i % 5],
+        label: e.name,
+        config: e.reference.config,
+        output: e.reference.output,
+      };
+
+      const permutations = e.permutations.map((p, j) => ({
+        label: `${e.name}/${p.name}`,
+        color: colors[(j + 1) % 10],
+        linestyle: linestyles[i % 5],
+        config: p.config,
+        output: p.output,
+      }));
+      return [reference, ...permutations];
+    });
+});
+
+const _allTimes = () =>
+  new Set(flatExperiments().flatMap((e) => e.output?.t ?? []));
+const uniqueTimes = () => [...new Set(_allTimes())].sort((a, b) => a - b);
+
+// TODO: could memoize all reactive elements here, would it make a difference?
 export function TimeSeriesPlot() {
   const [xVariable, setXVariable] = createSignal("t");
   const [yVariable, setYVariable] = createSignal("theta");
   const xVariableOptions = ["t"]; // TODO: separate plot types for timeseries and x-vs-y? Use time axis?
   const yVariableOptions = ["h", "theta", "q", "dtheta", "dq"];
 
-  const chartData = createMemo(() => {
-    return experiments
-      .filter((e) => e.running === false) // Skip running experiments
-      .flatMap((e, i) => {
-        const experimentOutput = e.reference.output;
-        const permutationRuns = e.permutations
-          .filter((perm) => perm.output !== undefined)
-          .map((perm, j) => {
-            return {
-              label: `${e.name}/${perm.name}`,
-              color: colors[(j + 1) % 10],
-              linestyle: linestyles[i % 5],
-              data:
-                perm.output?.t.map((tVal, ti) => ({
-                  x: perm.output ? perm.output[xVariable()][ti] : Number.NaN,
-                  y: perm.output ? perm.output[yVariable()][ti] : Number.NaN,
-                })) || [],
-            };
-          });
-        return [
-          {
-            label: e.name,
-            color: colors[0],
-            linestyle: linestyles[i],
-            data:
-              experimentOutput?.t.map((tVal, ti) => ({
-                x: experimentOutput
-                  ? experimentOutput[xVariable()][ti]
-                  : Number.NaN,
-                y: experimentOutput
-                  ? experimentOutput[yVariable()][ti]
-                  : Number.NaN,
-              })) || [],
-          },
-          ...permutationRuns,
-        ];
-      });
-  });
+  const allX = () =>
+    flatExperiments().flatMap((e) => (e.output ? e.output[xVariable()] : []));
+  const allY = () =>
+    flatExperiments().flatMap((e) => (e.output ? e.output[yVariable()] : []));
+
+  const xLim = () => getNiceAxisLimits(allX());
+  const yLim = () => getNiceAxisLimits(allY());
+
+  const chartData = () =>
+    flatExperiments().map((e) => {
+      const { config, output, ...formatting } = e;
+      return {
+        ...formatting,
+        data:
+          // Zip x[] and y[] into [x, y][]
+          output?.t.map((_, t) => ({
+            x: output ? output[xVariable()][t] : Number.NaN,
+            y: output ? output[yVariable()][t] : Number.NaN,
+          })) || [],
+      };
+    });
 
   return (
     <>
       {/* TODO: get label for yVariable from model config */}
-      <LinePlot data={chartData} xlabel={() => "Time [s]"} ylabel={yVariable} />
+      <ChartContainer>
+        <Legend entries={chartData} />
+        <Chart title="Vertical profile plot">
+          <AxisBottom domain={xLim} label="Time [s]" />
+          <AxisLeft domain={yLim} label={yVariable()} />
+          <For each={chartData()}>{(d) => Line(d)}</For>
+        </Chart>
+      </ChartContainer>
       <div class="flex justify-around">
         <Picker
           value={xVariable}
-          setValue={setXVariable as Setter<string>}
+          setValue={(v) => !!v && setXVariable(v)}
           options={xVariableOptions}
           label="x-axis"
         />
         <Picker
           value={yVariable}
-          setValue={setYVariable as Setter<string>}
+          setValue={(v) => !!v && setYVariable(v)}
           options={yVariableOptions}
           label="y-axis"
         />
@@ -112,72 +142,59 @@ export function TimeSeriesPlot() {
 }
 
 export function VerticalProfilePlot() {
-  const [time, setTime] = createSignal<number>(-1);
-  const [variable, setVariable] = createSignal("theta");
-
-  // TODO also check time of permutations.
-  const timeOptions = experiments
-    .filter((e) => e.running === false)
-    .flatMap((e) => (e.reference.output ? e.reference.output.t : []));
   const variableOptions = {
     theta: "Potential temperature [K]",
     q: "Specific humidity [kg/kg]",
   };
 
-  // TODO: refactor this? We could have a function that creates shared ChartData
-  // props (linestyle, color, label) generic for each plot type, and custom data
-  // formatting as required by specific chart
-  const profileData = createMemo(() => {
-    return experiments
-      .filter((e) => e.running === false) // Skip running experiments
-      .flatMap((e, i) => {
-        const permutations = e.permutations.map((p, j) => {
-          // TODO get additional config info from reference
-          // permutations probably usually don't have gammaq/gammatetha set?
-          return {
-            color: colors[(j + 1) % 10],
-            linestyle: linestyles[i % 5],
-            label: `${e.name}/${p.name}`,
-            data: getVerticalProfiles(p.output, p.config, variable(), time()),
-          };
-        });
+  const [time, setTime] = createSignal<number>(uniqueTimes().length - 1);
+  const [variable, setVariable] = createSignal("theta");
 
-        return [
-          {
-            label: e.name,
-            color: colors[0],
-            linestyle: linestyles[i],
-            data: getVerticalProfiles(
-              e.reference.output ?? {
-                t: [],
-                h: [],
-                theta: [],
-                dtheta: [],
-              },
-              e.reference.config,
-              variable(),
-              time(),
-            ),
-          },
-          ...permutations,
-        ];
-      });
-  });
+  const allValues = () =>
+    flatExperiments().flatMap((e) => (e.output ? e.output[variable()] : []));
+  const allHeights = () =>
+    flatExperiments().flatMap((e) => (e.output ? e.output.h : []));
+
+  // TODO: better to include jump at top in extent calculation rather than adding random margin.
+  const xLim = () => getNiceAxisLimits(allValues(), 1);
+  const yLim = () => getNiceAxisLimits(allHeights(), 0);
+  const profileData = () =>
+    flatExperiments().map((e) => {
+      const { config, output, ...formatting } = e;
+      const t = output?.t.indexOf(uniqueTimes()[time()]);
+      return {
+        ...formatting,
+        data:
+          t !== -1 // -1 now means "not found in array" rather than last index
+            ? getVerticalProfiles(e.output, e.config, variable(), t)
+            : [],
+      };
+    });
+
   return (
     <>
-      <LinePlot
-        data={profileData}
-        xlabel={() =>
-          variableOptions[variable() as keyof typeof variableOptions]
-        }
-        ylabel={() => "Height [m]"}
-      />
-      <Picker
-        value={variable}
-        setValue={setVariable as Setter<string>}
-        options={Object.keys(variableOptions)}
-        label="variable: "
-      />
+      <div class="flex flex-col gap-2">
+        <ChartContainer>
+          <Legend entries={profileData} />
+          <Chart title="Vertical profile plot">
+            <AxisBottom
+              domain={xLim}
+              label={
+                variableOptions[variable() as keyof typeof variableOptions]
+              }
+            />
+            <AxisLeft domain={yLim} label="Height[m]" />
+            <For each={profileData()}>{(d) => Line(d)}</For>
+          </Chart>
+        </ChartContainer>
+        <Picker
+          value={variable}
+          setValue={(v) => !!v && setVariable(v)}
+          options={Object.keys(variableOptions)}
+          label="variable: "
+        />
+        {TimeSlider(time, uniqueTimes(), setTime)}
+      </div>
     </>
   );
 }
@@ -188,6 +205,37 @@ type PickerProps = {
   options: string[];
   label?: string;
 };
+
+/** format a number in seconds as HH:MM */
+function formatSeconds(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+}
+
+function TimeSlider(
+  time: Accessor<number>,
+  timeOptions: number[],
+  setTime: Setter<number>,
+) {
+  return (
+    <Slider
+      value={[time()]}
+      maxValue={timeOptions.length - 1}
+      onChange={(value) => setTime(value[0])}
+      class="w-full max-w-md"
+    >
+      <div class="flex w-full items-center gap-5">
+        <p>Time: </p>
+        <SliderTrack>
+          <SliderFill />
+          <SliderThumb />
+        </SliderTrack>
+        <p>{formatSeconds(timeOptions[time()])}</p>
+      </div>
+    </Slider>
+  );
+}
 
 function Picker(props: PickerProps) {
   return (
@@ -212,36 +260,27 @@ function Picker(props: PickerProps) {
 }
 
 export function ThermodynamicPlot() {
-  const time = -1;
-  const skewTData = createMemo(() => {
-    return experiments.flatMap((e, i) => {
-      const permutations = e.permutations.map((p, j) => {
-        // TODO get additional config info from reference
-        // permutations probably usually don't have gammaq/gammatetha set?
-        return {
-          color: colors[(j + 1) % 10],
-          linestyle: linestyles[i % 5],
-          label: `${e.name}/${p.name}`,
-          data: getThermodynamicProfiles(p.output, p.config, time),
-        };
-      });
+  const [time, setTime] = createSignal<number>(uniqueTimes().length - 1);
 
-      return [
-        {
-          label: e.name,
-          color: colors[0],
-          linestyle: linestyles[i],
-          data: getThermodynamicProfiles(
-            e.reference.output,
-            e.reference.config,
-            time,
-          ),
-        },
-        ...permutations,
-      ];
+  const skewTData = () =>
+    flatExperiments().map((e) => {
+      const { config, output, ...formatting } = e;
+      const t = output?.t.indexOf(uniqueTimes()[time()]);
+      return {
+        ...formatting,
+        data:
+          t !== -1 // -1 now means "not found in array" rather than last index
+            ? getThermodynamicProfiles(e.output, e.config, t)
+            : [],
+      };
     });
-  });
-  return <SkewTPlot data={skewTData} />;
+
+  return (
+    <>
+      <SkewTPlot data={skewTData} />
+      {TimeSlider(time, uniqueTimes(), setTime)}
+    </>
+  );
 }
 
 /** Simply show the final height for each experiment that has output */

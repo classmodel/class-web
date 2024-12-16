@@ -80,14 +80,17 @@ export const AxisLeft = (props: AxisProps) => {
  * Calculate a "nice" step size by rounding up to the nearest power of 10
  * Snap the min and max to the nearest multiple of step
  */
-export function getNiceAxisLimits(data: number[]): [number, number] {
+export function getNiceAxisLimits(
+  data: number[],
+  extraMargin = 0,
+): [number, number] {
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min;
   const step = 10 ** Math.floor(Math.log10(range));
 
-  const niceMin = Math.floor(min / step) * step;
-  const niceMax = Math.ceil(max / step) * step;
+  const niceMin = Math.floor(min / step) * step - extraMargin * step;
+  const niceMax = Math.ceil(max / step) * step + extraMargin * step;
 
   return [niceMin, niceMax];
 }

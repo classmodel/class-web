@@ -61,7 +61,7 @@ export function ChartContainer(props: {
     const scaleX = supportedScales[chart.scalePropsX.type]()
       .range(chart.scalePropsX.range)
       .domain(chart.scalePropsX.domain);
-    // .nice(); // TODO: could use this instead of getNiceAxisLimits
+    // .nice(); // TODO: could use this instead of getNiceAxisLimits but messes up skewT
     updateChart("scaleX", () => scaleX);
   });
 
