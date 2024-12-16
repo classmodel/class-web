@@ -23,14 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import {
-  Slider,
-  SliderFill,
-  SliderLabel,
-  SliderThumb,
-  SliderTrack,
-  SliderValueLabel,
-} from "./ui/slider";
+import { Slider, SliderFill, SliderThumb, SliderTrack } from "./ui/slider";
 
 /** https://github.com/d3/d3-scale-chromatic/blob/main/src/categorical/Tableau10.js */
 const colors = [
@@ -136,13 +129,20 @@ export function VerticalProfilePlot() {
   // TODO: refactor this? We could have a function that creates shared ChartData
   // props (linestyle, color, label) generic for each plot type, and custom data
   // formatting as required by specific chart
-  const profileData = createMemo(() => {
+  const profileData = () => {
     return experiments
       .filter((e) => e.running === false) // Skip running experiments
       .flatMap((e, i) => {
+        const r = e.reference;
+        const reference = {
+          label: e.name,
+          color: colors[0],
+          linestyle: linestyles[i],
+          data: getVerticalProfiles(r.output, r.config, variable(), time()),
+        };
+
         const permutations = e.permutations.map((p, j) => {
-          // TODO get additional config info from reference
-          // permutations probably usually don't have gammaq/gammatetha set?
+          // TODO make sure config gammaq/gammatetha are available for all reference/permutations
           return {
             color: colors[(j + 1) % 10],
             linestyle: linestyles[i % 5],
@@ -151,27 +151,9 @@ export function VerticalProfilePlot() {
           };
         });
 
-        return [
-          {
-            label: e.name,
-            color: colors[0],
-            linestyle: linestyles[i],
-            data: getVerticalProfiles(
-              e.reference.output ?? {
-                t: [],
-                h: [],
-                theta: [],
-                dtheta: [],
-              },
-              e.reference.config,
-              variable(),
-              time(),
-            ),
-          },
-          ...permutations,
-        ];
+        return [reference, ...permutations];
       });
-  });
+  };
   return (
     <>
       <div class="flex flex-col gap-2">
@@ -220,7 +202,7 @@ function TimeSlider(
       onChange={(value) => setTime(value[0])}
       class="w-full max-w-md"
     >
-      <div class="flex w-full gap-5 items-center">
+      <div class="flex w-full items-center gap-5">
         <p>Time: </p>
         <SliderTrack>
           <SliderFill />
