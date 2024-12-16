@@ -259,34 +259,16 @@ function Picker(props: PickerProps) {
 
 export function ThermodynamicPlot() {
   const time = -1;
-  const skewTData = createMemo(() => {
-    return experiments.flatMap((e, i) => {
-      const permutations = e.permutations.map((p, j) => {
-        // TODO get additional config info from reference
-        // permutations probably usually don't have gammaq/gammatetha set?
-        return {
-          color: colors[(j + 1) % 10],
-          linestyle: linestyles[i % 5],
-          label: `${e.name}/${p.name}`,
-          data: getThermodynamicProfiles(p.output, p.config, time),
-        };
-      });
 
-      return [
-        {
-          label: e.name,
-          color: colors[0],
-          linestyle: linestyles[i],
-          data: getThermodynamicProfiles(
-            e.reference.output,
-            e.reference.config,
-            time,
-          ),
-        },
-        ...permutations,
-      ];
+  const skewTData = () =>
+    flatExperiments().map((e) => {
+      const { config, output, ...formatting } = e;
+      return {
+        ...formatting,
+        data: getThermodynamicProfiles(e.output, e.config, time),
+      };
     });
-  });
+
   return <SkewTPlot data={skewTData} />;
 }
 
