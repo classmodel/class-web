@@ -79,6 +79,7 @@ const flatExperiments: () => FlatExperiment[] = createMemo(() => {
     });
 });
 
+// TODO: could memoize all reactive elements here, would it make a difference?
 export function TimeSeriesPlot() {
   const [xVariable, setXVariable] = createSignal("t");
   const [yVariable, setYVariable] = createSignal("theta");
@@ -121,13 +122,13 @@ export function TimeSeriesPlot() {
       <div class="flex justify-around">
         <Picker
           value={xVariable}
-          setValue={setXVariable as Setter<string>}
+          setValue={(v) => !!v && setXVariable(v)}
           options={xVariableOptions}
           label="x-axis"
         />
         <Picker
           value={yVariable}
-          setValue={setYVariable as Setter<string>}
+          setValue={(v) => !!v && setYVariable(v)}
           options={yVariableOptions}
           label="y-axis"
         />
@@ -186,7 +187,7 @@ export function VerticalProfilePlot() {
         </ChartContainer>
         <Picker
           value={variable}
-          setValue={setVariable as Setter<string>}
+          setValue={(v) => !!v && setVariable(v)}
           options={Object.keys(variableOptions)}
           label="variable: "
         />
