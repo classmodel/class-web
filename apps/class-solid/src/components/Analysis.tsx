@@ -1,6 +1,5 @@
 import type { ClassOutput } from "@classmodel/class/runner";
 import type { PartialConfig } from "@classmodel/class/validate";
-import * as d3 from "d3";
 import {
   type Accessor,
   For,
@@ -19,7 +18,6 @@ import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./plots/Axes";
 import { Chart, ChartContainer } from "./plots/ChartContainer";
 import { Legend } from "./plots/Legend";
 import { Line } from "./plots/LinePlot";
-import LinePlot from "./plots/LinePlot";
 import { SkewTPlot } from "./plots/skewTlogP";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -81,58 +79,45 @@ const flatExperiments: () => FlatExperiment[] = createMemo(() => {
     });
 });
 
-/** Very rudimentary plot showing time series of each experiment globally available
- * It only works if the time axes are equal
- */
 export function TimeSeriesPlot() {
   const [xVariable, setXVariable] = createSignal("t");
   const [yVariable, setYVariable] = createSignal("theta");
   const xVariableOptions = ["t"]; // TODO: separate plot types for timeseries and x-vs-y? Use time axis?
   const yVariableOptions = ["h", "theta", "q", "dtheta", "dq"];
 
-  const chartData = createMemo(() => {
-    return experiments
-      .filter((e) => e.running === false) // Skip running experiments
-      .flatMap((e, i) => {
-        const experimentOutput = e.reference.output;
-        const permutationRuns = e.permutations
-          .filter((perm) => perm.output !== undefined)
-          .map((perm, j) => {
-            return {
-              label: `${e.name}/${perm.name}`,
-              color: colors[(j + 1) % 10],
-              linestyle: linestyles[i % 5],
-              data:
-                perm.output?.t.map((tVal, ti) => ({
-                  x: perm.output ? perm.output[xVariable()][ti] : Number.NaN,
-                  y: perm.output ? perm.output[yVariable()][ti] : Number.NaN,
-                })) || [],
-            };
-          });
-        return [
-          {
-            label: e.name,
-            color: colors[0],
-            linestyle: linestyles[i],
-            data:
-              experimentOutput?.t.map((tVal, ti) => ({
-                x: experimentOutput
-                  ? experimentOutput[xVariable()][ti]
-                  : Number.NaN,
-                y: experimentOutput
-                  ? experimentOutput[yVariable()][ti]
-                  : Number.NaN,
-              })) || [],
-          },
-          ...permutationRuns,
-        ];
-      });
-  });
+  const allX = () =>
+    flatExperiments().flatMap((e) => (e.output ? e.output[xVariable()] : []));
+  const allY = () =>
+    flatExperiments().flatMap((e) => (e.output ? e.output[yVariable()] : []));
+
+  const xLim = () => getNiceAxisLimits(allX());
+  const yLim = () => getNiceAxisLimits(allY());
+
+  const chartData = () =>
+    flatExperiments().map((e) => {
+      const { config, output, ...formatting } = e;
+      return {
+        ...formatting,
+        data:
+          // Zip x[] and y[] into [x, y][]
+          output?.t.map((_, t) => ({
+            x: output ? output[xVariable()][t] : Number.NaN,
+            y: output ? output[yVariable()][t] : Number.NaN,
+          })) || [],
+      };
+    });
 
   return (
     <>
       {/* TODO: get label for yVariable from model config */}
-      <LinePlot data={chartData} xlabel={() => "Time [s]"} ylabel={yVariable} />
+      <ChartContainer>
+        <Legend entries={chartData} />
+        <Chart title="Vertical profile plot">
+          <AxisBottom domain={xLim} label="Time [s]" />
+          <AxisLeft domain={yLim} label={yVariable()} />
+          <For each={chartData()}>{(d) => Line(d)}</For>
+        </Chart>
+      </ChartContainer>
       <div class="flex justify-around">
         <Picker
           value={xVariable}
@@ -149,12 +134,6 @@ export function TimeSeriesPlot() {
       </div>
     </>
   );
-}
-
-function getExtent(values: number[]): [number, number] {
-  return values.length > 0
-    ? [Math.min(...values), Math.max(...values)]
-    : [0, 1];
 }
 
 export function VerticalProfilePlot() {
