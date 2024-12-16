@@ -10,7 +10,7 @@ export interface Point {
   y: number;
 }
 
-function Line(d: ChartData<Point>) {
+export function Line(d: ChartData<Point>) {
   const [chart, updateChart] = useChartContext();
   const [hovered, setHovered] = createSignal(false);
 

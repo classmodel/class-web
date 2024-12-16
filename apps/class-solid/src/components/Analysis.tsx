@@ -1,5 +1,6 @@
 import type { ClassOutput } from "@classmodel/class/runner";
 import type { PartialConfig } from "@classmodel/class/validate";
+import * as d3 from "d3";
 import {
   type Accessor,
   For,
@@ -14,6 +15,10 @@ import {
 import { getThermodynamicProfiles, getVerticalProfiles } from "~/lib/profiles";
 import { type Analysis, deleteAnalysis, experiments } from "~/lib/store";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
+import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./plots/Axes";
+import { Chart, ChartContainer } from "./plots/ChartContainer";
+import { Legend } from "./plots/Legend";
+import { Line } from "./plots/LinePlot";
 import LinePlot from "./plots/LinePlot";
 import { SkewTPlot } from "./plots/skewTlogP";
 import { Button } from "./ui/button";
@@ -146,25 +151,39 @@ export function TimeSeriesPlot() {
   );
 }
 
+function getExtent(values: number[]): [number, number] {
+  return values.length > 0
+    ? [Math.min(...values), Math.max(...values)]
+    : [0, 1];
+}
+
 export function VerticalProfilePlot() {
   const variableOptions = {
     theta: "Potential temperature [K]",
     q: "Specific humidity [kg/kg]",
   };
   const allTimes = new Set(flatExperiments().flatMap((e) => e.output?.t ?? []));
-  const uniqueTimeValues = [...new Set(allTimes)].sort((a, b) => a - b);
+  const uniqueTimes = [...new Set(allTimes)].sort((a, b) => a - b);
 
-  const [time, setTime] = createSignal<number>(uniqueTimeValues.length - 1);
+  const [time, setTime] = createSignal<number>(uniqueTimes.length - 1);
   const [variable, setVariable] = createSignal("theta");
 
+  const allValues = () =>
+    flatExperiments().flatMap((e) => (e.output ? e.output[variable()] : []));
+  const allHeights = () =>
+    flatExperiments().flatMap((e) => (e.output ? e.output.h : []));
+
+  // TODO: better to include jump at top in extent calculation rather than adding random margin.
+  const xLim = () => getNiceAxisLimits(allValues(), 1);
+  const yLim = () => getNiceAxisLimits(allHeights(), 0);
   const profileData = () =>
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
-      const t = e.output?.t.indexOf(uniqueTimeValues[time()]);
+      const t = e.output?.t.indexOf(uniqueTimes[time()]);
       return {
         ...formatting,
         data:
-          t !== -1
+          t !== -1 // -1 now means "not found in array" rather than last index
             ? getVerticalProfiles(e.output, e.config, variable(), t)
             : [],
       };
@@ -173,20 +192,26 @@ export function VerticalProfilePlot() {
   return (
     <>
       <div class="flex flex-col gap-2">
-        <LinePlot
-          data={profileData}
-          xlabel={() =>
-            variableOptions[variable() as keyof typeof variableOptions]
-          }
-          ylabel={() => "Height [m]"}
-        />
+        <ChartContainer>
+          <Legend entries={profileData} />
+          <Chart title="Vertical profile plot">
+            <AxisBottom
+              domain={xLim}
+              label={
+                variableOptions[variable() as keyof typeof variableOptions]
+              }
+            />
+            <AxisLeft domain={yLim} label="Height[m]" />
+            <For each={profileData()}>{(d) => Line(d)}</For>
+          </Chart>
+        </ChartContainer>
         <Picker
           value={variable}
           setValue={setVariable as Setter<string>}
           options={Object.keys(variableOptions)}
           label="variable: "
         />
-        {TimeSlider(time, uniqueTimeValues, setTime)}
+        {TimeSlider(time, uniqueTimes, setTime)}
       </div>
     </>
   );
