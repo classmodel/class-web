@@ -6,7 +6,7 @@ import type { Point } from "~/components/plots/LinePlot";
 export function getVerticalProfiles(
   output: ClassOutput | undefined,
   config: PartialConfig,
-  variable: "theta" | "q" = "theta",
+  variable = "theta",
   t = -1,
 ): Point[] {
   // Guard against undefined output

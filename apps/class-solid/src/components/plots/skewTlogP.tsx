@@ -29,8 +29,8 @@ function ClipPath() {
 
 function SkewTGridLine(temperature: number) {
   const [chart, updateChart] = useChartContext();
-  const x = chart.scaleX;
-  const y = chart.scaleY;
+  const x = (temp: number) => chart.scaleX(temp);
+  const y = (pres: number) => chart.scaleY(pres);
   return (
     <line
       x1={x(temperature) - 0.5 + (y(basep) - y(100)) / tan}
@@ -47,8 +47,8 @@ function SkewTGridLine(temperature: number) {
 
 function LogPGridLine(pressure: number) {
   const [chart, updateChart] = useChartContext();
-  const x = chart.scaleX;
-  const y = chart.scaleY;
+  const x = (temp: number) => chart.scaleX(temp);
+  const y = (pres: number) => chart.scaleY(pres);
   return (
     <line
       x1="0"
@@ -65,8 +65,8 @@ function LogPGridLine(pressure: number) {
 /** Dry adiabats (lines of constant potential temperature): array of lines of [p, T] */
 function DryAdiabat(d: [number, number][]) {
   const [chart, updateChart] = useChartContext();
-  const x = chart.scaleX;
-  const y = chart.scaleY;
+  const x = (temp: number) => chart.scaleX(temp);
+  const y = (pres: number) => chart.scaleY(pres);
 
   const dryline = d3
     .line()
@@ -92,8 +92,8 @@ function Sounding(data: ChartData<SoundingRecord>) {
   const [hovered, setHovered] = createSignal(false);
 
   // Scales and axes. Note the inverted domain for the y-scale: bigger is up!
-  const x = chart.scaleX;
-  const y = chart.scaleY;
+  const x = (temp: number) => chart.scaleX(temp);
+  const y = (pres: number) => chart.scaleY(pres);
 
   const temperatureLine = d3
     .line<SoundingRecord>()

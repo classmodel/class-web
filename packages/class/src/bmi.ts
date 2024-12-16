@@ -65,7 +65,7 @@ export class BmiClass implements BmiLight<Config> {
     return ouput_var_names.length;
   }
 
-  get_output_var_names() {
+  static get_output_var_names() {
     return ouput_var_names;
   }
 
