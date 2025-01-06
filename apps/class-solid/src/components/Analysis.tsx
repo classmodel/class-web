@@ -196,6 +196,7 @@ function Picker(props: PickerProps) {
       <p>{props.label}</p>
       <Select
         value={props.value()}
+        disallowEmptySelection={true}
         onChange={props.setValue}
         options={props.options}
         placeholder="Select value..."
