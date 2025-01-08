@@ -1,12 +1,14 @@
-import { pruneDefaults } from "@classmodel/class/validate";
+import {
+  ajv,
+  overwriteDefaultsInJsonSchema,
+  pruneConfig,
+} from "@classmodel/class/validate";
 import { type SubmitHandler, createForm } from "@modular-forms/solid";
 import { createMemo } from "solid-js";
+import { unwrap } from "solid-js/store";
+import { findPresetConfigByName } from "~/lib/presets";
 import type { Experiment } from "~/lib/store";
-import {
-  type NamedConfig,
-  jsonSchemaOfNamedConfig,
-  validate,
-} from "./NamedConfig";
+import { type NamedConfig, jsonSchemaOfNamedConfig } from "./NamedConfig";
 import { ObjectField } from "./ObjectField";
 import { ajvForm } from "./ajvForm";
 
@@ -19,21 +21,37 @@ export function ExperimentConfigForm({
   experiment: Experiment;
   onSubmit: (c: NamedConfig) => void;
 }) {
+  const presetConfig = createMemo(() =>
+    findPresetConfigByName(experiment.preset),
+  );
+
+  const jsonSchemaOfPreset = createMemo(() => {
+    const schema = overwriteDefaultsInJsonSchema(
+      jsonSchemaOfNamedConfig,
+      unwrap(presetConfig()),
+    );
+    return schema;
+  });
+
   const initialValues = createMemo(() => {
+    const config = pruneConfig(
+      unwrap(experiment.reference.config),
+      unwrap(presetConfig()),
+    );
     return {
       title: experiment.name,
       description: experiment.description,
-      ...pruneDefaults(experiment.reference.config),
+      ...config,
     };
   });
   const [_, { Form, Field }] = createForm<NamedConfig>({
     initialValues: initialValues(),
-    validate: ajvForm(validate),
+    validate: ajvForm(ajv.compile(jsonSchemaOfPreset())),
   });
 
   const handleSubmit: SubmitHandler<NamedConfig> = (values, event) => {
-    // Use validate to coerce strings to numbers
-    validate(values);
+    // Use ajv to coerce strings to numbers and fill in defaults
+    ajv.compile(jsonSchemaOfPreset())(values);
     onSubmit(values);
   };
 
@@ -46,8 +64,8 @@ export function ExperimentConfigForm({
     >
       <div>
         <ObjectField
-          schema={jsonSchemaOfNamedConfig}
-          value={pruneDefaults(experiment.reference.config)}
+          schema={jsonSchemaOfPreset()}
+          value={initialValues()}
           Field={Field}
         />
       </div>
