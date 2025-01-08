@@ -1,11 +1,14 @@
 import {
   type PartialConfig,
+  ajv,
   overwriteDefaultsInJsonSchema,
-  pruneDefaults,
+  pruneConfig,
 } from "@classmodel/class/validate";
 import { type SubmitHandler, createForm } from "@modular-forms/solid";
 import { For, createMemo, createSignal, createUniqueId } from "solid-js";
+import { unwrap } from "solid-js/store";
 import { Button } from "~/components/ui/button";
+import { findPresetConfigByName } from "~/lib/presets";
 import {
   type Experiment,
   type Permutation,
@@ -15,11 +18,7 @@ import {
   setPermutationConfigInExperiment,
   swapPermutationAndReferenceConfiguration,
 } from "~/lib/store";
-import {
-  type NamedConfig,
-  jsonSchemaOfNamedConfig,
-  validate,
-} from "./NamedConfig";
+import { type NamedConfig, jsonSchemaOfNamedConfig } from "./NamedConfig";
 import { ObjectField } from "./ObjectField";
 import { PermutationSweepButton } from "./PermutationSweepButton";
 import { ajvForm } from "./ajvForm";
@@ -60,17 +59,23 @@ function PermutationConfigForm(props: {
       props.reference,
     );
   });
-  const [_, { Form, Field }] = createForm<NamedConfig>({
-    initialValues: {
+
+  const initialValues = createMemo(() => {
+    const config = pruneConfig(unwrap(props.config), unwrap(props.reference));
+    return {
       title: props.permutationName ?? "",
-      ...pruneDefaults(props.config),
-    },
-    validate: ajvForm(validate),
+      ...config,
+    };
+  });
+
+  const [_, { Form, Field }] = createForm<NamedConfig>({
+    initialValues: initialValues(),
+    validate: ajvForm(ajv.compile(jsonSchemaOfPermutation())),
   });
 
   const handleSubmit: SubmitHandler<NamedConfig> = (values: NamedConfig) => {
-    // Use validate to coerce strings to numbers
-    validate(values);
+    // Use ajv to coerce strings to numbers and fill in defaults
+    ajv.compile(jsonSchemaOfPermutation())(values);
     props.onSubmit(values);
   };
 
@@ -84,7 +89,7 @@ function PermutationConfigForm(props: {
       <div>
         <ObjectField
           schema={jsonSchemaOfPermutation()}
-          value={pruneDefaults(props.config)}
+          value={initialValues()}
           Field={Field}
         />
       </div>
@@ -98,6 +103,14 @@ function AddPermutationButton(props: {
 }) {
   const [open, setOpen] = createSignal(false);
   const permutationName = () => `${props.experiment.permutations.length + 1}`;
+
+  const presetConfig = createMemo(() =>
+    findPresetConfigByName(props.experiment.preset),
+  );
+  const prunedReferenceConfig = createMemo(() =>
+    pruneConfig(unwrap(props.experiment.reference.config), presetConfig()),
+  );
+
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
       <DialogTrigger
@@ -118,7 +131,7 @@ function AddPermutationButton(props: {
         <PermutationConfigForm
           id="add-permutation-form"
           reference={props.experiment.reference.config}
-          config={{}}
+          config={prunedReferenceConfig()}
           permutationName={permutationName()}
           onSubmit={(config) => {
             const { title, description, ...strippedConfig } = config;
@@ -149,6 +162,14 @@ function EditPermutationButton(props: {
   const [open, setOpen] = createSignal(false);
   const permutationName =
     props.experiment.permutations[props.permutationIndex].name;
+
+  const presetConfig = createMemo(() =>
+    findPresetConfigByName(props.experiment.preset),
+  );
+  const prunedReferenceConfig = createMemo(() =>
+    pruneConfig(unwrap(props.experiment.reference.config), presetConfig()),
+  );
+
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
       <DialogTrigger
@@ -168,7 +189,7 @@ function EditPermutationButton(props: {
         <PermutationConfigForm
           id="edit-permutation-form"
           permutationName={permutationName}
-          reference={props.experiment.reference.config}
+          reference={prunedReferenceConfig()}
           config={props.experiment.permutations[props.permutationIndex].config}
           onSubmit={(config) => {
             const { title, description, ...strippedConfig } = config;
@@ -197,10 +218,10 @@ function PermutationDifferenceButton(props: {
 }) {
   const [open, setOpen] = createSignal(false);
   const prunedReference = createMemo(() =>
-    JSON.stringify(pruneDefaults(props.reference), null, 2),
+    JSON.stringify(props.reference, null, 2),
   );
   const prunedPermutation = createMemo(() =>
-    JSON.stringify(pruneDefaults(props.permutation), null, 2),
+    JSON.stringify(props.permutation, null, 2),
   );
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
@@ -237,6 +258,18 @@ function PermutationInfo(props: {
   perm: Permutation;
 }) {
   const id = createUniqueId();
+  const prunedReferenceConfig = createMemo(() =>
+    pruneConfig(
+      unwrap(props.experiment.reference.config),
+      findPresetConfigByName(props.experiment.preset),
+    ),
+  );
+  const prunedPermutationConfig = createMemo(() =>
+    pruneConfig(
+      unwrap(props.perm.config),
+      unwrap(props.experiment.reference.config),
+    ),
+  );
   return (
     <article
       class="flex flex-row items-center justify-center gap-1 p-2"
@@ -244,8 +277,8 @@ function PermutationInfo(props: {
     >
       <span id={id}>{props.perm.name}</span>
       <PermutationDifferenceButton
-        reference={props.experiment.reference.config}
-        permutation={props.perm.config}
+        reference={prunedReferenceConfig()}
+        permutation={prunedPermutationConfig()}
       />
       <EditPermutationButton
         experiment={props.experiment}
