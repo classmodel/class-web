@@ -21,7 +21,7 @@ The class model can be run from the command line.
 
 ```shell
 # Fetch default config file
-wget https://classmodel.github.io/class-web/presets/default.v1.0.0.json
+curl https://classmodel.github.io/class-web/presets/default.v1.0.0.json | jq .reference > config.json
 
 # Edit the config file
 
