@@ -71,6 +71,10 @@ export type PartialConfig = RecursivePartial<Config>;
  * configuration and removes any properties that match the default values.
  * It currently handles only objects of objects.
  *
+ * Defaults are defined in the JSON schema.
+ * Do not use this function when presets are used,
+ * as the preset should be treated as the default instead of the JSON schema.
+ *
  * @param config - The configuration object to prune.
  * @returns A new configuration object with default values removed.
  */
@@ -219,10 +223,11 @@ export function pruneConfig(
   reference: PartialConfig,
   preset?: PartialConfig,
 ): PartialConfig {
-  const config = structuredClone(permutation);
+  let config = structuredClone(permutation);
   let config2 = reference;
   if (preset) {
-    config2 = pruneConfig(reference, preset);
+    config = pruneConfig(permutation, reference);
+    config2 = preset;
   }
   for (const section in config) {
     const s = config[section as keyof typeof config];

@@ -1,5 +1,6 @@
-import { parse, pruneDefaults } from "@classmodel/class/validate";
+import { parse, pruneConfig } from "@classmodel/class/validate";
 import { unwrap } from "solid-js/store";
+import { findPresetConfigByName } from "./presets";
 import type { Analysis, Experiment } from "./store";
 
 export function decodeAppState(encoded: string): [Experiment[], Analysis[]] {
@@ -38,19 +39,25 @@ export function encodeAppState(
 ) {
   const rawExperiments = unwrap(experiments);
   const minimizedState = {
-    experiments: rawExperiments.map((exp) => ({
-      name: exp.name,
-      description: exp.description,
-      reference: pruneDefaults(exp.reference.config),
-      preset: exp.preset,
-      permutations: Object.fromEntries(
-        exp.permutations.map((perm) => [
-          perm.name,
-          // TODO if reference.var and prem.var are the same also remove prem.var
-          pruneDefaults(perm.config),
-        ]),
-      ),
-    })),
+    experiments: rawExperiments.map((exp) => {
+      const preset = findPresetConfigByName(exp.preset);
+      const reference = pruneConfig(exp.reference.config, preset);
+      return {
+        name: exp.name,
+        description: exp.description,
+        reference,
+        preset: exp.preset,
+        permutations: Object.fromEntries(
+          exp.permutations.map((perm) => {
+            return [
+              perm.name,
+              pruneConfig(perm.config, exp.reference.config, preset),
+            ];
+          }),
+        ),
+      };
+    }),
   };
+  console.log(JSON.stringify(minimizedState, undefined, 2));
   return encodeURI(JSON.stringify(minimizedState, undefined, 0));
 }

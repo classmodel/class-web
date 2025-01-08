@@ -236,4 +236,107 @@ describe("pruneConfig()", () => {
     const expected: PartialConfig = {};
     assert.deepEqual(result, expected);
   });
+
+  test("given 3 minimal configs, only unique first should survive", () => {
+    const first: PartialConfig = {
+      initialState: { h_0: 100, theta_0: 288 },
+      timeControl: { runtime: 120 },
+    };
+    const second: PartialConfig = {
+      initialState: { h_0: 100, theta_0: 308 },
+      timeControl: { runtime: 120 },
+    };
+    const third: PartialConfig = {
+      initialState: { h_0: 100, theta_0: 123 },
+      timeControl: { runtime: 240 },
+    };
+
+    const result = pruneConfig(first, second, third);
+    const expected = {
+      initialState: { theta_0: 288 },
+    };
+    assert.deepEqual(result, expected);
+  });
+
+  test("given 3 real configs", () => {
+    const preset = {
+      initialState: {
+        theta_0: 323,
+        h_0: 200,
+        dtheta_0: 1,
+        q_0: 0.008,
+        dq_0: -0.001,
+      },
+      timeControl: {
+        dt: 60,
+        runtime: 4320,
+      },
+      mixedLayer: {
+        wtheta: 0.1,
+        advtheta: 0,
+        gammatheta: 0.006,
+        wq: 0.0001,
+        advq: 0,
+        gammaq: 0,
+        divU: 0,
+        beta: 0.2,
+      },
+    };
+    const reference = {
+      initialState: {
+        h_0: 211,
+        theta_0: 323,
+        dtheta_0: 1,
+        q_0: 0.008,
+        dq_0: -0.001,
+      },
+      timeControl: {
+        dt: 60,
+        runtime: 4320,
+      },
+      mixedLayer: {
+        wtheta: 0.1,
+        advtheta: 0,
+        gammatheta: 0.006,
+        wq: 0.0001,
+        advq: 0,
+        gammaq: 0,
+        divU: 0,
+        beta: 0.2,
+      },
+    };
+    const permutation = {
+      initialState: {
+        h_0: 222,
+        theta_0: 323,
+        dtheta_0: 1,
+        q_0: 0.008,
+        dq_0: -0.001,
+      },
+      timeControl: {
+        dt: 60,
+        runtime: 4320,
+      },
+      mixedLayer: {
+        wtheta: 0.1,
+        advtheta: 0,
+        gammatheta: 0.006,
+        wq: 0.0001,
+        advq: 0,
+        gammaq: 0,
+        divU: 0,
+        beta: 0.212,
+      },
+    };
+    const result = pruneConfig(permutation, reference, preset);
+    const expected = {
+      initialState: {
+        h_0: 222,
+      },
+      mixedLayer: {
+        beta: 0.212,
+      },
+    };
+    assert.deepEqual(result, expected);
+  });
 });
