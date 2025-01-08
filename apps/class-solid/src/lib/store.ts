@@ -4,7 +4,7 @@ import type { ClassOutput } from "@classmodel/class/runner";
 import {
   type PartialConfig,
   parseExperimentConfig,
-  pruneDefaults,
+  pruneConfig,
 } from "@classmodel/class/validate";
 import { createUniqueId } from "solid-js";
 import { decodeAppState } from "./encode";
@@ -158,14 +158,16 @@ export async function modifyExperiment(
   setExperiments(
     index,
     produce((e) => {
+      const oldConfig = e.reference.config;
       e.reference.config = newConfig;
       e.name = name;
       e.description = description;
       e.permutations = e.permutations.map((perm) => {
-        const config = mergeConfigurations(
-          newConfig,
-          pruneDefaults(perm.config),
+        const permPrunedConfig = pruneConfig(
+          unwrap(perm.config),
+          unwrap(oldConfig),
         );
+        const config = mergeConfigurations(newConfig, permPrunedConfig);
         return {
           ...perm,
           config,
