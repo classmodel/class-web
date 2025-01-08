@@ -1,5 +1,5 @@
-import { For, Show, createResource, createSignal } from "solid-js";
-import { presetCatalog } from "~/lib/presets";
+import { For, Show, createSignal } from "solid-js";
+import { presets } from "~/lib/presets";
 import { hasLocalStorage, loadFromLocalStorage } from "~/lib/state";
 import { experiments, uploadExperiment } from "~/lib/store";
 import {
@@ -145,9 +145,6 @@ function StartFromUploadButton(props: {
     </>
   );
 }
-
-// Only load presets once and keep them in memory
-const [presets] = createResource(() => presetCatalog());
 
 function PresetPicker(props: {
   open: boolean;
