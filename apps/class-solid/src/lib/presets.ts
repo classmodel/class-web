@@ -16,6 +16,7 @@ function absoluteUrl(rawUrl: string) {
 
 export async function presetCatalog(rawUrl = "/presets/index.json") {
   // TODO use /presets.json route which is materialized during build
+  // TODO or generate complete catalog with pnpm generate:presets to src/presets.json
   const url = absoluteUrl(rawUrl);
   const response = await fetch(url);
   const presetUrls = (await response.json()) as string[];
