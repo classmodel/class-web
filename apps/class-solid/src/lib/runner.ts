@@ -15,7 +15,7 @@ export async function runClass(config: PartialConfig): Promise<ClassOutput> {
     const model = await new AsyncBmiClass();
     await model.initialize(parsedConfig);
     const output = await model.run({
-      var_names: BmiClass.get_output_var_names(),
+      var_names: new BmiClass().get_output_var_names(),
     });
     return output;
   } catch (error) {

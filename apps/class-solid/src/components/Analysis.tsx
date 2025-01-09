@@ -49,7 +49,7 @@ export function TimeSeriesPlot() {
   const [xVariable, setXVariable] = createSignal("t");
   const [yVariable, setYVariable] = createSignal("theta");
   const xVariableOptions = ["t"]; // TODO: separate plot types for timeseries and x-vs-y? Use time axis?
-  const yVariableOptions = BmiClass.get_output_var_names();
+  const yVariableOptions = new BmiClass().get_output_var_names();
 
   const chartData = createMemo(() => {
     return experiments
