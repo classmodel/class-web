@@ -13,6 +13,7 @@ import {
 import { getThermodynamicProfiles, getVerticalProfiles } from "~/lib/profiles";
 import {
   type Analysis,
+  type ProfilesAnalysis,
   type TimeseriesAnalysis,
   deleteAnalysis,
   experiments,
@@ -125,8 +126,9 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
   );
 }
 
-export function VerticalProfilePlot() {
-  const [time, setTime] = createSignal<number>(-1);
+export function VerticalProfilePlot({
+  analysis,
+}: { analysis: ProfilesAnalysis }) {
   const [variable, setVariable] = createSignal("Potential temperature [K]");
 
   // TODO also check time of permutations.
@@ -138,7 +140,7 @@ export function VerticalProfilePlot() {
     "Specific humidity [kg/kg]": "q",
   };
   const classVariable = () =>
-    variableOptions[variable() as keyof typeof variableOptions];
+    variableOptions[analysis.variable as keyof typeof variableOptions];
 
   // TODO: refactor this? We could have a function that creates shared ChartData
   // props (linestyle, color, label) generic for each plot type, and custom data
@@ -158,7 +160,7 @@ export function VerticalProfilePlot() {
               p.output,
               p.config,
               classVariable(),
-              time(),
+              analysis.time,
             ),
           };
         });
@@ -177,7 +179,7 @@ export function VerticalProfilePlot() {
               },
               e.reference.config,
               classVariable(),
-              time(),
+              analysis.time,
             ),
           },
           ...permutations,
@@ -192,8 +194,8 @@ export function VerticalProfilePlot() {
         ylabel={() => "Height [m]"}
       />
       <Picker
-        value={variable}
-        setValue={setVariable as Setter<string>}
+        value={() => analysis.variable}
+        setValue={(v) => updateAnalysis(analysis, { variable: v })}
         options={Object.keys(variableOptions)}
         label="variable: "
       />
@@ -343,7 +345,7 @@ export function AnalysisCard(analysis: Analysis) {
             <TimeSeriesPlot analysis={analysis as TimeseriesAnalysis} />
           </Match>
           <Match when={analysis.type === "profiles"}>
-            <VerticalProfilePlot />
+            <VerticalProfilePlot analysis={analysis as ProfilesAnalysis} />
           </Match>
           <Match when={analysis.type === "skewT"}>
             <ThermodynamicPlot />
