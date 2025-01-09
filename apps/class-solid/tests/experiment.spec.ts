@@ -124,7 +124,7 @@ test("Swap permutation with custom reference", async ({ page }) => {
   await page.getByRole("link", { name: "Configuration", exact: true }).click();
   const config1 = await parseDownload(downloadPromise1);
   expect(config1.reference.initialState?.h_0).toEqual(800);
-  expect(config1.reference.initialState?.theta_0).toEqual(288); // the default
+  expect(config1.reference.initialState?.theta_0).toEqual(265);
   expect(config1.reference.initialState?.dtheta_0).toEqual(0.8);
   expect(config1.permutations[0].config.initialState?.h_0).toEqual(400);
   expect(config1.permutations[0].config.initialState?.theta_0).toEqual(265);

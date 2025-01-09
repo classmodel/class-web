@@ -257,6 +257,10 @@ export function swapPermutationAndReferenceConfiguration(
     refConfig,
   );
   // TODO should names also be swapped?
+
+  // TODO update all other permutations?
+  // As they are full configs which where based on the reference
+
   runExperiment(experimentIndex);
 }
 
