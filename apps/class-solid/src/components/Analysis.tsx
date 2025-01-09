@@ -11,7 +11,13 @@ import {
   createUniqueId,
 } from "solid-js";
 import { getThermodynamicProfiles, getVerticalProfiles } from "~/lib/profiles";
-import { type Analysis, deleteAnalysis, experiments } from "~/lib/store";
+import {
+  type Analysis,
+  type TimeseriesAnalysis,
+  deleteAnalysis,
+  experiments,
+  updateAnalysis,
+} from "~/lib/store";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import LinePlot from "./plots/LinePlot";
 import { SkewTPlot } from "./plots/skewTlogP";
@@ -45,13 +51,11 @@ const linestyles = ["none", "5,5", "10,10", "15,5,5,5", "20,10,5,5,5,10"];
 /** Very rudimentary plot showing time series of each experiment globally available
  * It only works if the time axes are equal
  */
-export function TimeSeriesPlot() {
-  const [xVariable, setXVariable] = createSignal("t");
-  const [yVariable, setYVariable] = createSignal("theta");
+export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
   const xVariableOptions = ["t"]; // TODO: separate plot types for timeseries and x-vs-y? Use time axis?
   // TODO: add nice description from config as title and dropdown option for the variable picker.
   const yVariableOptions = new BmiClass().get_output_var_names();
-  
+
   const chartData = createMemo(() => {
     return experiments
       .filter((e) => e.running === false) // Skip running experiments
@@ -66,8 +70,12 @@ export function TimeSeriesPlot() {
               linestyle: linestyles[i % 5],
               data:
                 perm.output?.t.map((tVal, ti) => ({
-                  x: perm.output ? perm.output[xVariable()][ti] : Number.NaN,
-                  y: perm.output ? perm.output[yVariable()][ti] : Number.NaN,
+                  x: perm.output
+                    ? perm.output[analysis.xVariable][ti]
+                    : Number.NaN,
+                  y: perm.output
+                    ? perm.output[analysis.yVariable][ti]
+                    : Number.NaN,
                 })) || [],
             };
           });
@@ -79,10 +87,10 @@ export function TimeSeriesPlot() {
             data:
               experimentOutput?.t.map((tVal, ti) => ({
                 x: experimentOutput
-                  ? experimentOutput[xVariable()][ti]
+                  ? experimentOutput[analysis.xVariable][ti]
                   : Number.NaN,
                 y: experimentOutput
-                  ? experimentOutput[yVariable()][ti]
+                  ? experimentOutput[analysis.yVariable][ti]
                   : Number.NaN,
               })) || [],
           },
@@ -94,17 +102,21 @@ export function TimeSeriesPlot() {
   return (
     <>
       {/* TODO: get label for yVariable from model config */}
-      <LinePlot data={chartData} xlabel={() => "Time [s]"} ylabel={yVariable} />
+      <LinePlot
+        data={chartData}
+        xlabel={() => "Time [s]"}
+        ylabel={() => analysis.yVariable}
+      />
       <div class="flex justify-around">
         <Picker
-          value={xVariable}
-          setValue={setXVariable as Setter<string>}
+          value={() => analysis.xVariable}
+          setValue={(v) => updateAnalysis(analysis, { xVariable: v })}
           options={xVariableOptions}
           label="x-axis"
         />
         <Picker
-          value={yVariable}
-          setValue={setYVariable as Setter<string>}
+          value={() => analysis.yVariable}
+          setValue={(v) => updateAnalysis(analysis, { yVariable: v })}
           options={yVariableOptions}
           label="y-axis"
         />
@@ -125,7 +137,8 @@ export function VerticalProfilePlot() {
     "Potential temperature [K]": "theta",
     "Specific humidity [kg/kg]": "q",
   };
-  const classVariable = () => variableOptions[variable() as keyof typeof variableOptions]
+  const classVariable = () =>
+    variableOptions[variable() as keyof typeof variableOptions];
 
   // TODO: refactor this? We could have a function that creates shared ChartData
   // props (linestyle, color, label) generic for each plot type, and custom data
@@ -141,7 +154,12 @@ export function VerticalProfilePlot() {
             color: colors[(j + 1) % 10],
             linestyle: linestyles[i % 5],
             label: `${e.name}/${p.name}`,
-            data: getVerticalProfiles(p.output, p.config, classVariable(), time()),
+            data: getVerticalProfiles(
+              p.output,
+              p.config,
+              classVariable(),
+              time(),
+            ),
           };
         });
 
@@ -322,7 +340,7 @@ export function AnalysisCard(analysis: Analysis) {
             <FinalHeights />
           </Match>
           <Match when={analysis.type === "timeseries"}>
-            <TimeSeriesPlot />
+            <TimeSeriesPlot analysis={analysis as TimeseriesAnalysis} />
           </Match>
           <Match when={analysis.type === "profiles"}>
             <VerticalProfilePlot />
