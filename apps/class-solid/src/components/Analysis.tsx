@@ -49,8 +49,9 @@ export function TimeSeriesPlot() {
   const [xVariable, setXVariable] = createSignal("t");
   const [yVariable, setYVariable] = createSignal("theta");
   const xVariableOptions = ["t"]; // TODO: separate plot types for timeseries and x-vs-y? Use time axis?
+  // TODO: add nice description from config as title and dropdown option for the variable picker.
   const yVariableOptions = new BmiClass().get_output_var_names();
-
+  
   const chartData = createMemo(() => {
     return experiments
       .filter((e) => e.running === false) // Skip running experiments
@@ -114,16 +115,17 @@ export function TimeSeriesPlot() {
 
 export function VerticalProfilePlot() {
   const [time, setTime] = createSignal<number>(-1);
-  const [variable, setVariable] = createSignal("theta");
+  const [variable, setVariable] = createSignal("Potential temperature [K]");
 
   // TODO also check time of permutations.
   const timeOptions = experiments
     .filter((e) => e.running === false)
     .flatMap((e) => (e.reference.output ? e.reference.output.t : []));
   const variableOptions = {
-    theta: "Potential temperature [K]",
-    q: "Specific humidity [kg/kg]",
+    "Potential temperature [K]": "theta",
+    "Specific humidity [kg/kg]": "q",
   };
+  const classVariable = () => variableOptions[variable() as keyof typeof variableOptions]
 
   // TODO: refactor this? We could have a function that creates shared ChartData
   // props (linestyle, color, label) generic for each plot type, and custom data
@@ -139,7 +141,7 @@ export function VerticalProfilePlot() {
             color: colors[(j + 1) % 10],
             linestyle: linestyles[i % 5],
             label: `${e.name}/${p.name}`,
-            data: getVerticalProfiles(p.output, p.config, variable(), time()),
+            data: getVerticalProfiles(p.output, p.config, classVariable(), time()),
           };
         });
 
@@ -156,7 +158,7 @@ export function VerticalProfilePlot() {
                 dtheta: [],
               },
               e.reference.config,
-              variable(),
+              classVariable(),
               time(),
             ),
           },
@@ -168,9 +170,7 @@ export function VerticalProfilePlot() {
     <>
       <LinePlot
         data={profileData}
-        xlabel={() =>
-          variableOptions[variable() as keyof typeof variableOptions]
-        }
+        xlabel={variable}
         ylabel={() => "Height [m]"}
       />
       <Picker
@@ -195,6 +195,7 @@ function Picker(props: PickerProps) {
     <div class="flex items-center gap-2">
       <p>{props.label}</p>
       <Select
+        class="whitespace-nowrap"
         value={props.value()}
         disallowEmptySelection={true}
         onChange={props.setValue}
@@ -204,7 +205,7 @@ function Picker(props: PickerProps) {
           <SelectItem item={props.item}>{props.item.rawValue}</SelectItem>
         )}
       >
-        <SelectTrigger aria-label="Variable" class="w-[180px]">
+        <SelectTrigger aria-label="Variable" class="min-w-[100px]">
           <SelectValue<string>>{(state) => state.selectedOption()}</SelectValue>
         </SelectTrigger>
         <SelectContent />
