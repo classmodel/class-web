@@ -129,7 +129,11 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
       <ChartContainer>
         <Legend entries={chartData} />
         <Chart title="Vertical profile plot">
-          <AxisBottom domain={xLim} label="Time [s]" />
+          <AxisBottom
+            domain={xLim}
+            label="Time [s]"
+            tickFormat={formatSeconds}
+          />
           <AxisLeft domain={yLim} label={analysis.yVariable} />
           <For each={chartData()}>{(d) => Line(d)}</For>
         </Chart>
@@ -237,18 +241,17 @@ function TimeSlider(
   timeOptions: Accessor<number[]>,
   setTime: Setter<number>,
 ) {
-  const maxValue = () => timeOptions().length - 1
+  const maxValue = () => timeOptions().length - 1;
   createEffect(() => {
     // Update time in store as side effect of new data
     // Avoid case where timeOptions is briefly empty during update
-    const max = maxValue()
-    if (time() > max && max!== -1) {
-      setTime(maxValue())
-      console.log(maxValue())
-      console.log(time())
+    const max = maxValue();
+    if (time() > max && max !== -1) {
+      setTime(maxValue());
+      console.log(maxValue());
+      console.log(time());
     }
-  }
-  )
+  });
   return (
     <Slider
       value={[time()]}

@@ -9,7 +9,7 @@ type AxisProps = {
   domain?: () => [number, number]; // TODO: is this needed for reactivity?
   label?: string;
   tickValues?: number[];
-  tickFormat?: (n: number | { valueOf(): number }) => string;
+  tickFormat?: (n: number) => string;
 };
 
 export const AxisBottom = (props: AxisProps) => {
