@@ -37,7 +37,11 @@ export default function LinePlot({
   data,
   xlabel,
   ylabel,
-}: { data: () => ChartData<Point>[]; xlabel?: string; ylabel?: string }) {
+}: {
+  data: () => ChartData<Point>[];
+  xlabel?: () => string;
+  ylabel?: () => string;
+}) {
   const xLim = () =>
     getNiceAxisLimits(data().flatMap((d) => d.data.flatMap((d) => d.x)));
   const yLim = () =>
@@ -46,8 +50,8 @@ export default function LinePlot({
     <ChartContainer>
       <Legend entries={data} />
       <Chart title="Vertical profile plot">
-        <AxisBottom domain={xLim} label={xlabel} />
-        <AxisLeft domain={yLim} label={ylabel} />
+        <AxisBottom domain={xLim} label={xlabel ? xlabel() : ""} />
+        <AxisLeft domain={yLim} label={ylabel ? ylabel() : ""} />
         <For each={data()}>{(d) => Line(d)}</For>
       </Chart>
     </ChartContainer>

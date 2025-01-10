@@ -16,12 +16,7 @@ import { Flex } from "~/components/ui/flex";
 import { Toaster } from "~/components/ui/toast";
 import { onPageLoad } from "~/lib/state";
 
-import {
-  type AnalysisType,
-  addAnalysis,
-  analysisNames,
-  experiments,
-} from "~/lib/store";
+import { addAnalysis, analysisNames, experiments } from "~/lib/store";
 import { analyses } from "~/lib/store";
 
 export default function Home() {
@@ -65,12 +60,10 @@ export default function Home() {
             <DropdownMenuContent>
               <DropdownMenuLabel>Add analysis</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <For
-                each={Object.entries(analysisNames) as [AnalysisType, string][]}
-              >
-                {([key, value]) => (
-                  <DropdownMenuItem onClick={() => addAnalysis(key)}>
-                    {value}
+              <For each={analysisNames}>
+                {(name) => (
+                  <DropdownMenuItem onClick={() => addAnalysis(name)}>
+                    {name}
                   </DropdownMenuItem>
                 )}
               </For>
