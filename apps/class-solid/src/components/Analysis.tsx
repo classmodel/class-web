@@ -25,7 +25,7 @@ import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./plots/Axes";
 import { Chart, ChartContainer } from "./plots/ChartContainer";
 import { Legend } from "./plots/Legend";
-import { Line } from "./plots/LinePlot";
+import { Line } from "./plots/Line";
 import { SkewTPlot } from "./plots/skewTlogP";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";

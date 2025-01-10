@@ -1,6 +1,6 @@
 import type { ClassOutput } from "@classmodel/class/runner";
 import type { PartialConfig } from "@classmodel/class/validate";
-import type { Point } from "~/components/plots/LinePlot";
+import type { Point } from "~/components/plots/Line";
 
 // Get vertical profiles for a single class run
 export function getVerticalProfiles(
