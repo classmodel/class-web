@@ -297,44 +297,6 @@ export function ThermodynamicPlot() {
   );
 }
 
-/** Simply show the final height for each experiment that has output */
-function FinalHeights() {
-  return (
-    <ul>
-      <For each={experiments}>
-        {(experiment) => {
-          const h = () => {
-            const experimentOutput = experiment.reference.output;
-            return experimentOutput?.h[experimentOutput?.h.length - 1] || 0;
-          };
-          return (
-            <Show when={!experiment.running}>
-              <li class="mb-2" title={experiment.name}>
-                {experiment.name}: {h().toFixed()} m
-              </li>
-              <For each={experiment.permutations}>
-                {(perm) => {
-                  const h = () => {
-                    const permOutput = perm.output;
-                    return permOutput?.h?.length
-                      ? permOutput.h[permOutput.h.length - 1]
-                      : 0;
-                  };
-                  return (
-                    <li title={`${experiment.name}/${perm.name}`}>
-                      {experiment.name}/{perm.name}: {h().toFixed()} m
-                    </li>
-                  );
-                }}
-              </For>
-            </Show>
-          );
-        }}
-      </For>
-    </ul>
-  );
-}
-
 export function AnalysisCard(analysis: Analysis) {
   const id = createUniqueId();
   return (
@@ -367,10 +329,6 @@ export function AnalysisCard(analysis: Analysis) {
       </CardHeader>
       <CardContent class="min-h-[450px]">
         <Switch fallback={<p>Unknown analysis type</p>}>
-          {/* @ts-ignore: kept for developers, but not included in production */}
-          <Match when={analysis.type === "finalheight"}>
-            <FinalHeights />
-          </Match>
           <Match when={analysis.type === "timeseries"}>
             <TimeSeriesPlot analysis={analysis as TimeseriesAnalysis} />
           </Match>
