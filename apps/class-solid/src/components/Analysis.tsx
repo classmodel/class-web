@@ -1,3 +1,4 @@
+import { BmiClass } from "@classmodel/class/bmi";
 import type { ClassOutput } from "@classmodel/class/runner";
 import type { PartialConfig } from "@classmodel/class/validate";
 import {
@@ -7,12 +8,21 @@ import {
   type Setter,
   Show,
   Switch,
+  createEffect,
   createMemo,
   createSignal,
   createUniqueId,
 } from "solid-js";
 import { getThermodynamicProfiles, getVerticalProfiles } from "~/lib/profiles";
-import { type Analysis, deleteAnalysis, experiments } from "~/lib/store";
+import {
+  type Analysis,
+  type ProfilesAnalysis,
+  type TimeseriesAnalysis,
+  analyses,
+  deleteAnalysis,
+  experiments,
+  updateAnalysis,
+} from "~/lib/store";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./plots/Axes";
 import { Chart, ChartContainer } from "./plots/ChartContainer";
@@ -84,16 +94,16 @@ const _allTimes = () =>
 const uniqueTimes = () => [...new Set(_allTimes())].sort((a, b) => a - b);
 
 // TODO: could memoize all reactive elements here, would it make a difference?
-export function TimeSeriesPlot() {
-  const [xVariable, setXVariable] = createSignal("t");
-  const [yVariable, setYVariable] = createSignal("theta");
+export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
+
   const xVariableOptions = ["t"]; // TODO: separate plot types for timeseries and x-vs-y? Use time axis?
-  const yVariableOptions = ["h", "theta", "q", "dtheta", "dq"];
+  // TODO: add nice description from config as title and dropdown option for the variable picker.
+  const yVariableOptions = new BmiClass().get_output_var_names();
 
   const allX = () =>
-    flatExperiments().flatMap((e) => (e.output ? e.output[xVariable()] : []));
+    flatExperiments().flatMap((e) => (e.output ? e.output[analysis.xVariable] : []));
   const allY = () =>
-    flatExperiments().flatMap((e) => (e.output ? e.output[yVariable()] : []));
+    flatExperiments().flatMap((e) => (e.output ? e.output[analysis.yVariable] : []));
 
   const xLim = () => getNiceAxisLimits(allX());
   const yLim = () => getNiceAxisLimits(allY());
@@ -106,8 +116,8 @@ export function TimeSeriesPlot() {
         data:
           // Zip x[] and y[] into [x, y][]
           output?.t.map((_, t) => ({
-            x: output ? output[xVariable()][t] : Number.NaN,
-            y: output ? output[yVariable()][t] : Number.NaN,
+            x: output ? output[analysis.xVariable][t] : Number.NaN,
+            y: output ? output[analysis.yVariable][t] : Number.NaN,
           })) || [],
       };
     });
@@ -119,20 +129,20 @@ export function TimeSeriesPlot() {
         <Legend entries={chartData} />
         <Chart title="Vertical profile plot">
           <AxisBottom domain={xLim} label="Time [s]" />
-          <AxisLeft domain={yLim} label={yVariable()} />
+          <AxisLeft domain={yLim} label={analysis.yVariable} />
           <For each={chartData()}>{(d) => Line(d)}</For>
         </Chart>
       </ChartContainer>
       <div class="flex justify-around">
         <Picker
-          value={xVariable}
-          setValue={(v) => !!v && setXVariable(v)}
+          value={() => analysis.xVariable}
+          setValue={(v) => updateAnalysis(analysis, { xVariable: v })}
           options={xVariableOptions}
           label="x-axis"
         />
         <Picker
-          value={yVariable}
-          setValue={(v) => !!v && setYVariable(v)}
+          value={() => analysis.yVariable}
+          setValue={(v) => updateAnalysis(analysis, { yVariable: v })}
           options={yVariableOptions}
           label="y-axis"
         />
@@ -141,23 +151,27 @@ export function TimeSeriesPlot() {
   );
 }
 
-export function VerticalProfilePlot() {
-  const variableOptions = {
-    theta: "Potential temperature [K]",
-    q: "Specific humidity [kg/kg]",
-  };
+export function VerticalProfilePlot({
+  analysis,
+}: { analysis: ProfilesAnalysis }) {
 
+  const variableOptions = {
+    "Potential temperature [K]": "theta",
+    "Specific humidity [kg/kg]": "q",
+  };
+  
+  const classVariable = () => variableOptions[analysis.variable as keyof typeof variableOptions];
   const [time, setTime] = createSignal<number>(uniqueTimes().length - 1);
-  const [variable, setVariable] = createSignal("theta");
 
   const allValues = () =>
-    flatExperiments().flatMap((e) => (e.output ? e.output[variable()] : []));
+    flatExperiments().flatMap((e) => (e.output ? e.output[classVariable()] : []));
   const allHeights = () =>
     flatExperiments().flatMap((e) => (e.output ? e.output.h : []));
 
   // TODO: better to include jump at top in extent calculation rather than adding random margin.
   const xLim = () => getNiceAxisLimits(allValues(), 1);
   const yLim = () => getNiceAxisLimits(allHeights(), 0);
+  console.log(xLim())
   const profileData = () =>
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
@@ -166,7 +180,7 @@ export function VerticalProfilePlot() {
         ...formatting,
         data:
           t !== -1 // -1 now means "not found in array" rather than last index
-            ? getVerticalProfiles(e.output, e.config, variable(), t)
+            ? getVerticalProfiles(e.output, e.config, classVariable(), t)
             : [],
       };
     });
@@ -179,17 +193,15 @@ export function VerticalProfilePlot() {
           <Chart title="Vertical profile plot">
             <AxisBottom
               domain={xLim}
-              label={
-                variableOptions[variable() as keyof typeof variableOptions]
-              }
+              label={analysis.variable}
             />
             <AxisLeft domain={yLim} label="Height[m]" />
             <For each={profileData()}>{(d) => Line(d)}</For>
           </Chart>
         </ChartContainer>
         <Picker
-          value={variable}
-          setValue={(v) => !!v && setVariable(v)}
+          value={() => analysis.variable}
+          setValue={(v) => updateAnalysis(analysis, { variable: v })}
           options={Object.keys(variableOptions)}
           label="variable: "
         />
@@ -242,7 +254,9 @@ function Picker(props: PickerProps) {
     <div class="flex items-center gap-2">
       <p>{props.label}</p>
       <Select
+        class="whitespace-nowrap"
         value={props.value()}
+        disallowEmptySelection={true}
         onChange={props.setValue}
         options={props.options}
         placeholder="Select value..."
@@ -250,7 +264,7 @@ function Picker(props: PickerProps) {
           <SelectItem item={props.item}>{props.item.rawValue}</SelectItem>
         )}
       >
-        <SelectTrigger aria-label="Variable" class="w-[180px]">
+        <SelectTrigger aria-label="Variable" class="min-w-[100px]">
           <SelectValue<string>>{(state) => state.selectedOption()}</SelectValue>
         </SelectTrigger>
         <SelectContent />
@@ -358,10 +372,10 @@ export function AnalysisCard(analysis: Analysis) {
             <FinalHeights />
           </Match>
           <Match when={analysis.type === "timeseries"}>
-            <TimeSeriesPlot />
+            <TimeSeriesPlot analysis={analysis as TimeseriesAnalysis} />
           </Match>
           <Match when={analysis.type === "profiles"}>
-            <VerticalProfilePlot />
+            <VerticalProfilePlot analysis={analysis as ProfilesAnalysis} />
           </Match>
           <Match when={analysis.type === "skewT"}>
             <ThermodynamicPlot />
