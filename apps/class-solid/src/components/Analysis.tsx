@@ -7,6 +7,7 @@ import {
   Match,
   type Setter,
   Switch,
+  createEffect,
   createMemo,
   createUniqueId,
 } from "solid-js";
@@ -161,7 +162,6 @@ export function VerticalProfilePlot({
 
   const classVariable = () =>
     variableOptions[analysis.variable as keyof typeof variableOptions];
-  updateAnalysis(analysis, { time: uniqueTimes().length - 1 });
 
   const allValues = () =>
     flatExperiments().flatMap((e) =>
@@ -173,7 +173,6 @@ export function VerticalProfilePlot({
   // TODO: better to include jump at top in extent calculation rather than adding random margin.
   const xLim = () => getNiceAxisLimits(allValues(), 1);
   const yLim = () => getNiceAxisLimits(allHeights(), 0);
-  console.log(xLim());
   const profileData = () =>
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
@@ -211,7 +210,7 @@ export function VerticalProfilePlot({
         />
         {TimeSlider(
           () => analysis.time,
-          uniqueTimes(),
+          uniqueTimes,
           (t) => updateAnalysis(analysis, { time: t }),
         )}
       </div>
@@ -235,13 +234,25 @@ function formatSeconds(seconds: number): string {
 
 function TimeSlider(
   time: Accessor<number>,
-  timeOptions: number[],
+  timeOptions: Accessor<number[]>,
   setTime: Setter<number>,
 ) {
+  const maxValue = () => timeOptions().length - 1
+  createEffect(() => {
+    // Update time in store as side effect of new data
+    // Avoid case where timeOptions is briefly empty during update
+    const max = maxValue()
+    if (time() > max && max!== -1) {
+      setTime(maxValue())
+      console.log(maxValue())
+      console.log(time())
+    }
+  }
+  )
   return (
     <Slider
       value={[time()]}
-      maxValue={timeOptions.length - 1}
+      maxValue={maxValue()}
       onChange={(value) => setTime(value[0])}
       class="w-full max-w-md"
     >
@@ -251,7 +262,7 @@ function TimeSlider(
           <SliderFill />
           <SliderThumb />
         </SliderTrack>
-        <p>{formatSeconds(timeOptions[time()])}</p>
+        <p>{formatSeconds(timeOptions()[time()])}</p>
       </div>
     </Slider>
   );
@@ -282,8 +293,6 @@ function Picker(props: PickerProps) {
 }
 
 export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
-  updateAnalysis(analysis, { time: uniqueTimes().length - 1 });
-
   const skewTData = () =>
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
@@ -302,7 +311,7 @@ export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
       <SkewTPlot data={skewTData} />
       {TimeSlider(
         () => analysis.time,
-        uniqueTimes(),
+        uniqueTimes,
         (t) => updateAnalysis(analysis, { time: t }),
       )}
     </>
