@@ -6,16 +6,15 @@ import {
   For,
   Match,
   type Setter,
-  Show,
   Switch,
   createMemo,
-  createSignal,
   createUniqueId,
 } from "solid-js";
 import { getThermodynamicProfiles, getVerticalProfiles } from "~/lib/profiles";
 import {
   type Analysis,
   type ProfilesAnalysis,
+  type SkewTAnalysis,
   type TimeseriesAnalysis,
   deleteAnalysis,
   experiments,
@@ -162,7 +161,7 @@ export function VerticalProfilePlot({
 
   const classVariable = () =>
     variableOptions[analysis.variable as keyof typeof variableOptions];
-  const [time, setTime] = createSignal<number>(uniqueTimes().length - 1);
+  updateAnalysis(analysis, { time: uniqueTimes().length - 1 });
 
   const allValues = () =>
     flatExperiments().flatMap((e) =>
@@ -178,12 +177,17 @@ export function VerticalProfilePlot({
   const profileData = () =>
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
-      const t = output?.t.indexOf(uniqueTimes()[time()]);
+      const t = output?.t.indexOf(uniqueTimes()[analysis.time]);
       return {
         ...formatting,
         data:
           t !== -1 // -1 now means "not found in array" rather than last index
-            ? getVerticalProfiles(e.output, e.config, classVariable(), t)
+            ? getVerticalProfiles(
+                e.output,
+                e.config,
+                classVariable(),
+                analysis.time,
+              )
             : [],
       };
     });
@@ -205,7 +209,11 @@ export function VerticalProfilePlot({
           options={Object.keys(variableOptions)}
           label="variable: "
         />
-        {TimeSlider(time, uniqueTimes(), setTime)}
+        {TimeSlider(
+          () => analysis.time,
+          uniqueTimes(),
+          (t) => updateAnalysis(analysis, { time: t }),
+        )}
       </div>
     </>
   );
@@ -273,13 +281,13 @@ function Picker(props: PickerProps) {
   );
 }
 
-export function ThermodynamicPlot() {
-  const [time, setTime] = createSignal<number>(uniqueTimes().length - 1);
+export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
+  updateAnalysis(analysis, { time: uniqueTimes().length - 1 });
 
   const skewTData = () =>
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
-      const t = output?.t.indexOf(uniqueTimes()[time()]);
+      const t = output?.t.indexOf(uniqueTimes()[analysis.time]);
       return {
         ...formatting,
         data:
@@ -292,7 +300,11 @@ export function ThermodynamicPlot() {
   return (
     <>
       <SkewTPlot data={skewTData} />
-      {TimeSlider(time, uniqueTimes(), setTime)}
+      {TimeSlider(
+        () => analysis.time,
+        uniqueTimes(),
+        (t) => updateAnalysis(analysis, { time: t }),
+      )}
     </>
   );
 }
@@ -336,7 +348,7 @@ export function AnalysisCard(analysis: Analysis) {
             <VerticalProfilePlot analysis={analysis as ProfilesAnalysis} />
           </Match>
           <Match when={analysis.type === "skewT"}>
-            <ThermodynamicPlot />
+            <ThermodynamicPlot analysis={analysis as SkewTAnalysis} />
           </Match>
         </Switch>
       </CardContent>

@@ -31,7 +31,7 @@ test("Create share link from an experiment", async ({ page }) => {
   const config1 = await parseDownload(downloadPromise1);
   expect(config1.reference.initialState?.h_0).toEqual(800);
 
-    // TODO: finalheight is gone; implement alternative check to see that experiment finished
+  // TODO: finalheight is gone; implement alternative check to see that experiment finished
 });
 
 test("Given large app state, sharing is not possible", async ({ page }) => {
