@@ -8,7 +8,6 @@ import {
   type Setter,
   Show,
   Switch,
-  createEffect,
   createMemo,
   createSignal,
   createUniqueId,
@@ -18,7 +17,6 @@ import {
   type Analysis,
   type ProfilesAnalysis,
   type TimeseriesAnalysis,
-  analyses,
   deleteAnalysis,
   experiments,
   updateAnalysis,
@@ -95,15 +93,18 @@ const uniqueTimes = () => [...new Set(_allTimes())].sort((a, b) => a - b);
 
 // TODO: could memoize all reactive elements here, would it make a difference?
 export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
-
   const xVariableOptions = ["t"]; // TODO: separate plot types for timeseries and x-vs-y? Use time axis?
   // TODO: add nice description from config as title and dropdown option for the variable picker.
   const yVariableOptions = new BmiClass().get_output_var_names();
 
   const allX = () =>
-    flatExperiments().flatMap((e) => (e.output ? e.output[analysis.xVariable] : []));
+    flatExperiments().flatMap((e) =>
+      e.output ? e.output[analysis.xVariable] : [],
+    );
   const allY = () =>
-    flatExperiments().flatMap((e) => (e.output ? e.output[analysis.yVariable] : []));
+    flatExperiments().flatMap((e) =>
+      e.output ? e.output[analysis.yVariable] : [],
+    );
 
   const xLim = () => getNiceAxisLimits(allX());
   const yLim = () => getNiceAxisLimits(allY());
@@ -154,24 +155,26 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
 export function VerticalProfilePlot({
   analysis,
 }: { analysis: ProfilesAnalysis }) {
-
   const variableOptions = {
     "Potential temperature [K]": "theta",
     "Specific humidity [kg/kg]": "q",
   };
-  
-  const classVariable = () => variableOptions[analysis.variable as keyof typeof variableOptions];
+
+  const classVariable = () =>
+    variableOptions[analysis.variable as keyof typeof variableOptions];
   const [time, setTime] = createSignal<number>(uniqueTimes().length - 1);
 
   const allValues = () =>
-    flatExperiments().flatMap((e) => (e.output ? e.output[classVariable()] : []));
+    flatExperiments().flatMap((e) =>
+      e.output ? e.output[classVariable()] : [],
+    );
   const allHeights = () =>
     flatExperiments().flatMap((e) => (e.output ? e.output.h : []));
 
   // TODO: better to include jump at top in extent calculation rather than adding random margin.
   const xLim = () => getNiceAxisLimits(allValues(), 1);
   const yLim = () => getNiceAxisLimits(allHeights(), 0);
-  console.log(xLim())
+  console.log(xLim());
   const profileData = () =>
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
@@ -191,10 +194,7 @@ export function VerticalProfilePlot({
         <ChartContainer>
           <Legend entries={profileData} />
           <Chart title="Vertical profile plot">
-            <AxisBottom
-              domain={xLim}
-              label={analysis.variable}
-            />
+            <AxisBottom domain={xLim} label={analysis.variable} />
             <AxisLeft domain={yLim} label="Height[m]" />
             <For each={profileData()}>{(d) => Line(d)}</For>
           </Chart>
