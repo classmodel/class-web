@@ -1,14 +1,9 @@
-import {
-  ajv,
-  overwriteDefaultsInJsonSchema,
-  pruneConfig,
-} from "@classmodel/class/validate";
+import type { Config } from "@classmodel/class/config";
 import { type SubmitHandler, createForm } from "@modular-forms/solid";
 import { createMemo } from "solid-js";
 import { unwrap } from "solid-js/store";
-import { findPresetConfigByName } from "~/lib/presets";
-import type { Experiment } from "~/lib/store";
-import { type NamedConfig, jsonSchemaOfNamedConfig } from "./NamedConfig";
+import { type ExperimentConfig, pruneConfig } from "~/lib/experiment_config";
+import { findPresetByName } from "~/lib/presets";
 import { ObjectField } from "./ObjectField";
 import { ajvForm } from "./ajvForm";
 
@@ -18,40 +13,26 @@ export function ExperimentConfigForm({
   onSubmit,
 }: {
   id: string;
-  experiment: Experiment;
-  onSubmit: (c: NamedConfig) => void;
+  experiment: ExperimentConfig;
+  onSubmit: (c: Config) => void;
 }) {
-  const presetConfig = createMemo(() =>
-    findPresetConfigByName(experiment.preset),
-  );
-
-  const jsonSchemaOfPreset = createMemo(() => {
-    const schema = overwriteDefaultsInJsonSchema(
-      jsonSchemaOfNamedConfig,
-      unwrap(presetConfig()),
-    );
-    return schema;
-  });
+  const preset = createMemo(() => findPresetByName(experiment.preset));
 
   const initialValues = createMemo(() => {
     const config = pruneConfig(
-      unwrap(experiment.reference.config),
-      unwrap(presetConfig()),
+      unwrap(experiment.reference),
+      unwrap(preset().config),
     );
-    return {
-      title: experiment.name,
-      description: experiment.description,
-      ...config,
-    };
+    return config;
   });
-  const [_, { Form, Field }] = createForm<NamedConfig>({
+  const [_, { Form, Field }] = createForm<Config>({
     initialValues: initialValues(),
-    validate: ajvForm(ajv.compile(jsonSchemaOfPreset())),
+    validate: ajvForm(preset().validate),
   });
 
-  const handleSubmit: SubmitHandler<NamedConfig> = (values, event) => {
+  const handleSubmit: SubmitHandler<Config> = (values, event) => {
     // Use ajv to coerce strings to numbers and fill in defaults
-    ajv.compile(jsonSchemaOfPreset())(values);
+    preset().validate(values);
     onSubmit(values);
   };
 
@@ -64,7 +45,7 @@ export function ExperimentConfigForm({
     >
       <div>
         <ObjectField
-          schema={jsonSchemaOfPreset()}
+          schema={preset().schema}
           value={initialValues()}
           Field={Field}
         />

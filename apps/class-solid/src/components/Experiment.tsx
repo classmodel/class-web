@@ -8,6 +8,7 @@ import {
 } from "solid-js";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { createArchive, toConfigBlob } from "~/lib/download";
+import { findPresetByName } from "~/lib/presets";
 import {
   type Experiment,
   addExperiment,
@@ -52,17 +53,19 @@ export function AddExperimentDialog(props: {
   onClose: () => void;
   open: boolean;
 }) {
-  const initialExperiment = () => {
+  const initialExperimentConfig = createMemo(() => {
+    const preset = findPresetByName();
+    const config = preset.parse({});
     return {
-      name: `My experiment ${props.nextIndex}`,
-      description: "",
-      reference: { config: {} },
+      preset: "Default",
+      reference: {
+        ...config,
+        name: `My experiment ${props.nextIndex}`,
+        description: "",
+      },
       permutations: [],
-      running: false as const,
-      // TODO make sure preset ends up in store
-      preset: "/presets/default.v1.0.0.json",
     };
-  };
+  });
 
   function setOpen(value: boolean) {
     if (!value) {
@@ -78,15 +81,10 @@ export function AddExperimentDialog(props: {
         </DialogHeader>
         <ExperimentConfigForm
           id="experiment-form"
-          experiment={initialExperiment()}
+          experiment={initialExperimentConfig()}
           onSubmit={(newConfig) => {
             props.onClose();
-            const { title, description, ...strippedConfig } = newConfig;
-            addExperiment(
-              strippedConfig,
-              title ?? initialExperiment().name,
-              description ?? initialExperiment().description,
-            );
+            addExperiment(newConfig);
           }}
         />
         <DialogFooter>
@@ -116,16 +114,10 @@ export function ExperimentSettingsDialog(props: {
         </DialogHeader>
         <ExperimentConfigForm
           id="experiment-form"
-          experiment={props.experiment}
+          experiment={props.experiment.config}
           onSubmit={(newConfig) => {
             setOpen(false);
-            const { title, description, ...strippedConfig } = newConfig;
-            modifyExperiment(
-              props.experimentIndex,
-              strippedConfig,
-              title ?? props.experiment.name,
-              description ?? props.experiment.description,
-            );
+            modifyExperiment(props.experimentIndex, newConfig);
           }}
         />
         <DialogFooter>
@@ -179,7 +171,7 @@ function DownloadExperimentConfiguration(props: { experiment: Experiment }) {
     URL.revokeObjectURL(downloadUrl());
   });
 
-  const filename = `class-${props.experiment.name}.json`;
+  const filename = `class-${props.experiment.config.reference.name}.json`;
   return (
     <a href={downloadUrl()} download={filename} type="application/json">
       Configuration
@@ -199,7 +191,7 @@ function DownloadExperimentArchive(props: { experiment: Experiment }) {
     onCleanup(() => URL.revokeObjectURL(objectUrl));
   });
 
-  const filename = `class-${props.experiment.name}.zip`;
+  const filename = `class-${props.experiment.config.reference.name}.zip`;
   return (
     <a href={url()} download={filename} type="application/zip">
       Configuration and output
@@ -244,9 +236,9 @@ export function ExperimentCard(props: {
       aria-describedby={descriptionId}
     >
       <CardHeader>
-        <CardTitle id={id}>{experiment().name}</CardTitle>
+        <CardTitle id={id}>{experiment().config.reference.name}</CardTitle>
         <CardDescription id={descriptionId}>
-          {experiment().description}
+          {experiment().config.reference.description}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -257,8 +249,8 @@ export function ExperimentCard(props: {
       </CardContent>
       <CardFooter>
         <Show
-          when={!experiment().running}
-          fallback={<RunningIndicator progress={experiment().running} />}
+          when={!experiment().output.running}
+          fallback={<RunningIndicator progress={experiment().output.running} />}
         >
           <DownloadExperiment experiment={experiment()} />
           <ExperimentSettingsDialog
@@ -287,10 +279,10 @@ export function ExperimentCard(props: {
           >
             <MdiDelete />
           </Button>
-          <Show when={experiment().preset}>
+          <Show when={experiment().config.preset}>
             <div class="text-[#888]">
               <a
-                href={`?preset=${encodeURI(experiment().preset ?? "")}`}
+                href={`?preset=${encodeURI(experiment().config.preset ?? "")}`}
                 target="_blank"
                 rel="noreferrer"
                 class={buttonVariants({ variant: "outline" })}

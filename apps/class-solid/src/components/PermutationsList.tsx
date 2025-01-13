@@ -8,7 +8,7 @@ import { type SubmitHandler, createForm } from "@modular-forms/solid";
 import { For, createMemo, createSignal, createUniqueId } from "solid-js";
 import { unwrap } from "solid-js/store";
 import { Button } from "~/components/ui/button";
-import { findPresetConfigByName } from "~/lib/presets";
+import { findPresetByName } from "~/lib/presets";
 import {
   type Experiment,
   type Permutation,
@@ -105,7 +105,7 @@ function AddPermutationButton(props: {
   const permutationName = () => `${props.experiment.permutations.length + 1}`;
 
   const presetConfig = createMemo(() =>
-    findPresetConfigByName(props.experiment.preset),
+    findPresetByName(props.experiment.preset),
   );
   const prunedReferenceConfig = createMemo(() =>
     pruneConfig(unwrap(props.experiment.reference.config), presetConfig()),
@@ -164,7 +164,7 @@ function EditPermutationButton(props: {
     props.experiment.permutations[props.permutationIndex].name;
 
   const presetConfig = createMemo(() =>
-    findPresetConfigByName(props.experiment.preset),
+    findPresetByName(props.experiment.preset),
   );
   const prunedReferenceConfig = createMemo(() =>
     pruneConfig(unwrap(props.experiment.reference.config), presetConfig()),
@@ -261,7 +261,7 @@ function PermutationInfo(props: {
   const prunedReferenceConfig = createMemo(() =>
     pruneConfig(
       unwrap(props.experiment.reference.config),
-      findPresetConfigByName(props.experiment.preset),
+      findPresetByName(props.experiment.preset),
     ),
   );
   const prunedPermutationConfig = createMemo(() =>

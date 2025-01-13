@@ -1,24 +1,11 @@
 import type { ClassOutput } from "@classmodel/class/runner";
-import type { ExperimentConfigSchema } from "@classmodel/class/validate";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
+import { toPartial } from "./encode";
+import type { PartialExperimentConfig } from "./experiment_config";
 import type { Experiment } from "./store";
 
-export function toConfig(experiment: Experiment): ExperimentConfigSchema {
-  const e: ExperimentConfigSchema = {
-    name: experiment.name,
-    description: experiment.description,
-    reference: experiment.reference.config,
-    permutations: experiment.permutations.map(({ name, config }) => {
-      return {
-        name,
-        config,
-      };
-    }),
-  };
-  if (experiment.preset) {
-    e.preset = experiment.preset;
-  }
-  return e;
+export function toConfig(experiment: Experiment): PartialExperimentConfig {
+  return toPartial(experiment.config);
 }
 
 export function toConfigBlob(experiment: Experiment) {
@@ -45,20 +32,24 @@ export async function createArchive(experiment: Experiment) {
   });
   await zipWriter.add("config.json", new BlobReader(configBlob));
 
-  if (experiment.reference.output) {
-    const csvBlob = new Blob([outputToCsv(experiment.reference.output)], {
+  if (experiment.output.reference) {
+    const csvBlob = new Blob([outputToCsv(experiment.output.reference)], {
       type: "text/csv",
     });
-    await zipWriter.add(`${experiment.name}.csv`, new BlobReader(csvBlob));
+    await zipWriter.add(
+      `${experiment.config.reference.name}.csv`,
+      new BlobReader(csvBlob),
+    );
   }
 
-  for (const permutation of experiment.permutations) {
-    const permutationOutput = permutation.output;
+  for (let index = 0; index < experiment.config.permutations.length; index++) {
+    const permConfig = experiment.config.permutations[index];
+    const permutationOutput = experiment.output.permutations[index];
     if (permutationOutput) {
       const csvBlob = new Blob([outputToCsv(permutationOutput)], {
         type: "text/csv",
       });
-      await zipWriter.add(`${permutation.name}.csv`, new BlobReader(csvBlob));
+      await zipWriter.add(`${permConfig.name}.csv`, new BlobReader(csvBlob));
     }
   }
   await zipWriter.close();

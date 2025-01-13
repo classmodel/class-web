@@ -30,10 +30,10 @@ const linestyles = ["none", "5,5", "10,10", "15,5,5,5", "20,10,5,5,5,10"];
 export function TimeSeriesPlot() {
   const chartData = createMemo(() => {
     return experiments
-      .filter((e) => e.running === false) // Skip running experiments
+      .filter((e) => e.output.running === false) // Skip running experiments
       .flatMap((e, i) => {
-        const experimentOutput = e.reference.output;
-        const permutationRuns = e.permutations
+        const experimentOutput = e.output.reference;
+        const permutationRuns = e.output.permutations
           .filter((perm) => perm.output !== undefined)
           .map((perm, j) => {
             return {
@@ -49,7 +49,7 @@ export function TimeSeriesPlot() {
           });
         return [
           {
-            label: e.name,
+            label: e.config.reference.name,
             color: colors[0],
             linestyle: linestyles[i],
             data:
@@ -77,7 +77,7 @@ export function VerticalProfilePlot() {
   const time = -1;
   const profileData = createMemo(() => {
     return experiments
-      .filter((e) => e.running === false) // Skip running experiments
+      .filter((e) => e.output.running === false) // Skip running experiments
       .flatMap((e, i) => {
         const permutations = e.permutations.map((p, j) => {
           // TODO get additional config info from reference

@@ -1,83 +1,57 @@
+import { createUniqueId } from "solid-js";
 import { createStore, produce, unwrap } from "solid-js/store";
 
+import type { Config } from "@classmodel/class/config";
 import type { ClassOutput } from "@classmodel/class/runner";
+
+import { decodeAppState, parseExperimentConfig } from "./encode";
 import {
-  type PartialConfig,
-  parseExperimentConfig,
+  type ExperimentConfig,
+  mergeConfigurations,
   pruneConfig,
-} from "@classmodel/class/validate";
-import { createUniqueId } from "solid-js";
-import { decodeAppState } from "./encode";
+} from "./experiment_config";
+import { findPresetByName } from "./presets";
 import { runClass } from "./runner";
 
-export interface Permutation<C extends PartialConfig = PartialConfig> {
-  name: string;
-  config: C;
-  output?: ClassOutput | undefined;
-  // TODO Could use per run state to show progress of run of reference and each permutation
-  // running: boolean;
-}
-
-export interface Experiment {
-  name: string;
-  description: string;
-  preset?: string;
-  reference: {
-    // TODO change reference.config to config, as there are no other keys in reference
-    config: PartialConfig;
-    output?: ClassOutput | undefined;
-  };
-  permutations: Permutation[];
+interface ExperimentOutput {
+  reference: ClassOutput;
+  permutations: ClassOutput[];
   running: number | false;
 }
+
+export type Experiment = {
+  config: ExperimentConfig;
+  output: ExperimentOutput;
+};
 
 export const [experiments, setExperiments] = createStore<Experiment[]>([]);
 export const [analyses, setAnalyses] = createStore<Analysis[]>([]);
 
-// biome-ignore lint/suspicious/noExplicitAny: recursion is hard to type
-function mergeConfigurations(reference: any, permutation: any) {
-  const merged = { ...reference };
-
-  for (const key in permutation) {
-    if (
-      permutation[key] &&
-      typeof permutation[key] === "object" &&
-      !Array.isArray(permutation[key])
-    ) {
-      merged[key] = mergeConfigurations(reference[key], permutation[key]);
-    } else {
-      merged[key] = permutation[key];
-    }
-  }
-
-  return merged;
-}
-
 export async function runExperiment(id: number) {
   const exp = experiments[id];
 
-  setExperiments(id, "running", 0.0001);
+  setExperiments(id, "output", "running", 0.0001);
 
   // TODO make lazy, if config does not change do not rerun
   // or make more specific like runReference and runPermutation
 
   // Run reference
-  const referenceConfig = unwrap(exp.reference.config);
+  const referenceConfig = unwrap(exp.config.reference);
   const newOutput = await runClass(referenceConfig);
 
-  setExperiments(id, "reference", "output", newOutput);
+  setExperiments(id, "output", "reference", newOutput);
 
   // Run permutations
   let permCounter = 0;
-  for (const proxiedPerm of exp.permutations) {
-    const permConfig = unwrap(proxiedPerm.config);
+  for (const proxiedPerm of exp.config.permutations) {
+    const permConfig = unwrap(proxiedPerm);
     const combinedConfig = mergeConfigurations(referenceConfig, permConfig);
     const newOutput = await runClass(combinedConfig);
-    setExperiments(id, "permutations", permCounter, "output", newOutput);
+    setExperiments(id, "output", "permutations", permCounter, newOutput);
     permCounter++;
   }
 
-  setExperiments(id, "running", false);
+  setExperiments(id, "output", "running", false);
 
   // If no analyis are set then add all of them
   if (analyses.length === 0) {
@@ -96,38 +70,42 @@ function findExperiment(index: number) {
   return exp;
 }
 
-export async function addExperiment(
-  config: PartialConfig = {},
-  name?: string,
-  description?: string,
-) {
+export async function addExperiment(config: Config) {
   const newExperiment: Experiment = {
-    name: name ?? `My experiment ${experiments.length}`,
-    description: description ?? "Standard experiment",
-    reference: {
-      config,
+    config: {
+      preset: "Default",
+      reference: {
+        ...config,
+        name: config.name ?? `My experiment ${experiments.length}`,
+        description: config.description ?? "Standard experiment",
+      },
+      permutations: [],
     },
-    permutations: [],
-    running: false,
+    output: {
+      reference: {},
+      permutations: [],
+      running: false,
+    },
   };
   setExperiments(experiments.length, newExperiment);
   await runExperiment(experiments.length - 1);
 }
 
 export async function uploadExperiment(rawData: unknown) {
+  const preset = findPresetByName();
   const upload = parseExperimentConfig(rawData);
   const experiment: Experiment = {
-    name: upload.name, // TODO check name is not already used
-    description: upload.description ?? "",
-    reference: {
-      config: upload.reference,
+    config: {
+      preset: upload.preset,
+      reference: upload.reference,
+      permutations: upload.permutations,
     },
-    permutations: upload.permutations,
-    running: false,
+    output: {
+      reference: {},
+      permutations: [],
+      running: false,
+    },
   };
-  if (upload.preset) {
-    experiment.preset = upload.preset;
-  }
   setExperiments(experiments.length, experiment);
   await runExperiment(experiments.length - 1);
 }
@@ -137,8 +115,8 @@ export function duplicateExperiment(id: number) {
 
   const newExperiment = {
     ...original,
-    name: `Copy of ${original.name}`,
-    description: original.description,
+    name: `Copy of ${original.config.reference.name}`,
+    description: original.config.reference.description,
     running: 0,
   };
   setExperiments(experiments.length, newExperiment);
@@ -149,24 +127,15 @@ export function deleteExperiment(index: number) {
   setExperiments(experiments.filter((_, i) => i !== index));
 }
 
-export async function modifyExperiment(
-  index: number,
-  newConfig: PartialConfig,
-  name: string,
-  description: string,
-) {
+export async function modifyExperiment(index: number, newConfig: Config) {
   setExperiments(
     index,
+    "config",
     produce((e) => {
-      const oldConfig = e.reference.config;
-      e.reference.config = newConfig;
-      e.name = name;
-      e.description = description;
+      const oldConfig = e.reference;
+      e.reference = newConfig;
       e.permutations = e.permutations.map((perm) => {
-        const permPrunedConfig = pruneConfig(
-          unwrap(perm.config),
-          unwrap(oldConfig),
-        );
+        const permPrunedConfig = pruneConfig(unwrap(perm), unwrap(oldConfig));
         const config = mergeConfigurations(newConfig, permPrunedConfig);
         return {
           ...perm,
@@ -181,16 +150,16 @@ export async function modifyExperiment(
 export async function setPermutationConfigInExperiment(
   experimentIndex: number,
   permutationIndex: number,
-  config: PartialConfig,
-  name: string,
+  config: Config,
 ) {
   setExperiments(
     experimentIndex,
+    "config",
     "permutations",
     permutationIndex === -1
-      ? findExperiment(experimentIndex).permutations.length
+      ? findExperiment(experimentIndex).config.permutations.length
       : permutationIndex,
-    { config, name },
+    config,
   );
   await runExperiment(experimentIndex);
 }
@@ -199,13 +168,15 @@ export async function deletePermutationFromExperiment(
   experimentIndex: number,
   permutationIndex: number,
 ) {
-  setExperiments(experimentIndex, "permutations", (perms) =>
+  setExperiments(experimentIndex, "config", "permutations", (perms) =>
     perms.filter((_, i) => i !== permutationIndex),
   );
 }
 
 export function findPermutation(exp: Experiment, permutationName: string) {
-  const perm = exp.permutations.find((perm) => perm.name === permutationName);
+  const perm = exp.config.permutations.find(
+    (perm) => perm.name === permutationName,
+  );
   if (!perm) {
     throw new Error(`No permutation with name ${permutationName}`);
   }
@@ -217,10 +188,10 @@ export function promotePermutationToExperiment(
   permutationIndex: number,
 ) {
   const exp = findExperiment(experimentIndex);
-  const perm = exp.permutations[permutationIndex];
+  const perm = exp.config.permutations[permutationIndex];
 
-  const newConfig = structuredClone(perm.config);
-  addExperiment(newConfig, perm.name, "");
+  const newConfig = structuredClone(perm);
+  addExperiment(newConfig);
   // TODO should permutation be removed from original experiment?
 }
 
@@ -229,13 +200,9 @@ export function duplicatePermutation(
   permutationIndex: number,
 ) {
   const exp = findExperiment(experimentIndex);
-  const perm = exp.permutations[permutationIndex];
-  setPermutationConfigInExperiment(
-    experimentIndex,
-    -1,
-    structuredClone(perm.config),
-    `Copy of ${perm.name}`,
-  );
+  const perm = structuredClone(exp.config.permutations[permutationIndex]);
+  perm.name = `Copy of ${perm.name}`;
+  setPermutationConfigInExperiment(experimentIndex, -1, perm);
   runExperiment(experimentIndex);
 }
 
@@ -244,16 +211,16 @@ export function swapPermutationAndReferenceConfiguration(
   permutationIndex: number,
 ) {
   const exp = findExperiment(experimentIndex);
-  const refConfig = structuredClone(exp.reference.config);
-  const perm = exp.permutations[permutationIndex];
-  const permConfig = structuredClone(perm.config);
+  const refConfig = structuredClone(exp.config.reference);
+  const perm = exp.config.permutations[permutationIndex];
+  const permConfig = structuredClone(perm);
 
-  setExperiments(experimentIndex, "reference", "config", permConfig);
+  setExperiments(experimentIndex, "config", "reference", permConfig);
   setExperiments(
     experimentIndex,
+    "config",
     "permutations",
     permutationIndex,
-    "config",
     refConfig,
   );
   // TODO should names also be swapped?

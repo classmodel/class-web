@@ -157,7 +157,7 @@ function PresetPicker(props: {
           <DialogTitle class="mr-10">Pick a preset</DialogTitle>
         </DialogHeader>
         <Flex justifyContent="center" class="flex-wrap gap-4">
-          <For each={presets()}>
+          <For each={presets}>
             {(preset) => (
               <Button
                 variant="outline"
@@ -182,8 +182,8 @@ function PresetPicker(props: {
                     });
                 }}
               >
-                <h1 class="text-xl">{preset.name}</h1>
-                <div>{preset.description}</div>
+                <h1 class="text-xl">{preset.config.name}</h1>
+                <div>{preset.config.description}</div>
               </Button>
             )}
           </For>

@@ -7,6 +7,7 @@ export interface Sweep {
   step: number;
   steps: number;
 }
+
 function cartesianProduct(values: PartialConfig[][]): PartialConfig[] {
   if (values.length === 0) return [];
   return values.reduce(
@@ -17,8 +18,18 @@ function cartesianProduct(values: PartialConfig[][]): PartialConfig[] {
           // TODO make recursive and handle literals and arrays
           const merged = { ...a };
           for (const [section, params] of Object.entries(b)) {
-            merged[section as keyof typeof merged] = {
-              ...merged[section as keyof typeof merged],
+            if (typeof params === "string") {
+              continue;
+            }
+            const msection = section as keyof typeof merged;
+            const mparams = merged[msection];
+            if (mparams === undefined || typeof mparams === "string") {
+              continue;
+            }
+            // TODO replace PartialConfig with Config
+            // @ts-ignore
+            merged[msection] = {
+              ...mparams,
               ...params,
             };
           }

@@ -8,7 +8,8 @@
     "build": "vinxi build",
     "typecheck": "tsc --noEmit",
     "start": "serve --no-clipboard .output/public",
-    "test": "playwright test"
+    "test": "playwright test",
+    "test:unit": "tsx --test src/*.test.ts"
   },
   "dependencies": {
     "@classmodel/class": "workspace:*",
@@ -39,6 +40,7 @@
     "@types/d3": "^7.4.3",
     "@types/node": "^20.13.1",
     "serve": "^14.2.3",
+    "tsx": "^4.16.5",
     "typescript": "^5.3.3"
   }
 }

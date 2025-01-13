@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "@solidjs/router";
 import { showToast } from "~/components/ui/toast";
 import { encodeAppState } from "./encode";
-import { loadPreset } from "./presets";
+import { findPresetByName } from "./presets";
 import {
   analyses,
   experiments,
@@ -15,6 +15,7 @@ export function hasLocalStorage() {
   const state = localStorage.getItem(localStorageName);
   return (
     state !== null &&
+    // TODO do not hardcode this value, but derive it on import time
     state !== "%7B%22experiments%22%3A%5B%5D%2C%22analyses%22%3A%5B%5D%7D"
   );
 }
@@ -73,10 +74,10 @@ export async function onPageLoad() {
   navigate("/");
 }
 
-async function loadExperimentPreset(presetUrl: string) {
+async function loadExperimentPreset(presetName: string) {
   const navigate = useNavigate();
   try {
-    const preset = await loadPreset(presetUrl);
+    const preset = findPresetByName(presetName);
     await uploadExperiment(preset);
     showToast({
       title: "Experiment preset loaded",

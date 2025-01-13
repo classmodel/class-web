@@ -1,18 +1,10 @@
+import type { Config } from "@classmodel/class/config";
 import { type Sweep, performSweep } from "@classmodel/class/sweep";
-import {
-  type PartialConfig,
-  overwriteDefaultsInJsonSchema,
-} from "@classmodel/class/validate";
-import { For, createMemo, createSignal } from "solid-js";
-import { unwrap } from "solid-js/store";
+import type { PartialConfig } from "@classmodel/class/validate";
+import { For, createSignal } from "solid-js";
 import { Button } from "~/components/ui/button";
-import {
-  type Experiment,
-  type Permutation,
-  runExperiment,
-  setExperiments,
-} from "~/lib/store";
-import { jsonSchemaOfNamedConfig } from "./NamedConfig";
+import { mergeConfigurations } from "~/lib/experiment_config";
+import { type Experiment, runExperiment, setExperiments } from "~/lib/store";
 import {
   Dialog,
   DialogContent,
@@ -35,28 +27,24 @@ function nameForPermutation(config: PartialConfig): string {
   return chunks.join(",");
 }
 
-function config2permutation(config: PartialConfig): Permutation {
+function config2permutation(reference: Config, config: PartialConfig): Config {
   return {
-    config,
+    ...mergeConfigurations(config, reference),
     name: nameForPermutation(config),
   };
 }
 
-function configs2Permutations(configs: PartialConfig[]): Permutation[] {
-  return configs.map(config2permutation);
+function configs2Permutations(
+  reference: Config,
+  configs: PartialConfig[],
+): Config[] {
+  return configs.map((c) => config2permutation(reference, c));
 }
 
 export function PermutationSweepButton(props: {
   experiment: Experiment;
   experimentIndex: number;
 }) {
-  const jsonSchemaOfPermutation = createMemo(() => {
-    return overwriteDefaultsInJsonSchema(
-      jsonSchemaOfNamedConfig,
-      unwrap(props.experiment.reference.config),
-    );
-  });
-
   const sweeps: Sweep[] = [
     {
       section: "initialState",
@@ -76,9 +64,12 @@ export function PermutationSweepButton(props: {
 
   function addSweep() {
     const configs = performSweep(sweeps);
-    const perms = configs2Permutations(configs);
+    const perms = configs2Permutations(
+      props.experiment.config.reference,
+      configs,
+    );
     setOpen(false);
-    setExperiments(props.experimentIndex, "permutations", perms);
+    setExperiments(props.experimentIndex, "config", "permutations", perms);
     runExperiment(props.experimentIndex);
   }
   const [open, setOpen] = createSignal(false);

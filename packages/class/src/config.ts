@@ -4,6 +4,8 @@
  * and run "pnpm json2ts" to regenerate this file.
  */
 import type { JSONSchemaType } from "ajv/dist/2019.js";
+export type Name = string;
+export type Description = string;
 export type ABLHeight = number;
 /**
  * The potential temperature of the mixed layer at the initial time.
@@ -24,6 +26,8 @@ export type HorizontalLargeScaleDivergenceOfWind = number;
 export type EntrainmentRatioForVirtualHeat = number;
 
 export interface Config {
+  name: Name;
+  description: Description;
   initialState: InitialState;
   timeControl: TimeControl;
   mixedLayer: MixedLayer;
@@ -57,6 +61,8 @@ export type JsonSchemaOfConfig = JSONSchemaType<Config>;
 export const jsonSchemaOfConfig = {
   type: "object",
   properties: {
+    name: { type: "string", title: "Name", default: "" },
+    description: { type: "string", title: "Description", default: "" },
     initialState: {
       type: "object",
       properties: {
@@ -187,6 +193,12 @@ export const jsonSchemaOfConfig = {
     },
   },
   additionalProperties: false,
-  required: ["initialState", "timeControl", "mixedLayer"],
+  required: [
+    "name",
+    "description",
+    "initialState",
+    "timeControl",
+    "mixedLayer",
+  ],
   $schema: "https://json-schema.org/draft/2019-09/schema",
 } as unknown as JsonSchemaOfConfig;

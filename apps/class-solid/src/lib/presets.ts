@@ -1,62 +1,49 @@
-import {
-  type ExperimentConfigSchema,
-  type PartialConfig,
-  parse,
-  parseExperimentConfig,
-} from "@classmodel/class/validate";
-import { createResource } from "solid-js";
+import { type Config, jsonSchemaOfConfig } from "@classmodel/class/config";
+import { ValidationError, ajv } from "@classmodel/class/validate";
+import type { DefinedError, JSONSchemaType, ValidateFunction } from "ajv";
+import { overwriteDefaultsInJsonSchema } from "./experiment_config";
+// TODO replace with preset of a forest fire
+import deathValley from "./presets/death-valley.json";
 
-function absoluteUrl(rawUrl: string) {
-  let url = rawUrl;
-  if (window) {
-    // TODO add host:port to url
-  }
-  if (rawUrl.startsWith("/") && import.meta.env.BASE_URL !== "/_build") {
-    url = import.meta.env.BASE_URL + rawUrl;
-    // TODO test in production with BASE_URL=/somepath
-  }
-  return url;
+const presetConfigs = [
+  {
+    name: "Default",
+    description: "The classic default configuration",
+  },
+  deathValley,
+] as const;
+
+export interface Preset {
+  config: Config;
+  schema: JSONSchemaType<Config>;
+  validate: ValidateFunction<Config>;
+  parse: (input: unknown) => Config;
 }
 
-export async function presetCatalog(rawUrl = "/presets/index.json") {
-  // TODO use /presets.json route which is materialized during build
-  // TODO or generate complete catalog with pnpm generate:presets to src/presets.json
-  const url = absoluteUrl(rawUrl);
-  const response = await fetch(url);
-  const presetUrls = (await response.json()) as string[];
-  return await Promise.all(presetUrls.map(loadPreset));
-}
+function loadPreset(preset: unknown): Preset {
+  const config = parse(preset);
+  const schema = overwriteDefaultsInJsonSchema(jsonSchemaOfConfig, config);
+  const validate = ajv.compile(schema);
 
-export async function loadPreset(
-  rawUrl: string,
-): Promise<ExperimentConfigSchema> {
-  const url = absoluteUrl(rawUrl);
-  const response = await fetch(url);
-  const json = await response.json();
-  const config = parseExperimentConfig(json);
-  config.preset = url;
-  return config;
-}
-
-// Only load presets once and keep them in memory
-export const [presets] = createResource(() => presetCatalog());
-
-export function findPresetConfigByName(
-  name: string | undefined,
-): PartialConfig {
-  // presets could undefined due to unrsolved fetches
-  // TODO handle when this function is called before presets are loaded.
-  const mypresets = presets();
-  if (name && mypresets) {
-    const preset = mypresets.find((p) => p.preset === name);
-    if (!preset) {
-      // presets() only contains presets from ../../public/presets directory
-      // preset could be url to a remote server
-      // TODO fetch preset from remote server, make sure to cache it
-      throw new Error(`Preset ${name} not found`);
+  function parse(input: unknown): Config {
+    if (!validate(input)) {
+      throw new ValidationError(validate.errors as DefinedError[]);
     }
-    return preset.reference;
+    return input;
   }
-  // Fallback to defaults from json schema
-  return parse({});
+
+  return { config, schema, validate, parse };
+}
+
+export const presets = presetConfigs.map(loadPreset);
+
+/**
+ * Finds a preset by its name.
+ *
+ * @param name - The name of the preset configuration to find. If undefined, the default preset is returned.
+ * @returns The preset that matches the given name, or the default preset if no match is found.
+ */
+export function findPresetByName(name?: string): Preset {
+  if (!name) return presets[0];
+  return presets.find((preset) => preset.config.name === name) ?? presets[0];
 }

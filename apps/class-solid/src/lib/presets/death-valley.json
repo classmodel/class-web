@@ -1,6 +1,7 @@
 {
   "name": "Death Valley",
   "description": "Preset with Death Valley conditions",
+  "preset": "death-valley",
   "reference": {
     "initialState": {
       "theta_0": 323,
