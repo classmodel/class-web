@@ -81,7 +81,7 @@ export class CLASS {
   /** Tendency of specific humidity jump at h[kg kg-1 s-1] */
   get dqtend(): number {
     const w_q_ft = 0; // TODO: add free troposphere switch
-    return this._cfg.mixedLayer.gammaq - this.qtend + w_q_ft;
+    return this._cfg.mixedLayer.gammaq * this.we - this.qtend + w_q_ft;
   }
 
   /** Entrainment velocity [m s-1]. */

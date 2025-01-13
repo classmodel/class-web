@@ -87,6 +87,10 @@ export function getNiceAxisLimits(
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min;
+
+  // Avoid NaNs on axis for constant values
+  if (range === 0) return [min - 1, max + 1];
+
   const step = 10 ** Math.floor(Math.log10(range));
 
   const niceMin = Math.floor(min / step) * step - extraMargin * step;
