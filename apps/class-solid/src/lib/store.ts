@@ -312,7 +312,7 @@ export function addAnalysis(name: string) {
         type: "profiles",
         name: "Vertical profiles",
         variable: "Potential temperature [K]",
-        time: -1,
+        time: Number.POSITIVE_INFINITY,
       } as ProfilesAnalysis;
       break;
     case "Thermodynamic diagram":
@@ -321,7 +321,7 @@ export function addAnalysis(name: string) {
         description: "",
         type: "skewT",
         name: "Thermodynamic diagram",
-        time: -1,
+        time: Number.POSITIVE_INFINITY,
       } as SkewTAnalysis;
       break;
     default:

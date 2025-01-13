@@ -1,6 +1,6 @@
 import type { ClassOutput } from "@classmodel/class/runner";
 import type { PartialConfig } from "@classmodel/class/validate";
-import type { Point } from "~/components/plots/LinePlot";
+import type { Point } from "~/components/plots/Line";
 
 // Get vertical profiles for a single class run
 export function getVerticalProfiles(
@@ -16,7 +16,7 @@ export function getVerticalProfiles(
 
   // Extract height profile
   const height = output.h.slice(t)[0];
-  const dh = 400; // how much free troposphere to display?
+  const dh = 1600; // how much free troposphere to display?
   const hProfile = [0, height, height, height + dh];
 
   if (variable === "theta") {
