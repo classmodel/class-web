@@ -176,7 +176,7 @@ export function VerticalProfilePlot({
 
   // TODO: better to include jump at top in extent calculation rather than adding random margin.
   const xLim = () => getNiceAxisLimits(allValues(), 1);
-  const yLim = () => getNiceAxisLimits(allHeights(), 0);
+  const yLim = () => [0, getNiceAxisLimits(allHeights(), 0)[1]];
   const profileData = () =>
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
@@ -248,8 +248,6 @@ function TimeSlider(
     const max = maxValue();
     if (time() > max && max !== -1) {
       setTime(maxValue());
-      console.log(maxValue());
-      console.log(time());
     }
   });
   return (

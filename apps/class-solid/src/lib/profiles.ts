@@ -18,7 +18,6 @@ export function getVerticalProfiles(
   const height = output.h.slice(t)[0];
   const dh = 1600; // how much free troposphere to display?
   const hProfile = [0, height, height, height + dh];
-
   if (variable === "theta") {
     // Extract potential temperature profile
     const theta = output.theta.slice(t)[0];
