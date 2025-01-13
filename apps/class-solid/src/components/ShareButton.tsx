@@ -29,7 +29,10 @@ export function ShareButton() {
     }
 
     const appState = encodeAppState(experiments, analyses);
-    const url = `${window.location.origin}#${appState}`;
+    const basePath = import.meta.env.DEV
+      ? ""
+      : import.meta.env.BASE_URL.replace("/_build", "");
+    const url = `${window.location.origin}${basePath}#${appState}`;
     return url;
   });
 
