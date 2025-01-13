@@ -29,7 +29,9 @@ export function ShareButton() {
     }
 
     const appState = encodeAppState(experiments, analyses);
-    const basePath = import.meta.env.DEV ? "" : import.meta.env.BASE_URL.replace('/_build', '');
+    const basePath = import.meta.env.DEV
+      ? ""
+      : import.meta.env.BASE_URL.replace("/_build", "");
     const url = `${window.location.origin}${basePath}#${appState}`;
     return url;
   });
