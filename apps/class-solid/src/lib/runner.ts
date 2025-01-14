@@ -9,10 +9,18 @@ const worker = new Worker(new URL("./worker.ts", import.meta.url), {
 });
 export const AsyncBmiClass = wrap<typeof BmiClass>(worker);
 
-export async function runClass(config: PartialConfig): Promise<ClassOutput> {
+const pyodideWorker = new Worker(new URL("./worker_pyodide.ts", import.meta.url), {
+  type: "module",
+});
+export const PyodideClass = wrap<typeof BmiClass>(pyodideWorker)
+
+export async function runClass(config: PartialConfig, backend='pyodide'): Promise<ClassOutput> {
   try {
     const parsedConfig: Config = parse(config);
-    const model = await new AsyncBmiClass();
+    const model = backend === 'ts'
+      ? await new AsyncBmiClass()
+      : await new PyodideClass();
+    console.log(await model.get_component_name())
     await model.initialize(parsedConfig);
     const output = await model.run({
       var_names: new BmiClass().get_output_var_names(),
