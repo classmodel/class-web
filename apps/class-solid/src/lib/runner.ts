@@ -20,6 +20,7 @@ export async function runClass(config: PartialConfig, backend='pyodide'): Promis
     const model = backend === 'ts'
       ? await new AsyncBmiClass()
       : await new PyodideClass();
+    console.log(await model.get_component_name())
     await model.initialize(parsedConfig);
     const output = await model.run({
       var_names: new BmiClass().get_output_var_names(),
