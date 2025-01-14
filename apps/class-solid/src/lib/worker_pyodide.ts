@@ -2,123 +2,76 @@ import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.27.0/full/pyodi
 import type { BmiClass } from "@classmodel/class/bmi";
 import { expose } from "comlink";
 
-// let pythonModel: BmiClass;
+const bmiClassCode = `
+class SubClass:
+    def __init__(self):
+        self.value = 42
+
+class BmiClass:
+    def __init__(self):
+        print("BmiClass in python instantiated")
+        self.model = None
+
+    def get_component_name(self):
+        return "Chemistry Land-surface Atmosphere Soil Slab model"
+
+    def initialize(self, cfg: dict):
+        # Instantiate another class (SubClass) here
+        self.model = SubClass()
+
+    def get_value(self, var: str):
+        return self.model.value
+
+    def get_output_var_names(self):
+        return ["h", "theta", "dtheta", "q", "dq"]
+
+    def run(self, var_names=["t"]):
+        output = {"t": []}
+        return output
+
+model = BmiClass()
+`
+
+function createBmiWrapper(pyodide): BmiClass {
+
+  pyodide.runPython(bmiClassCode);
+  const bmiInstance = pyodide.globals.get('model');
 
 
-function wrapPythonClass<T>(pyClass: any): { new (...args: any[]): T } {
-  return new Proxy(pyClass, {
-    construct(target, args) {
-      // Instantiate the Python class
-      const instance = target(...args);
-
-      // Wrap the instance to ensure methods are callable
-      return new Proxy(instance, {
-        get(obj, prop) {
-          const value = obj[prop];
-          // If the property is a function, return a callable function
-          if (typeof value === "function") {
-            // If it's a class (has __name__), wrap it as a class
-            if (value.__name__) {
-              return wrapPythonClass(value);
-            }
-            // Otherwise, it's a method
-            return (...methodArgs: any[]) => {
-                // Call the method and handle the return value
-                const result = value(...methodArgs);
-                return wrapPythonReturnValue(result);
-              };
+  // Return a Proxy that intercepts method calls and forwards them to the Python instance
+  return new Proxy({}, {
+      get: (target, prop, receiver) => {
+          // If the property is a function in the Python instance, forward the call
+          if (typeof prop === 'string' && prop in bmiInstance) {
+              const args = [...arguments].slice(2); // Collect arguments passed to the method
+              const methodCall = `${prop}(${args.map(arg => JSON.stringify(arg)).join(", ")})`;
+              // Forward the method call to the Python instance
+              console.log(methodCall)
+              return pyodide.runPython(`model.${methodCall}`);
           }
-          // If the property is an object, recursively wrap it
-          if (value && typeof value === "object") {
-            return wrapPythonObject(value);
-          }
-          return value;
-        },
-      });
-    },
-  });
+          // Return undefined for unknown properties
+          return undefined;
+      }
+  }) as BmiClass; // Cast the Proxy to BmiClass type
 }
-
-function wrapPythonObject(pyObject: any): any {
-  return new Proxy(pyObject, {
-    get(obj, prop) {
-      const value = obj[prop];
-      if (typeof value === "function") {
-        return (...methodArgs: any[]) => {
-            // Call the method and handle the return value
-            const result = value(...methodArgs);
-            return wrapPythonReturnValue(result);
-          };
-      }
-      if (value && typeof value === "function" && value.__name__) {
-        return wrapPythonClass(value);
-      }
-      if (value && typeof value === "object") {
-        return wrapPythonObject(value);
-      }
-      return value;
-    },
-  });
-}
-
-// Function to recursively convert Python objects to serializable JS objects
-function wrapPythonReturnValue(value: any): any {
-    if (value === null || value === undefined) {
-      return value; // Return null or undefined as is
-    }
-  
-    // If it's a simple type, return it directly
-    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-      return value;
-    }
-  
-    // If it's a list, recursively wrap each element
-    if (Array.isArray(value)) {
-      return value.map(wrapPythonReturnValue);
-    }
-  
-    // If it's a dictionary-like object (e.g., Python dict), convert to plain JS object
-    if (typeof value === "object") {
-      const result: { [key: string]: any } = {};
-      for (const key in value) {
-        result[key] = wrapPythonReturnValue(value[key]);
-      }
-      return result;
-    }
-  
-    // If it's a function or other complex type, return as is (it will be handled by the wrapper)
-    return value;
-  }
-
 
 async function initializeWorker() {
-    try {
-        const pyodide = await loadPyodide();
-        console.log("Pyodide initialized!");
+  try {
+      const pyodide = await loadPyodide();
+      console.log("Pyodide initialized!");
 
-        const classModelCode = await fetch("/python/class_model.py").then((res) => res.text());
-        const bmiClassCode = await fetch("/python/bmi_class.py").then((res) => res.text());
+      // Create the BMI wrapper
+      const model = createBmiWrapper(pyodide);
 
-        // await pyodide.runPython(classModelCode);
-        await pyodide.runPython(bmiClassCode);
-
-        const rawBmiClass = pyodide.globals.get("BmiClass");
-        const pythonModel = wrapPythonClass<BmiClass>(rawBmiClass);
-
-        // Check it works without wrapping with comlink
-        const model = new pythonModel();
-        console.log(model.get_component_name())
-        model.initialize({a: 10});
-        console.log(model.get_value('random_var'));
-        const output = model.run({var_names: ['t']});
-        console.log(output)
-        console.log(typeof output)
-    
-        expose(pythonModel);
-    } catch (error) {
-        console.error("Worker initialization failed:", error);
-        throw error;
-    }
+      console.log(model.get_component_name());
+      model.initialize({ a: 10 });
+      console.log(model.get_value('random_var'));
+      const output = model.run({ var_names: ['t'] });
+      console.log(output);
+      console.log(typeof output);
+  } catch (error) {
+      console.error("Error initializing worker:", error);
+  }
 }
 
-await initializeWorker();
+initializeWorker()
