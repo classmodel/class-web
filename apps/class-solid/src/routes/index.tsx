@@ -25,6 +25,11 @@ export default function Home() {
 
   onMount(onPageLoad);
 
+  const initModel = () => {
+    const model = new wasm.BmiClass();
+    alert(`Welcome to the ${model.get_component_name()}`)
+  }
+
   return (
     <main class="mx-auto p-4 text-center text-gray-700">
       <h2 class="my-8 text-4xl">
@@ -76,7 +81,7 @@ export default function Home() {
           <For each={analyses}>{(analysis) => AnalysisCard(analysis)}</For>
         </Flex>
       </Show>
-      <button onclick={wasm.greet}>Test WASM</button>
+      <button onclick={initModel}>Test WASM</button>
       <Toaster />
     </main>
   );
