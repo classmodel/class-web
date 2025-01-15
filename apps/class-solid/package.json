@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@classmodel/class": "workspace:*",
+    "@classmodel/class-rust": "workspace:*",
     "@kobalte/core": "^0.13.3",
     "@modular-forms/solid": "^0.23.0",
     "@solid-primitives/refs": "^1.0.8",
@@ -39,6 +40,7 @@
     "@types/d3": "^7.4.3",
     "@types/node": "^20.13.1",
     "serve": "^14.2.3",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vite-plugin-wasm": "^3.4.1"
   }
 }

@@ -1,6 +1,6 @@
 [package]
 name = "class-rust"
-version = "0.1.0"
+version = "0.0.14"
 authors = ["Peter Kalverla <peter.kalverla@gmx.com>"]
 edition = "2018"
 
