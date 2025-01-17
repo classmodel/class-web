@@ -24,6 +24,12 @@
       }
     },
     "./config.json": "./dist/config.json",
+    "./config_utils": {
+      "import": {
+        "default": "./dist/config_utils.js",
+        "types": "./dist/config_utils.d.ts"
+      }
+    },
     "./runner": {
       "import": {
         "default": "./dist/runner.js",

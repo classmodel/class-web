@@ -1,10 +1,7 @@
 import assert from "node:assert";
 import test, { describe } from "node:test";
-import { jsonSchemaOfConfig } from "@classmodel/class/config";
-import {
-  overwriteDefaultsInJsonSchema,
-  pruneConfig,
-} from "./experiment_config";
+import { jsonSchemaOfConfig } from "./config.js";
+import { overwriteDefaultsInJsonSchema, pruneConfig } from "./config_utils.js";
 
 describe("overwriteDefaultsInJsonSchema", () => {
   test("given new default for initialState.h_0 should return schema with given default", () => {

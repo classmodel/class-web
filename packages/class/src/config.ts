@@ -25,25 +25,25 @@ export type FreeAtmosphereSpecificHumidityLapseRate = number;
 export type HorizontalLargeScaleDivergenceOfWind = number;
 export type EntrainmentRatioForVirtualHeat = number;
 
-export interface Config {
+export type Config = {
   name: Name;
   description: Description;
   initialState: InitialState;
   timeControl: TimeControl;
   mixedLayer: MixedLayer;
-}
-export interface InitialState {
+};
+export type InitialState = {
   h_0: ABLHeight;
   theta_0: MixedLayerPotentialTemperature;
   dtheta_0: TemperatureJumpAtH;
   q_0: MixedLayerSpecificHumidity;
   dq_0: SpecificHumidityJumpAtH;
-}
-export interface TimeControl {
+};
+export type TimeControl = {
   dt: TimeStep;
   runtime: TotalRunTime;
-}
-export interface MixedLayer {
+};
+export type MixedLayer = {
   wtheta: SurfaceKinematicHeatFlux;
   advtheta: AdvectionOfHeat;
   gammatheta: FreeAtmospherePotentialTemperatureLapseRate;
@@ -52,7 +52,7 @@ export interface MixedLayer {
   gammaq: FreeAtmosphereSpecificHumidityLapseRate;
   divU: HorizontalLargeScaleDivergenceOfWind;
   beta: EntrainmentRatioForVirtualHeat;
-}
+};
 
 export type JsonSchemaOfConfig = JSONSchemaType<Config>;
 /**

@@ -1,7 +1,8 @@
 import type { BmiClass } from "@classmodel/class/bmi";
 import type { Config } from "@classmodel/class/config";
+import type { PartialConfig } from "@classmodel/class/config_utils";
 import type { ClassOutput } from "@classmodel/class/runner";
-import { type PartialConfig, parse } from "@classmodel/class/validate";
+import { parse } from "@classmodel/class/validate";
 import { wrap } from "comlink";
 
 const worker = new Worker(new URL("./worker.ts", import.meta.url), {

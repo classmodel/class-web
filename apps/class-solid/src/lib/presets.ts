@@ -1,7 +1,11 @@
 import { type Config, jsonSchemaOfConfig } from "@classmodel/class/config";
-import { ValidationError, ajv } from "@classmodel/class/validate";
+import { overwriteDefaultsInJsonSchema } from "@classmodel/class/config_utils";
+import {
+  ValidationError,
+  ajv,
+  parse as origParse,
+} from "@classmodel/class/validate";
 import type { DefinedError, JSONSchemaType, ValidateFunction } from "ajv";
-import { overwriteDefaultsInJsonSchema } from "./experiment_config";
 // TODO replace with preset of a forest fire
 import deathValley from "./presets/death-valley.json";
 
@@ -21,7 +25,7 @@ export interface Preset {
 }
 
 function loadPreset(preset: unknown): Preset {
-  const config = parse(preset);
+  const config = origParse(preset);
   const schema = overwriteDefaultsInJsonSchema(jsonSchemaOfConfig, config);
   const validate = ajv.compile(schema);
 

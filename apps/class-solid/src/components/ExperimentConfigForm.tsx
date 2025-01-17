@@ -1,8 +1,9 @@
 import type { Config } from "@classmodel/class/config";
+import { pruneConfig } from "@classmodel/class/config_utils";
 import { type SubmitHandler, createForm } from "@modular-forms/solid";
 import { createMemo } from "solid-js";
 import { unwrap } from "solid-js/store";
-import { type ExperimentConfig, pruneConfig } from "~/lib/experiment_config";
+import type { ExperimentConfig } from "~/lib/experiment_config";
 import { findPresetByName } from "~/lib/presets";
 import { ObjectField } from "./ObjectField";
 import { ajvForm } from "./ajvForm";

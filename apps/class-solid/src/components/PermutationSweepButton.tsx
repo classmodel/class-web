@@ -1,9 +1,12 @@
 import type { Config } from "@classmodel/class/config";
+import {
+  type PartialConfig,
+  mergeConfigurations,
+} from "@classmodel/class/config_utils";
 import { type Sweep, performSweep } from "@classmodel/class/sweep";
-import type { PartialConfig } from "@classmodel/class/validate";
 import { For, createSignal } from "solid-js";
+import { unwrap } from "solid-js/store";
 import { Button } from "~/components/ui/button";
-import { mergeConfigurations } from "~/lib/experiment_config";
 import { type Experiment, runExperiment, setExperiments } from "~/lib/store";
 import {
   Dialog,
@@ -29,8 +32,9 @@ function nameForPermutation(config: PartialConfig): string {
 
 function config2permutation(reference: Config, config: PartialConfig): Config {
   return {
-    ...mergeConfigurations(config, reference),
+    ...mergeConfigurations(reference, config),
     name: nameForPermutation(config),
+    description: "",
   };
 }
 
@@ -65,7 +69,7 @@ export function PermutationSweepButton(props: {
   function addSweep() {
     const configs = performSweep(sweeps);
     const perms = configs2Permutations(
-      props.experiment.config.reference,
+      unwrap(props.experiment.config.reference),
       configs,
     );
     setOpen(false);

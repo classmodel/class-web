@@ -1,5 +1,5 @@
+import type { PartialConfig } from "@classmodel/class/config_utils";
 import type { ClassOutput } from "@classmodel/class/runner";
-import type { PartialConfig } from "@classmodel/class/validate";
 import type { Point } from "~/components/plots/LinePlot";
 
 // Get vertical profiles for a single class run

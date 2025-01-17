@@ -1,7 +1,7 @@
-import type { PartialConfig } from "./validate.js";
+import { type PartialConfig, mergeConfigurations } from "./config_utils.js";
 
 export interface Sweep {
-  section: string;
+  section: string; // Only handles single level nesting
   parameter: string;
   start: number;
   step: number;
@@ -11,32 +11,8 @@ export interface Sweep {
 function cartesianProduct(values: PartialConfig[][]): PartialConfig[] {
   if (values.length === 0) return [];
   return values.reduce(
-    (acc, curr) => {
-      return acc.flatMap((a) =>
-        curr.map((b) => {
-          // TODO move config merging to a separate function or reuse
-          // TODO make recursive and handle literals and arrays
-          const merged = { ...a };
-          for (const [section, params] of Object.entries(b)) {
-            if (typeof params === "string") {
-              continue;
-            }
-            const msection = section as keyof typeof merged;
-            const mparams = merged[msection];
-            if (mparams === undefined || typeof mparams === "string") {
-              continue;
-            }
-            // TODO replace PartialConfig with Config
-            // @ts-ignore
-            merged[msection] = {
-              ...mparams,
-              ...params,
-            };
-          }
-          return merged;
-        }),
-      );
-    },
+    (acc, curr) =>
+      acc.flatMap((a) => curr.map((b) => mergeConfigurations(a, b))),
     [{}],
   );
 }
