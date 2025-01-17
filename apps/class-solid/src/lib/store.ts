@@ -56,8 +56,8 @@ export async function runExperiment(id: number) {
 
   // If no analyis are set then add all of them
   if (analyses.length === 0) {
-    for (const key of Object.keys(analysisNames) as AnalysisType[]) {
-      addAnalysis(key);
+    for (const name of analysisNames) {
+      addAnalysis(name);
     }
   }
 }
@@ -233,33 +233,88 @@ export async function loadStateFromString(rawState: string): Promise<void> {
   await Promise.all(loadedExperiments.map((_, i) => runExperiment(i)));
 }
 
-export const analysisNames = {
-  profiles: "Vertical profiles",
-  timeseries: "Timeseries",
-  skewT: "Thermodynamic diagram",
-  // finalheight: "Final height",  // keep for development but not in production
-} as const;
-export type AnalysisType = keyof typeof analysisNames;
-
 export interface Analysis {
-  name: string;
-  description: string;
   id: string;
-  experiments: Experiment[] | undefined;
-  type: AnalysisType;
+  description: string;
+  type: string;
+  name: string;
 }
 
-export function addAnalysis(type: AnalysisType) {
-  const name = analysisNames[type];
+export type TimeseriesAnalysis = Analysis & {
+  xVariable: string;
+  yVariable: string;
+};
 
-  setAnalyses(analyses.length, {
-    name,
-    id: createUniqueId(),
-    experiments: experiments,
-    type,
-  });
+export type ProfilesAnalysis = Analysis & {
+  variable: string;
+  time: number;
+};
+
+export type SkewTAnalysis = Analysis & {
+  time: number;
+};
+
+export type AnalysisType =
+  | TimeseriesAnalysis
+  | ProfilesAnalysis
+  | SkewTAnalysis;
+export const analysisNames = [
+  "Vertical profiles",
+  "Timeseries",
+  "Thermodynamic diagram",
+];
+
+export function addAnalysis(name: string) {
+  let newAnalysis: Analysis;
+
+  switch (name) {
+    case "Timeseries":
+      newAnalysis = {
+        id: createUniqueId(),
+        description: "",
+        type: "timeseries",
+        name: "Timeseries",
+        xVariable: "t",
+        yVariable: "h",
+      } as TimeseriesAnalysis;
+      break;
+    case "Vertical profiles":
+      newAnalysis = {
+        id: createUniqueId(),
+        description: "",
+        type: "profiles",
+        name: "Vertical profiles",
+        variable: "Potential temperature [K]",
+        time: Number.POSITIVE_INFINITY,
+      } as ProfilesAnalysis;
+      break;
+    case "Thermodynamic diagram":
+      newAnalysis = {
+        id: createUniqueId(),
+        description: "",
+        type: "skewT",
+        name: "Thermodynamic diagram",
+        time: Number.POSITIVE_INFINITY,
+      } as SkewTAnalysis;
+      break;
+    default:
+      throw new Error(`Unknown analysis type: ${name}`);
+  }
+
+  setAnalyses(analyses.length, newAnalysis);
 }
 
 export function deleteAnalysis(analysis: Analysis) {
   setAnalyses(analyses.filter((ana) => ana.id !== analysis.id));
+}
+
+export function updateAnalysis(analysis: Analysis, newData: object) {
+  setAnalyses(
+    produce((analyses) => {
+      const currentAnalysis = analyses.find((a) => a.id === analysis.id);
+      if (currentAnalysis) {
+        Object.assign(currentAnalysis, newData);
+      }
+    }),
+  );
 }

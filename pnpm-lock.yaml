@@ -96,6 +96,9 @@ importers:
       serve:
         specifier: ^14.2.3
         version: 14.2.3
+      tsx:
+        specifier: ^4.16.5
+        version: 4.16.5
       typescript:
         specifier: ^5.3.3
         version: 5.3.3

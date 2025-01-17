@@ -34,7 +34,18 @@ interface BmiLight<Config> {
   get_grid_type(): string;
 }
 
-const ouput_var_names: string[] = ["h", "theta", "dtheta", "q", "dq"] as const;
+const ouput_var_names: string[] = [
+  "h",
+  "theta",
+  "dtheta",
+  "q",
+  "dq",
+  "dthetav",
+  "we",
+  "ws",
+  "wthetave",
+  "wthetav",
+] as const;
 
 /**
  * Class representing a BMI (Basic Model Interface) implementation for the CLASS model.
@@ -134,8 +145,7 @@ export class BmiClass implements BmiLight<Config> {
   }): { t: number[] } & { [K in T[number]]: number[] } {
     const output: { t: number[] } & { [K in T[number]]: number[] } =
       Object.fromEntries([["t", []], ...var_names.map((name) => [name, []])]);
-    while (this.model.t < this.config.timeControl.runtime) {
-      this.update();
+    while (this.model.t <= this.config.timeControl.runtime) {
       if (this.model.t % freq === 0) {
         output.t.push(this.model.t);
         for (const name of var_names) {
@@ -145,6 +155,7 @@ export class BmiClass implements BmiLight<Config> {
         // TODO progress callback?
         // Initial attempt failed with "could not be cloned" error
       }
+      this.update();
     }
     return output;
   }
