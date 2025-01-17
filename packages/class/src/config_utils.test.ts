@@ -10,7 +10,7 @@ describe("overwriteDefaultsInJsonSchema", () => {
       name: "Default",
       description: "Default configuration",
       initialState: {
-        theta_0: 323,
+        theta_0: 288,
         h_0: 42, // changed
         dtheta_0: 1,
         q_0: 0.008,
@@ -18,7 +18,7 @@ describe("overwriteDefaultsInJsonSchema", () => {
       },
       timeControl: {
         dt: 60,
-        runtime: 4320,
+        runtime: 43200,
       },
       mixedLayer: {
         wtheta: 0.1,
@@ -36,6 +36,7 @@ describe("overwriteDefaultsInJsonSchema", () => {
 
     const expected = structuredClone(jsonSchemaOfConfig);
     expected.properties.initialState.properties.h_0.default = 42;
+
     assert.deepEqual(result, expected);
   });
 });
@@ -119,6 +120,8 @@ describe("pruneConfig()", () => {
     };
     const result = pruneConfig(permutation, reference, preset);
     const expected = {
+      name: "Higher",
+      description: "",
       initialState: {
         h_0: 222,
       },

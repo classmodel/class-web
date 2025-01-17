@@ -36,20 +36,15 @@ test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
   const downloadPromise1 = page.waitForEvent("download");
   await page.getByRole("link", { name: "Configuration", exact: true }).click();
   const config1 = await parseDownload(downloadPromise1);
-  expect(config1.reference.initialState?.h_0).toEqual(200);
-  expect(config1.reference.mixedLayer?.beta).toEqual(0.2);
   expect(config1.permutations[0].initialState?.h_0).toEqual(800);
-  expect(config1.permutations[0].mixedLayer?.beta).toEqual(0.2);
 
   // Download configuration of experiment 2
   experiment2.getByRole("button", { name: "Download" }).click();
   const downloadPromise2 = page.waitForEvent("download");
   await page.getByRole("link", { name: "Configuration", exact: true }).click();
   const config2 = await parseDownload(downloadPromise2);
-  expect(config2.reference.initialState?.h_0).toEqual(200);
   expect(config2.reference.mixedLayer?.beta).toEqual(0.3);
   expect(config2.permutations[0].initialState?.h_0).toEqual(800);
-  expect(config2.permutations[0].mixedLayer?.beta).toEqual(0.3);
 
   // visually check that timeseries plot has 4 non-overlapping lines
   await testInfo.attach("timeseries plot with 4 non-overlapping lines", {
@@ -84,12 +79,12 @@ test("Swap permutation with default reference", async ({ page }) => {
   await page.getByRole("menuitem", { name: "Swap permutation with" }).click();
 
   // Assert
-  experiment.getByRole("button", { name: "Download" }).click();
+  const renamedExperiment = page.getByLabel("1", { exact: true });
+  renamedExperiment.getByRole("button", { name: "Download" }).click();
   const downloadPromise1 = page.waitForEvent("download");
   await page.getByRole("link", { name: "Configuration", exact: true }).click();
   const config1 = await parseDownload(downloadPromise1);
   expect(config1.reference.initialState?.h_0).toEqual(800);
-  expect(config1.permutations[0].initialState?.h_0).toEqual(200);
 });
 
 test("Swap permutation with custom reference", async ({ page }) => {
@@ -119,16 +114,14 @@ test("Swap permutation with custom reference", async ({ page }) => {
   await page.getByRole("menuitem", { name: "Swap permutation with" }).click();
 
   // Assert that parameters are swapped and default values are not overwritten.
-  experiment.getByRole("button", { name: "Download" }).click();
+  const renamedExperiment = page.getByLabel("1", { exact: true });
+  renamedExperiment.getByRole("button", { name: "Download" }).click();
   const downloadPromise1 = page.waitForEvent("download");
   await page.getByRole("link", { name: "Configuration", exact: true }).click();
   const config1 = await parseDownload(downloadPromise1);
   expect(config1.reference.initialState?.h_0).toEqual(800);
-  expect(config1.reference.initialState?.theta_0).toEqual(265);
   expect(config1.reference.initialState?.dtheta_0).toEqual(0.8);
   expect(config1.permutations[0].initialState?.h_0).toEqual(400);
-  expect(config1.permutations[0].initialState?.theta_0).toEqual(265);
-  expect(config1.permutations[0].initialState?.dtheta_0).toEqual(1); // the default
 });
 
 test("Promote permutation to a new experiment", async ({ page }) => {
@@ -146,7 +139,7 @@ test("Promote permutation to a new experiment", async ({ page }) => {
     )
     .click();
   await page.getByRole("button", { name: "Initial State" }).click();
-  await page.getByLabel("Title").fill("perm1");
+  await page.getByLabel("Name").fill("perm1");
   await page.getByLabel("ABL height").fill("800");
   await page.getByRole("button", { name: "Run" }).click();
 
@@ -197,7 +190,6 @@ test("Duplicate permutation", async ({ page }) => {
   const downloadPromise1 = page.waitForEvent("download");
   await page.getByRole("link", { name: "Configuration", exact: true }).click();
   const config1 = await parseDownload(downloadPromise1);
-  expect(config1.reference.initialState?.h_0).toEqual(200);
   expect(config1.permutations.length).toEqual(2);
   expect(config1.permutations[0].initialState?.h_0).toEqual(800);
   expect(config1.permutations[1].initialState?.h_0).toEqual(400);

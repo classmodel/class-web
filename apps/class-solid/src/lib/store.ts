@@ -110,14 +110,17 @@ export async function uploadExperiment(rawData: unknown) {
 }
 
 export function duplicateExperiment(id: number) {
-  const original = structuredClone(findExperiment(id));
-
-  const newExperiment = {
-    ...original,
-    name: `Copy of ${original.config.reference.name}`,
-    description: original.config.reference.description,
-    running: 0,
+  const config = structuredClone(findExperiment(id).config);
+  config.reference.name = `Copy of ${config.reference.name}`;
+  const newExperiment: Experiment = {
+    config: config,
+    output: {
+      reference: undefined,
+      permutations: [],
+      running: false,
+    },
   };
+
   setExperiments(experiments.length, newExperiment);
   runExperiment(experiments.length - 1);
 }
