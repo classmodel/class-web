@@ -34,16 +34,16 @@ export function TimeSeriesPlot() {
       .flatMap((e, i) => {
         const experimentOutput = e.output.reference;
         const permutationRuns = e.output.permutations
-          .filter((perm) => perm.output !== undefined)
+          .filter((perm) => perm !== undefined)
           .map((perm, j) => {
             return {
-              label: `${e.name}/${perm.name}`,
+              label: `${e.config.reference.name}/${e.config.permutations[j].name}`,
               color: colors[(j + 1) % 10],
               linestyle: linestyles[i % 5],
               data:
-                perm.output?.t.map((tVal, i) => ({
+                perm?.t.map((tVal, i) => ({
                   x: tVal,
-                  y: perm.output?.h[i] || Number.NaN,
+                  y: perm?.h[i] || Number.NaN,
                 })) || [],
             };
           });
@@ -79,30 +79,31 @@ export function VerticalProfilePlot() {
     return experiments
       .filter((e) => e.output.running === false) // Skip running experiments
       .flatMap((e, i) => {
-        const permutations = e.permutations.map((p, j) => {
+        const permutations = e.output.permutations.map((p, j) => {
           // TODO get additional config info from reference
           // permutations probably usually don't have gammaq/gammatetha set?
+          const permConfig = e.config.permutations[j];
           return {
             color: colors[(j + 1) % 10],
             linestyle: linestyles[i % 5],
-            label: `${e.name}/${p.name}`,
-            data: getVerticalProfiles(p.output, p.config, variable, time),
+            label: `${e.config.reference.name}/${permConfig.name}`,
+            data: getVerticalProfiles(p, permConfig, variable, time),
           };
         });
 
         return [
           {
-            label: e.name,
+            label: e.config.reference.name,
             color: colors[0],
             linestyle: linestyles[i],
             data: getVerticalProfiles(
-              e.reference.output ?? {
+              e.output.reference ?? {
                 t: [],
                 h: [],
                 theta: [],
                 dtheta: [],
               },
-              e.reference.config,
+              e.config.reference,
               variable,
               time,
             ),
@@ -124,25 +125,26 @@ export function ThermodynamicPlot() {
   const time = -1;
   const skewTData = createMemo(() => {
     return experiments.flatMap((e, i) => {
-      const permutations = e.permutations.map((p, j) => {
+      const permutations = e.output.permutations.map((p, j) => {
         // TODO get additional config info from reference
         // permutations probably usually don't have gammaq/gammatetha set?
+        const permConfig = e.config.permutations[j];
         return {
           color: colors[(j + 1) % 10],
           linestyle: linestyles[i % 5],
-          label: `${e.name}/${p.name}`,
-          data: getThermodynamicProfiles(p.output, p.config, time),
+          label: `${e.config.reference.name}/${permConfig.name}`,
+          data: getThermodynamicProfiles(p, permConfig, time),
         };
       });
 
       return [
         {
-          label: e.name,
+          label: e.config.reference.name,
           color: colors[0],
           linestyle: linestyles[i],
           data: getThermodynamicProfiles(
-            e.reference.output,
-            e.reference.config,
+            e.output.reference,
+            e.config.reference,
             time,
           ),
         },
@@ -160,25 +162,26 @@ function FinalHeights() {
       <For each={experiments}>
         {(experiment) => {
           const h = () => {
-            const experimentOutput = experiment.reference.output;
+            const experimentOutput = experiment.output.reference;
             return experimentOutput?.h[experimentOutput?.h.length - 1] || 0;
           };
           return (
-            <Show when={!experiment.running}>
-              <li class="mb-2" title={experiment.name}>
-                {experiment.name}: {h().toFixed()} m
+            <Show when={!experiment.output.running}>
+              <li class="mb-2" title={experiment.config.reference.name}>
+                {experiment.config.reference.name}: {h().toFixed()} m
               </li>
-              <For each={experiment.permutations}>
-                {(perm) => {
+              <For each={experiment.output.permutations}>
+                {(permOutput, i) => {
                   const h = () => {
-                    const permOutput = perm.output;
                     return permOutput?.h?.length
                       ? permOutput.h[permOutput.h.length - 1]
                       : 0;
                   };
+                  const permConfig = experiment.config.permutations[i()];
+                  const title = `${experiment.config.reference.name}/${permConfig.name}`;
                   return (
-                    <li title={`${experiment.name}/${perm.name}`}>
-                      {experiment.name}/{perm.name}: {h().toFixed()} m
+                    <li title={title}>
+                      {title}: {h().toFixed()} m
                     </li>
                   );
                 }}

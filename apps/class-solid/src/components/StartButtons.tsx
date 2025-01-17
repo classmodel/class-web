@@ -1,4 +1,5 @@
 import { For, Show, createSignal } from "solid-js";
+import type { ExperimentConfig } from "~/lib/experiment_config";
 import { presets } from "~/lib/presets";
 import { hasLocalStorage, loadFromLocalStorage } from "~/lib/state";
 import { experiments, uploadExperiment } from "~/lib/store";
@@ -164,7 +165,12 @@ function PresetPicker(props: {
                 class="flex h-44 w-56 flex-col gap-2 border border-dashed"
                 onClick={() => {
                   props.setOpen(false);
-                  uploadExperiment(preset)
+                  const experiment: ExperimentConfig = {
+                    preset: preset.config.name,
+                    reference: preset.config,
+                    permutations: [],
+                  };
+                  uploadExperiment(experiment)
                     .then(() => {
                       showToast({
                         title: "Experiment preset loaded",

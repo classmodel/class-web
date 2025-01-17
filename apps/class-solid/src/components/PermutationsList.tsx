@@ -1,9 +1,9 @@
+import type { Config } from "@classmodel/class/config";
 import {
-  type PartialConfig,
-  ajv,
   overwriteDefaultsInJsonSchema,
   pruneConfig,
-} from "@classmodel/class/validate";
+} from "@classmodel/class/config_utils";
+import { ajv } from "@classmodel/class/validate";
 import { type SubmitHandler, createForm } from "@modular-forms/solid";
 import { For, createMemo, createSignal, createUniqueId } from "solid-js";
 import { unwrap } from "solid-js/store";
@@ -11,14 +11,12 @@ import { Button } from "~/components/ui/button";
 import { findPresetByName } from "~/lib/presets";
 import {
   type Experiment,
-  type Permutation,
   deletePermutationFromExperiment,
   duplicatePermutation,
   promotePermutationToExperiment,
   setPermutationConfigInExperiment,
   swapPermutationAndReferenceConfiguration,
 } from "~/lib/store";
-import { type NamedConfig, jsonSchemaOfNamedConfig } from "./NamedConfig";
 import { ObjectField } from "./ObjectField";
 import { PermutationSweepButton } from "./PermutationSweepButton";
 import { ajvForm } from "./ajvForm";
@@ -48,32 +46,26 @@ import {
 
 function PermutationConfigForm(props: {
   id: string;
-  onSubmit: (config: NamedConfig) => void;
-  permutationName?: string;
-  reference: PartialConfig;
-  config: PartialConfig;
+  onSubmit: (config: Config) => void;
+  reference: Config;
+  config: Config; // Config of the permutation
+  preset: string;
 }) {
   const jsonSchemaOfPermutation = createMemo(() => {
-    return overwriteDefaultsInJsonSchema(
-      jsonSchemaOfNamedConfig,
-      props.reference,
-    );
+    const jsonSchemaOfPreset = findPresetByName(props.preset).schema;
+    return overwriteDefaultsInJsonSchema(jsonSchemaOfPreset, props.reference);
   });
 
-  const initialValues = createMemo(() => {
-    const config = pruneConfig(unwrap(props.config), unwrap(props.reference));
-    return {
-      title: props.permutationName ?? "",
-      ...config,
-    };
-  });
+  const initialValues = createMemo(() =>
+    pruneConfig(unwrap(props.config), unwrap(props.reference)),
+  );
 
-  const [_, { Form, Field }] = createForm<NamedConfig>({
+  const [_, { Form, Field }] = createForm<Config>({
     initialValues: initialValues(),
     validate: ajvForm(ajv.compile(jsonSchemaOfPermutation())),
   });
 
-  const handleSubmit: SubmitHandler<NamedConfig> = (values: NamedConfig) => {
+  const handleSubmit: SubmitHandler<Config> = (values: Config) => {
     // Use ajv to coerce strings to numbers and fill in defaults
     ajv.compile(jsonSchemaOfPermutation())(values);
     props.onSubmit(values);
@@ -102,14 +94,13 @@ function AddPermutationButton(props: {
   experimentIndex: number;
 }) {
   const [open, setOpen] = createSignal(false);
-  const permutationName = () => `${props.experiment.permutations.length + 1}`;
 
-  const presetConfig = createMemo(() =>
-    findPresetByName(props.experiment.preset),
-  );
-  const prunedReferenceConfig = createMemo(() =>
-    pruneConfig(unwrap(props.experiment.reference.config), presetConfig()),
-  );
+  const initialPermutationConfig = createMemo(() => {
+    const config = structuredClone(unwrap(props.experiment.config.reference));
+    config.name = `${props.experiment.config.permutations.length + 1}`;
+    config.description = "";
+    return config;
+  });
 
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
@@ -125,22 +116,16 @@ function AddPermutationButton(props: {
         <DialogHeader>
           <DialogTitle class="mr-10">
             Permutation on reference configuration of experiment{" "}
-            {props.experiment.name}
+            {props.experiment.config.reference.name}
           </DialogTitle>
         </DialogHeader>
         <PermutationConfigForm
           id="add-permutation-form"
-          reference={props.experiment.reference.config}
-          config={prunedReferenceConfig()}
-          permutationName={permutationName()}
+          reference={props.experiment.config.reference}
+          config={initialPermutationConfig()}
+          preset={props.experiment.config.preset}
           onSubmit={(config) => {
-            const { title, description, ...strippedConfig } = config;
-            setPermutationConfigInExperiment(
-              props.experimentIndex,
-              -1,
-              strippedConfig,
-              title ?? permutationName(),
-            );
+            setPermutationConfigInExperiment(props.experimentIndex, -1, config);
             setOpen(false);
           }}
         />
@@ -160,15 +145,6 @@ function EditPermutationButton(props: {
   permutationIndex: number;
 }) {
   const [open, setOpen] = createSignal(false);
-  const permutationName =
-    props.experiment.permutations[props.permutationIndex].name;
-
-  const presetConfig = createMemo(() =>
-    findPresetByName(props.experiment.preset),
-  );
-  const prunedReferenceConfig = createMemo(() =>
-    pruneConfig(unwrap(props.experiment.reference.config), presetConfig()),
-  );
 
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
@@ -183,21 +159,19 @@ function EditPermutationButton(props: {
         <DialogHeader>
           <DialogTitle>
             Permutation on reference configuration of experiment{" "}
-            {props.experiment.name}
+            {props.experiment.config.reference.name}
           </DialogTitle>
         </DialogHeader>
         <PermutationConfigForm
           id="edit-permutation-form"
-          permutationName={permutationName}
-          reference={prunedReferenceConfig()}
-          config={props.experiment.permutations[props.permutationIndex].config}
+          reference={props.experiment.config.reference}
+          config={props.experiment.config.permutations[props.permutationIndex]}
+          preset={props.experiment.config.preset}
           onSubmit={(config) => {
-            const { title, description, ...strippedConfig } = config;
             setPermutationConfigInExperiment(
               props.experimentIndex,
               props.permutationIndex,
-              strippedConfig,
-              title ?? permutationName,
+              config,
             );
             setOpen(false);
           }}
@@ -213,16 +187,31 @@ function EditPermutationButton(props: {
 }
 
 function PermutationDifferenceButton(props: {
-  reference: PartialConfig;
-  permutation: PartialConfig;
+  reference: Config;
+  permutation: Config;
 }) {
   const [open, setOpen] = createSignal(false);
-  const prunedReference = createMemo(() =>
-    JSON.stringify(props.reference, null, 2),
-  );
-  const prunedPermutation = createMemo(() =>
-    JSON.stringify(props.permutation, null, 2),
-  );
+
+  const prunedReference = createMemo(() => {
+    if (!open()) {
+      return ""; // Don't compute anything if the dialog is closed
+    }
+    const { name, description, ...pruned } = pruneConfig(
+      unwrap(props.reference),
+      unwrap(props.permutation),
+    );
+    return JSON.stringify(pruned, null, 2);
+  });
+  const prunedPermutation = createMemo(() => {
+    if (!open()) {
+      return "";
+    }
+    const { name, description, ...pruned } = pruneConfig(
+      unwrap(props.permutation),
+      unwrap(props.reference),
+    );
+    return JSON.stringify(pruned, null, 2);
+  });
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
       <DialogTrigger
@@ -255,21 +244,10 @@ function PermutationInfo(props: {
   experiment: Experiment;
   experimentIndex: number;
   permutationIndex: number;
-  perm: Permutation;
+  perm: Config;
 }) {
   const id = createUniqueId();
-  const prunedReferenceConfig = createMemo(() =>
-    pruneConfig(
-      unwrap(props.experiment.reference.config),
-      findPresetByName(props.experiment.preset),
-    ),
-  );
-  const prunedPermutationConfig = createMemo(() =>
-    pruneConfig(
-      unwrap(props.perm.config),
-      unwrap(props.experiment.reference.config),
-    ),
-  );
+
   return (
     <article
       class="flex flex-row items-center justify-center gap-1 p-2"
@@ -277,8 +255,8 @@ function PermutationInfo(props: {
     >
       <span id={id}>{props.perm.name}</span>
       <PermutationDifferenceButton
-        reference={prunedReferenceConfig()}
-        permutation={prunedPermutationConfig()}
+        reference={props.experiment.config.reference}
+        permutation={props.perm}
       />
       <EditPermutationButton
         experiment={props.experiment}
@@ -358,7 +336,7 @@ export function PermutationsList(props: {
         />
       </legend>
       <ul class="max-h-40 overflow-auto">
-        <For each={props.experiment.permutations}>
+        <For each={props.experiment.config.permutations}>
           {(perm, permutationIndex) => (
             <li>
               <PermutationInfo

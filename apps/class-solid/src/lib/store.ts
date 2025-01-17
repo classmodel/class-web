@@ -4,18 +4,19 @@ import { createStore, produce, unwrap } from "solid-js/store";
 import type { Config } from "@classmodel/class/config";
 import type { ClassOutput } from "@classmodel/class/runner";
 
-import { decodeAppState, parseExperimentConfig } from "./encode";
 import {
-  type ExperimentConfig,
   mergeConfigurations,
   pruneConfig,
-} from "./experiment_config";
+} from "@classmodel/class/config_utils";
+import { decodeAppState } from "./encode";
+import { parseExperimentConfig } from "./experiment_config";
+import type { ExperimentConfig } from "./experiment_config";
 import { findPresetByName } from "./presets";
 import { runClass } from "./runner";
 
 interface ExperimentOutput {
-  reference: ClassOutput;
-  permutations: ClassOutput[];
+  reference?: ClassOutput;
+  permutations: Array<ClassOutput | undefined>;
   running: number | false;
 }
 
@@ -82,7 +83,6 @@ export async function addExperiment(config: Config) {
       permutations: [],
     },
     output: {
-      reference: {},
       permutations: [],
       running: false,
     },
@@ -96,12 +96,11 @@ export async function uploadExperiment(rawData: unknown) {
   const upload = parseExperimentConfig(rawData);
   const experiment: Experiment = {
     config: {
-      preset: upload.preset,
+      preset: upload.preset ?? preset,
       reference: upload.reference,
       permutations: upload.permutations,
     },
     output: {
-      reference: {},
       permutations: [],
       running: false,
     },
@@ -132,15 +131,12 @@ export async function modifyExperiment(index: number, newConfig: Config) {
     index,
     "config",
     produce((e) => {
-      const oldConfig = e.reference;
+      const oldConfig = unwrap(e.reference);
       e.reference = newConfig;
       e.permutations = e.permutations.map((perm) => {
-        const permPrunedConfig = pruneConfig(unwrap(perm), unwrap(oldConfig));
-        const config = mergeConfigurations(newConfig, permPrunedConfig);
-        return {
-          ...perm,
-          config,
-        };
+        const oldPermConfig = unwrap(perm);
+        const permPrunedConfig = pruneConfig(oldPermConfig, oldConfig);
+        return mergeConfigurations(newConfig, permPrunedConfig);
       });
     }),
   );
@@ -149,7 +145,7 @@ export async function modifyExperiment(index: number, newConfig: Config) {
 
 export async function setPermutationConfigInExperiment(
   experimentIndex: number,
-  permutationIndex: number,
+  permutationIndex: number, // use -1 to add a permutation
   config: Config,
 ) {
   setExperiments(

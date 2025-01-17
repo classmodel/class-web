@@ -6,6 +6,7 @@ import {
   createUniqueId,
   onCleanup,
 } from "solid-js";
+import { unwrap } from "solid-js/store";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { createArchive, toConfigBlob } from "~/lib/download";
 import { findPresetByName } from "~/lib/presets";
@@ -18,13 +19,7 @@ import {
 } from "~/lib/store";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import { PermutationsList } from "./PermutationsList";
-import {
-  MdiCog,
-  MdiContentCopy,
-  MdiDelete,
-  MdiDownload,
-  MdiStar,
-} from "./icons";
+import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import {
   Card,
   CardContent,
@@ -53,9 +48,9 @@ export function AddExperimentDialog(props: {
   onClose: () => void;
   open: boolean;
 }) {
+  const defaultPreset = findPresetByName();
   const initialExperimentConfig = createMemo(() => {
-    const preset = findPresetByName();
-    const config = preset.parse({});
+    const config = defaultPreset.parse({});
     return {
       preset: "Default",
       reference: {
@@ -77,7 +72,12 @@ export function AddExperimentDialog(props: {
     <Dialog open={props.open} onOpenChange={setOpen}>
       <DialogContent class="min-w-[33%]">
         <DialogHeader>
-          <DialogTitle class="mr-10">Experiment</DialogTitle>
+          <DialogTitle class="mr-10 flex justify-between gap-1">
+            Experiment
+            <span class="text-gray-300 text-sm ">
+              Preset: {defaultPreset.config.name}
+            </span>
+          </DialogTitle>
         </DialogHeader>
         <ExperimentConfigForm
           id="experiment-form"
@@ -110,7 +110,12 @@ export function ExperimentSettingsDialog(props: {
       </DialogTrigger>
       <DialogContent class="min-w-[33%]">
         <DialogHeader>
-          <DialogTitle class="mr-10">Experiment</DialogTitle>
+          <DialogTitle class="mr-10 flex justify-between gap-1">
+            Experiment
+            <span class="text-gray-300 text-sm ">
+              Preset: {props.experiment.config.preset}
+            </span>
+          </DialogTitle>
         </DialogHeader>
         <ExperimentConfigForm
           id="experiment-form"
@@ -164,7 +169,7 @@ function RunningIndicator(props: { progress: number | false }) {
 
 function DownloadExperimentConfiguration(props: { experiment: Experiment }) {
   const downloadUrl = createMemo(() => {
-    return URL.createObjectURL(toConfigBlob(props.experiment));
+    return URL.createObjectURL(toConfigBlob(unwrap(props.experiment.config)));
   });
 
   onCleanup(() => {
@@ -182,7 +187,7 @@ function DownloadExperimentConfiguration(props: { experiment: Experiment }) {
 function DownloadExperimentArchive(props: { experiment: Experiment }) {
   const [url, setUrl] = createSignal<string>("");
   createEffect(async () => {
-    const archive = await createArchive(props.experiment);
+    const archive = await createArchive(unwrap(props.experiment));
     if (!archive) {
       return;
     }
@@ -247,7 +252,7 @@ export function ExperimentCard(props: {
           experimentIndex={experimentIndex()}
         />
       </CardContent>
-      <CardFooter>
+      <CardFooter class="gap-1">
         <Show
           when={!experiment().output.running}
           fallback={<RunningIndicator progress={experiment().output.running} />}
@@ -279,19 +284,6 @@ export function ExperimentCard(props: {
           >
             <MdiDelete />
           </Button>
-          <Show when={experiment().config.preset}>
-            <div class="text-[#888]">
-              <a
-                href={`?preset=${encodeURI(experiment().config.preset ?? "")}`}
-                target="_blank"
-                rel="noreferrer"
-                class={buttonVariants({ variant: "outline" })}
-                title="Preset link of experiment"
-              >
-                <MdiStar />
-              </a>
-            </div>
-          </Show>
         </Show>
       </CardFooter>
     </Card>
