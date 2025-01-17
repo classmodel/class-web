@@ -1,20 +1,11 @@
 import type { ClassOutput } from "@classmodel/class/runner";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
 import { toPartial } from "./encode";
-import type {
-  ExperimentConfig,
-  PartialExperimentConfig,
-} from "./experiment_config";
+import type { ExperimentConfig } from "./experiment_config";
 import type { Experiment } from "./store";
 
-export function toConfig(
-  experiment: ExperimentConfig,
-): PartialExperimentConfig {
-  return toPartial(experiment);
-}
-
 export function toConfigBlob(experiment: ExperimentConfig) {
-  const data = toConfig(experiment);
+  const data = toPartial(experiment);
   return new Blob([JSON.stringify(data, undefined, 2)], {
     type: "application/json",
   });
@@ -33,7 +24,7 @@ export async function createArchive(experiment: Experiment) {
   const zipFileWriter = new BlobWriter();
   const zipWriter = new ZipWriter(zipFileWriter);
   const configBlob = new Blob(
-    [JSON.stringify(toConfig(experiment.config), undefined, 2)],
+    [JSON.stringify(toPartial(experiment.config), undefined, 2)],
     {
       type: "application/json",
     },

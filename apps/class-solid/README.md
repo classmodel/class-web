@@ -58,3 +58,6 @@ The format is JSON with content adhering to the [JSON schema](https://github.com
 
 The `src/lib/presets.ts` is used as an index of presets.
 If you add an preset the `src/lib/presets.ts` file needs to be updated.
+
+An experiment from a preset can be opened from a url like `?preset=<preset-name>`.
+For example to load <src/lib/presets/death-valley.json> use `http://localhost:3000/?preset=Death%20Valley`.

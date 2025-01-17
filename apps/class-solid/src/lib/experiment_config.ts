@@ -1,11 +1,15 @@
 import type { Config } from "@classmodel/class/config";
-import type { PartialConfig } from "@classmodel/class/config_utils";
+import {
+  type PartialConfig,
+  overwriteDefaultsInJsonSchema,
+} from "@classmodel/class/config_utils";
 import { ValidationError, ajv } from "@classmodel/class/validate";
 import type { DefinedError, JSONSchemaType } from "ajv";
 import { findPresetByName } from "./presets";
 
 /**
- * An experiment configuration is a combination of a reference configuration and a set of permutation configurations.
+ * An experiment configuration is a combination of a preset name and
+ * a reference configuration and a set of permutation configurations.
  */
 export interface ExperimentConfig<C = Config> {
   preset: string;
@@ -49,7 +53,6 @@ const validateExperimentConfigBase = ajv.compile(
 );
 
 function parseExperimentConfigBase(input: unknown): ExperimentConfig<object> {
-  // TODO make preset aware, aka when validating use defaults from preset
   if (!validateExperimentConfigBase(input)) {
     throw new ValidationError(
       validateExperimentConfigBase.errors as DefinedError[],
@@ -70,8 +73,24 @@ export function parseExperimentConfig(input: unknown): ExperimentConfig {
   const base = parseExperimentConfigBase(input);
   const preset = findPresetByName(base.preset);
   const reference = preset.parse(base.reference);
-  // TODO a reference paramaeer not overwritten in a permutation should be in permutation.
-  const permutations = base.permutations.map((perm) => preset.parse(perm));
+
+  // The partial permutation should be parsed with the reference as the base.
+  // For example given parameter in preset is 10 and in reference is 20
+  // If permutation has 30 then should stay 30.
+  // If permutation has undefined then should be 20.
+  const referenceSchema = overwriteDefaultsInJsonSchema(
+    preset.schema,
+    reference,
+  );
+  const referenceValidate = ajv.compile(referenceSchema);
+  function permParse(input: unknown): Config {
+    if (!referenceValidate(input)) {
+      throw new ValidationError(referenceValidate.errors as DefinedError[]);
+    }
+    return input;
+  }
+
+  const permutations = base.permutations.map(permParse);
   return {
     reference,
     preset: base.preset,

@@ -19,13 +19,9 @@ export function ExperimentConfigForm({
 }) {
   const preset = createMemo(() => findPresetByName(experiment.preset));
 
-  const initialValues = createMemo(() => {
-    const config = pruneConfig(
-      unwrap(experiment.reference),
-      unwrap(preset().config),
-    );
-    return config;
-  });
+  const initialValues = createMemo(() =>
+    pruneConfig(unwrap(experiment.reference), unwrap(preset().config)),
+  );
   const [_, { Form, Field }] = createForm<Config>({
     initialValues: initialValues(),
     validate: ajvForm(preset().validate),

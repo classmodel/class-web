@@ -15,7 +15,6 @@ export function hasLocalStorage() {
   const state = localStorage.getItem(localStorageName);
   return (
     state !== null &&
-    // TODO do not hardcode this value, but derive it on import time
     state !== "%7B%22experiments%22%3A%5B%5D%2C%22analyses%22%3A%5B%5D%7D"
   );
 }
@@ -77,8 +76,12 @@ export async function onPageLoad() {
 async function loadExperimentPreset(presetName: string) {
   const navigate = useNavigate();
   try {
-    const preset = findPresetByName(presetName);
-    await uploadExperiment(preset);
+    const reference = findPresetByName(presetName).config;
+    await uploadExperiment({
+      preset: presetName,
+      reference,
+      permutations: [],
+    });
     showToast({
       title: "Experiment preset loaded",
       variant: "success",
