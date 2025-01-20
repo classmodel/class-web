@@ -50,13 +50,11 @@ export function AddExperimentDialog(props: {
 }) {
   const defaultPreset = findPresetByName();
   const initialExperimentConfig = createMemo(() => {
-    const config = defaultPreset.parse({});
     return {
       preset: "Default",
       reference: {
-        ...config,
+        ...defaultPreset.config,
         name: `My experiment ${props.nextIndex}`,
-        description: "",
       },
       permutations: [],
     };
