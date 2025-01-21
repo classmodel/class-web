@@ -46,7 +46,7 @@ export async function runExperiment(id: number) {
   let permCounter = 0;
   for (const proxiedPerm of exp.config.permutations) {
     const permConfig = unwrap(proxiedPerm);
-    const combinedConfig = mergeConfigurations(referenceConfig, permConfig);
+    const combinedConfig = mergeConfigurations(referenceConfig, permConfig) as Config;
     const newOutput = await runClass(combinedConfig);
     setExperiments(id, "output", "permutations", permCounter, newOutput);
     permCounter++;
