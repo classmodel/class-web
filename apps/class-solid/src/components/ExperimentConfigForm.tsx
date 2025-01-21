@@ -1,12 +1,10 @@
-import { pruneDefaults } from "@classmodel/class/validate";
+import type { Config } from "@classmodel/class/config";
+import { pruneConfig } from "@classmodel/class/config_utils";
 import { type SubmitHandler, createForm } from "@modular-forms/solid";
 import { createMemo } from "solid-js";
-import type { Experiment } from "~/lib/store";
-import {
-  type NamedConfig,
-  jsonSchemaOfNamedConfig,
-  validate,
-} from "./NamedConfig";
+import { unwrap } from "solid-js/store";
+import type { ExperimentConfig } from "~/lib/experiment_config";
+import { findPresetByName } from "~/lib/presets";
 import { ObjectField } from "./ObjectField";
 import { ajvForm } from "./ajvForm";
 
@@ -16,24 +14,22 @@ export function ExperimentConfigForm({
   onSubmit,
 }: {
   id: string;
-  experiment: Experiment;
-  onSubmit: (c: NamedConfig) => void;
+  experiment: ExperimentConfig;
+  onSubmit: (c: Config) => void;
 }) {
-  const initialValues = createMemo(() => {
-    return {
-      title: experiment.name,
-      description: experiment.description,
-      ...pruneDefaults(experiment.reference.config),
-    };
-  });
-  const [_, { Form, Field }] = createForm<NamedConfig>({
+  const preset = createMemo(() => findPresetByName(experiment.preset));
+
+  const initialValues = createMemo(() =>
+    pruneConfig(unwrap(experiment.reference), unwrap(preset().config)),
+  );
+  const [_, { Form, Field }] = createForm<Config>({
     initialValues: initialValues(),
-    validate: ajvForm(validate),
+    validate: ajvForm(preset().validate),
   });
 
-  const handleSubmit: SubmitHandler<NamedConfig> = (values, event) => {
-    // Use validate to coerce strings to numbers
-    validate(values);
+  const handleSubmit: SubmitHandler<Config> = (values, event) => {
+    // Use ajv to coerce strings to numbers and fill in defaults
+    preset().validate(values);
     onSubmit(values);
   };
 
@@ -46,8 +42,8 @@ export function ExperimentConfigForm({
     >
       <div>
         <ObjectField
-          schema={jsonSchemaOfNamedConfig}
-          value={pruneDefaults(experiment.reference.config)}
+          schema={preset().schema}
+          value={initialValues()}
           Field={Field}
         />
       </div>

@@ -1,7 +1,13 @@
 import { useLocation, useNavigate } from "@solidjs/router";
 import { showToast } from "~/components/ui/toast";
 import { encodeAppState } from "./encode";
-import { analyses, experiments, loadStateFromString } from "./store";
+import { findPresetByName } from "./presets";
+import {
+  analyses,
+  experiments,
+  loadStateFromString,
+  uploadExperiment,
+} from "./store";
 
 const localStorageName = "class-state";
 
@@ -38,6 +44,10 @@ export function loadFromLocalStorage() {
 export async function onPageLoad() {
   const location = useLocation();
   const navigate = useNavigate();
+  const presetUrl = location.query.preset;
+  if (presetUrl) {
+    return await loadExperimentPreset(presetUrl);
+  }
   const rawState = location.hash.substring(1);
   if (!rawState) {
     return;
@@ -60,6 +70,31 @@ export async function onPageLoad() {
   }
   // Remove hash after loading experiment from URL,
   // as after editing the experiment the hash out of sync
+  navigate("/");
+}
+
+async function loadExperimentPreset(presetName: string) {
+  const navigate = useNavigate();
+  try {
+    const reference = findPresetByName(presetName).config;
+    await uploadExperiment({
+      preset: presetName,
+      reference,
+      permutations: [],
+    });
+    showToast({
+      title: "Experiment preset loaded",
+      variant: "success",
+      duration: 1000,
+    });
+  } catch (error) {
+    console.error(error);
+    showToast({
+      title: "Failed to load preset",
+      description: `${error}`,
+      variant: "error",
+    });
+  }
   navigate("/");
 }
 

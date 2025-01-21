@@ -36,7 +36,6 @@ describe("CLASS model", () => {
   test("produces realistic results", () => {
     const config = parse({});
     const output = runClass(config);
-    console.log(output);
     assert.ok(output);
   });
 });

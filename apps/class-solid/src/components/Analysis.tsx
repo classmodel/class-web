@@ -1,6 +1,6 @@
 import { BmiClass } from "@classmodel/class/bmi";
+import type { Config } from "@classmodel/class/config";
 import type { ClassOutput } from "@classmodel/class/runner";
-import type { PartialConfig } from "@classmodel/class/validate";
 import {
   type Accessor,
   For,
@@ -59,30 +59,33 @@ interface FlatExperiment {
   label: string;
   color: string;
   linestyle: string;
-  config: PartialConfig;
+  config: Config;
   output?: ClassOutput;
 }
 
 // Create a derived store for looping over all outputs:
 const flatExperiments: () => FlatExperiment[] = createMemo(() => {
   return experiments
-    .filter((e) => e.running === false) // skip running experiments
+    .filter((e) => e.output.running === false) // skip running experiments
     .flatMap((e, i) => {
       const reference = {
         color: colors[0],
         linestyle: linestyles[i % 5],
-        label: e.name,
-        config: e.reference.config,
-        output: e.reference.output,
+        label: e.config.reference.name,
+        config: e.config.reference,
+        output: e.output.reference,
       };
 
-      const permutations = e.permutations.map((p, j) => ({
-        label: `${e.name}/${p.name}`,
-        color: colors[(j + 1) % 10],
-        linestyle: linestyles[i % 5],
-        config: p.config,
-        output: p.output,
-      }));
+      const permutations = e.config.permutations.map((config, j) => {
+        const output = e.output.permutations[j];
+        return {
+          label: `${e.config.reference.name}/${config.name}`,
+          color: colors[(j + 1) % 10],
+          linestyle: linestyles[i % 5],
+          config,
+          output,
+        };
+      });
       return [reference, ...permutations];
     });
 });
