@@ -1,11 +1,11 @@
+import type { Config } from "@classmodel/class/config";
 import type { ClassOutput } from "@classmodel/class/runner";
-import type { PartialConfig } from "@classmodel/class/validate";
 import type { Point } from "~/components/plots/Line";
 
 // Get vertical profiles for a single class run
 export function getVerticalProfiles(
   output: ClassOutput | undefined,
-  config: PartialConfig,
+  config: Config,
   variable = "theta",
   t = -1,
 ): Point[] {
@@ -22,8 +22,7 @@ export function getVerticalProfiles(
     // Extract potential temperature profile
     const theta = output.theta.slice(t)[0];
     const dtheta = output.dtheta.slice(t)[0];
-    // TODO: make sure config contains gammatheta
-    const gammatheta = config.mixedLayer?.gammatheta ?? 0.006;
+    const gammatheta = config.mixedLayer.gammatheta;
     const thetaProfile = [
       theta,
       theta,
@@ -36,8 +35,7 @@ export function getVerticalProfiles(
     // Extract humidity profile
     const q = output.q.slice(t)[0];
     const dq = output.dq.slice(t)[0];
-    // TODO: make sure config contains gammaq
-    const gammaq = config.mixedLayer?.gammaq ?? 0;
+    const gammaq = config.mixedLayer.gammaq;
     const qProfile = [q, q, q + dq, q + dq + dh * gammaq];
     return hProfile.map((h, i) => ({ x: qProfile[i], y: h }));
   }
@@ -100,7 +98,7 @@ const thickness = (T: number, q: number, p: number, dp: number) => {
 
 export function getThermodynamicProfiles(
   output: ClassOutput | undefined,
-  config: PartialConfig,
+  config: Config,
   t = -1,
 ) {
   // Guard against undefined output
@@ -113,9 +111,8 @@ export function getThermodynamicProfiles(
   const dtheta = output.dtheta.slice(t)[0];
   const dq = output.dq.slice(t)[0];
   const h = output.h.slice(t)[0];
-  // TODO: ensure config contains gammatheta and gammaq
-  const gammaTheta = config.mixedLayer?.gammatheta ?? 0.006;
-  const gammaq = config.mixedLayer?.gammaq ?? 0;
+  const gammaTheta = config.mixedLayer.gammatheta;
+  const gammaq = config.mixedLayer.gammaq;
 
   const nz = 25;
   let dz = h / nz;

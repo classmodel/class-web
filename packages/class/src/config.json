@@ -1,6 +1,8 @@
 {
   "type": "object",
   "properties": {
+    "name": { "type": "string", "title": "Name", "default": "" },
+    "description": { "type": "string", "title": "Description", "default": "" },
     "initialState": {
       "type": "object",
       "properties": {
@@ -130,6 +132,12 @@
     }
   },
   "additionalProperties": false,
-  "required": ["initialState", "timeControl", "mixedLayer"],
+  "required": [
+    "name",
+    "description",
+    "initialState",
+    "timeControl",
+    "mixedLayer"
+  ],
   "$schema": "https://json-schema.org/draft/2019-09/schema"
 }

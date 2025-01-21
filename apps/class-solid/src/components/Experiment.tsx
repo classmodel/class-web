@@ -6,8 +6,10 @@ import {
   createUniqueId,
   onCleanup,
 } from "solid-js";
+import { unwrap } from "solid-js/store";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { createArchive, toConfigBlob } from "~/lib/download";
+import { findPresetByName } from "~/lib/presets";
 import {
   type Experiment,
   addExperiment,
@@ -46,15 +48,17 @@ export function AddExperimentDialog(props: {
   onClose: () => void;
   open: boolean;
 }) {
-  const initialExperiment = () => {
+  const defaultPreset = findPresetByName();
+  const initialExperimentConfig = createMemo(() => {
     return {
-      name: `My experiment ${props.nextIndex}`,
-      description: "",
-      reference: { config: {} },
+      preset: "Default",
+      reference: {
+        ...structuredClone(defaultPreset.config),
+        name: `My experiment ${props.nextIndex}`,
+      },
       permutations: [],
-      running: false as const,
     };
-  };
+  });
 
   function setOpen(value: boolean) {
     if (!value) {
@@ -66,19 +70,19 @@ export function AddExperimentDialog(props: {
     <Dialog open={props.open} onOpenChange={setOpen}>
       <DialogContent class="min-w-[33%]">
         <DialogHeader>
-          <DialogTitle class="mr-10">Experiment</DialogTitle>
+          <DialogTitle class="mr-10 flex justify-between gap-1">
+            Experiment
+            <span class="text-gray-300 text-sm ">
+              Preset: {defaultPreset.config.name}
+            </span>
+          </DialogTitle>
         </DialogHeader>
         <ExperimentConfigForm
           id="experiment-form"
-          experiment={initialExperiment()}
+          experiment={initialExperimentConfig()}
           onSubmit={(newConfig) => {
             props.onClose();
-            const { title, description, ...strippedConfig } = newConfig;
-            addExperiment(
-              strippedConfig,
-              title ?? initialExperiment().name,
-              description ?? initialExperiment().description,
-            );
+            addExperiment(newConfig);
           }}
         />
         <DialogFooter>
@@ -104,20 +108,19 @@ export function ExperimentSettingsDialog(props: {
       </DialogTrigger>
       <DialogContent class="min-w-[33%]">
         <DialogHeader>
-          <DialogTitle class="mr-10">Experiment</DialogTitle>
+          <DialogTitle class="mr-10 flex justify-between gap-1">
+            Experiment
+            <span class="text-gray-300 text-sm ">
+              Preset: {props.experiment.config.preset}
+            </span>
+          </DialogTitle>
         </DialogHeader>
         <ExperimentConfigForm
           id="experiment-form"
-          experiment={props.experiment}
+          experiment={props.experiment.config}
           onSubmit={(newConfig) => {
             setOpen(false);
-            const { title, description, ...strippedConfig } = newConfig;
-            modifyExperiment(
-              props.experimentIndex,
-              strippedConfig,
-              title ?? props.experiment.name,
-              description ?? props.experiment.description,
-            );
+            modifyExperiment(props.experimentIndex, newConfig);
           }}
         />
         <DialogFooter>
@@ -164,14 +167,14 @@ function RunningIndicator(props: { progress: number | false }) {
 
 function DownloadExperimentConfiguration(props: { experiment: Experiment }) {
   const downloadUrl = createMemo(() => {
-    return URL.createObjectURL(toConfigBlob(props.experiment));
+    return URL.createObjectURL(toConfigBlob(unwrap(props.experiment.config)));
   });
 
   onCleanup(() => {
     URL.revokeObjectURL(downloadUrl());
   });
 
-  const filename = `class-${props.experiment.name}.json`;
+  const filename = `class-${props.experiment.config.reference.name}.json`;
   return (
     <a href={downloadUrl()} download={filename} type="application/json">
       Configuration
@@ -182,7 +185,7 @@ function DownloadExperimentConfiguration(props: { experiment: Experiment }) {
 function DownloadExperimentArchive(props: { experiment: Experiment }) {
   const [url, setUrl] = createSignal<string>("");
   createEffect(async () => {
-    const archive = await createArchive(props.experiment);
+    const archive = await createArchive(unwrap(props.experiment));
     if (!archive) {
       return;
     }
@@ -191,7 +194,7 @@ function DownloadExperimentArchive(props: { experiment: Experiment }) {
     onCleanup(() => URL.revokeObjectURL(objectUrl));
   });
 
-  const filename = `class-${props.experiment.name}.zip`;
+  const filename = `class-${props.experiment.config.reference.name}.zip`;
   return (
     <a href={url()} download={filename} type="application/zip">
       Configuration and output
@@ -236,9 +239,9 @@ export function ExperimentCard(props: {
       aria-describedby={descriptionId}
     >
       <CardHeader>
-        <CardTitle id={id}>{experiment().name}</CardTitle>
+        <CardTitle id={id}>{experiment().config.reference.name}</CardTitle>
         <CardDescription id={descriptionId}>
-          {experiment().description}
+          {experiment().config.reference.description}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -247,10 +250,10 @@ export function ExperimentCard(props: {
           experimentIndex={experimentIndex()}
         />
       </CardContent>
-      <CardFooter>
+      <CardFooter class="gap-1">
         <Show
-          when={!experiment().running}
-          fallback={<RunningIndicator progress={experiment().running} />}
+          when={!experiment().output.running}
+          fallback={<RunningIndicator progress={experiment().output.running} />}
         >
           <DownloadExperiment experiment={experiment()} />
           <ExperimentSettingsDialog

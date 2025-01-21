@@ -1,10 +1,9 @@
 import type { Download } from "@playwright/test";
-
-import type { ExperimentConfigSchema } from "@classmodel/class/validate";
+import type { PartialExperimentConfig } from "~/lib/experiment_config";
 
 export async function parseDownload(
   downloadPromise: Promise<Download>,
-): Promise<ExperimentConfigSchema> {
+): Promise<PartialExperimentConfig> {
   const download = await downloadPromise;
   const readStream = await download.createReadStream();
   const body = await new Promise<string>((resolve, reject) => {
@@ -13,5 +12,5 @@ export async function parseDownload(
     readStream.on("end", () => resolve(chunks.join("")));
     readStream.on("error", reject);
   });
-  return JSON.parse(body) as ExperimentConfigSchema;
+  return JSON.parse(body) as PartialExperimentConfig;
 }

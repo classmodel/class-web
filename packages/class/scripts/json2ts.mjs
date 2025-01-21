@@ -52,6 +52,16 @@ async function json2ts(jsonSchemaPath, schemaTsPath) {
     bannerComment: "",
   });
 
+  // Modular forms does not like interface definitions
+  // See https://github.com/fabian-hiller/modular-forms/issues/2
+  // and https://github.com/bcherny/json-schema-to-typescript/issues/307
+  // So, replace interface with type
+  // for example "interface Foo {" becomes "type Foo = {"
+  const tsOfJsonSchemaTypesOnly = tsOfJsonSchema.replaceAll(
+    /interface\s+(\w+) {/g,
+    "type $1 = {",
+  );
+
   const prefix = prefixOfJsonSchema(jsonSchemaPath);
 
   // Read JSON schema file
@@ -65,7 +75,7 @@ async function json2ts(jsonSchemaPath, schemaTsPath) {
  * and run "pnpm json2ts" to regenerate this file.
  */  
 import type { JSONSchemaType } from "ajv/dist/2019.js";
-${tsOfJsonSchema}
+${tsOfJsonSchemaTypesOnly}
 export type JsonSchemaOf${prefix} = JSONSchemaType<${prefix}>;
 /**
  * JSON schema of ${jsonSchemaPath} embedded in a TypeScript file.

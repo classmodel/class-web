@@ -1,4 +1,6 @@
-import { Show, createSignal } from "solid-js";
+import { For, Show, createSignal } from "solid-js";
+import type { ExperimentConfig } from "~/lib/experiment_config";
+import { presets } from "~/lib/presets";
 import { hasLocalStorage, loadFromLocalStorage } from "~/lib/state";
 import { experiments, uploadExperiment } from "~/lib/store";
 import {
@@ -16,6 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import { Flex } from "./ui/flex";
 import { showToast } from "./ui/toast";
 
 function ResumeSessionButton(props: { afterClick: () => void }) {
@@ -47,7 +50,7 @@ function ResumeSessionButton(props: { afterClick: () => void }) {
   );
 }
 
-function StartFromSratchButton(props: {
+function StartFromScratchButton(props: {
   onClick: () => void;
   afterClick: () => void;
 }) {
@@ -154,7 +157,43 @@ function PresetPicker(props: {
         <DialogHeader>
           <DialogTitle class="mr-10">Pick a preset</DialogTitle>
         </DialogHeader>
-        <p>Presets are not implemented yet</p>
+        <Flex justifyContent="center" class="flex-wrap gap-4">
+          <For each={presets}>
+            {(preset) => (
+              <Button
+                variant="outline"
+                class="flex h-44 w-56 flex-col gap-2 border border-dashed"
+                onClick={() => {
+                  props.setOpen(false);
+                  const experiment: ExperimentConfig = {
+                    preset: preset.config.name,
+                    reference: preset.config,
+                    permutations: [],
+                  };
+                  uploadExperiment(experiment)
+                    .then(() => {
+                      showToast({
+                        title: "Experiment preset loaded",
+                        variant: "success",
+                        duration: 1000,
+                      });
+                    })
+                    .catch((error) => {
+                      console.error(error);
+                      showToast({
+                        title: "Failed to load preset",
+                        description: `${error}`,
+                        variant: "error",
+                      });
+                    });
+                }}
+              >
+                <h1 class="text-xl">{preset.config.name}</h1>
+                <div>{preset.config.description}</div>
+              </Button>
+            )}
+          </For>
+        </Flex>
       </DialogContent>
     </Dialog>
   );
@@ -195,7 +234,7 @@ export function StartButtons(props: {
 }) {
   return (
     <>
-      <StartFromSratchButton
+      <StartFromScratchButton
         onClick={props.onFromSratchClick}
         afterClick={props.afterClick}
       />
