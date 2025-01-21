@@ -61,7 +61,7 @@ function parseExperimentConfigBase(input: unknown): ExperimentConfig<object> {
   return input;
 }
 
-/** Parse unknown input into a Experiment configuration
+/** Parse unknown input into an Experiment configuration
  *
  * The input can be partial, i.e. only contain the fields that are different from the preset or reference.
  *
