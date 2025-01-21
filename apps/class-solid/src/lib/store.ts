@@ -88,11 +88,11 @@ export async function addExperiment(reference: Config) {
 }
 
 export async function uploadExperiment(rawData: unknown) {
-  const preset = findPresetByName();
+  const defaultPreset = findPresetByName();
   const upload = parseExperimentConfig(rawData);
   const experiment: Experiment = {
     config: {
-      preset: upload.preset ?? preset,
+      preset: upload.preset ?? defaultPreset.config.name,
       reference: upload.reference,
       permutations: upload.permutations,
     },
