@@ -2,7 +2,7 @@
   "name": "@classmodel/class",
   "description": "Chemistry Land-surface Atmosphere Soil Slab (CLASS) model",
   "type": "module",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "exports": {
     "./package.json": "./package.json",
     "./class": {
@@ -69,7 +69,8 @@
     "dev": "concurrently -n \"tsc,json2ts\" -c \"blue,green\" \"pnpm dev:tsc\" \"pnpm json2ts --watch\"",
     "dev:tsc": "tsc --watch",
     "build:tsc": "tsc",
-    "build": "pnpm json2ts && pnpm build:tsc",
+    "build:config": "cp src/config.json dist/config.json",
+    "build": "pnpm json2ts && pnpm build:tsc && pnpm build:config",
     "prepack": "pnpm build",
     "test": "tsx --test src/*.test.ts",
     "typecheck": "tsc --noEmit",

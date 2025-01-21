@@ -32,7 +32,7 @@ pnpx @classmodel/class run config.json
 # Outputs h variable for each timestep in JSON format
 
 # To output csv use
-pnpx @classmodel/class run --output output.csv --formtat csv config.json
+pnpx @classmodel/class run --output output.csv --format csv config.json
 
 # To read from stdin use
 cat config.json | pnpx @classmodel/class -
