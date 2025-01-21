@@ -50,7 +50,7 @@ function ResumeSessionButton(props: { afterClick: () => void }) {
   );
 }
 
-function StartFromSratchButton(props: {
+function StartFromScratchButton(props: {
   onClick: () => void;
   afterClick: () => void;
 }) {
@@ -234,7 +234,7 @@ export function StartButtons(props: {
 }) {
   return (
     <>
-      <StartFromSratchButton
+      <StartFromScratchButton
         onClick={props.onFromSratchClick}
         afterClick={props.afterClick}
       />
