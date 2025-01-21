@@ -71,15 +71,11 @@ function findExperiment(index: number) {
   return exp;
 }
 
-export async function addExperiment(config: Config) {
+export async function addExperiment(reference: Config) {
   const newExperiment: Experiment = {
     config: {
       preset: "Default",
-      reference: {
-        ...config,
-        name: config.name ?? `My experiment ${experiments.length}`,
-        description: config.description ?? "Standard experiment",
-      },
+      reference,
       permutations: [],
     },
     output: {
