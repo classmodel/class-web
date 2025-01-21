@@ -53,7 +53,7 @@ export function AddExperimentDialog(props: {
     return {
       preset: "Default",
       reference: {
-        ...defaultPreset.config,
+        ...structuredClone(defaultPreset.config),
         name: `My experiment ${props.nextIndex}`,
       },
       permutations: [],
