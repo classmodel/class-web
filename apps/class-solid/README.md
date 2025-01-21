@@ -57,7 +57,7 @@ The presets are stored in the `src/lib/presets/` directory.
 The format is JSON with content adhering to the [JSON schema](https://github.com/classmodel/class-web/blob/main/packages/class/src/config.json).
 
 The `src/lib/presets.ts` is used as an index of presets.
-If you add an preset the `src/lib/presets.ts` file needs to be updated.
+If you add a preset the `src/lib/presets.ts` file needs to be updated.
 
 An experiment from a preset can be opened from a url like `?preset=<preset-name>`.
 For example to load <src/lib/presets/death-valley.json> use `http://localhost:3000/?preset=Death%20Valley`.
