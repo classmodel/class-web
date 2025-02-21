@@ -39,6 +39,18 @@ type RecursivePartial<T> = {
  */
 export type PartialConfig = RecursivePartial<Config>;
 
+function compareArray<T>(a: T[], b: T[]): boolean {
+  if (a.length !== b.length) {
+    return false
+  }
+  for (let index = 0; index < a.length; index++) {
+    if (a[index] !== b[index]) {
+      return false
+    }
+  }
+  return true
+}
+
 /**
  *
  * From first config remove all parameters that are the same as in the second config or third config.
@@ -72,7 +84,9 @@ export function pruneConfig(
     for (const key in s) {
       const k = key as keyof typeof s;
       const k2 = key as keyof typeof s2;
-      if (s[k] === s2[k2]) {
+      if (Array.isArray(s[k]) && Array.isArray(s2[k2]) && compareArray(s[k], s2[k2])) {
+        delete s[k]
+      } else if (s[k] === s2[k2]) {
         delete s[k];
       }
     }

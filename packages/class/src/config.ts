@@ -16,7 +16,7 @@ export type MixedLayerSpecificHumidity = number;
 export type SpecificHumidityJumpAtH = number;
 export type TimeStep = number;
 export type TotalRunTime = number;
-export type SurfaceKinematicHeatFlux = number;
+export type SurfaceKinematicHeatFlux = number[];
 export type AdvectionOfHeat = number;
 export type FreeAtmospherePotentialTemperatureLapseRate = number;
 export type SurfaceKinematicMoistureFlux = number;
@@ -130,8 +130,11 @@ export const jsonSchemaOfConfig = {
       type: "object",
       properties: {
         wtheta: {
-          type: "number",
-          default: 0.1,
+          type: "array",
+          items: {
+            type: "number",
+          },
+          default: [0.1],
           unit: "K m s-1",
           title: "Surface kinematic heat flux",
         },

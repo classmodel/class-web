@@ -92,6 +92,9 @@ function PropField({
       <Match when={schema.type === "string"}>
         <MyTextField name={name} schema={schema} Field={Field} />
       </Match>
+      <Match when={schema.type === "array"}>
+        <MyTextField name={name} schema={schema} Field={Field} />
+      </Match>
     </Switch>
   );
 }

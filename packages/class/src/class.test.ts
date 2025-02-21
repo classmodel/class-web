@@ -13,7 +13,7 @@ describe("CLASS model", () => {
     assert.strictEqual(model.t, 0);
     assert.strictEqual(model._cfg.initialState.h_0, 200);
     assert.strictEqual(model._cfg.timeControl.dt, 60);
-    assert.strictEqual(model._cfg.mixedLayer.wtheta, 0.1);
+    assert.deepEqual(model._cfg.mixedLayer.wtheta, [0.1]);
     assert.strictEqual(model._cfg.mixedLayer.wq, 0.0001);
   });
 

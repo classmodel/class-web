@@ -59,8 +59,10 @@ export class CLASS {
 
   /** Tendency of mixed-layer potential temperature [K s-1] */
   get thetatend(): number {
+    let i = 0
+    
     return (
-      (this._cfg.mixedLayer.wtheta - this.wthetae) / this.h +
+      (this._cfg.mixedLayer.wtheta[i] - this.wthetae) / this.h +
       this._cfg.mixedLayer.advtheta
     );
   }
@@ -126,8 +128,10 @@ export class CLASS {
 
   /** Surface kinematic virtual heat flux [K m s-1]. */
   get wthetav(): number {
+    let i = 0
+
     return (
-      this._cfg.mixedLayer.wtheta + 0.61 * this.theta * this._cfg.mixedLayer.wq
+      this._cfg.mixedLayer.wtheta[i] + 0.61 * this.theta * this._cfg.mixedLayer.wq
     );
   }
 }

@@ -21,7 +21,7 @@ describe("overwriteDefaultsInJsonSchema", () => {
         runtime: 43200,
       },
       mixedLayer: {
-        wtheta: 0.1,
+        wtheta: [0.1],
         advtheta: 0,
         gammatheta: 0.006,
         wq: 0.0001,
@@ -58,7 +58,7 @@ describe("pruneConfig()", () => {
         runtime: 4320,
       },
       mixedLayer: {
-        wtheta: 0.1,
+        wtheta: [0.1],
         advtheta: 0,
         gammatheta: 0.006,
         wq: 0.0001,
@@ -83,7 +83,7 @@ describe("pruneConfig()", () => {
         runtime: 4320,
       },
       mixedLayer: {
-        wtheta: 0.1,
+        wtheta: [0.1],
         advtheta: 0,
         gammatheta: 0.006,
         wq: 0.0001,
@@ -108,7 +108,7 @@ describe("pruneConfig()", () => {
         runtime: 4320,
       },
       mixedLayer: {
-        wtheta: 0.1,
+        wtheta: [0.1],
         advtheta: 0,
         gammatheta: 0.006,
         wq: 0.0001,
