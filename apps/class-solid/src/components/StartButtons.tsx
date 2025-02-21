@@ -234,13 +234,9 @@ export function StartButtons(props: {
 }) {
   return (
     <>
-      <StartFromScratchButton
-        onClick={props.onFromSratchClick}
-        afterClick={props.afterClick}
-      />
+      <StartFromPresetButton afterClick={props.afterClick} />
       <StartFromUploadButton afterClick={props.afterClick} />
       <ResumeSessionButton afterClick={props.afterClick} />
-      <StartFromPresetButton afterClick={props.afterClick} />
     </>
   );
 }
