@@ -19,7 +19,7 @@ export const AxisBottom = (props: AxisProps) => {
     props.type && updateChart("scalePropsX", { type: props.type });
   });
 
-  const format = () => (props.tickFormat ? props.tickFormat : d3.format(".3g"));
+  const format = () => (props.tickFormat ? props.tickFormat : d3.format(".4"));
   const ticks = () => props.tickValues || generateTicks(chart.scaleX.domain());
   return (
     <g transform={`translate(0,${chart.innerHeight - 0.5})`}>
@@ -49,7 +49,7 @@ export const AxisLeft = (props: AxisProps) => {
   });
 
   const ticks = () => props.tickValues || generateTicks(chart.scaleY.domain());
-  const format = () => (props.tickFormat ? props.tickFormat : d3.format(".0f"));
+  const format = () => (props.tickFormat ? props.tickFormat : d3.format(".4"));
   return (
     <g transform="translate(-0.5,0)">
       <line
