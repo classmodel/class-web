@@ -16,6 +16,7 @@ import { Flex } from "~/components/ui/flex";
 import { Toaster } from "~/components/ui/toast";
 import { onPageLoad } from "~/lib/state";
 
+import * as wasm from "@classmodel/class-rust";
 import { addAnalysis, analysisNames, experiments } from "~/lib/store";
 import { analyses } from "~/lib/store";
 
@@ -23,6 +24,11 @@ export default function Home() {
   const [openAddDialog, setOpenAddDialog] = createSignal(false);
 
   onMount(onPageLoad);
+
+  const initModel = () => {
+    const model = new wasm.BmiClass();
+    alert(`Welcome to the ${model.get_component_name()}`)
+  }
 
   return (
     <main class="mx-auto p-4 text-center text-gray-700">
@@ -49,7 +55,6 @@ export default function Home() {
           )}
         </For>
       </Flex>
-
       <h2 class="my-8 text-4xl">
         Analysis
         <Show when={experiments.length}>
@@ -76,6 +81,7 @@ export default function Home() {
           <For each={analyses}>{(analysis) => AnalysisCard(analysis)}</For>
         </Flex>
       </Show>
+      <button onclick={initModel}>Test WASM</button>
       <Toaster />
     </main>
   );
