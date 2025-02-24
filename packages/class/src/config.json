@@ -1,143 +1,217 @@
 {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
-    "name": { "type": "string", "title": "Name", "default": "" },
-    "description": { "type": "string", "title": "Description", "default": "" },
-    "initialState": {
-      "type": "object",
-      "properties": {
-        "h_0": {
-          "type": "number",
-          "default": 200,
-          "title": "ABL height",
-          "unit": "m"
-        },
-        "theta_0": {
-          "type": "number",
-          "default": 288,
-          "title": "Mixed-layer potential temperature",
-          "minimum": 0,
-          "description": "The potential temperature of the mixed layer at the initial time.",
-          "unit": "K"
-        },
-        "dtheta_0": {
-          "type": "number",
-          "default": 1,
-          "title": "Temperature jump at h",
-          "unit": "K"
-        },
-        "q_0": {
-          "type": "number",
-          "default": 0.008,
-          "unit": "kg kg-1",
-          "title": "Mixed-layer specific humidity"
-        },
-        "dq_0": {
-          "type": "number",
-          "default": -0.001,
-          "unit": "kg kg-1",
-          "title": "Specific humidity jump at h"
-        }
-      },
-      "additionalProperties": false,
-      "required": ["h_0", "theta_0", "dtheta_0", "q_0", "dq_0"],
-      "title": "Initial State",
-      "default": {}
+    "name": {
+      "type": "string",
+      "title": "Name",
+      "default": ""
     },
-    "timeControl": {
-      "type": "object",
-      "properties": {
-        "dt": {
-          "type": "number",
-          "default": 60,
-          "unit": "s",
-          "title": "Time step"
-        },
-        "runtime": {
-          "type": "number",
-          "default": 43200,
-          "unit": "s",
-          "title": "Total run time"
-        }
-      },
-      "additionalProperties": false,
-      "required": ["dt", "runtime"],
-      "title": "Time control",
-      "default": {}
+    "description": {
+      "type": "string",
+      "title": "Description",
+      "default": ""
     },
-    "mixedLayer": {
-      "type": "object",
-      "properties": {
-        "wtheta": {
-          "type": "number",
-          "default": 0.1,
-          "unit": "K m s-1",
-          "title": "Surface kinematic heat flux"
-        },
-        "advtheta": {
-          "type": "number",
-          "default": 0,
-          "unit": "K s-1",
-          "title": "Advection of heat"
-        },
-        "gammatheta": {
-          "type": "number",
-          "default": 0.006,
-          "unit": "K m-1",
-          "title": "Free atmosphere potential temperature lapse rate"
-        },
-        "wq": {
-          "type": "number",
-          "default": 0.0001,
-          "unit": "kg kg-1 m s-1",
-          "title": "Surface kinematic moisture flux"
-        },
-        "advq": {
-          "type": "number",
-          "default": 0,
-          "unit": "kg kg-1 s-1",
-          "title": "Advection of moisture"
-        },
-        "gammaq": {
-          "type": "number",
-          "default": 0,
-          "unit": "kg kg-1 m-1",
-          "title": "Free atmosphere specific humidity lapse rate"
-        },
-        "divU": {
-          "type": "number",
-          "default": 0,
-          "unit": "s-1",
-          "title": "Horizontal large-scale divergence of wind"
-        },
-        "beta": {
-          "type": "number",
-          "default": 0.2,
-          "title": "Entrainment ratio for virtual heat"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "wtheta",
-        "advtheta",
-        "gammatheta",
-        "wq",
-        "advq",
-        "gammaq",
-        "divU",
-        "beta"
-      ],
-      "title": "Mixed layer",
-      "default": {}
+    "dt": {
+      "type": "integer",
+      "unit": "s",
+      "minimum": 1,
+      "default": 60,
+      "title": "Time step",
+      "ui:group": "Time Control"
+    },
+    "runtime": {
+      "type": "integer",
+      "unit": "s",
+      "minimum": 1,
+      "title": "Total run time",
+      "default": 43200,
+      "ui:group": "Time Control"
+    },
+    "sw_ml": {
+      "type": "boolean",
+      "ui:group": "Mixed layer",
+      "title": "Mixed-layer switch",
+      "default": true
+    },
+    "radiationMode": {
+      "type": "string",
+      "title": "Radiation mode",
+      "enum": ["constant", "dynamic", ""],
+      "default": "",
+      "ui:group": "Radiation"
     }
   },
-  "additionalProperties": false,
-  "required": [
-    "name",
-    "description",
-    "initialState",
-    "timeControl",
-    "mixedLayer"
-  ],
-  "$schema": "https://json-schema.org/draft/2019-09/schema"
+  "required": ["name", "dt", "runtime"],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "sw_ml": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "h_0": {
+            "type": "number",
+            "title": "ABL height",
+            "unit": "m",
+            "default": 200,
+            "ui:group": "Mixed layer"
+          },
+          "theta_0": {
+            "type": "number",
+            "ui:group": "Mixed layer",
+            "title": "Potential temperature",
+            "minimum": 0,
+            "default": 288,
+            "description": "The potential temperature of the mixed layer at the initial time.",
+            "unit": "K"
+          },
+          "dtheta_0": {
+            "type": "number",
+            "title": "Temperature jump at h",
+            "ui:group": "Mixed layer",
+            "default": 1,
+            "unit": "K"
+          },
+          "q_0": {
+            "type": "number",
+            "ui:group": "Mixed layer",
+            "unit": "kg kg-1",
+            "default": 0.008,
+            "title": "Mixed-layer specific humidity"
+          },
+          "dq_0": {
+            "type": "number",
+            "description": "Specific humidity jump at h",
+            "unit": "kg kg-1",
+            "default": -0.001,
+            "ui:group": "Mixed layer"
+          },
+          "wtheta": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "symbol": "wθ",
+            "ui:group": "Mixed layer",
+            "unit": "K m s-1",
+            "title": "Surface kinematic heat flux",
+            "default": [0.1],
+            "minItems": 1
+          },
+          "advtheta": {
+            "type": "number",
+            "ui:group": "Mixed layer",
+            "unit": "K s-1",
+            "default": 0,
+            "title": "Advection of heat"
+          },
+          "gammatheta": {
+            "type": "number",
+            "ui:group": "Mixed layer",
+            "unit": "K m-1",
+            "default": 0.006,
+            "title": "Free atmosphere potential temperature lapse rate"
+          },
+          "wq": {
+            "type": "number",
+            "ui:group": "Mixed layer",
+            "unit": "kg kg-1 m s-1",
+            "default": 0.0001,
+            "title": "Surface kinematic moisture flux"
+          },
+          "advq": {
+            "type": "number",
+            "ui:group": "Mixed layer",
+            "unit": "kg kg-1 s-1",
+            "default": 0,
+            "title": "Advection of moisture"
+          },
+          "gammaq": {
+            "type": "number",
+            "ui:group": "Mixed layer",
+            "unit": "kg kg-1 m-1",
+            "default": 0,
+            "title": "Free atmosphere specific humidity lapse rate"
+          },
+          "divU": {
+            "type": "number",
+            "ui:group": "Mixed layer",
+            "default": 0,
+            "unit": "s-1",
+            "title": "Horizontal large-scale divergence of wind"
+          },
+          "beta": {
+            "type": "number",
+            "ui:group": "Mixed layer",
+            "default": 0.2,
+            "title": "Entrainment ratio for virtual heat",
+            "symbol": "β"
+          }
+        },
+        "required": [
+          "h_0",
+          "theta_0",
+          "dtheta_0",
+          "q_0",
+          "dq_0",
+          "wtheta",
+          "advtheta",
+          "gammatheta",
+          "wq",
+          "advq",
+          "gammaq",
+          "divU",
+          "beta"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "radiationMode": {
+            "const": "dynamic"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "albedo": {
+            "type": "number",
+            "ui:group": "Radiation",
+            "title": "Albedo",
+            "symbol": "𝜶",
+            "default": 0.2
+          }
+        },
+        "required": ["albedo"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "radiationMode": {
+            "const": "constant"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "cq": {
+            "type": "number",
+            "ui:group": "Radiation",
+            "unit": "kg kg-1",
+            "title": "Constant radiation value",
+            "symbol": "cq",
+            "default": 0
+          }
+        },
+        "required": ["cq"]
+      }
+    }
+  ]
 }
