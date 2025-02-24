@@ -3,21 +3,33 @@
  *
  * @module
  */
-import { Ajv2019 } from "ajv/dist/2019.js";
-import type { DefinedError } from "ajv/dist/2019.js";
+import { Ajv2020, type DefinedError } from "ajv/dist/2020.js";
 import { type Config, jsonSchemaOfConfig } from "./config.js";
 
-export const ajv = new Ajv2019({
+export const ajv = new Ajv2020({
   coerceTypes: true,
   allErrors: true,
   useDefaults: "empty",
   code: { esm: true },
 });
+
 ajv.addKeyword({
   keyword: "unit",
-  type: "number",
+  type: ["number", "array"],
   schemaType: "string",
   // TODO Add validation, like if unit===K then value >= 0
+});
+ajv.addKeyword({
+  keyword: "symbol",
+  type: ["number", "array"],
+  schemaType: "string",
+});
+/**
+ * When property has 'ui:group' keyword, it will be grouped in the UI inside the group of the same name.
+ */
+ajv.addKeyword({
+  keyword: "ui:group",
+  schemaType: "string",
 });
 
 /**
