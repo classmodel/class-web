@@ -15,7 +15,7 @@ export function runClass(config: Config): ClassOutput {
   const model = new CLASS(validatedConfig);
   const output: ClassOutput = { t: [], h: [] };
 
-  while (model.t < config.timeControl.runtime) {
+  while (model.t < config.runtime) {
     model.update();
 
     if (model.t % 60 === 0) {
