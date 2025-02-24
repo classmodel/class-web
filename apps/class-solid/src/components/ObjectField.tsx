@@ -1,3 +1,4 @@
+// TODO remove this file, when its replaced with ./form/Form.tsx
 import type { JSONSchemaType } from "ajv";
 import { For, Match, Show, Switch, splitProps } from "solid-js";
 import {

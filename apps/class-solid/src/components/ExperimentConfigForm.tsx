@@ -1,12 +1,10 @@
 import type { Config } from "@classmodel/class/config";
 import { pruneConfig } from "@classmodel/class/config_utils";
-import { type SubmitHandler, createForm } from "@modular-forms/solid";
 import { createMemo } from "solid-js";
 import { unwrap } from "solid-js/store";
 import type { ExperimentConfig } from "~/lib/experiment_config";
 import { findPresetByName } from "~/lib/presets";
-import { ObjectField } from "./ObjectField";
-import { ajvForm } from "./ajvForm";
+import { Form } from "./form/Form";
 
 export function ExperimentConfigForm({
   id,
@@ -22,12 +20,8 @@ export function ExperimentConfigForm({
   const initialValues = createMemo(() =>
     pruneConfig(unwrap(experiment.reference), unwrap(preset().config)),
   );
-  const [_, { Form, Field }] = createForm<Config>({
-    initialValues: initialValues(),
-    validate: ajvForm(preset().validate),
-  });
 
-  const handleSubmit: SubmitHandler<Config> = (values, event) => {
+  const handleSubmit = (values: Config) => {
     // Use ajv to coerce strings to numbers and fill in defaults
     preset().validate(values);
     onSubmit(values);
@@ -37,16 +31,9 @@ export function ExperimentConfigForm({
     <Form
       id={id}
       onSubmit={handleSubmit}
-      shouldActive={false} // Also return from collapsed fields
-      shouldDirty={false} // ~Don't return empty strings for unset fields~
-    >
-      <div>
-        <ObjectField
-          schema={preset().schema}
-          value={initialValues()}
-          Field={Field}
-        />
-      </div>
-    </Form>
+      values={experiment.reference}
+      defaults={preset().config}
+      schema={preset().schema}
+    />
   );
 }
