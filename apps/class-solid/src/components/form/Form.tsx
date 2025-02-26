@@ -94,6 +94,12 @@ function createFormStore(
 }
 
 // TODO move Config to generic so Form can be used for any JSONSchemaType<T>
+// tried in form-refactor-generic branch but got stuck on
+// - FormContext and useFormContext have hardcoded type, not C
+// - overwriteDefaultsInJsonSchema: Property 'type' is missing in type ...
+// - setStore("values", key, value): Argument of type 'keyof C' is not assignable to parameter of type 'Part<Exclude<C, NotWrappable>, MutableKeyOf<Exclude<C, NotWrappable>>>'.
+// - FormContext.Provider: Type 'FormStore<C>' is not assignable to type 'FormStore<Record<string, unknown>>'.
+
 interface Props {
   id: string;
   onSubmit: (values: Config) => void;
