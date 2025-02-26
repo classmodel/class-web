@@ -10,7 +10,8 @@
     "description": {
       "type": "string",
       "title": "Description",
-      "default": ""
+      "default": "",
+      "ui:widget": "textarea"
     },
     "dt": {
       "type": "integer",
@@ -65,7 +66,7 @@
             "type": "number",
             "ui:group": "Mixed layer",
             "title": "Potential temperature",
-            "minimum": 0,
+            "minimum": 1,
             "default": 288,
             "description": "The potential temperature of the mixed layer at the initial time.",
             "unit": "K"

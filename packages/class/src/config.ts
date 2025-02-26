@@ -99,6 +99,7 @@ const untypedSchema = {
       type: "string",
       title: "Description",
       default: "",
+      "ui:widget": "textarea",
     },
     dt: {
       type: "integer",
@@ -154,7 +155,8 @@ const untypedSchema = {
             type: "number",
             "ui:group": "Mixed layer",
             title: "Potential temperature",
-            minimum: 0,
+            // TODO For some reason ajv ignores minimum=0, for now raised to 1
+            minimum: 1,
             default: 288,
             description:
               "The potential temperature of the mixed layer at the initial time.",

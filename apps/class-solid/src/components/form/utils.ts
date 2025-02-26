@@ -56,6 +56,7 @@ function group2nested(schema: JsonSchemaOfConfig): {
   return { unnested, nested };
 }
 
+// TODO do not redefine, use types from Ajv somehow, difficult due to generics and infers
 export interface SchemaOfProperty {
   type: string;
   title?: string;
@@ -64,9 +65,15 @@ export interface SchemaOfProperty {
   description?: string;
   // biome-ignore lint/suspicious/noExplicitAny: can be anything
   default?: any;
+  enum?: string[];
+  minimum?: number;
+  maximum?: number;
+  minItems?: number;
   items?: {
     type: string;
   };
+  "ui:group"?: string;
+  "ui:widget"?: string;
 }
 
 export interface Toggle {

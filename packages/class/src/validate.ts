@@ -31,6 +31,10 @@ ajv.addKeyword({
   keyword: "ui:group",
   schemaType: "string",
 });
+ajv.addKeyword({
+  keyword: "ui:widget",
+  schemaType: "string",
+});
 
 /**
  * Validates the given input against the configuration JSON schema.
