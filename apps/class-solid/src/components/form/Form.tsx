@@ -101,14 +101,22 @@ function createFormStore(
 // - FormContext.Provider: Type 'FormStore<C>' is not assignable to type 'FormStore<Record<string, unknown>>'.
 
 interface Props {
-  id: string;
+  id?: string;
   onSubmit: (values: Config) => void;
   values: Config;
   defaults: Config;
   schema: JsonSchemaOfConfig;
 }
 
-export const Form: Component<Props> = (props) => {
+/*
+ * TODO add validation mode, now always onSubmit
+ * When to validate the form.
+ * - onSubmit: validate when form is submitted
+ * - onChange: validate when input changes and on submit
+ * - onBlur: validate when input loses focus and on submit
+ */
+
+export const Form: ParentComponent<Props> = (props) => {
   const schemaWithDefaults = createMemo(() =>
     overwriteDefaultsInJsonSchema(unwrap(props.schema), unwrap(props.defaults)),
   );
@@ -120,10 +128,13 @@ export const Form: Component<Props> = (props) => {
   return (
     <form
       id={props.id}
+      // Disable native form validation, we use ajv for validation
+      noValidate={true}
       onSubmit={(e) => {
         e.preventDefault();
 
         const data = unwrap(store.values);
+        // Use ajv to coerce strings to numbers and fill in defaults
         const valid = validate()(data);
         if (!valid) {
           const errors = validate().errors as DefinedError[];
@@ -135,7 +146,7 @@ export const Form: Component<Props> = (props) => {
           store.setErrors([]);
         }
 
-        props.onSubmit(props.values);
+        props.onSubmit(data);
       }}
     >
       <FormContext.Provider value={store}>
@@ -155,6 +166,7 @@ export const Form: Component<Props> = (props) => {
             {(item) => <ToggleableGroupField name={item[0]} toggle={item[1]} />}
           </For>
         </Accordion>
+        {props.children}
       </FormContext.Provider>
     </form>
   );
@@ -335,8 +347,7 @@ const DescriptionTooltip: Component<{ schema: SchemaOfProperty }> = (props) => {
         <TooltipTrigger
           as={Button<"button">}
           variant="ghost"
-          size="icon"
-          class="ml-2"
+          class="ml-2 size-8 rounded-full"
         >
           ?
         </TooltipTrigger>
@@ -357,10 +368,19 @@ function createErrors(...names: string[]) {
   );
 }
 
+function sameArray<T>(a: T[], b: T[]): boolean {
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+
 function createInputClass(name: keyof Config, placeholder: unknown) {
   return createMemo(() => {
     const value = useFormContext().values[name];
-    if (value === placeholder) {
+    if (
+      value === placeholder ||
+      (Array.isArray(value) &&
+        Array.isArray(placeholder) &&
+        sameArray(value, placeholder))
+    ) {
       // make value look like placeholder
       // aka value is rendered but greyed out
       // TODO make behave like actual placeholder
@@ -370,38 +390,44 @@ function createInputClass(name: keyof Config, placeholder: unknown) {
   });
 }
 
-interface ValueGetSet {
-  value?: string;
-  onChange?: (value: string) => void;
-  error?: string;
-}
-
-const TextFieldWrapper: ParentComponent<FieldProps & ValueGetSet> = (props) => {
-  const label = createLabel(props.name, props.schema);
+const TextFieldWrapper: ParentComponent<FieldProps> = (props) => {
   const value = createMemo(() => {
-    if (props.value) {
-      return props.value;
-    }
     const v = useFormContext().values[props.name];
     return v as string;
   });
   const onChange = useFormContext().setProperty;
+  return (
+    <TextFieldWrapperControlled
+      value={value()}
+      onChange={(newValue) => onChange(props.name, newValue)}
+      {...props}
+    >
+      {props.children}
+    </TextFieldWrapperControlled>
+  );
+};
+
+interface ValueGetSet {
+  value: string;
+  onChange: (value: string) => void;
+  /**
+   * Error message if value is invalid according to non-schema validation
+   */
+  // TODO if error is truthy also update AccordionTrigger to havea an error badge
+  error?: string;
+}
+
+const TextFieldWrapperControlled: ParentComponent<FieldProps & ValueGetSet> = (
+  props,
+) => {
+  const label = createLabel(props.name, props.schema);
   const errors = createErrors(props.name);
-  // TODO get required from parent object/then schema
-  const required = () => true;
   return (
     <TextField
       name={props.name}
-      value={value()}
-      onChange={(newValue) => {
-        if (props.onChange) {
-          props.onChange(newValue);
-          return;
-        }
-        onChange(props.name, newValue);
-      }}
+      value={props.value}
+      onChange={props.onChange}
       validationState={errors().length > 0 || props.error ? "invalid" : "valid"}
-      required={required()}
       disabled={props.disabled}
       class="me-2 py-1"
     >
@@ -503,11 +529,14 @@ const InputNumber: Component<FieldProps> = (props) => {
 };
 
 function string2numbers(value: string): number[] {
-  return value.split(",").map(Number);
+  return value
+    .split(",")
+    .map((v) => v.trim())
+    .map(Number);
 }
 
 function numbers2string(value: number[]): string {
-  return value.join(",");
+  return value.join(", ");
 }
 
 const InputNumbers: Component<FieldProps> = (props) => {
@@ -536,7 +565,7 @@ const InputNumbers: Component<FieldProps> = (props) => {
   }
 
   return (
-    <TextFieldWrapper
+    <TextFieldWrapperControlled
       name={props.name}
       schema={props.schema}
       disabled={props.disabled}
@@ -549,6 +578,6 @@ const InputNumbers: Component<FieldProps> = (props) => {
         type="text"
         class={className()}
       />
-    </TextFieldWrapper>
+    </TextFieldWrapperControlled>
   );
 };
