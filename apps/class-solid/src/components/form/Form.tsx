@@ -110,7 +110,7 @@ interface Props {
 
 export const Form: Component<Props> = (props) => {
   const schemaWithDefaults = createMemo(() =>
-    overwriteDefaultsInJsonSchema(props.schema, props.defaults),
+    overwriteDefaultsInJsonSchema(unwrap(props.schema), unwrap(props.defaults)),
   );
   const validate = createMemo(() => ajv.compile(schemaWithDefaults()));
   const store = createFormStore(schemaWithDefaults, props.values);
