@@ -1,14 +1,10 @@
-import type { Config, JsonSchemaOfConfig } from "@classmodel/class/config";
-import {
-  type PartialConfig,
-  overwriteDefaultsInJsonSchema,
-} from "@classmodel/class/config_utils";
-import { ajv } from "@classmodel/class/validate";
 import type { DefinedError } from "ajv/dist/2020";
+import type { JSONSchemaType } from "ajv/dist/2020.js";
 import {
   type Accessor,
   type Component,
   For,
+  type JSX,
   Match,
   type ParentComponent,
   Show,
@@ -20,6 +16,19 @@ import {
   useContext,
 } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
+
+// TODO move this file and imports below to new @classmodel/form package
+
+// Modules that are part of @classmodel/form package
+import {
+  type SchemaOfProperty,
+  type Toggle,
+  buildValidate,
+  overwriteDefaultsInJsonSchema,
+  schema2groups,
+} from "./utils";
+
+// UI components, that should be part of @classmodel/form package, but overwritable
 import {
   Accordion,
   AccordionContent,
@@ -38,14 +47,16 @@ import {
   TextFieldTextArea,
 } from "../ui/text-field";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { type SchemaOfProperty, type Toggle, schema2groups } from "./utils";
+
+type GenericConfigValue = string | number | boolean | number[];
+type GenericConfig = Record<string, GenericConfigValue>;
 
 interface FormStore {
-  readonly values: PartialConfig;
-  setProperty: (key: keyof Config, value: Config[typeof key]) => void;
+  readonly values: GenericConfig;
+  setProperty: (key: string, value: GenericConfigValue) => void;
   setErrors: (errors: DefinedError[]) => void;
   readonly errors: DefinedError[];
-  readonly schema: JsonSchemaOfConfig;
+  readonly schema: JSONSchemaType<GenericConfig>;
 }
 
 const FormContext = createContext<FormStore>();
@@ -59,13 +70,13 @@ function useFormContext() {
 }
 
 function createFormStore(
-  schema: Accessor<JsonSchemaOfConfig>,
-  initialValues: PartialConfig,
+  schema: Accessor<JSONSchemaType<GenericConfig>>,
+  initialValues: GenericConfig,
 ) {
   const [store, setStore] = createStore<{
-    values: PartialConfig;
+    values: GenericConfig;
     errors: DefinedError[];
-    schema: JsonSchemaOfConfig;
+    schema: JSONSchemaType<GenericConfig>;
   }>({
     // Copy props.values as initial form values
     values: structuredClone(unwrap(initialValues)),
@@ -76,7 +87,7 @@ function createFormStore(
     get values() {
       return store.values;
     },
-    setProperty: (key: keyof Config, value: Config[typeof key]) => {
+    setProperty: (key: string, value: GenericConfigValue) => {
       setStore("values", key, value);
     },
     setErrors: (errors: DefinedError[]) => {
@@ -93,19 +104,13 @@ function createFormStore(
   return formStore;
 }
 
-// TODO move Config to generic so Form can be used for any JSONSchemaType<T>
-// tried in form-refactor-generic branch but got stuck on
-// - FormContext and useFormContext have hardcoded type, not C
-// - overwriteDefaultsInJsonSchema: Property 'type' is missing in type ...
-// - setStore("values", key, value): Argument of type 'keyof C' is not assignable to parameter of type 'Part<Exclude<C, NotWrappable>, MutableKeyOf<Exclude<C, NotWrappable>>>'.
-// - FormContext.Provider: Type 'FormStore<C>' is not assignable to type 'FormStore<Record<string, unknown>>'.
-
-interface Props {
+interface Props<C extends GenericConfig> {
   id?: string;
-  onSubmit: (values: Config) => void;
-  values: Config;
-  defaults: Config;
-  schema: JsonSchemaOfConfig;
+  onSubmit: (values: C) => void;
+  values: C;
+  defaults: C;
+  schema: JSONSchemaType<C>;
+  children?: JSX.Element;
 }
 
 /*
@@ -116,11 +121,15 @@ interface Props {
  * - onBlur: validate when input loses focus and on submit
  */
 
-export const Form: ParentComponent<Props> = (props) => {
+export function Form<C extends GenericConfig>(props: Props<C>) {
   const schemaWithDefaults = createMemo(() =>
-    overwriteDefaultsInJsonSchema(unwrap(props.schema), unwrap(props.defaults)),
+    // TODO do not cast, but without it ajv and solidjs complain
+    overwriteDefaultsInJsonSchema(
+      unwrap(props.schema as JSONSchemaType<GenericConfig>),
+      unwrap(props.defaults),
+    ),
   );
-  const validate = createMemo(() => ajv.compile(schemaWithDefaults()));
+  const validate = createMemo(() => buildValidate(schemaWithDefaults()));
   const store = createFormStore(schemaWithDefaults, props.values);
 
   const groups = createMemo(() => schema2groups(props.schema));
@@ -146,16 +155,13 @@ export const Form: ParentComponent<Props> = (props) => {
           store.setErrors([]);
         }
 
-        props.onSubmit(data);
+        props.onSubmit(data as unknown as C);
       }}
     >
       <FormContext.Provider value={store}>
         <For each={groups().groupless}>
           {(item) => (
-            <PropField
-              name={item as keyof Config}
-              schema={store.schema.properties[item]}
-            />
+            <PropField name={item} schema={store.schema.properties[item]} />
           )}
         </For>
         <Accordion multiple={false} collapsible>
@@ -170,7 +176,7 @@ export const Form: ParentComponent<Props> = (props) => {
       </FormContext.Provider>
     </form>
   );
-};
+}
 
 interface GroupFieldProps {
   name: string;
@@ -183,12 +189,7 @@ const GroupField: Component<GroupFieldProps> = (props) => {
   return (
     <AccordionWrapper name={props.name} members={props.members}>
       <For each={props.members}>
-        {(item) => (
-          <PropField
-            name={item as keyof Config}
-            schema={schema.properties[item]}
-          />
-        )}
+        {(item) => <PropField name={item} schema={schema.properties[item]} />}
       </For>
     </AccordionWrapper>
   );
@@ -219,7 +220,7 @@ const BooleanToggleGroupField: Component<ToggleableGroupFieldProps> = (
   );
   const label = createLabel(props.name, toggleSchema());
   const checked = createMemo(
-    () => useFormContext().values[props.toggle.key as keyof Config] as boolean,
+    () => useFormContext().values[props.toggle.key] as boolean,
   );
   const onChange = useFormContext().setProperty;
   return (
@@ -229,7 +230,7 @@ const BooleanToggleGroupField: Component<ToggleableGroupFieldProps> = (
           id={id}
           checked={checked()}
           onChange={(checked) => {
-            onChange(props.toggle.key as keyof Config, checked);
+            onChange(props.toggle.key, checked);
           }}
         />
         <Label for={id}>{label()}</Label>
@@ -238,7 +239,7 @@ const BooleanToggleGroupField: Component<ToggleableGroupFieldProps> = (
       <For each={Object.entries(props.toggle.members)}>
         {(item) => (
           <PropField
-            name={item[0] as keyof Config}
+            name={item[0]}
             schema={item[1]}
             // TODO when disabled then besides the input, the label and unit should also be greyed out
             disabled={!checked()}
@@ -269,7 +270,7 @@ const AccordionWrapper: ParentComponent<{ name: string; members: string[] }> = (
 };
 
 interface FieldProps {
-  name: keyof Config;
+  name: string;
   schema: SchemaOfProperty;
   disabled?: boolean;
 }
@@ -372,7 +373,7 @@ function sameArray<T>(a: T[], b: T[]): boolean {
   return a.length === b.length && a.every((v, i) => v === b[i]);
 }
 
-function createInputClass(name: keyof Config, placeholder: unknown) {
+function createInputClass(name: string, placeholder: unknown) {
   return createMemo(() => {
     const value = useFormContext().values[name];
     if (
@@ -560,7 +561,7 @@ const InputNumbers: Component<FieldProps> = (props) => {
       // add number[] type to second arg of setProperty
       setError("");
       // only update store when string is valid
-      setProperty(props.name, numbers as unknown as string);
+      setProperty(props.name, numbers);
     }
   }
 

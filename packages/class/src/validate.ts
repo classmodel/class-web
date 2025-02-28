@@ -6,6 +6,10 @@
 import { Ajv2020, type DefinedError } from "ajv/dist/2020.js";
 import { type Config, jsonSchemaOfConfig } from "./config.js";
 
+// buildValidate() in @classmodel/form duplicates this code
+// TODO dedup, by moving ajv helpers to own package
+// so @classmode/class and @classmodel/form can both use it
+// without having both depend on each other
 export const ajv = new Ajv2020({
   coerceTypes: true,
   allErrors: true,

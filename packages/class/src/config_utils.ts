@@ -1,5 +1,4 @@
-import type { Config, JsonSchemaOfConfig } from "./config.js";
-
+import type { Config } from "./config.js";
 /**
  * Overwrite values in first configuration with second configuration.
  *
@@ -89,70 +88,4 @@ export function pruneConfig(
     }
   }
   return config;
-}
-
-/**
- * Overwrites the default values in a JSON schema with the provided defaults.
- *
- * @param schema - The original JSON schema to be modified.
- * @param defaults - An object containing the default values to overwrite in the schema.
- * @returns A new JSON schema with the default values overwritten.
- *
- * @remarks
- * This function currently only handles objects of objects and needs to be made more generic.
- *
- * @example
- * ```typescript
- * const schema = {
- *   properties: {
- *     setting1: {
- *       properties: {
- *         subsetting1: { type: 'string', default: 'oldValue' }
- *       }
- *     }
- *   }
- * };
- *
- * const defaults = {
- *   setting1: {
- *     subsetting1: 'newValue'
- *   }
- * };
- *
- * const newSchema = overwriteDefaultsInJsonSchema(schema, defaults);
- * console.log(newSchema.properties.setting1.properties.subsetting1.default); // 'newValue'
- * ```
- */
-export function overwriteDefaultsInJsonSchema(
-  schema: JsonSchemaOfConfig,
-  defaults: Config,
-) {
-  const newSchema = structuredClone(schema);
-  // TODO make more generic, now only handles .properties and .allOf[n].then.properties
-  for (const key in defaults) {
-    const val = defaults[key as keyof Config];
-    const prop = newSchema.properties[key as keyof Config];
-    if (prop && "default" in prop) {
-      prop.default = val;
-    }
-    // for (const subkey in val) {
-    //   const subval = val[subkey as keyof typeof val];
-    //   const prop =
-    //     newSchema.properties[key as keyof Config].properties[
-    //       subkey as keyof typeof val
-    //     ];
-    //   prop.default = subval;
-    // }
-  }
-  for (const ifs of newSchema.allOf) {
-    const props = ifs.then.properties;
-    for (const key in defaults) {
-      const val = defaults[key as keyof Config];
-      const prop = props[key as keyof Config];
-      if (prop && "default" in prop) {
-        prop.default = val;
-      }
-    }
-  }
-  return newSchema;
 }

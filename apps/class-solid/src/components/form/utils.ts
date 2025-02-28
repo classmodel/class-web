@@ -1,6 +1,10 @@
-import type { JsonSchemaOfConfig } from "@classmodel/class/config";
+import {
+  Ajv2020,
+  type JSONSchemaType,
+  type ValidateFunction,
+} from "ajv/dist/2020.js";
 
-function group2nested(schema: JsonSchemaOfConfig): {
+function group2nested<C>(schema: JSONSchemaType<C>): {
   unnested: string[];
   nested: Map<string, string[]>;
 } {
@@ -85,7 +89,7 @@ export interface Toggle {
   members: Record<string, SchemaOfProperty>;
 }
 
-function conditions2toggles(schema: JsonSchemaOfConfig): Toggle[] {
+function conditions2toggles<C>(schema: JSONSchemaType<C>): Toggle[] {
   if (schema.type !== "object") {
     throw new Error("Only object schemas are supported");
   }
@@ -110,7 +114,7 @@ function conditions2toggles(schema: JsonSchemaOfConfig): Toggle[] {
   return toggles;
 }
 
-export function schema2groups(schema: JsonSchemaOfConfig): {
+export function schema2groups<C>(schema: JSONSchemaType<C>): {
   groupless: string[];
   untoggelable: Map<string, string[]>;
   toggleable: Map<string, Toggle>;
@@ -133,4 +137,115 @@ export function schema2groups(schema: JsonSchemaOfConfig): {
     untoggelable,
     toggleable,
   };
+}
+
+// TODO move to from @classmodel/config
+/**
+ * Overwrites the default values in a JSON schema with the provided defaults.
+ *
+ * @param schema - The original JSON schema to be modified.
+ * @param defaults - An object containing the default values to overwrite in the schema.
+ * @returns A new JSON schema with the default values overwritten.
+ *
+ * @remarks
+ * This function currently only handles objects of objects and needs to be made more generic.
+ *
+ * @example
+ * ```typescript
+ * const schema = {
+ *   properties: {
+ *     setting1: {
+ *       properties: {
+ *         subsetting1: { type: 'string', default: 'oldValue' }
+ *       }
+ *     }
+ *   }
+ * };
+ *
+ * const defaults = {
+ *   setting1: {
+ *     subsetting1: 'newValue'
+ *   }
+ * };
+ *
+ * const newSchema = overwriteDefaultsInJsonSchema(schema, defaults);
+ * console.log(newSchema.properties.setting1.properties.subsetting1.default); // 'newValue'
+ * ```
+ */
+export function overwriteDefaultsInJsonSchema<C>(
+  schema: JSONSchemaType<C>,
+  defaults: C,
+): JSONSchemaType<C> {
+  const newSchema = structuredClone(schema);
+  // TODO make more generic, now only handles .properties and .allOf[n].then.properties
+  for (const key in defaults) {
+    const val = defaults[key];
+    const prop = newSchema.properties[key];
+    if (prop && "default" in prop) {
+      prop.default = val;
+    }
+    // for (const subkey in val) {
+    //   const subval = val[subkey as keyof typeof val];
+    //   const prop =
+    //     newSchema.properties[key as keyof Config].properties[
+    //       subkey as keyof typeof val
+    //     ];
+    //   prop.default = subval;
+    // }
+  }
+  for (const ifs of newSchema.allOf) {
+    const props = ifs.then.properties;
+    for (const key in defaults) {
+      const val = defaults[key];
+      const prop = props[key];
+      if (prop && "default" in prop) {
+        prop.default = val;
+      }
+    }
+  }
+  return newSchema;
+}
+
+/**
+ * Build function that validates the given input against the here given JSON schema.
+ *
+ * Errors can be accessed via the `errors` property of the returned function.
+ *
+ * @param schema - The JSON schema to validate against.
+ * @returns A function that validates the input against the schema.
+ */
+export function buildValidate<C>(
+  schema: JSONSchemaType<C>,
+): ValidateFunction<C> {
+  const ajv = new Ajv2020({
+    coerceTypes: true,
+    allErrors: true,
+    useDefaults: "empty",
+    code: { esm: true },
+  });
+
+  ajv.addKeyword({
+    keyword: "unit",
+    type: ["number", "array"],
+    schemaType: "string",
+    // TODO Add validation, like if unit===K then value >= 0
+  });
+  ajv.addKeyword({
+    keyword: "symbol",
+    type: ["number", "array"],
+    schemaType: "string",
+  });
+  /**
+   * When property has 'ui:group' keyword, it will be grouped in the UI inside the group of the same name.
+   */
+  ajv.addKeyword({
+    keyword: "ui:group",
+    schemaType: "string",
+  });
+  ajv.addKeyword({
+    keyword: "ui:widget",
+    schemaType: "string",
+  });
+
+  return ajv.compile(schema);
 }

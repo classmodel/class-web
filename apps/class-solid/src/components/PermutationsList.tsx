@@ -1,8 +1,5 @@
 import type { Config } from "@classmodel/class/config";
-import {
-  overwriteDefaultsInJsonSchema,
-  pruneConfig,
-} from "@classmodel/class/config_utils";
+import { pruneConfig } from "@classmodel/class/config_utils";
 import { For, createMemo, createSignal, createUniqueId } from "solid-js";
 import { unwrap } from "solid-js/store";
 import { Button } from "~/components/ui/button";
@@ -17,6 +14,7 @@ import {
 } from "~/lib/store";
 import { PermutationSweepButton } from "./PermutationSweepButton";
 import { Form } from "./form/Form";
+import { overwriteDefaultsInJsonSchema } from "./form/utils";
 import {
   MdiCakeVariantOutline,
   MdiCog,
