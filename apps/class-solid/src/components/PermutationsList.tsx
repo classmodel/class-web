@@ -1,7 +1,7 @@
 import type { Config } from "@classmodel/class/config";
 import { pruneConfig } from "@classmodel/class/config_utils";
-import { Form } from '@classmodel/form';
-import { overwriteDefaultsInJsonSchema } from "@classmodel/form/utils"
+import { Form } from "@classmodel/form";
+import { overwriteDefaultsInJsonSchema } from "@classmodel/form/utils";
 import { For, createMemo, createSignal, createUniqueId } from "solid-js";
 import { unwrap } from "solid-js/store";
 import { Button } from "~/components/ui/button";

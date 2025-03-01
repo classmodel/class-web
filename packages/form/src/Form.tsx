@@ -17,9 +17,6 @@ import {
 } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
 
-// TODO move this file and imports below to new @classmodel/form package
-
-// Modules that are part of @classmodel/form package
 import {
   type SchemaOfProperty,
   type Toggle,
@@ -28,7 +25,7 @@ import {
   schema2groups,
 } from "./utils";
 
-// UI components, that should be part of @classmodel/form package, but overwritable
+// TODO make components overridable by Form component user
 import {
   Accordion,
   AccordionContent,
@@ -112,6 +109,7 @@ interface Props<C extends GenericConfig> {
   id?: string;
   onSubmit: (values: C) => void;
   values: C;
+  // TODO make defaults optional, as they could already be defined in the schema
   defaults: C;
   schema: JSONSchemaType<C>;
   children?: JSX.Element;

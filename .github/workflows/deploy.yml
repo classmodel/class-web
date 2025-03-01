@@ -37,6 +37,9 @@ jobs:
         run: pnpm run docs --out ../../apps/class-solid/.output/public/docs
         working-directory: ./packages/class
 
+      # TODO deploy example app of @classmodel/form package
+      # TODO deploy docs of @classmodel/form package
+
       - name: upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

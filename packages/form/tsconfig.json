@@ -5,15 +5,18 @@
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "jsxImportSource": "solid-js",
-    "types": ["vite/client"],
-    "noEmit": true,
+    "types": ["vite/client", "node"],
     "isolatedModules": true,
     "strictNullChecks": true,
-    "baseUrl": ".",
+    "skipLibCheck": true,
+    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": true,
     "paths": {
       "~/*": ["./src/*"]
     }
-  }
+  },
+  "include": ["src"]
 }

@@ -54,3 +54,5 @@ jobs:
           name: playwright-report
           path: apps/class-solid/playwright-report/
           retention-days: 30
+
+# TODO run tests for @classmodel/form package

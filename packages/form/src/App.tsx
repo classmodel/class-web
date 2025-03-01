@@ -3,7 +3,12 @@ import type { Component } from "solid-js";
 import { Form } from "./Form";
 import { Button } from "./components/ui/button";
 
-export type Config = {
+// TODO use App to show examples of Form component usage
+// TODO use storybookjs instead of App.tsx, but
+// https://github.com/storybookjs/sandboxes/blob/main/solid-vite/default-ts/after-storybook
+// does not work with node22
+
+type Config = {
   s1: string;
   so1?: string;
   i1: number;
@@ -11,7 +16,7 @@ export type Config = {
   nn1: number[];
 } & ({ sw_ml: true; h_0: number } | { sw_ml?: false });
 
-export const defaults: Config = {
+const defaults: Config = {
   s1: "string1",
   i1: 60,
   n1: 4.2,
@@ -28,7 +33,7 @@ const values: Config = {
   sw_ml: false,
 };
 
-export const schema = {
+const schema = {
   type: "object",
   properties: {
     s1: { type: "string", default: "string1" },

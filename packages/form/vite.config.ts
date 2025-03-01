@@ -14,32 +14,5 @@ export default defineConfig({
   },
   build: {
     target: "esnext",
-    lib: {
-      formats: ["es"],
-      entry: [
-        path.resolve(__dirname, "./src/Form.tsx"),
-        path.resolve(__dirname, "./src/utils.ts"),
-      ],
-    },
-    rollupOptions: {
-      external: [
-        "@kobalte/core", 
-        "@kobalte/core/accordion",
-        "@kobalte/core/button",
-        "@kobalte/core/checkbox",
-        "@kobalte/core/polymorphic",
-        "@kobalte/core/text-field",
-        "@kobalte/core/tooltip",
-        "ajv",
-        "ajv/dist/2020",
-        "ajv/dist/2020.js",
-        "class-variance-authority",
-        "clsx",
-        "solid-js",
-        "solid-js/store",
-        "tailwind-merge",
-        "tailwindcss-animate"
-      ]
-    }
   },
 });

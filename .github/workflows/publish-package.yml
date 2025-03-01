@@ -29,3 +29,5 @@ jobs:
         working-directory: packages/class
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+# TODO publish @classmodel/form package

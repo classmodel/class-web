@@ -1,19 +1,32 @@
 {
   "name": "@classmodel/form",
-  "version": "0.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "JSON schema to form with Solid UI components",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/classmodel/class-web.git",
+    "directory": "packages/form"
+  },
+  "bugs": {
+    "url": "https://github.com/classmodel/class-web/issues"
+  },
   "scripts": {
     "start": "vite",
     "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview"
+    "example:build": "vite build",
+    "example:serve": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test 'src/**/*.test.ts'",
+    "build": "tsc --project tsconfig.build.json"
   },
   "license": "Apache-2.0",
   "devDependencies": {
+    "@types/node": "^20.13.1",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.4",
+    "tsx": "^4.16.5",
     "typescript": "^5.7.2",
     "vite": "^6.0.0",
     "vite-plugin-solid": "^2.11.6"
@@ -27,11 +40,16 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "peerDependencies": {
-    "solid-js": "^1.9.3"    
+    "solid-js": "^1.9.3"
   },
-  "files": ["dist", "src", "!src/**/*.stories.tsx", "!src/**/*.test.ts"],
-  "module": "dist/index.js",
-  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src",
+    "!src/**/*.stories.tsx",
+    "!src/**/*.test.ts",
+    "!src/App.tsx",
+    "!src/index.tsx"
+  ],
   "exports": {
     ".": {
       "types": "./dist/Form.d.ts",
@@ -40,6 +58,18 @@
     "./utils": {
       "types": "./dist/utils.d.ts",
       "import": "./dist/utils.js"
+    },
+    "./components/ui/*": {
+      "types": "./dist/components/ui/*.d.ts",
+      "import": "./dist/components/ui/*.js"
+    },
+    "./lib/utils": {
+      "types": "./dist/lib/utils.d.ts",
+      "import": "./dist/lib//utils.js"
     }
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
   }
 }
