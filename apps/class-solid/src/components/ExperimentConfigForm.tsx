@@ -1,8 +1,8 @@
 import type { Config } from "@classmodel/class/config";
+import { Form } from '@classmodel/form';
 import { createMemo } from "solid-js";
 import type { ExperimentConfig } from "~/lib/experiment_config";
 import { findPresetByName } from "~/lib/presets";
-import { Form } from "./form/Form";
 
 export function ExperimentConfigForm({
   id,

@@ -34,19 +34,23 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "../ui/accordion";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
-import { Label } from "../ui/label";
+} from "./components/ui/accordion";
+import { Badge } from "./components/ui/badge";
+import { Button } from "./components/ui/button";
+import { Checkbox } from "./components/ui/checkbox";
+import { Label } from "./components/ui/label";
 import {
   TextField,
   TextFieldErrorMessage,
   TextFieldInput,
   TextFieldLabel,
   TextFieldTextArea,
-} from "../ui/text-field";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+} from "./components/ui/text-field";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "./components/ui/tooltip";
 
 type GenericConfigValue = string | number | boolean | number[];
 type GenericConfig = Record<string, GenericConfigValue>;
@@ -536,7 +540,10 @@ function string2numbers(value: string): number[] {
     .map(Number);
 }
 
-function numbers2string(value: number[]): string {
+function numbers2string(value: number[] | undefined): string {
+  if (!value) {
+    return "";
+  }
   return value.join(", ");
 }
 
