@@ -25,7 +25,6 @@ import {
   schema2groups,
 } from "./utils";
 
-// TODO make components overridable by Form component user
 import {
   Accordion,
   AccordionContent,
@@ -142,7 +141,6 @@ interface Props<C extends GenericConfig> {
   id?: string;
   onSubmit: (values: C) => void;
   values: C;
-  // TODO make defaults optional, as they could already be defined in the schema
   defaults?: C;
   schema: JSONSchemaType<C>;
   children?: JSX.Element;

@@ -1,9 +1,13 @@
 import type { JSONSchemaType } from "ajv/dist/2020";
-import { type Component, type ParentComponent, createUniqueId } from "solid-js";
+import {
+  type Component,
+  type JSX,
+  type ParentComponent,
+  createUniqueId,
+} from "solid-js";
 import { Form } from "./Form";
 import { Button } from "./components/ui/button";
 
-// TODO use App to show examples of Form component usage
 // TODO use storybookjs instead of App.tsx, but
 // https://github.com/storybookjs/sandboxes/blob/main/solid-vite/default-ts/after-storybook
 // does not work with node22
@@ -87,9 +91,6 @@ function Minimal() {
   const values = {
     s1: "string1",
   };
-  const defaults = {
-    s1: "string0",
-  };
   const schema: JSONSchemaType<{ s1: string }> = {
     type: "object",
     properties: {
@@ -100,7 +101,6 @@ function Minimal() {
   return (
     <Form
       schema={schema}
-      defaults={defaults}
       onSubmit={(data) => console.log(data)}
       values={values}
     >
@@ -232,10 +232,111 @@ function GroupToggle() {
   );
 }
 
-// TODO add examples for
-// - number
-// - integer
-// - array of number
+function NumberExample() {
+  const values = {
+    n1: 3.14,
+  };
+  const schema: JSONSchemaType<typeof values> = {
+    type: "object",
+    properties: {
+      n1: { type: "number" },
+    },
+    required: ["n1"],
+  };
+  return (
+    <Form
+      schema={schema}
+      onSubmit={(data) => console.log(data)}
+      values={values}
+    >
+      <Button type="submit">Submit</Button>
+      <p>on submit returns number `3.14` if unchanged.</p>
+    </Form>
+  );
+}
+
+function IntegerExample() {
+  const values = {
+    n1: 42,
+  };
+  const schema: JSONSchemaType<typeof values> = {
+    type: "object",
+    properties: {
+      n1: { type: "integer" },
+    },
+    required: ["n1"],
+  };
+  return (
+    <Form
+      schema={schema}
+      onSubmit={(data) => console.log(data)}
+      values={values}
+    >
+      <Button type="submit">Submit</Button>
+      <p>on submit returns integer `42` if unchanged.</p>
+    </Form>
+  );
+}
+
+function ArrayOfNumberExample() {
+  const values = {
+    nn1: [1, 2, 3],
+  };
+  const schema: JSONSchemaType<typeof values> = {
+    type: "object",
+    properties: {
+      nn1: { type: "array", items: { type: "number" } },
+    },
+    required: ["nn1"],
+  };
+  return (
+    <Form
+      schema={schema}
+      onSubmit={(data) => console.log(data)}
+      values={values}
+    >
+      <Button type="submit">Submit</Button>
+      <p>
+        on submit returns array with `1`, `2` and `3` if unchanged. When
+        unparseable should then shows error.
+      </p>
+    </Form>
+  );
+}
+
+const CustomLabel: Component<JSX.LabelHTMLAttributes<HTMLLabelElement>> = (
+  props,
+) => {
+  return (
+    <label class="m-2 bg-blue-500 p-2" for={props.for}>
+      {props.children}
+    </label>
+  );
+};
+
+function CustomUiComponent() {
+  const values = {
+    s1: "string1",
+  };
+  const schema: JSONSchemaType<{ s1: string }> = {
+    type: "object",
+    properties: {
+      s1: { type: "string" },
+    },
+    required: ["s1"],
+  };
+  return (
+    <Form
+      schema={schema}
+      onSubmit={(data) => console.log(data)}
+      values={values}
+      uiComponents={{ TextFieldLabel: CustomLabel }}
+    >
+      <Button type="submit">Submit</Button>
+      <p>TextFieldLabel is a custom component with blue background.</p>
+    </Form>
+  );
+}
 
 const ExampleWrapper: ParentComponent<{ legend: string }> = (props) => {
   return (
@@ -247,8 +348,19 @@ const ExampleWrapper: ParentComponent<{ legend: string }> = (props) => {
 };
 
 const App: Component = () => {
+  // TODO render this on GitHub pages, will need to
   return (
     <div class="flex-row gap-4 p-12">
+      <p>
+        Example usage of `@classmodel/form` package. Code at{" "}
+        <a
+          class="underline"
+          href="https://github.com/classmodel/class-web/blob/main/packages/form/src/App.tsx"
+        >
+          src/App.tsx
+        </a>
+        . Use devtools console to see submitted result.
+      </p>
       <ExampleWrapper legend="Minimal">
         <Minimal />
       </ExampleWrapper>
@@ -263,6 +375,18 @@ const App: Component = () => {
       </ExampleWrapper>
       <ExampleWrapper legend="Group toggle">
         <GroupToggle />
+      </ExampleWrapper>
+      <ExampleWrapper legend="Number">
+        <NumberExample />
+      </ExampleWrapper>
+      <ExampleWrapper legend="Integer">
+        <IntegerExample />
+      </ExampleWrapper>
+      <ExampleWrapper legend="Array of number">
+        <ArrayOfNumberExample />
+      </ExampleWrapper>
+      <ExampleWrapper legend="Custom UI component">
+        <CustomUiComponent />
       </ExampleWrapper>
       <ExampleWrapper legend="Kitchen sink">
         <Kitchensink />
