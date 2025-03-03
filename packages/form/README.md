@@ -72,8 +72,6 @@ It can be run with
 
 ```bash
 pnpm example:dev
-# Or for spa production build
-pnpm example:build & pnpm example:serve
 ```
 
 The unit tests can be run with
@@ -86,4 +84,13 @@ The types can be checked with
 
 ```bash
 pnpm typecheck
+```
+
+## Release
+
+For release check the stuff is compliant with
+
+```bash
+pnpm dlx publint
+pnpm --package @arethetypeswrong/cli dlx attw --profile esm-only --pack .
 ```

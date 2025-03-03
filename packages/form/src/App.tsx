@@ -128,7 +128,7 @@ function ExternalSubmit() {
         schema={schema}
         onSubmit={(data) => console.log(data)}
         values={values}
-      ></Form>
+      />
       <Button type="submit" form={id}>
         Submit outside form element
       </Button>
