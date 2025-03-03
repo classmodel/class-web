@@ -1,3 +1,4 @@
+import { group } from "console";
 import {
   Ajv2020,
   type JSONSchemaType,
@@ -80,14 +81,20 @@ export interface SchemaOfProperty {
   "ui:widget"?: string;
 }
 
-export interface Toggle {
+export interface BooleanToggle {
   // key of the property that triggers the toggle
   key: string;
-  // value of key that triggers the toggle
-  value: boolean | string;
   // properties that are toggled (aka made required) by the key, excludes key
   members: Record<string, SchemaOfProperty>;
 }
+
+export interface EnumToggle {
+   // key of the property that triggers the toggle
+   key: string;
+   choices: Record<string, Record<string, SchemaOfProperty>>;
+}
+
+export type Toggle = BooleanToggle | EnumToggle;
 
 function conditions2toggles<C>(schema: JSONSchemaType<C>): Toggle[] {
   if (schema.type !== "object") {
@@ -109,7 +116,7 @@ function conditions2toggles<C>(schema: JSONSchemaType<C>): Toggle[] {
     const members = subSchema.then.properties;
     const key = Object.keys(ifProp)[0];
     const value = ifProp[key].const;
-    toggles.push({ key, value, members });
+    toggles.push({ key, members });
   }
   return toggles;
 }
@@ -117,18 +124,24 @@ function conditions2toggles<C>(schema: JSONSchemaType<C>): Toggle[] {
 export function schema2groups<C>(schema: JSONSchemaType<C>): {
   groupless: string[];
   untoggelable: Map<string, string[]>;
-  toggleable: Map<string, Toggle>;
+  toggleable: Map<string, Toggle[]>;
 } {
   const hierarchy = group2nested(schema);
   const toggles = conditions2toggles(schema);
   const groupless = hierarchy.unnested;
   const untoggelable = new Map<string, string[]>();
-  const toggleable = new Map<string, Toggle>();
+  const toggleable = new Map<string, Toggle[]>();
   for (const [groupName, members] of hierarchy.nested) {
-    const toggle = toggles.find((t) => members.includes(t.key));
-    if (toggle) {
-      toggleable.set(groupName, toggle);
-    } else {
+    const groupToggles = toggles.filter((t) => members.includes(t.key))
+    for (const toggle of groupToggles) {
+      const tg = toggleable.get(groupName)
+      if (tg) {
+        tg.push(toggle);
+      } else {
+        toggleable.set(groupName, [toggle]);
+      }
+    }
+    if (groupToggles.length === 0) {
       untoggelable.set(groupName, members);
     }
   }

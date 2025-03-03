@@ -68,10 +68,6 @@ describe("parse", () => {
       gammaq: 0,
       divU: 0,
       beta: 0.2,
-      // TODO Props below should not be there when radiationMode is uncommented in config.ts
-      // radiationMode: "",
-      // albedo: 0.2,
-      // cq: 0,
     };
     assert.deepEqual(output, expected);
   });

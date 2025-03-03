@@ -239,10 +239,12 @@ const GroupField: Component<GroupFieldProps> = (props) => {
 
 interface ToggleableGroupFieldProps {
   name: string;
-  toggle: Toggle;
+  toggle: Toggle[];
 }
 
 const ToggleableGroupField: Component<ToggleableGroupFieldProps> = (props) => {
+  
+
   const members = createMemo(() => Object.keys(props.toggle.members));
   return (
     <AccordionWrapper name={props.name} members={members()}>

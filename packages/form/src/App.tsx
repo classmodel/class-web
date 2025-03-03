@@ -7,6 +7,7 @@ import {
 } from "solid-js";
 import { Form } from "./Form";
 import { Button } from "./components/ui/button";
+import { schema2groups } from "./utils";
 
 // TODO use storybookjs instead of App.tsx, but
 // https://github.com/storybookjs/sandboxes/blob/main/solid-vite/default-ts/after-storybook
@@ -188,7 +189,7 @@ function GroupError() {
   );
 }
 
-function GroupToggle() {
+function GroupBooleanToggle() {
   const values = {
     t1: true,
     s1: "string1",
@@ -227,6 +228,73 @@ function GroupToggle() {
       values={values}
     >
       <p>If t1 is checked then s1 is required.</p>
+      <Button type="submit">Submit</Button>
+    </Form>
+  );
+}
+
+function GroupEnumToggle() {
+  type Config = {
+    t1: 'a' | 'b';
+  } & ({ t1: 'a'; s1: string;s2: string; } | { t1: 'b'; s1: string;s3: string });
+  const values: Config = {
+    t1: 'a',
+    s1: "string1",
+    s2: "string2"
+  };
+  const schema = {
+    type: "object",
+    properties: {
+      t1: { type: "string", enum: ['a', 'b'], "ui:group": "g1", "default": 'a' },
+    },
+    allOf: [
+      {
+        if: {
+          properties: {
+            t1: {
+              const: 'a',
+            },
+          },
+        },
+        // biome-ignore lint/suspicious/noThenProperty: <explanation>
+        then: {
+          properties: {
+            s1: { type: "string", "ui:group": "g1" },
+            s2: { type: "string", "ui:group": "g1" },
+          },
+          required: ["s1", "s2"],
+        },
+      },
+      {
+        if: {
+          properties: {
+            t1: {
+              const: 'b',
+            },
+          },
+        },
+        // biome-ignore lint/suspicious/noThenProperty: <explanation>
+        then: {
+          properties: {
+            s1: { type: "string", "ui:group": "g1" },
+            s3: { type: "string", "ui:group": "g1" },
+          },
+          required: ["s1", "s3"],
+        },
+      },
+    ],
+  } as unknown as JSONSchemaType<Config>;
+  console.log(
+    schema2groups(schema)
+  )
+  return (
+    <Form
+      schema={schema}
+      onSubmit={(data) => console.log(data)}
+      values={values}
+    >
+      <p>If t1='a' is selected then s1 and s2 are required.</p>
+      <p>If t1='b' is selected then s1 and s3 are required.</p>
       <Button type="submit">Submit</Button>
     </Form>
   );
@@ -373,8 +441,11 @@ const App: Component = () => {
       <ExampleWrapper legend="Group error">
         <GroupError />
       </ExampleWrapper>
-      <ExampleWrapper legend="Group toggle">
-        <GroupToggle />
+      <ExampleWrapper legend="Group boolean toggle">
+        <GroupBooleanToggle />
+      </ExampleWrapper>
+      <ExampleWrapper legend="Group enum toggle">
+        <GroupEnumToggle />
       </ExampleWrapper>
       <ExampleWrapper legend="Number">
         <NumberExample />

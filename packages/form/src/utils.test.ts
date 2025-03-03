@@ -58,7 +58,8 @@ const jsonSchemaOfConfig = {
   ],
 } as unknown as JSONSchemaType<Config>;
 
-test("schema2groups()", () => {
+describe("schema2groups()", () => {
+  test('given boolean toggle', () => {
   const result = schema2groups(jsonSchemaOfConfig);
   const expected = {
     groupless: ["s1", "so1", "i1", "nn1"],
@@ -68,13 +69,14 @@ test("schema2groups()", () => {
         "g2",
         {
           key: "sw_ml",
-          value: true,
           members: jsonSchemaOfConfig.allOf[0].then.properties,
         },
       ],
     ]),
   };
   deepEqual(result, expected);
+})
+
 });
 
 describe("overwriteDefaultsInJsonSchema", () => {

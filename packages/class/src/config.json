@@ -34,13 +34,6 @@
       "ui:group": "Mixed layer",
       "title": "Mixed-layer switch",
       "default": true
-    },
-    "radiationMode": {
-      "type": "string",
-      "title": "Radiation mode",
-      "enum": ["constant", "dynamic", ""],
-      "default": "",
-      "ui:group": "Radiation"
     }
   },
   "required": ["name", "dt", "runtime"],
@@ -169,49 +162,6 @@
           "divU",
           "beta"
         ]
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "radiationMode": {
-            "const": "dynamic"
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "albedo": {
-            "type": "number",
-            "ui:group": "Radiation",
-            "title": "Albedo",
-            "symbol": "𝜶",
-            "default": 0.2
-          }
-        },
-        "required": ["albedo"]
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "radiationMode": {
-            "const": "constant"
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "cq": {
-            "type": "number",
-            "ui:group": "Radiation",
-            "unit": "kg kg-1",
-            "title": "Constant radiation value",
-            "symbol": "cq",
-            "default": 0
-          }
-        },
-        "required": ["cq"]
       }
     }
   ]
