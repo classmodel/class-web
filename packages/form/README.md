@@ -2,6 +2,8 @@
 
 Form component that renders a JSON schema using Solid UI components.
 
+Examples of the form can be see at [https://classmodel.github.io/class-web/form/](https://classmodel.github.io/class-web/form/).
+
 ## Usage
 
 ```bash
