@@ -4,8 +4,8 @@ import {
   ajv,
   parse as origParse,
 } from "@classmodel/class/validate";
+import { overwriteDefaultsInJsonSchema } from "@classmodel/form/utils";
 import type { DefinedError, JSONSchemaType, ValidateFunction } from "ajv";
-import { overwriteDefaultsInJsonSchema } from "~/components/form/utils";
 // TODO replace with preset of a forest fire
 import deathValley from "./presets/death-valley.json";
 

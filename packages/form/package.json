@@ -12,8 +12,8 @@
     "url": "https://github.com/classmodel/class-web/issues"
   },
   "scripts": {
-    "start": "vite",
-    "dev": "vite",
+    "dev": "tsc --watch",
+    "example:dev": "vite",
     "example:build": "vite build",
     "example:serve": "vite preview",
     "typecheck": "tsc --noEmit",

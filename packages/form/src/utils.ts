@@ -193,13 +193,15 @@ export function overwriteDefaultsInJsonSchema<C>(
     //   prop.default = subval;
     // }
   }
-  for (const ifs of newSchema.allOf) {
-    const props = ifs.then.properties;
-    for (const key in defaults) {
-      const val = defaults[key];
-      const prop = props[key];
-      if (prop && "default" in prop) {
-        prop.default = val;
+  if (newSchema.allOf) {
+    for (const ifs of newSchema.allOf) {
+      const props = ifs.then.properties;
+      for (const key in defaults) {
+        const val = defaults[key];
+        const prop = props[key];
+        if (prop && "default" in prop) {
+          prop.default = val;
+        }
       }
     }
   }

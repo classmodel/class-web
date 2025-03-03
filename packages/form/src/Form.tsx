@@ -49,6 +49,31 @@ import {
   TooltipTrigger,
 } from "./components/ui/tooltip";
 
+const MyCheckbox: Component<{
+  id?: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}> = Checkbox;
+
+const DEFAULT_UI_COMPONENTS = {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  Badge,
+  Button,
+  Checkbox: MyCheckbox,
+  Label,
+  TextField,
+  TextFieldErrorMessage,
+  TextFieldInput,
+  TextFieldLabel,
+  TextFieldTextArea,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} as const;
+
 type GenericConfigValue = string | number | boolean | number[];
 type GenericConfig = Record<string, GenericConfigValue>;
 
@@ -56,8 +81,10 @@ interface FormStore {
   readonly values: GenericConfig;
   setProperty: (key: string, value: GenericConfigValue) => void;
   setErrors: (errors: DefinedError[]) => void;
+  reset: () => void;
   readonly errors: DefinedError[];
   readonly schema: JSONSchemaType<GenericConfig>;
+  readonly uiComponents: typeof DEFAULT_UI_COMPONENTS;
 }
 
 const FormContext = createContext<FormStore>();
@@ -73,6 +100,7 @@ function useFormContext() {
 function createFormStore(
   schema: Accessor<JSONSchemaType<GenericConfig>>,
   initialValues: GenericConfig,
+  uiComponents: typeof DEFAULT_UI_COMPONENTS,
 ) {
   const [store, setStore] = createStore<{
     values: GenericConfig;
@@ -94,6 +122,10 @@ function createFormStore(
     setErrors: (errors: DefinedError[]) => {
       setStore("errors", errors);
     },
+    reset: () => {
+      setStore("values", structuredClone(initialValues));
+      setStore("errors", []);
+    },
     get errors() {
       return store.errors;
     },
@@ -101,6 +133,7 @@ function createFormStore(
     get schema() {
       return store.schema;
     },
+    uiComponents,
   };
   return formStore;
 }
@@ -110,9 +143,10 @@ interface Props<C extends GenericConfig> {
   onSubmit: (values: C) => void;
   values: C;
   // TODO make defaults optional, as they could already be defined in the schema
-  defaults: C;
+  defaults?: C;
   schema: JSONSchemaType<C>;
   children?: JSX.Element;
+  uiComponents?: Partial<typeof DEFAULT_UI_COMPONENTS>;
 }
 
 /*
@@ -124,15 +158,19 @@ interface Props<C extends GenericConfig> {
  */
 
 export function Form<C extends GenericConfig>(props: Props<C>) {
-  const schemaWithDefaults = createMemo(() =>
+  const uiComponents = props.uiComponents
+    ? { ...DEFAULT_UI_COMPONENTS, ...props.uiComponents }
+    : DEFAULT_UI_COMPONENTS;
+  const schemaWithDefaults = createMemo(() => {
     // TODO do not cast, but without it ajv and solidjs complain
-    overwriteDefaultsInJsonSchema(
-      unwrap(props.schema as JSONSchemaType<GenericConfig>),
-      unwrap(props.defaults),
-    ),
-  );
+    const uschema = unwrap(props.schema as JSONSchemaType<GenericConfig>);
+    if (!props.defaults) {
+      return uschema;
+    }
+    return overwriteDefaultsInJsonSchema(uschema, unwrap(props.defaults));
+  });
   const validate = createMemo(() => buildValidate(schemaWithDefaults()));
-  const store = createFormStore(schemaWithDefaults, props.values);
+  const store = createFormStore(schemaWithDefaults, props.values, uiComponents);
 
   const groups = createMemo(() => schema2groups(props.schema));
 
@@ -159,6 +197,10 @@ export function Form<C extends GenericConfig>(props: Props<C>) {
 
         props.onSubmit(data as unknown as C);
       }}
+      onReset={(e) => {
+        e.preventDefault();
+        store.reset();
+      }}
     >
       <FormContext.Provider value={store}>
         <For each={groups().groupless}>
@@ -166,14 +208,14 @@ export function Form<C extends GenericConfig>(props: Props<C>) {
             <PropField name={item} schema={store.schema.properties[item]} />
           )}
         </For>
-        <Accordion multiple={false} collapsible>
+        <store.uiComponents.Accordion multiple={false} collapsible>
           <For each={Array.from(groups().untoggelable.entries())}>
             {(item) => <GroupField name={item[0]} members={item[1]} />}
           </For>
           <For each={Array.from(groups().toggleable.entries())}>
             {(item) => <ToggleableGroupField name={item[0]} toggle={item[1]} />}
           </For>
-        </Accordion>
+        </store.uiComponents.Accordion>
         {props.children}
       </FormContext.Provider>
     </form>
@@ -225,17 +267,18 @@ const BooleanToggleGroupField: Component<ToggleableGroupFieldProps> = (
     () => useFormContext().values[props.toggle.key] as boolean,
   );
   const onChange = useFormContext().setProperty;
+  const UiComponents = useFormContext().uiComponents;
   return (
     <>
       <div class="flex items-center space-x-2">
-        <Checkbox
+        <UiComponents.Checkbox
           id={id}
           checked={checked()}
           onChange={(checked) => {
             onChange(props.toggle.key, checked);
           }}
         />
-        <Label for={id}>{label()}</Label>
+        <UiComponents.Label for={id}>{label()}</UiComponents.Label>
         <DescriptionTooltip schema={toggleSchema()} />
       </div>
       <For each={Object.entries(props.toggle.members)}>
@@ -256,18 +299,21 @@ const AccordionWrapper: ParentComponent<{ name: string; members: string[] }> = (
   props,
 ) => {
   const memberErrors = createErrors(...props.members);
+  const UiComponents = useFormContext().uiComponents;
   return (
-    <AccordionItem value={props.name}>
-      <AccordionTrigger>
+    <UiComponents.AccordionItem value={props.name}>
+      <UiComponents.AccordionTrigger>
         <div class="flex w-full justify-between pe-1">
           {props.name}
           <Show when={memberErrors().length > 0}>
             <Badge variant="error">{memberErrors().length} error(s)</Badge>
           </Show>
         </div>
-      </AccordionTrigger>
-      <AccordionContent>{props.children}</AccordionContent>
-    </AccordionItem>
+      </UiComponents.AccordionTrigger>
+      <UiComponents.AccordionContent>
+        {props.children}
+      </UiComponents.AccordionContent>
+    </UiComponents.AccordionItem>
   );
 };
 
@@ -340,25 +386,26 @@ function createLabel(name: string, schema: SchemaOfProperty) {
 }
 
 const DescriptionTooltip: Component<{ schema: SchemaOfProperty }> = (props) => {
+  const UiComponents = useFormContext().uiComponents;
   return (
     <Show
       when={
         (props.schema.symbol && !props.schema.title) || props.schema.description
       }
     >
-      <Tooltip>
-        <TooltipTrigger
+      <UiComponents.Tooltip>
+        <UiComponents.TooltipTrigger
           as={Button<"button">}
           variant="ghost"
           class="ml-2 size-8 rounded-full"
         >
           ?
-        </TooltipTrigger>
-        <TooltipContent>
+        </UiComponents.TooltipTrigger>
+        <UiComponents.TooltipContent>
           <p>{!props.schema.symbol || props.schema.title}</p>
           <p>{props.schema.description}</p>
-        </TooltipContent>
-      </Tooltip>
+        </UiComponents.TooltipContent>
+      </UiComponents.Tooltip>
     </Show>
   );
 };
@@ -425,8 +472,9 @@ const TextFieldWrapperControlled: ParentComponent<FieldProps & ValueGetSet> = (
 ) => {
   const label = createLabel(props.name, props.schema);
   const errors = createErrors(props.name);
+  const UiComponents = useFormContext().uiComponents;
   return (
-    <TextField
+    <UiComponents.TextField
       name={props.name}
       value={props.value}
       onChange={props.onChange}
@@ -436,7 +484,7 @@ const TextFieldWrapperControlled: ParentComponent<FieldProps & ValueGetSet> = (
     >
       <div class="flex items-center gap-2">
         <div class="basis-1/2">
-          <TextFieldLabel>{label()}</TextFieldLabel>
+          <UiComponents.TextFieldLabel>{label()}</UiComponents.TextFieldLabel>
           <DescriptionTooltip schema={props.schema} />
         </div>
         <Show
@@ -452,25 +500,26 @@ const TextFieldWrapperControlled: ParentComponent<FieldProps & ValueGetSet> = (
           </div>
         </Show>
       </div>
-      <TextFieldErrorMessage class="pt-2">
+      <UiComponents.TextFieldErrorMessage class="pt-2">
         <For each={errors()}>{(error) => <p>{error.message}</p>}</For>
         <Show when={props.error}>
           <p>{props.error}</p>
         </Show>
-      </TextFieldErrorMessage>
-    </TextField>
+      </UiComponents.TextFieldErrorMessage>
+    </UiComponents.TextField>
   );
 };
 
 const InputText: Component<FieldProps> = (props) => {
   const className = createInputClass(props.name, props.schema.default);
+  const UiComponents = useFormContext().uiComponents;
   return (
     <TextFieldWrapper
       name={props.name}
       schema={props.schema}
       disabled={props.disabled}
     >
-      <TextFieldInput
+      <UiComponents.TextFieldInput
         placeholder={props.schema.default}
         type="text"
         class={className()}
@@ -481,13 +530,14 @@ const InputText: Component<FieldProps> = (props) => {
 
 const TextAreaWidget: Component<FieldProps> = (props) => {
   const className = createInputClass(props.name, props.schema.default);
+  const UiComponents = useFormContext().uiComponents;
   return (
     <TextFieldWrapper
       name={props.name}
       schema={props.schema}
       disabled={props.disabled}
     >
-      <TextFieldTextArea
+      <UiComponents.TextFieldTextArea
         placeholder={props.schema.default}
         class={className()}
       />
@@ -497,13 +547,14 @@ const TextAreaWidget: Component<FieldProps> = (props) => {
 
 const InputInteger: Component<FieldProps> = (props) => {
   const className = createInputClass(props.name, props.schema.default);
+  const UiComponents = useFormContext().uiComponents;
   return (
     <TextFieldWrapper
       name={props.name}
       schema={props.schema}
       disabled={props.disabled}
     >
-      <TextFieldInput
+      <UiComponents.TextFieldInput
         placeholder={props.schema.default}
         type="text"
         inputMode="numeric"
@@ -515,13 +566,14 @@ const InputInteger: Component<FieldProps> = (props) => {
 
 const InputNumber: Component<FieldProps> = (props) => {
   const className = createInputClass(props.name, props.schema.default);
+  const UiComponents = useFormContext().uiComponents;
   return (
     <TextFieldWrapper
       name={props.name}
       schema={props.schema}
       disabled={props.disabled}
     >
-      <TextFieldInput
+      <UiComponents.TextFieldInput
         placeholder={props.schema.default}
         type="text"
         inputMode="decimal"
@@ -553,6 +605,7 @@ const InputNumbers: Component<FieldProps> = (props) => {
   const [stringVal, setStringVal] = createSignal(numbers2string(raw));
   const [error, setError] = createSignal("");
   const setProperty = useFormContext().setProperty;
+  const UiComponents = useFormContext().uiComponents;
 
   function onChange(value: string) {
     setStringVal(value);
@@ -569,7 +622,6 @@ const InputNumbers: Component<FieldProps> = (props) => {
       setProperty(props.name, numbers);
     }
   }
-
   return (
     <TextFieldWrapperControlled
       name={props.name}
@@ -579,7 +631,7 @@ const InputNumbers: Component<FieldProps> = (props) => {
       onChange={onChange}
       error={error()}
     >
-      <TextFieldInput
+      <UiComponents.TextFieldInput
         placeholder={numbers2string(props.schema.default)}
         type="text"
         class={className()}

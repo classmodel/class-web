@@ -1,8 +1,8 @@
 import type { Config } from "@classmodel/class/config";
 import type { PartialConfig } from "@classmodel/class/config_utils";
 import { ValidationError, ajv } from "@classmodel/class/validate";
+import { overwriteDefaultsInJsonSchema } from "@classmodel/form/utils";
 import type { DefinedError, JSONSchemaType } from "ajv";
-import { overwriteDefaultsInJsonSchema } from "~/components/form/utils";
 import { findPresetByName } from "./presets";
 
 /**
