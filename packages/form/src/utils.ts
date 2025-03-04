@@ -1,158 +1,9 @@
-import { group } from "console";
 import {
   Ajv2020,
   type JSONSchemaType,
   type ValidateFunction,
-} from "ajv/dist/2020.js";
+} from "ajv/dist/2020";
 
-function group2nested<C>(schema: JSONSchemaType<C>): {
-  unnested: string[];
-  nested: Map<string, string[]>;
-} {
-  if (!("properties" in schema)) {
-    throw new Error("Only object schemas are supported");
-  }
-  const unnested: string[] = [];
-  const nested = new Map<string, string[]>();
-  for (const key in schema.properties) {
-    const prop = schema.properties[key];
-    const groupName = prop["ui:group"];
-    if (groupName) {
-      const nest = nested.get(groupName);
-      if (nest) {
-        nest.push(key);
-      } else {
-        nested.set(groupName, [key]);
-      }
-    } else {
-      unnested.push(key);
-    }
-  }
-  if ("allOf" in schema) {
-    for (const ifthenelses of schema.allOf) {
-      for (const key in ifthenelses.then.properties) {
-        const prop = ifthenelses.then.properties[key];
-        const groupName = prop["ui:group"];
-        if (groupName) {
-          const nest = nested.get(groupName);
-          if (nest) {
-            nest.push(key);
-          } else {
-            nested.set(groupName, [key]);
-          }
-        } else {
-          unnested.push(key);
-        }
-      }
-    }
-  }
-
-  /*
-    Should return:
-  
-    {
-      unnested: ['name', 'description', 'runtime', 'h_0'],
-      nested: new Map([
-        ['Mixed layer', ['mixedLayer', 'wtheta']]
-      ])
-    }
-  
-    */
-  return { unnested, nested };
-}
-
-// TODO do not redefine, use types from Ajv somehow, difficult due to generics and infers
-export interface SchemaOfProperty {
-  type: string;
-  title?: string;
-  symbol?: string;
-  unit?: string;
-  description?: string;
-  // biome-ignore lint/suspicious/noExplicitAny: can be anything
-  default?: any;
-  enum?: string[];
-  minimum?: number;
-  maximum?: number;
-  minItems?: number;
-  items?: {
-    type: string;
-  };
-  "ui:group"?: string;
-  "ui:widget"?: string;
-}
-
-export interface BooleanToggle {
-  // key of the property that triggers the toggle
-  key: string;
-  // properties that are toggled (aka made required) by the key, excludes key
-  members: Record<string, SchemaOfProperty>;
-}
-
-export interface EnumToggle {
-   // key of the property that triggers the toggle
-   key: string;
-   choices: Record<string, Record<string, SchemaOfProperty>>;
-}
-
-export type Toggle = BooleanToggle | EnumToggle;
-
-function conditions2toggles<C>(schema: JSONSchemaType<C>): Toggle[] {
-  if (schema.type !== "object") {
-    throw new Error("Only object schemas are supported");
-  }
-  if (!schema.allOf) {
-    return [];
-  }
-  /* Should return 
-  
-      [ { key: 'mixedLayer', value: true, members: [ 'wtheta' ] } ]
-    */
-  const toggles: Toggle[] = [];
-  for (const subSchema of schema.allOf) {
-    if (!subSchema.if || !subSchema.then) {
-      continue;
-    }
-    const ifProp = subSchema.if.properties;
-    const members = subSchema.then.properties;
-    const key = Object.keys(ifProp)[0];
-    const value = ifProp[key].const;
-    toggles.push({ key, members });
-  }
-  return toggles;
-}
-
-export function schema2groups<C>(schema: JSONSchemaType<C>): {
-  groupless: string[];
-  untoggelable: Map<string, string[]>;
-  toggleable: Map<string, Toggle[]>;
-} {
-  const hierarchy = group2nested(schema);
-  const toggles = conditions2toggles(schema);
-  const groupless = hierarchy.unnested;
-  const untoggelable = new Map<string, string[]>();
-  const toggleable = new Map<string, Toggle[]>();
-  for (const [groupName, members] of hierarchy.nested) {
-    const groupToggles = toggles.filter((t) => members.includes(t.key))
-    for (const toggle of groupToggles) {
-      const tg = toggleable.get(groupName)
-      if (tg) {
-        tg.push(toggle);
-      } else {
-        toggleable.set(groupName, [toggle]);
-      }
-    }
-    if (groupToggles.length === 0) {
-      untoggelable.set(groupName, members);
-    }
-  }
-  return {
-    groupless,
-    untoggelable,
-    toggleable,
-  };
-}
-
-// TODO move to from @classmodel/config
 /**
  * Overwrites the default values in a JSON schema with the provided defaults.
  *
@@ -263,4 +114,194 @@ export function buildValidate<C>(
   });
 
   return ajv.compile(schema);
+}
+
+// TODO do not redefine, use types from Ajv somehow, difficult due to generics and infers
+export interface SchemaOfProperty {
+  type: string;
+  title?: string;
+  symbol?: string;
+  unit?: string;
+  description?: string;
+  // biome-ignore lint/suspicious/noExplicitAny: can be anything
+  default?: any;
+  enum?: string[];
+  minimum?: number;
+  maximum?: number;
+  minItems?: number;
+  items?: {
+    type: string;
+  };
+  "ui:group"?: string;
+  "ui:widget"?: string;
+}
+
+export type Base = {
+  key: string;
+  schema: SchemaOfProperty;
+};
+
+type Choice = {
+  value: string | boolean;
+  members: Base[];
+};
+
+export type Choices = Base & {
+  choices: Choice[];
+};
+
+export type Group = {
+  group: string;
+  members: (Base | Choices)[];
+};
+
+export type Item = Base | Choices | Group;
+
+export function isBase(item: Item): item is Base {
+  return "key" in item;
+}
+
+export function isGroup(item: Item): item is Group {
+  return "group" in item;
+}
+
+function isChoice(item: Item): item is Choices {
+  return "choices" in item;
+}
+
+export function isBooleanChoices(item: Item): item is Choices {
+  return isChoice(item) && item.schema.type === "boolean";
+}
+
+export function isStringChoices(item: Item): item is Choices {
+  return isChoice(item) && item.schema.type === "string";
+}
+
+function findGroup(tree: Item[], groupName: string): Group | undefined {
+  return tree.find(
+    (item): item is Group => "group" in item && item.group === groupName,
+  );
+}
+
+function findByKey(tree: Item[], key: string): Base | Choices | undefined {
+  for (const item of tree) {
+    if ("key" in item && item.key === key) {
+      return item;
+    }
+    if ("members" in item) {
+      const member = findByKey(item.members, key);
+      if (member) {
+        return member;
+      }
+    }
+    if ("choices" in item) {
+      for (const choice of item.choices) {
+        const member = findByKey(choice.members, key);
+        if (member) {
+          return member;
+        }
+      }
+    }
+  }
+  return undefined;
+}
+
+export function keysOfGroupMembers(group: Group): Set<string> {
+  // This does not look which choice has been made
+  // aka whether choices.value === value
+  const keys = new Set<string>();
+  for (const member of group.members) {
+    if (isBase(member)) {
+      keys.add(member.key);
+    }
+    if (isChoice(member)) {
+      for (const choice of member.choices) {
+        for (const member of choice.members) {
+          keys.add(member.key);
+        }
+      }
+    }
+  }
+  return keys;
+}
+
+export function schema2tree<C>(schema: JSONSchemaType<C>): Item[] {
+  const tree: Item[] = [];
+  if (!("properties" in schema)) {
+    throw new Error("Only object schemas are supported");
+  }
+  for (const key in schema.properties) {
+    const prop = schema.properties[key];
+    const groupName = prop["ui:group"];
+    if (groupName) {
+      const group = findGroup(tree, groupName);
+      if (group) {
+        group.members.push({ key, schema: prop });
+      } else {
+        tree.push({ group: groupName, members: [{ key, schema: prop }] });
+      }
+    } else {
+      tree.push({ key, schema: prop });
+    }
+  }
+  if ("allOf" in schema) {
+    for (const ifthenelse of schema.allOf) {
+      if (!("if" in ifthenelse && "then" in ifthenelse)) {
+        throw new Error("Only if-then is supported in allOf array");
+      }
+      const ifentries = Object.entries(ifthenelse.if.properties) as [
+        string,
+        { const: string | boolean },
+      ][];
+      if (ifentries.length !== 1) {
+        throw new Error("If can only have one property");
+      }
+      const ifentry = ifentries[0];
+      if (
+        "const" in ifentry[1] &&
+        typeof ifentry[1].const !== "string" &&
+        typeof ifentry[1].const !== "boolean"
+      ) {
+        throw new Error(
+          "If property must have const that is a string or a boolean",
+        );
+      }
+      const key = ifentry[0];
+
+      const item = findByKey(tree, key) as Choices | undefined;
+      if (!item) {
+        throw new Error(`If property ${key} not found in tree`);
+      }
+      if (!("choices" in item)) {
+        (item as Choices).choices = [];
+      }
+      const value = ifentry[1].const;
+      if (typeof ifthenelse.then.properties !== "object") {
+        throw new Error("Then block must have properties object");
+      }
+      const then = ifthenelse.then.properties as Record<
+        string,
+        SchemaOfProperty
+      >;
+      const members: Base[] = [];
+      for (const [tkey, tvalue] of Object.entries(then)) {
+        if (
+          item.schema["ui:group"] &&
+          tvalue["ui:group"] &&
+          item.schema["ui:group"] !== tvalue["ui:group"]
+        ) {
+          throw new Error(
+            "Properties in then block must be in the same ui:group as the property in if block",
+          );
+        }
+        members.push({ key: tkey, schema: tvalue });
+      }
+      const choice = {
+        value,
+        members,
+      };
+      item.choices.push(choice);
+    }
+  }
+  return tree;
 }

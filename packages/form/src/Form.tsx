@@ -1,5 +1,4 @@
-import type { DefinedError } from "ajv/dist/2020";
-import type { JSONSchemaType } from "ajv/dist/2020.js";
+import type { DefinedError, JSONSchemaType } from "ajv/dist/2020";
 import {
   type Accessor,
   type Component,
@@ -18,14 +17,6 @@ import {
 import { createStore, unwrap } from "solid-js/store";
 
 import {
-  type SchemaOfProperty,
-  type Toggle,
-  buildValidate,
-  overwriteDefaultsInJsonSchema,
-  schema2groups,
-} from "./utils";
-
-import {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -35,6 +26,11 @@ import { Badge } from "./components/ui/badge";
 import { Button } from "./components/ui/button";
 import { Checkbox } from "./components/ui/checkbox";
 import { Label } from "./components/ui/label";
+import {
+  RadioGroup,
+  RadioGroupItem,
+  RadioGroupItemLabel,
+} from "./components/ui/radio-group";
 import {
   TextField,
   TextFieldErrorMessage,
@@ -47,6 +43,21 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "./components/ui/tooltip";
+import {
+  type Base,
+  type Choices,
+  type Group,
+  type Item,
+  type SchemaOfProperty,
+  buildValidate,
+  isBase,
+  isBooleanChoices,
+  isGroup,
+  isStringChoices,
+  keysOfGroupMembers,
+  overwriteDefaultsInJsonSchema,
+  schema2tree,
+} from "./utils";
 
 const MyCheckbox: Component<{
   id?: string;
@@ -71,8 +82,12 @@ const DEFAULT_UI_COMPONENTS = {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
+  RadioGroup,
+  RadioGroupItem,
+  RadioGroupItemLabel,
 } as const;
 
+// Inside Form component we use a generic object
 type GenericConfigValue = string | number | boolean | number[];
 type GenericConfig = Record<string, GenericConfigValue>;
 
@@ -137,7 +152,7 @@ function createFormStore(
   return formStore;
 }
 
-interface Props<C extends GenericConfig> {
+export interface Props<C extends GenericConfig> {
   id?: string;
   onSubmit: (values: C) => void;
   values: C;
@@ -170,7 +185,7 @@ export function Form<C extends GenericConfig>(props: Props<C>) {
   const validate = createMemo(() => buildValidate(schemaWithDefaults()));
   const store = createFormStore(schemaWithDefaults, props.values, uiComponents);
 
-  const groups = createMemo(() => schema2groups(props.schema));
+  const tree = createMemo(() => schema2tree(props.schema));
 
   return (
     <form
@@ -201,18 +216,9 @@ export function Form<C extends GenericConfig>(props: Props<C>) {
       }}
     >
       <FormContext.Provider value={store}>
-        <For each={groups().groupless}>
-          {(item) => (
-            <PropField name={item} schema={store.schema.properties[item]} />
-          )}
-        </For>
         <store.uiComponents.Accordion multiple={false} collapsible>
-          <For each={Array.from(groups().untoggelable.entries())}>
-            {(item) => <GroupField name={item[0]} members={item[1]} />}
-          </For>
-          <For each={Array.from(groups().toggleable.entries())}>
-            {(item) => <ToggleableGroupField name={item[0]} toggle={item[1]} />}
-          </For>
+          {/* not all children of accordion are AccordionItem, but works and allows for mixing types */}
+          <For each={tree()}>{(item) => <ItemField item={item} />}</For>
         </store.uiComponents.Accordion>
         {props.children}
       </FormContext.Provider>
@@ -221,90 +227,25 @@ export function Form<C extends GenericConfig>(props: Props<C>) {
 }
 
 interface GroupFieldProps {
-  name: string;
-  members: string[];
+  item: Group;
 }
 
 const GroupField: Component<GroupFieldProps> = (props) => {
-  const schema = useFormContext().schema;
-
   return (
-    <AccordionWrapper name={props.name} members={props.members}>
-      <For each={props.members}>
-        {(item) => <PropField name={item} schema={schema.properties[item]} />}
-      </For>
+    <AccordionWrapper item={props.item}>
+      <For each={props.item.members}>{(item) => <ItemField item={item} />}</For>
     </AccordionWrapper>
   );
 };
 
-interface ToggleableGroupFieldProps {
-  name: string;
-  toggle: Toggle[];
-}
-
-const ToggleableGroupField: Component<ToggleableGroupFieldProps> = (props) => {
-  
-
-  const members = createMemo(() => Object.keys(props.toggle.members));
-  return (
-    <AccordionWrapper name={props.name} members={members()}>
-      <BooleanToggleGroupField name={props.toggle.key} toggle={props.toggle} />
-      {/* TODO add EnumToggleGroupField */}
-    </AccordionWrapper>
-  );
-};
-
-const BooleanToggleGroupField: Component<ToggleableGroupFieldProps> = (
-  props,
-) => {
-  const id = createUniqueId();
-  const schema = useFormContext().schema;
-  const toggleSchema = createMemo(
-    () => schema.properties[props.toggle.key] as SchemaOfProperty,
-  );
-  const label = createLabel(props.name, toggleSchema());
-  const checked = createMemo(
-    () => useFormContext().values[props.toggle.key] as boolean,
-  );
-  const onChange = useFormContext().setProperty;
+const AccordionWrapper: ParentComponent<GroupFieldProps> = (props) => {
+  const memberErrors = createErrors(props.item);
   const UiComponents = useFormContext().uiComponents;
   return (
-    <>
-      <div class="flex items-center space-x-2">
-        <UiComponents.Checkbox
-          id={id}
-          checked={checked()}
-          onChange={(checked) => {
-            onChange(props.toggle.key, checked);
-          }}
-        />
-        <UiComponents.Label for={id}>{label()}</UiComponents.Label>
-        <DescriptionTooltip schema={toggleSchema()} />
-      </div>
-      <For each={Object.entries(props.toggle.members)}>
-        {(item) => (
-          <PropField
-            name={item[0]}
-            schema={item[1]}
-            // TODO when disabled then besides the input, the label and unit should also be greyed out
-            disabled={!checked()}
-          />
-        )}
-      </For>
-    </>
-  );
-};
-
-const AccordionWrapper: ParentComponent<{ name: string; members: string[] }> = (
-  props,
-) => {
-  const memberErrors = createErrors(...props.members);
-  const UiComponents = useFormContext().uiComponents;
-  return (
-    <UiComponents.AccordionItem value={props.name}>
+    <UiComponents.AccordionItem value={props.item.group}>
       <UiComponents.AccordionTrigger>
         <div class="flex w-full justify-between pe-1">
-          {props.name}
+          {props.item.group}
           <Show when={memberErrors().length > 0}>
             <Badge variant="error">{memberErrors().length} error(s)</Badge>
           </Show>
@@ -317,71 +258,69 @@ const AccordionWrapper: ParentComponent<{ name: string; members: string[] }> = (
   );
 };
 
-interface FieldProps {
-  name: string;
-  schema: SchemaOfProperty;
-  disabled?: boolean;
-}
-
-const PropField: Component<FieldProps> = (props) => {
+const ItemField: Component<{ item: Item; disabled?: boolean }> = (props) => {
   return (
     <Switch fallback={<p>Unknown type</p>}>
-      <Match when={props.schema.type === "number"}>
-        <InputNumber
-          name={props.name}
-          schema={props.schema}
-          disabled={props.disabled}
-        />
+      <Match when={isBooleanChoices(props.item)}>
+        {/* type narrowing does propagate to children use cast */}
+        <BooleanChoicesField item={props.item as Choices} />
       </Match>
-      <Match when={props.schema.type === "integer"}>
-        <InputInteger
-          name={props.name}
-          schema={props.schema}
-          disabled={props.disabled}
-        />
+      <Match when={isStringChoices(props.item)}>
+        <StringChoicesField item={props.item as Choices} />
       </Match>
-      <Match when={props.schema.type === "string"}>
-        <Show
-          when={props.schema["ui:widget"] === "textarea"}
-          fallback={
-            <InputText
-              name={props.name}
-              schema={props.schema}
-              disabled={props.disabled}
-            />
-          }
-        >
-          <TextAreaWidget
-            name={props.name}
-            schema={props.schema}
-            disabled={props.disabled}
-          />
-        </Show>
+      <Match when={isGroup(props.item)}>
+        <GroupField item={props.item as Group} />
       </Match>
-      <Match
-        when={
-          props.schema.type === "array" && props.schema.items?.type === "number"
-        }
-      >
-        <InputNumbers
-          name={props.name}
-          schema={props.schema}
-          disabled={props.disabled}
-        />
+      <Match when={isBase(props.item)}>
+        <PropField item={props.item as Base} disabled={props.disabled} />
       </Match>
     </Switch>
   );
 };
 
-function createLabel(name: string, schema: SchemaOfProperty) {
+interface PropFieldProps {
+  item: Base;
+  disabled?: boolean;
+}
+
+const PropField: Component<PropFieldProps> = (props) => {
+  return (
+    <Switch fallback={<p>Unknown type</p>}>
+      <Match when={props.item.schema.type === "number"}>
+        <InputNumber item={props.item} disabled={props.disabled} />
+      </Match>
+      <Match when={props.item.schema.type === "integer"}>
+        <InputInteger item={props.item} disabled={props.disabled} />
+      </Match>
+      <Match when={props.item.schema.type === "string"}>
+        <Show
+          when={props.item.schema["ui:widget"] === "textarea"}
+          fallback={<InputText item={props.item} disabled={props.disabled} />}
+        >
+          <TextAreaWidget item={props.item} disabled={props.disabled} />
+        </Show>
+      </Match>
+      <Match
+        when={
+          props.item.schema.type === "array" &&
+          props.item.schema.items?.type === "number"
+        }
+      >
+        <InputNumbers item={props.item} disabled={props.disabled} />
+      </Match>
+    </Switch>
+  );
+};
+
+function createLabel(item: Base) {
   return createMemo(() => {
-    if (schema.symbol) {
-      return schema.symbol;
+    if (item.schema.symbol) {
+      return item.schema.symbol;
     }
-    if (schema.title) {
-      return schema.title;
+    if (item.schema.title) {
+      return item.schema.title;
     }
-    return name;
+    return item.key;
   });
 }
 
@@ -410,11 +349,18 @@ const DescriptionTooltip: Component<{ schema: SchemaOfProperty }> = (props) => {
   );
 };
 
-function createErrors(...names: string[]) {
+function createErrors(group: Group): () => DefinedError[] {
   return createMemo(() =>
-    useFormContext().errors.filter((e) =>
-      names.some((name) => e.instancePath === `/${name}`),
-    ),
+    useFormContext().errors.filter((e) => {
+      const keysOfGroup = keysOfGroupMembers(group);
+      return keysOfGroup.has(e.instancePath.replace("/", ""));
+    }),
+  );
+}
+
+function createError(key: string): () => DefinedError[] {
+  return createMemo(() =>
+    useFormContext().errors.filter((e) => e.instancePath === `/${key}`),
   );
 }
 
@@ -440,16 +386,16 @@ function createInputClass(name: string, placeholder: unknown) {
   });
 }
 
-const TextFieldWrapper: ParentComponent<FieldProps> = (props) => {
+const TextFieldWrapper: ParentComponent<PropFieldProps> = (props) => {
   const value = createMemo(() => {
-    const v = useFormContext().values[props.name];
+    const v = useFormContext().values[props.item.key];
     return v as string;
   });
   const onChange = useFormContext().setProperty;
   return (
     <TextFieldWrapperControlled
       value={value()}
-      onChange={(newValue) => onChange(props.name, newValue)}
+      onChange={(newValue) => onChange(props.item.key, newValue)}
       {...props}
     >
       {props.children}
@@ -467,15 +413,15 @@ interface ValueGetSet {
   error?: string;
 }
 
-const TextFieldWrapperControlled: ParentComponent<FieldProps & ValueGetSet> = (
-  props,
-) => {
-  const label = createLabel(props.name, props.schema);
-  const errors = createErrors(props.name);
+const TextFieldWrapperControlled: ParentComponent<
+  PropFieldProps & ValueGetSet
+> = (props) => {
+  const label = createLabel(props.item);
+  const errors = createError(props.item.key);
   const UiComponents = useFormContext().uiComponents;
   return (
     <UiComponents.TextField
-      name={props.name}
+      name={props.item.key}
       value={props.value}
       onChange={props.onChange}
       validationState={errors().length > 0 || props.error ? "invalid" : "valid"}
@@ -485,17 +431,17 @@ const TextFieldWrapperControlled: ParentComponent<FieldProps & ValueGetSet> = (
       <div class="flex items-center gap-2">
         <div class="basis-1/2">
           <UiComponents.TextFieldLabel>{label()}</UiComponents.TextFieldLabel>
-          <DescriptionTooltip schema={props.schema} />
+          <DescriptionTooltip schema={props.item.schema} />
         </div>
         <Show
-          when={props.schema.unit}
+          when={props.item.schema.unit}
           fallback={<div class="basis-1/2">{props.children}</div>}
         >
           {/* TODO when field is invalid then red border is behind unit */}
           <div class="relative block basis-1/2">
             {props.children}
             <span class="absolute inset-y-0 right-0 flex items-center bg-muted px-2">
-              {props.schema.unit}
+              {props.item.schema.unit}
             </span>
           </div>
         </Show>
@@ -510,17 +456,13 @@ const TextFieldWrapperControlled: ParentComponent<FieldProps & ValueGetSet> = (
   );
 };
 
-const InputText: Component<FieldProps> = (props) => {
-  const className = createInputClass(props.name, props.schema.default);
+const InputText: Component<PropFieldProps> = (props) => {
+  const className = createInputClass(props.item.key, props.item.schema.default);
   const UiComponents = useFormContext().uiComponents;
   return (
-    <TextFieldWrapper
-      name={props.name}
-      schema={props.schema}
-      disabled={props.disabled}
-    >
+    <TextFieldWrapper item={props.item} disabled={props.disabled}>
       <UiComponents.TextFieldInput
-        placeholder={props.schema.default}
+        placeholder={props.item.schema.default}
         type="text"
         class={className()}
       />
@@ -528,34 +470,26 @@ const InputText: Component<FieldProps> = (props) => {
   );
 };
 
-const TextAreaWidget: Component<FieldProps> = (props) => {
-  const className = createInputClass(props.name, props.schema.default);
+const TextAreaWidget: Component<PropFieldProps> = (props) => {
+  const className = createInputClass(props.item.key, props.item.schema.default);
   const UiComponents = useFormContext().uiComponents;
   return (
-    <TextFieldWrapper
-      name={props.name}
-      schema={props.schema}
-      disabled={props.disabled}
-    >
+    <TextFieldWrapper item={props.item} disabled={props.disabled}>
       <UiComponents.TextFieldTextArea
-        placeholder={props.schema.default}
+        placeholder={props.item.schema.default}
         class={className()}
       />
     </TextFieldWrapper>
   );
 };
 
-const InputInteger: Component<FieldProps> = (props) => {
-  const className = createInputClass(props.name, props.schema.default);
+const InputInteger: Component<PropFieldProps> = (props) => {
+  const className = createInputClass(props.item.key, props.item.schema.default);
   const UiComponents = useFormContext().uiComponents;
   return (
-    <TextFieldWrapper
-      name={props.name}
-      schema={props.schema}
-      disabled={props.disabled}
-    >
+    <TextFieldWrapper item={props.item} disabled={props.disabled}>
       <UiComponents.TextFieldInput
-        placeholder={props.schema.default}
+        placeholder={props.item.schema.default}
         type="text"
         inputMode="numeric"
         class={className()}
@@ -564,17 +498,13 @@ const InputInteger: Component<FieldProps> = (props) => {
   );
 };
 
-const InputNumber: Component<FieldProps> = (props) => {
-  const className = createInputClass(props.name, props.schema.default);
+const InputNumber: Component<PropFieldProps> = (props) => {
+  const className = createInputClass(props.item.key, props.item.schema.default);
   const UiComponents = useFormContext().uiComponents;
   return (
-    <TextFieldWrapper
-      name={props.name}
-      schema={props.schema}
-      disabled={props.disabled}
-    >
+    <TextFieldWrapper item={props.item} disabled={props.disabled}>
       <UiComponents.TextFieldInput
-        placeholder={props.schema.default}
+        placeholder={props.item.schema.default}
         type="text"
         inputMode="decimal"
         class={className()}
@@ -597,9 +527,9 @@ function numbers2string(value: number[] | undefined): string {
   return value.join(", ");
 }
 
-const InputNumbers: Component<FieldProps> = (props) => {
-  const className = createInputClass(props.name, props.schema.default);
-  const raw = useFormContext().values[props.name] as unknown as number[];
+const InputNumbers: Component<PropFieldProps> = (props) => {
+  const className = createInputClass(props.item.key, props.item.schema.default);
+  const raw = useFormContext().values[props.item.key] as unknown as number[];
   // initial value for stringVal is computed on mount
   // TODO should it be re-computed on value change?
   const [stringVal, setStringVal] = createSignal(numbers2string(raw));
@@ -619,23 +549,108 @@ const InputNumbers: Component<FieldProps> = (props) => {
       // add number[] type to second arg of setProperty
       setError("");
       // only update store when string is valid
-      setProperty(props.name, numbers);
+      setProperty(props.item.key, numbers);
     }
   }
   return (
     <TextFieldWrapperControlled
-      name={props.name}
-      schema={props.schema}
+      item={props.item}
       disabled={props.disabled}
       value={stringVal()}
       onChange={onChange}
       error={error()}
     >
       <UiComponents.TextFieldInput
-        placeholder={numbers2string(props.schema.default)}
+        placeholder={numbers2string(props.item.schema.default)}
         type="text"
         class={className()}
       />
     </TextFieldWrapperControlled>
   );
 };
+
+function BooleanChoicesField(props: { item: Choices }) {
+  const UiComponents = useFormContext().uiComponents;
+  const id = createUniqueId();
+  const checked = createMemo(
+    () => useFormContext().values[props.item.key] as boolean,
+  );
+  const label = createLabel(props.item);
+  const checkedMembers = createMemo(() => props.item.choices[0].members);
+  const setProperty = useFormContext().setProperty;
+  function onChange(checked: boolean) {
+    setProperty(props.item.key, checked);
+    // TODO when unchecked the checkedMembers should be removed/reset
+  }
+  return (
+    <>
+      <div class="flex items-center space-x-2">
+        <div class="basis-1/2">
+          <UiComponents.Label for={id}>{label()}</UiComponents.Label>
+          <DescriptionTooltip schema={props.item.schema} />
+        </div>
+        <UiComponents.Checkbox
+          id={id}
+          checked={checked()}
+          onChange={onChange}
+        />
+      </div>
+      <For each={checkedMembers()}>
+        {(item) => <ItemField item={item} disabled={!checked()} />}
+      </For>
+    </>
+  );
+}
+
+function StringChoicesField(props: { item: Choices }) {
+  const UiComponents = useFormContext().uiComponents;
+  const id = createUniqueId();
+  const value = createMemo(
+    () => useFormContext().values[props.item.key] as string,
+  );
+  const setProperty = useFormContext().setProperty;
+  function onChange(value: string) {
+    setProperty(props.item.key, value);
+    // TODO choice members that are not in the new choice should be removed/reset
+  }
+
+  const label = createLabel(props.item);
+  return (
+    <>
+      <div class="flex items-center gap-2">
+        <div class="basis-1/2">
+          <UiComponents.Label for={id}>{label()}</UiComponents.Label>
+          <DescriptionTooltip schema={props.item.schema} />
+        </div>
+        <UiComponents.RadioGroup
+          id={id}
+          value={value()}
+          onChange={onChange}
+          class="basis-1/2"
+        >
+          <For each={props.item.schema.enum}>
+            {(choice) => (
+              <UiComponents.RadioGroupItem value={choice}>
+                <UiComponents.RadioGroupItemLabel>
+                  {choice}
+                </UiComponents.RadioGroupItemLabel>
+              </UiComponents.RadioGroupItem>
+            )}
+          </For>
+        </UiComponents.RadioGroup>
+      </div>
+      <div>
+        <For each={props.item.choices}>
+          {(choice) => (
+            // Only show fields of active choice
+            <Show when={choice.value === value()}>
+              <For each={choice.members}>
+                {(item) => <ItemField item={item} />}
+              </For>
+            </Show>
+          )}
+        </For>
+      </div>
+    </>
+  );
+}

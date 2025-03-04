@@ -35,7 +35,7 @@ const lib_build: BuildEnvironmentOptions = {
     entry: entries,
   },
   rollupOptions: {
-    // List of all dependencies, how they are imported in the source code
+    // List of all dependencies, exactly how they are imported in the source code
     external: [
       "@kobalte/core",
       "@kobalte/core/accordion",
@@ -46,7 +46,6 @@ const lib_build: BuildEnvironmentOptions = {
       "@kobalte/core/tooltip",
       "ajv",
       "ajv/dist/2020",
-      "ajv/dist/2020.js",
       "class-variance-authority",
       "clsx",
       "solid-js",

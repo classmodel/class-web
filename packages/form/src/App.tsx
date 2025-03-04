@@ -7,7 +7,6 @@ import {
 } from "solid-js";
 import { Form } from "./Form";
 import { Button } from "./components/ui/button";
-import { schema2groups } from "./utils";
 
 // TODO use storybookjs instead of App.tsx, but
 // https://github.com/storybookjs/sandboxes/blob/main/solid-vite/default-ts/after-storybook
@@ -137,21 +136,30 @@ function ExternalSubmit() {
   );
 }
 
-function Group() {
+function Groups() {
   const values = {
-    ungrouped: "string1",
-    grouped: "string2",
+    s1: "string1",
+    s2: "string2",
+    s3: "string3",
+    s4: "string4",
+    s5: "string5",
   };
   const schema: JSONSchemaType<{
-    ungrouped: string;
-    grouped: string;
+    s1: string;
+    s2: string;
+    s3: string;
+    s4: string;
+    s5: string;
   }> = {
     type: "object",
     properties: {
-      ungrouped: { type: "string" },
-      grouped: { type: "string", "ui:group": "g1" },
+      s1: { type: "string" },
+      s2: { type: "string", "ui:group": "g1" },
+      s3: { type: "string", "ui:group": "g2" },
+      s4: { type: "string", "ui:group": "g2" },
+      s5: { type: "string", "ui:group": "g3" },
     },
-    required: ["ungrouped", "grouped"],
+    required: ["s1", "s2", "s3", "s4", "s5"],
   };
   return (
     <Form
@@ -159,6 +167,10 @@ function Group() {
       onSubmit={(data) => console.log(data)}
       values={values}
     >
+      <p>
+        s1 is ungrouped, s2 is in g1 group, s3 and s4 are in g2 group, s5 is in
+        group g3.
+      </p>
       <Button type="submit">Submit</Button>
     </Form>
   );
@@ -235,31 +247,34 @@ function GroupBooleanToggle() {
 
 function GroupEnumToggle() {
   type Config = {
-    t1: 'a' | 'b';
-  } & ({ t1: 'a'; s1: string;s2: string; } | { t1: 'b'; s1: string;s3: string });
+    t1: "a" | "b";
+  } & (
+    | { t1: "a"; s1: string; s2: string }
+    | { t1: "b"; s1: string; s3: string }
+  );
   const values: Config = {
-    t1: 'a',
+    t1: "a",
     s1: "string1",
-    s2: "string2"
+    s2: "string2",
   };
   const schema = {
     type: "object",
     properties: {
-      t1: { type: "string", enum: ['a', 'b'], "ui:group": "g1", "default": 'a' },
+      t1: { type: "string", enum: ["a", "b"], "ui:group": "g1", default: "a" },
     },
     allOf: [
       {
         if: {
           properties: {
             t1: {
-              const: 'a',
+              const: "a",
             },
           },
         },
         // biome-ignore lint/suspicious/noThenProperty: <explanation>
         then: {
           properties: {
-            s1: { type: "string", "ui:group": "g1" },
+            s1: { type: "string", "ui:group": "g1" }, // prop which is in both branches
             s2: { type: "string", "ui:group": "g1" },
           },
           required: ["s1", "s2"],
@@ -269,7 +284,7 @@ function GroupEnumToggle() {
         if: {
           properties: {
             t1: {
-              const: 'b',
+              const: "b",
             },
           },
         },
@@ -284,9 +299,6 @@ function GroupEnumToggle() {
       },
     ],
   } as unknown as JSONSchemaType<Config>;
-  console.log(
-    schema2groups(schema)
-  )
   return (
     <Form
       schema={schema}
@@ -435,8 +447,8 @@ const App: Component = () => {
       <ExampleWrapper legend="External submit">
         <ExternalSubmit />
       </ExampleWrapper>
-      <ExampleWrapper legend="Group">
-        <Group />
+      <ExampleWrapper legend="Groups">
+        <Groups />
       </ExampleWrapper>
       <ExampleWrapper legend="Group error">
         <GroupError />
