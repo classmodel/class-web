@@ -312,6 +312,28 @@ function GroupEnumToggle() {
   );
 }
 
+function StringEnumExample() {
+  const values = {
+    s1: "a",
+  };
+  const schema: JSONSchemaType<typeof values> = {
+    type: "object",
+    properties: {
+      s1: { type: "string", enum: ["a", "b", "c"] },
+    },
+    required: ["s1"],
+  };
+  return (
+    <Form
+      schema={schema}
+      onSubmit={(data) => console.log(data)}
+      values={values}
+    >
+      <Button type="submit">Submit</Button>
+    </Form>
+  );
+}
+
 function NumberExample() {
   const values = {
     n1: 3.14,
@@ -354,6 +376,29 @@ function IntegerExample() {
     >
       <Button type="submit">Submit</Button>
       <p>on submit returns integer `42` if unchanged.</p>
+    </Form>
+  );
+}
+
+function BooleanExample() {
+  const values = {
+    b1: true,
+  };
+  const schema: JSONSchemaType<typeof values> = {
+    type: "object",
+    properties: {
+      b1: { type: "boolean" },
+    },
+    required: ["b1"],
+  };
+  return (
+    <Form
+      schema={schema}
+      onSubmit={(data) => console.log(data)}
+      values={values}
+    >
+      <Button type="submit">Submit</Button>
+      <p>on submit returns boolean `true` if unchanged.</p>
     </Form>
   );
 }
@@ -459,11 +504,17 @@ const App: Component = () => {
       <ExampleWrapper legend="Group enum toggle">
         <GroupEnumToggle />
       </ExampleWrapper>
+      <ExampleWrapper legend="String as radio group">
+        <StringEnumExample />
+      </ExampleWrapper>
       <ExampleWrapper legend="Number">
         <NumberExample />
       </ExampleWrapper>
       <ExampleWrapper legend="Integer">
         <IntegerExample />
+      </ExampleWrapper>
+      <ExampleWrapper legend="Boolean as checkbox">
+        <BooleanExample />
       </ExampleWrapper>
       <ExampleWrapper legend="Array of number">
         <ArrayOfNumberExample />

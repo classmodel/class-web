@@ -206,6 +206,13 @@ function findByKey(tree: Item[], key: string): Base | Choices | undefined {
   return undefined;
 }
 
+/**
+ * Collects all unique keys from members within a group, including members nested in choices.
+ *
+ * @param group - The group name to search in
+ * @returns A Set containing all unique member keys found in the group
+ *
+ */
 export function keysOfGroupMembers(group: Group): Set<string> {
   // This does not look which choice has been made
   // aka whether choices.value === value
@@ -225,6 +232,14 @@ export function keysOfGroupMembers(group: Group): Set<string> {
   return keys;
 }
 
+/**
+ * Converts a JSON Schema object into a tree structure for form rendering.
+ *
+ * @template C - The type of the schema content
+ * @param schema - A JSON Schema object that must be of type object with properties
+ * @returns An array of items representing the hierarchical structure of the form
+ *
+ */
 export function schema2tree<C>(schema: JSONSchemaType<C>): Item[] {
   const tree: Item[] = [];
   if (!("properties" in schema)) {

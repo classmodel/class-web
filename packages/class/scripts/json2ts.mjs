@@ -131,5 +131,5 @@ function main() {
   }
 }
 
-// TODO temporary disabled as json-schema-to-typescript can not handle if/then/else
+// TODO disabled as json-schema-to-typescript can not handle if/then/else
 // main();

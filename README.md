@@ -23,7 +23,7 @@ The class model can be run from the command line, see [packages/class/README.md]
 
 The class model can be used a package or library, see [packages/class/README.md](packages/class/README.md#package-usage) for more information.
 
-The app use a form component has been generalized into a package, see [packages/form/README.md](packages/form/README.md) for more information.
+The app uses a form component that has been generalized into a package, see [packages/form/README.md](packages/form/README.md) for more information.
 
 ## Developers
 

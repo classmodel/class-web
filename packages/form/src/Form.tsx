@@ -63,6 +63,7 @@ const MyCheckbox: Component<{
   id?: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
+  disabled?: boolean;
 }> = Checkbox;
 
 const DEFAULT_UI_COMPONENTS = {
@@ -293,12 +294,22 @@ const PropField: Component<PropFieldProps> = (props) => {
         <InputInteger item={props.item} disabled={props.disabled} />
       </Match>
       <Match when={props.item.schema.type === "string"}>
-        <Show
-          when={props.item.schema["ui:widget"] === "textarea"}
-          fallback={<InputText item={props.item} disabled={props.disabled} />}
-        >
-          <TextAreaWidget item={props.item} disabled={props.disabled} />
-        </Show>
+        <Switch>
+          {/* TODO when enum.length > 10 then use select/combobox */}
+          <Match when={props.item.schema.enum}>
+            {/* TODO allow user to overwrite used input with ui:widget */}
+            <InputTextEnum item={props.item} disabled={props.disabled} />
+          </Match>
+          <Match when={props.item.schema["ui:widget"] === "textarea"}>
+            <TextAreaWidget item={props.item} disabled={props.disabled} />
+          </Match>
+          <Match when={props.item.schema.type === "string"}>
+            <InputText item={props.item} disabled={props.disabled} />
+          </Match>
+        </Switch>
+      </Match>
+      <Match when={props.item.schema.type === "boolean"}>
+        <InputBoolean item={props.item} disabled={props.disabled} />
       </Match>
       <Match
         when={
@@ -513,6 +524,74 @@ const InputNumber: Component<PropFieldProps> = (props) => {
   );
 };
 
+const InputBoolean: Component<PropFieldProps> = (props) => {
+  const UiComponents = useFormContext().uiComponents;
+  const id = createUniqueId();
+  const checked = createMemo(
+    () => useFormContext().values[props.item.key] as boolean,
+  );
+  const label = createLabel(props.item);
+  const setProperty = useFormContext().setProperty;
+  function onChange(checked: boolean) {
+    setProperty(props.item.key, checked);
+    // TODO when unchecked the checkedMembers should be removed/reset
+  }
+  return (
+    <div class="flex items-center space-x-2">
+      <div class="basis-1/2">
+        <UiComponents.Label for={id}>{label()}</UiComponents.Label>
+        <DescriptionTooltip schema={props.item.schema} />
+      </div>
+      <UiComponents.Checkbox
+        id={id}
+        checked={checked()}
+        onChange={onChange}
+        disabled={props.disabled}
+      />
+    </div>
+  );
+};
+
+const InputTextEnum: Component<PropFieldProps> = (props) => {
+  const UiComponents = useFormContext().uiComponents;
+  const label = createLabel(props.item);
+  const id = createUniqueId();
+  const value = createMemo(
+    () => useFormContext().values[props.item.key] as string,
+  );
+  const setProperty = useFormContext().setProperty;
+  function onChange(value: string) {
+    setProperty(props.item.key, value);
+    // TODO choice members that are not in the new choice should be removed/reset
+  }
+
+  return (
+    <div class="flex items-center gap-2">
+      <div class="basis-1/2">
+        <UiComponents.Label for={id}>{label()}</UiComponents.Label>
+        <DescriptionTooltip schema={props.item.schema} />
+      </div>
+      <UiComponents.RadioGroup
+        id={id}
+        value={value()}
+        onChange={onChange}
+        class="basis-1/2"
+        disabled={props.disabled}
+      >
+        <For each={props.item.schema.enum}>
+          {(choice) => (
+            <UiComponents.RadioGroupItem value={choice}>
+              <UiComponents.RadioGroupItemLabel>
+                {choice}
+              </UiComponents.RadioGroupItemLabel>
+            </UiComponents.RadioGroupItem>
+          )}
+        </For>
+      </UiComponents.RadioGroup>
+    </div>
+  );
+};
+
 function string2numbers(value: string): number[] {
   return value
     .split(",")
@@ -570,31 +649,13 @@ const InputNumbers: Component<PropFieldProps> = (props) => {
 };
 
 function BooleanChoicesField(props: { item: Choices }) {
-  const UiComponents = useFormContext().uiComponents;
-  const id = createUniqueId();
   const checked = createMemo(
     () => useFormContext().values[props.item.key] as boolean,
   );
-  const label = createLabel(props.item);
   const checkedMembers = createMemo(() => props.item.choices[0].members);
-  const setProperty = useFormContext().setProperty;
-  function onChange(checked: boolean) {
-    setProperty(props.item.key, checked);
-    // TODO when unchecked the checkedMembers should be removed/reset
-  }
   return (
     <>
-      <div class="flex items-center space-x-2">
-        <div class="basis-1/2">
-          <UiComponents.Label for={id}>{label()}</UiComponents.Label>
-          <DescriptionTooltip schema={props.item.schema} />
-        </div>
-        <UiComponents.Checkbox
-          id={id}
-          checked={checked()}
-          onChange={onChange}
-        />
-      </div>
+      <InputBoolean item={props.item} />
       <For each={checkedMembers()}>
         {(item) => <ItemField item={item} disabled={!checked()} />}
       </For>
@@ -603,42 +664,13 @@ function BooleanChoicesField(props: { item: Choices }) {
 }
 
 function StringChoicesField(props: { item: Choices }) {
-  const UiComponents = useFormContext().uiComponents;
-  const id = createUniqueId();
   const value = createMemo(
     () => useFormContext().values[props.item.key] as string,
   );
-  const setProperty = useFormContext().setProperty;
-  function onChange(value: string) {
-    setProperty(props.item.key, value);
-    // TODO choice members that are not in the new choice should be removed/reset
-  }
 
-  const label = createLabel(props.item);
   return (
     <>
-      <div class="flex items-center gap-2">
-        <div class="basis-1/2">
-          <UiComponents.Label for={id}>{label()}</UiComponents.Label>
-          <DescriptionTooltip schema={props.item.schema} />
-        </div>
-        <UiComponents.RadioGroup
-          id={id}
-          value={value()}
-          onChange={onChange}
-          class="basis-1/2"
-        >
-          <For each={props.item.schema.enum}>
-            {(choice) => (
-              <UiComponents.RadioGroupItem value={choice}>
-                <UiComponents.RadioGroupItemLabel>
-                  {choice}
-                </UiComponents.RadioGroupItemLabel>
-              </UiComponents.RadioGroupItem>
-            )}
-          </For>
-        </UiComponents.RadioGroup>
-      </div>
+      <InputTextEnum item={props.item} />
       <div>
         <For each={props.item.choices}>
           {(choice) => (
