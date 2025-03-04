@@ -15,7 +15,7 @@ test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
       "Add a permutation to the reference configuration of this experiment",
     )
     .click();
-  await page.getByRole("button", { name: "Initial State" }).click();
+  await page.getByLabel("Mixed layer").click();
   await page.getByLabel("ABL height").fill("800");
   await page.getByRole("button", { name: "Run" }).click();
 
@@ -27,8 +27,8 @@ test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
     exact: true,
   });
   await experiment2.getByRole("button", { name: "Edit", exact: true }).click();
-  await page.getByRole("button", { name: "Mixed layer Button" }).click();
-  await page.getByLabel("Entrainment ratio for virtual heat").fill("0.3");
+  await page.getByLabel("Mixed layer").click();
+  await page.getByLabel("β").fill("0.3");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Download configuration of experiment 1
@@ -36,6 +36,8 @@ test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
   const downloadPromise1 = page.waitForEvent("download");
   await page.getByRole("link", { name: "Configuration", exact: true }).click();
   const config1 = await parseDownload(downloadPromise1);
+  // Workaround that partial config is missing sw_ml, as its part of its preset
+  config1.permutations[0].sw_ml = true;
   if (!config1.permutations[0].sw_ml) {
     throw new Error("sw_ml is not defined");
   }
@@ -46,6 +48,9 @@ test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
   const downloadPromise2 = page.waitForEvent("download");
   await page.getByRole("link", { name: "Configuration", exact: true }).click();
   const config2 = await parseDownload(downloadPromise2);
+  // Workaround that partial config is missing sw_ml, as its part of its preset
+  config2.reference.sw_ml = true;
+  config2.permutations[0].sw_ml = true;
   if (!config2.reference.sw_ml || !config2.permutations[0].sw_ml) {
     throw new Error("sw_ml is not defined");
   }
@@ -76,7 +81,7 @@ test("Swap permutation with default reference", async ({ page }) => {
       "Add a permutation to the reference configuration of this experiment",
     )
     .click();
-  await page.getByRole("button", { name: "Initial State" }).click();
+  await page.getByLabel("Mixed layer").click();
   await page.getByLabel("ABL height").fill("800");
   await page.getByRole("button", { name: "Run" }).click();
 
@@ -90,8 +95,10 @@ test("Swap permutation with default reference", async ({ page }) => {
   const downloadPromise1 = page.waitForEvent("download");
   await page.getByRole("link", { name: "Configuration", exact: true }).click();
   const config1 = await parseDownload(downloadPromise1);
+  // Workaround that partial config is missing sw_ml, as its part of its preset
+  config1.reference.sw_ml = true;
   if (!config1.reference.sw_ml) {
-    throw new Error("sw_ml is not defined");
+    throw new Error("Mixed layer is turned off");
   }
   expect(config1.reference.h_0).toEqual(800);
 });
@@ -101,9 +108,9 @@ test("Swap permutation with custom reference", async ({ page }) => {
 
   // Create a new experiment
   await page.getByRole("button", { name: "Start from scratch" }).click();
-  await page.getByRole("button", { name: "Initial State" }).click();
+  await page.getByLabel("Mixed layer").click();
   await page.getByLabel("ABL height").fill("400");
-  await page.getByLabel("Mixed-layer potential temperature").fill("265");
+  await page.getByLabel("Potential temperature", { exact: true }).fill("265");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Add a permutation
@@ -113,7 +120,7 @@ test("Swap permutation with custom reference", async ({ page }) => {
       "Add a permutation to the reference configuration of this experiment",
     )
     .click();
-  await page.getByRole("button", { name: "Initial State" }).click();
+  await page.getByLabel("Mixed layer").click();
   await page.getByLabel("ABL height").fill("800");
   await page.getByLabel("Temperature jump at h").fill("0.8");
   await page.getByRole("button", { name: "Run" }).click();
@@ -128,9 +135,13 @@ test("Swap permutation with custom reference", async ({ page }) => {
   const downloadPromise1 = page.waitForEvent("download");
   await page.getByRole("link", { name: "Configuration", exact: true }).click();
   const config1 = await parseDownload(downloadPromise1);
+  // Workaround that partial config is missing sw_ml, as its part of its preset
+  config1.reference.sw_ml = true;
+  config1.permutations[0].sw_ml = true;
   if (!config1.reference.sw_ml || !config1.permutations[0].sw_ml) {
     throw new Error("sw_ml is not defined");
   }
+
   expect(config1.reference.h_0).toEqual(800);
   expect(config1.reference.dtheta_0).toEqual(0.8);
   expect(config1.permutations[0].h_0).toEqual(400);
@@ -150,7 +161,7 @@ test("Promote permutation to a new experiment", async ({ page }) => {
       "Add a permutation to the reference configuration of this experiment",
     )
     .click();
-  await page.getByRole("button", { name: "Initial State" }).click();
+  await page.getByLabel("Mixed layer").click();
   await page.getByLabel("Name").fill("perm1");
   await page.getByLabel("ABL height").fill("800");
   await page.getByRole("button", { name: "Run" }).click();
@@ -166,6 +177,8 @@ test("Promote permutation to a new experiment", async ({ page }) => {
   const downloadPromise2 = page.waitForEvent("download");
   await page.getByRole("link", { name: "Configuration", exact: true }).click();
   const config2 = await parseDownload(downloadPromise2);
+  // Workaround that partial config is missing sw_ml, as its part of its preset
+  config2.reference.sw_ml = true;
   if (!config2.reference.sw_ml) {
     throw new Error("sw_ml is not defined");
   }
@@ -187,7 +200,7 @@ test("Duplicate permutation", async ({ page }) => {
       "Add a permutation to the reference configuration of this experiment",
     )
     .click();
-  await page.getByRole("button", { name: "Initial State" }).click();
+  await page.getByLabel("Mixed layer").click();
   await page.getByLabel("ABL height").fill("800");
   await page.getByRole("button", { name: "Run" }).click();
   await page.getByRole("button", { name: "Other actions" }).click();
@@ -196,7 +209,7 @@ test("Duplicate permutation", async ({ page }) => {
   // Edit the duplicated permutation
   const perm2 = page.getByLabel("Copy of 1", { exact: true });
   await perm2.getByRole("button", { name: "Edit permutation" }).click();
-  await page.getByRole("button", { name: "Initial State" }).click();
+  await page.getByLabel("Mixed layer").click();
   await page.getByLabel("ABL height").fill("400");
   await page.getByRole("button", { name: "Run" }).click();
 
@@ -206,6 +219,10 @@ test("Duplicate permutation", async ({ page }) => {
   await page.getByRole("link", { name: "Configuration", exact: true }).click();
   const config1 = await parseDownload(downloadPromise1);
   expect(config1.permutations.length).toEqual(2);
+
+  // Workaround that partial config is missing sw_ml, as its part of its preset
+  config1.permutations[0].sw_ml = true;
+  config1.permutations[1].sw_ml = true;
   if (!config1.permutations[0].sw_ml || !config1.permutations[1].sw_ml) {
     throw new Error("sw_ml is not defined");
   }

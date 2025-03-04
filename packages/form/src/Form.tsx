@@ -243,7 +243,7 @@ const AccordionWrapper: ParentComponent<GroupFieldProps> = (props) => {
   const UiComponents = useFormContext().uiComponents;
   return (
     <UiComponents.AccordionItem value={props.item.group}>
-      <UiComponents.AccordionTrigger>
+      <UiComponents.AccordionTrigger aria-label={props.item.group}>
         <div class="flex w-full justify-between pe-1">
           {props.item.group}
           <Show when={memberErrors().length > 0}>
