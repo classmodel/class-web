@@ -96,6 +96,7 @@ const untypedSchema = {
       then: {
         properties: {
           h_0: {
+            "symbol": "h",
             type: "number",
             title: "ABL height",
             unit: "m",
@@ -103,6 +104,7 @@ const untypedSchema = {
             "ui:group": "Mixed layer",
           },
           theta_0: {
+            symbol: "θ",
             type: "number",
             "ui:group": "Mixed layer",
             title: "Potential temperature",
@@ -114,6 +116,7 @@ const untypedSchema = {
             unit: "K",
           },
           dtheta_0: {
+            symbol: "Δθ",
             type: "number",
             title: "Temperature jump at h",
             "ui:group": "Mixed layer",
@@ -121,6 +124,7 @@ const untypedSchema = {
             unit: "K",
           },
           q_0: {
+            symbol: "q",
             type: "number",
             "ui:group": "Mixed layer",
             unit: "kg kg-1",
@@ -128,6 +132,7 @@ const untypedSchema = {
             title: "Mixed-layer specific humidity",
           },
           dq_0: {
+            symbol: "Δq",
             type: "number",
             description: "Specific humidity jump at h",
             unit: "kg kg-1",
@@ -135,11 +140,11 @@ const untypedSchema = {
             "ui:group": "Mixed layer",
           },
           wtheta: {
+            symbol: "(w'θ')ₛ",
             type: "array",
             items: {
               type: "number",
             },
-            symbol: "wθ",
             "ui:group": "Mixed layer",
             unit: "K m s-1",
             title: "Surface kinematic heat flux",
@@ -147,6 +152,7 @@ const untypedSchema = {
             minItems: 1,
           },
           advtheta: {
+            symbol: "adv(θ)",  // _adv not possible in unicode
             type: "number",
             "ui:group": "Mixed layer",
             unit: "K s-1",
@@ -154,6 +160,7 @@ const untypedSchema = {
             title: "Advection of heat",
           },
           gammatheta: {
+            symbol: "γθ",     // TODO: theta should be subscript, not possible in unicode
             type: "number",
             "ui:group": "Mixed layer",
             unit: "K m-1",
@@ -161,6 +168,7 @@ const untypedSchema = {
             title: "Free atmosphere potential temperature lapse rate",
           },
           wq: {
+            symbol: "(w'q')ₛ",
             type: "number",
             "ui:group": "Mixed layer",
             unit: "kg kg-1 m s-1",
@@ -168,6 +176,7 @@ const untypedSchema = {
             title: "Surface kinematic moisture flux",
           },
           advq: {
+            symbol: "adv(q)",  // _adv not possible in unicode
             type: "number",
             "ui:group": "Mixed layer",
             unit: "kg kg-1 s-1",
@@ -175,6 +184,7 @@ const untypedSchema = {
             title: "Advection of moisture",
           },
           gammaq: {
+            symbol: "γq",     // TODO: q should be subscript, not possible in unicode
             type: "number",
             "ui:group": "Mixed layer",
             unit: "kg kg-1 m-1",
@@ -182,6 +192,7 @@ const untypedSchema = {
             title: "Free atmosphere specific humidity lapse rate",
           },
           divU: {
+            symbol: "div(Uₕ)",
             type: "number",
             "ui:group": "Mixed layer",
             default: 0,
@@ -189,11 +200,11 @@ const untypedSchema = {
             title: "Horizontal large-scale divergence of wind",
           },
           beta: {
+            symbol: "β",
             type: "number",
             "ui:group": "Mixed layer",
             default: 0.2,
             title: "Entrainment ratio for virtual heat",
-            symbol: "β",
           },
         },
         required: [
