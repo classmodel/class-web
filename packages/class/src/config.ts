@@ -96,7 +96,7 @@ const untypedSchema = {
       then: {
         properties: {
           h_0: {
-            "symbol": "h",
+            symbol: "h",
             type: "number",
             title: "ABL height",
             unit: "m",
@@ -152,7 +152,7 @@ const untypedSchema = {
             minItems: 1,
           },
           advtheta: {
-            symbol: "adv(θ)",  // _adv not possible in unicode
+            symbol: "adv(θ)", // _adv not possible in unicode
             type: "number",
             "ui:group": "Mixed layer",
             unit: "K s-1",
@@ -160,7 +160,7 @@ const untypedSchema = {
             title: "Advection of heat",
           },
           gammatheta: {
-            symbol: "γθ",     // TODO: theta should be subscript, not possible in unicode
+            symbol: "γ<sub>θ</sub>",
             type: "number",
             "ui:group": "Mixed layer",
             unit: "K m-1",
@@ -176,7 +176,7 @@ const untypedSchema = {
             title: "Surface kinematic moisture flux",
           },
           advq: {
-            symbol: "adv(q)",  // _adv not possible in unicode
+            symbol: "adv(q)", // _adv not possible in unicode
             type: "number",
             "ui:group": "Mixed layer",
             unit: "kg kg-1 s-1",
@@ -184,7 +184,7 @@ const untypedSchema = {
             title: "Advection of moisture",
           },
           gammaq: {
-            symbol: "γq",     // TODO: q should be subscript, not possible in unicode
+            symbol: "γ<sub>q</sub>",
             type: "number",
             "ui:group": "Mixed layer",
             unit: "kg kg-1 m-1",

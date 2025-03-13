@@ -441,7 +441,7 @@ const TextFieldWrapperControlled: ParentComponent<
     >
       <div class="flex items-center gap-2">
         <div class="basis-1/2">
-          <UiComponents.TextFieldLabel>{label()}</UiComponents.TextFieldLabel>
+          <UiComponents.TextFieldLabel innerHTML={label()} />
           <DescriptionTooltip schema={props.item.schema} />
         </div>
         <Show

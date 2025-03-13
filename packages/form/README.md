@@ -71,6 +71,8 @@ The form label uses the value of the `title` key or property key.
 If you want an shorter label you can add the `symbol` key with a string value.
 An example value could be `β` for beta.
 When symbol is set the title will be displayed as a tooltip.
+The symbol value can include HTML like sub and sup. For example `<sub>2</sub>` for subscript<sub>2</sub> or
+`<sup>3</sup>` for superscript<sup>3<sup>.
 
 ### unit keyword
 
