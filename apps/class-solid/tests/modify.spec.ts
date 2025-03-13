@@ -4,10 +4,10 @@ import { expect, test } from "@playwright/test";
 test("Edit experiment preserves previous edits", async ({ page }) => {
   await page.goto("/");
 
-  // Create new experiment with custom ABL height
+  // Create new experiment with custom h
   await page.getByRole("button", { name: "Add Start from scratch" }).click();
   await page.getByLabel("Mixed layer").click();
-  await page.getByLabel("ABL height").fill("800");
+  await page.getByLabel("h", { exact: true }).fill("800");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Edit a second field
@@ -19,7 +19,11 @@ test("Edit experiment preserves previous edits", async ({ page }) => {
   // Open editor again and check that both values are still updated
   await page.getByRole("button", { name: "Edit" }).click();
   await page.getByLabel("Mixed layer").click();
-  await expect(page.getByLabel("ABL height")).toHaveValue("800");
+  await expect(
+    page
+      .getByLabel("ExperimentPreset: Default")
+      .getByLabel("h", { exact: true }),
+  ).toHaveValue("800");
   await page.getByRole("button", { name: "Time control" }).click();
   await expect(page.getByLabel("Time step")).toHaveValue("30");
 });
@@ -39,7 +43,7 @@ test("Edit permutation preserves previous edits", async ({ page }) => {
     )
     .click();
   await page.getByLabel("Mixed layer").click();
-  await page.getByLabel("Temperature jump at h").fill("0.1");
+  await page.getByLabel("Δθ").fill("0.1");
   await page.getByRole("button", { name: "Run" }).click();
   // TODO: this gives weird looking results, fix + add check; how to test??
 

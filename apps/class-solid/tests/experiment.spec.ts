@@ -16,7 +16,10 @@ test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
     )
     .click();
   await page.getByLabel("Mixed layer").click();
-  await page.getByLabel("ABL height").fill("800");
+  await page
+    .getByLabel("Permutation on reference")
+    .getByLabel("h", { exact: true })
+    .fill("800");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Duplicate experiment
@@ -82,7 +85,10 @@ test("Swap permutation with default reference", async ({ page }) => {
     )
     .click();
   await page.getByLabel("Mixed layer").click();
-  await page.getByLabel("ABL height").fill("800");
+  await page
+    .getByLabel("Permutation on reference")
+    .getByLabel("h", { exact: true })
+    .fill("800");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Do action
@@ -109,8 +115,8 @@ test("Swap permutation with custom reference", async ({ page }) => {
   // Create a new experiment
   await page.getByRole("button", { name: "Start from scratch" }).click();
   await page.getByLabel("Mixed layer").click();
-  await page.getByLabel("ABL height").fill("400");
-  await page.getByLabel("Potential temperature", { exact: true }).fill("265");
+  await page.getByLabel("h", { exact: true }).fill("400");
+  await page.getByLabel("θ", { exact: true }).fill("265");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Add a permutation
@@ -121,8 +127,11 @@ test("Swap permutation with custom reference", async ({ page }) => {
     )
     .click();
   await page.getByLabel("Mixed layer").click();
-  await page.getByLabel("ABL height").fill("800");
-  await page.getByLabel("Temperature jump at h").fill("0.8");
+  await page
+    .getByLabel("Permutation on reference")
+    .getByLabel("h", { exact: true })
+    .fill("800");
+  await page.getByLabel("Δθ").fill("0.8");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Do action
@@ -163,7 +172,10 @@ test("Promote permutation to a new experiment", async ({ page }) => {
     .click();
   await page.getByLabel("Mixed layer").click();
   await page.getByLabel("Name").fill("perm1");
-  await page.getByLabel("ABL height").fill("800");
+  await page
+    .getByLabel("Permutation on reference")
+    .getByLabel("h", { exact: true })
+    .fill("800");
   await page.getByRole("button", { name: "Run" }).click();
 
   await page.getByRole("button", { name: "Other actions" }).click();
@@ -201,7 +213,10 @@ test("Duplicate permutation", async ({ page }) => {
     )
     .click();
   await page.getByLabel("Mixed layer").click();
-  await page.getByLabel("ABL height").fill("800");
+  await page
+    .getByLabel("Permutation on reference")
+    .getByLabel("h", { exact: true })
+    .fill("800");
   await page.getByRole("button", { name: "Run" }).click();
   await page.getByRole("button", { name: "Other actions" }).click();
   await page.getByRole("menuitem", { name: "Duplicate permutation" }).click();
@@ -210,7 +225,10 @@ test("Duplicate permutation", async ({ page }) => {
   const perm2 = page.getByLabel("Copy of 1", { exact: true });
   await perm2.getByRole("button", { name: "Edit permutation" }).click();
   await page.getByLabel("Mixed layer").click();
-  await page.getByLabel("ABL height").fill("400");
+  await page
+    .getByLabel("Permutation on reference")
+    .getByLabel("h", { exact: true })
+    .fill("400");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Check that configurations are correct

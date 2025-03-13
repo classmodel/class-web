@@ -8,7 +8,7 @@ test("Create share link from an experiment", async ({ page }) => {
   await page.getByRole("button", { name: "Start from scratch" }).click();
 
   await page.getByRole("button", { name: "Mixed Layer" }).click();
-  await page.getByLabel("ABL height").fill("800");
+  await page.getByLabel("h", { exact: true }).fill("800");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Open share dialog
