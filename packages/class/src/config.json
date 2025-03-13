@@ -49,6 +49,7 @@
       "then": {
         "properties": {
           "h_0": {
+            "symbol": "h",
             "type": "number",
             "title": "ABL height",
             "unit": "m",
@@ -56,6 +57,7 @@
             "ui:group": "Mixed layer"
           },
           "theta_0": {
+            "symbol": "θ",
             "type": "number",
             "ui:group": "Mixed layer",
             "title": "Potential temperature",
@@ -65,6 +67,7 @@
             "unit": "K"
           },
           "dtheta_0": {
+            "symbol": "Δθ",
             "type": "number",
             "title": "Temperature jump at h",
             "ui:group": "Mixed layer",
@@ -72,6 +75,7 @@
             "unit": "K"
           },
           "q_0": {
+            "symbol": "q",
             "type": "number",
             "ui:group": "Mixed layer",
             "unit": "kg kg-1",
@@ -79,6 +83,7 @@
             "title": "Mixed-layer specific humidity"
           },
           "dq_0": {
+            "symbol": "Δq",
             "type": "number",
             "description": "Specific humidity jump at h",
             "unit": "kg kg-1",
@@ -86,11 +91,11 @@
             "ui:group": "Mixed layer"
           },
           "wtheta": {
+            "symbol": "(w'θ')ₛ",
             "type": "array",
             "items": {
               "type": "number"
             },
-            "symbol": "wθ",
             "ui:group": "Mixed layer",
             "unit": "K m s-1",
             "title": "Surface kinematic heat flux",
@@ -98,6 +103,7 @@
             "minItems": 1
           },
           "advtheta": {
+            "symbol": "adv(θ)",
             "type": "number",
             "ui:group": "Mixed layer",
             "unit": "K s-1",
@@ -105,6 +111,7 @@
             "title": "Advection of heat"
           },
           "gammatheta": {
+            "symbol": "γ<sub>θ</sub>",
             "type": "number",
             "ui:group": "Mixed layer",
             "unit": "K m-1",
@@ -112,6 +119,7 @@
             "title": "Free atmosphere potential temperature lapse rate"
           },
           "wq": {
+            "symbol": "(w'q')ₛ",
             "type": "number",
             "ui:group": "Mixed layer",
             "unit": "kg kg-1 m s-1",
@@ -119,6 +127,7 @@
             "title": "Surface kinematic moisture flux"
           },
           "advq": {
+            "symbol": "adv(q)",
             "type": "number",
             "ui:group": "Mixed layer",
             "unit": "kg kg-1 s-1",
@@ -126,6 +135,7 @@
             "title": "Advection of moisture"
           },
           "gammaq": {
+            "symbol": "γ<sub>q</sub>",
             "type": "number",
             "ui:group": "Mixed layer",
             "unit": "kg kg-1 m-1",
@@ -133,6 +143,7 @@
             "title": "Free atmosphere specific humidity lapse rate"
           },
           "divU": {
+            "symbol": "div(Uₕ)",
             "type": "number",
             "ui:group": "Mixed layer",
             "default": 0,
@@ -140,11 +151,11 @@
             "title": "Horizontal large-scale divergence of wind"
           },
           "beta": {
+            "symbol": "β",
             "type": "number",
             "ui:group": "Mixed layer",
             "default": 0.2,
-            "title": "Entrainment ratio for virtual heat",
-            "symbol": "β"
+            "title": "Entrainment ratio for virtual heat"
           }
         },
         "required": [
