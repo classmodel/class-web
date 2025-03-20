@@ -1,5 +1,4 @@
-import type { Config, JsonSchemaOfConfig } from "./config.js";
-
+import type { Config } from "./config.js";
 /**
  * Overwrite values in first configuration with second configuration.
  *
@@ -39,6 +38,18 @@ type RecursivePartial<T> = {
  */
 export type PartialConfig = RecursivePartial<Config>;
 
+function isArrayEqual<T>(a: T[], b: T[]): boolean {
+  if (!(a && b) && a.length !== b.length) {
+    return false;
+  }
+  for (let index = 0; index < a.length; index++) {
+    if (a[index] !== b[index]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
  *
  * From first config remove all parameters that are the same as in the second config or third config.
@@ -59,81 +70,22 @@ export function pruneConfig(
     config = pruneConfig(permutation, reference) as Config;
     config2 = preset;
   }
-  for (const section in config) {
-    const s = config[section as keyof typeof config];
-    const s2 = config2[section as keyof typeof config2];
-    if (s === undefined || s2 === undefined) {
-      continue;
-    }
-    if (typeof s === "string") {
+  for (const key in config) {
+    const k = key as keyof typeof config;
+    const k2 = key as keyof typeof config;
+    if (typeof config[k] === "string") {
       // Do not prune name and description
       continue;
     }
-    for (const key in s) {
-      const k = key as keyof typeof s;
-      const k2 = key as keyof typeof s2;
-      if (s[k] === s2[k2]) {
-        delete s[k];
-      }
-    }
-    if (Object.keys(s).length === 0) {
-      delete config[section as keyof typeof config];
+    const v = config[k];
+    const v2 = config2[k2];
+    if (v === undefined && v2 === undefined) {
+      delete config[k];
+    } else if (Array.isArray(v) && Array.isArray(v2) && isArrayEqual(v, v2)) {
+      delete config[k];
+    } else if (v === v2) {
+      delete config[k];
     }
   }
   return config;
-}
-
-/**
- * Overwrites the default values in a JSON schema with the provided defaults.
- *
- * @param schema - The original JSON schema to be modified.
- * @param defaults - An object containing the default values to overwrite in the schema.
- * @returns A new JSON schema with the default values overwritten.
- *
- * @remarks
- * This function currently only handles objects of objects and needs to be made more generic.
- *
- * @example
- * ```typescript
- * const schema = {
- *   properties: {
- *     setting1: {
- *       properties: {
- *         subsetting1: { type: 'string', default: 'oldValue' }
- *       }
- *     }
- *   }
- * };
- *
- * const defaults = {
- *   setting1: {
- *     subsetting1: 'newValue'
- *   }
- * };
- *
- * const newSchema = overwriteDefaultsInJsonSchema(schema, defaults);
- * console.log(newSchema.properties.setting1.properties.subsetting1.default); // 'newValue'
- * ```
- */
-export function overwriteDefaultsInJsonSchema(
-  schema: JsonSchemaOfConfig,
-  defaults: Config,
-) {
-  const newSchema = structuredClone(schema);
-  // TODO make more generic, now only handles object of objects
-  for (const key in defaults) {
-    const val = defaults[key as keyof Config];
-    if (typeof val !== "object") {
-      continue;
-    }
-    for (const subkey in val) {
-      const subval = val[subkey as keyof typeof val];
-      const prop =
-        newSchema.properties[key as keyof Config].properties[
-          subkey as keyof typeof val
-        ];
-      prop.default = subval;
-    }
-  }
-  return newSchema;
 }

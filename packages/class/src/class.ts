@@ -33,23 +33,52 @@ export class CLASS {
    */
   constructor(config: Config) {
     this._cfg = config;
-    this.h = config.initialState.h_0;
-    this.theta = config.initialState.theta_0;
-    this.dtheta = config.initialState.dtheta_0;
-    this.q = config.initialState.q_0;
-    this.dq = config.initialState.dq_0;
+    if (config.sw_ml) {
+      this.h = config.h_0;
+      this.theta = config.theta_0;
+      this.dtheta = config.dtheta_0;
+      this.q = config.q_0;
+      this.dq = config.dq_0;
+    } else {
+      // TODO dont have defaults here, but have it work without this else block
+      this.h = 200;
+      this.theta = 288;
+      this.dtheta = 1;
+      this.q = 0.008;
+      this.dq = -0.001;
+    }
   }
   /**
    * Integrate mixed layer
    */
   update() {
-    const dt = this._cfg.timeControl.dt;
+    const dt = this._cfg.dt;
     this.h += dt * this.htend;
     this.theta += dt * this.thetatend;
     this.dtheta += dt * this.dthetatend;
     this.q += dt * this.qtend;
     this.dq += dt * this.dqtend;
     this.t += dt;
+  }
+
+  /**
+   * Type guard assertion function that checks if mixed layer mode is enabled in the configuration.
+   * @throws {Error} When mixed layer is not enabled in the configuration.
+   * @typeAssertion {CLASS & {_cfg: Config & {sw_ml: true}}} - Asserts that this instance has mixed layer enabled
+   * @private
+   */
+  private hasMixedLayer(): asserts this is CLASS & {
+    _cfg: Config & { sw_ml: true };
+  } {
+    if (!this._cfg.sw_ml) {
+      throw new Error("Mixed layer is not enabled");
+    }
+  }
+
+  private interpolatedWtheta(): number {
+    this.hasMixedLayer();
+    // TODO interpolated based on this.t / this.runtime and the wtheta values
+    return this._cfg.wtheta[0];
   }
 
   /** Tendency of CLB [m s-1]*/
@@ -59,29 +88,29 @@ export class CLASS {
 
   /** Tendency of mixed-layer potential temperature [K s-1] */
   get thetatend(): number {
-    return (
-      (this._cfg.mixedLayer.wtheta - this.wthetae) / this.h +
-      this._cfg.mixedLayer.advtheta
-    );
+    this.hasMixedLayer();
+    const wtheta = this.interpolatedWtheta();
+    return (wtheta - this.wthetae) / this.h + this._cfg.advtheta;
   }
 
   /** Tendency of potential temperature jump at h [K s-1] */
   get dthetatend(): number {
+    this.hasMixedLayer();
     const w_th_ft = 0.0; // TODO: add free troposphere switch
-    return this._cfg.mixedLayer.gammatheta * this.we - this.thetatend + w_th_ft;
+    return this._cfg.gammatheta * this.we - this.thetatend + w_th_ft;
   }
 
   /** Tendency of mixed-layer specific humidity [kg kg-1 s-1] */
   get qtend(): number {
-    return (
-      (this._cfg.mixedLayer.wq - this.wqe) / this.h + this._cfg.mixedLayer.advq
-    );
+    this.hasMixedLayer();
+    return (this._cfg.wq - this.wqe) / this.h + this._cfg.advq;
   }
 
   /** Tendency of specific humidity jump at h[kg kg-1 s-1] */
   get dqtend(): number {
+    this.hasMixedLayer();
     const w_q_ft = 0; // TODO: add free troposphere switch
-    return this._cfg.mixedLayer.gammaq * this.we - this.qtend + w_q_ft;
+    return this._cfg.gammaq * this.we - this.qtend + w_q_ft;
   }
 
   /** Entrainment velocity [m s-1]. */
@@ -98,7 +127,8 @@ export class CLASS {
 
   /** Large-scale vertical velocity [m s-1]. */
   get ws(): number {
-    return -this._cfg.mixedLayer.divU * this.h;
+    this.hasMixedLayer();
+    return -this._cfg.divU * this.h;
   }
 
   /** Entrainment kinematic heat flux [K m s-1]. */
@@ -113,7 +143,8 @@ export class CLASS {
 
   /** Entrainment kinematic virtual heat flux [K m s-1]. */
   get wthetave(): number {
-    return -this._cfg.mixedLayer.beta * this.wthetav;
+    this.hasMixedLayer();
+    return -this._cfg.beta * this.wthetav;
   }
 
   /** Virtual temperature jump at h [K]. */
@@ -126,8 +157,8 @@ export class CLASS {
 
   /** Surface kinematic virtual heat flux [K m s-1]. */
   get wthetav(): number {
-    return (
-      this._cfg.mixedLayer.wtheta + 0.61 * this.theta * this._cfg.mixedLayer.wq
-    );
+    this.hasMixedLayer();
+    const wtheta = this.interpolatedWtheta();
+    return wtheta + 0.61 * this.theta * this._cfg.wq;
   }
 }

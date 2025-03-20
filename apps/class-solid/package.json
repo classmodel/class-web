@@ -1,7 +1,7 @@
 {
   "name": "class-solid",
   "private": true,
-  "version": "0.0.15",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vinxi dev",
@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "@classmodel/class": "workspace:*",
+    "@classmodel/form": "workspace:*",
     "@kobalte/core": "^0.13.3",
-    "@modular-forms/solid": "^0.23.0",
     "@solid-primitives/refs": "^1.0.8",
     "@solidjs/router": "^0.14.1",
     "@solidjs/start": "^1.0.4",

@@ -1,10 +1,7 @@
 import type { Config } from "@classmodel/class/config";
-import {
-  overwriteDefaultsInJsonSchema,
-  pruneConfig,
-} from "@classmodel/class/config_utils";
-import { ajv } from "@classmodel/class/validate";
-import { type SubmitHandler, createForm } from "@modular-forms/solid";
+import { pruneConfig } from "@classmodel/class/config_utils";
+import { Form } from "@classmodel/form";
+import { overwriteDefaultsInJsonSchema } from "@classmodel/form/utils";
 import { For, createMemo, createSignal, createUniqueId } from "solid-js";
 import { unwrap } from "solid-js/store";
 import { Button } from "~/components/ui/button";
@@ -17,9 +14,7 @@ import {
   setPermutationConfigInExperiment,
   swapPermutationAndReferenceConfiguration,
 } from "~/lib/store";
-import { ObjectField } from "./ObjectField";
 import { PermutationSweepButton } from "./PermutationSweepButton";
-import { ajvForm } from "./ajvForm";
 import {
   MdiCakeVariantOutline,
   MdiCog,
@@ -56,36 +51,14 @@ function PermutationConfigForm(props: {
     return overwriteDefaultsInJsonSchema(jsonSchemaOfPreset, props.reference);
   });
 
-  const initialValues = createMemo(() =>
-    pruneConfig(unwrap(props.config), unwrap(props.reference)),
-  );
-
-  const [_, { Form, Field }] = createForm<Config>({
-    initialValues: initialValues(),
-    validate: ajvForm(ajv.compile(jsonSchemaOfPermutation())),
-  });
-
-  const handleSubmit: SubmitHandler<Config> = (values: Config) => {
-    // Use ajv to coerce strings to numbers and fill in defaults
-    ajv.compile(jsonSchemaOfPermutation())(values);
-    props.onSubmit(values);
-  };
-
   return (
     <Form
       id={props.id}
-      onSubmit={handleSubmit}
-      shouldActive={false} // Also return from collapsed fields
-      shouldDirty={false} // ~Don't return empty strings for unset fields~
-    >
-      <div>
-        <ObjectField
-          schema={jsonSchemaOfPermutation()}
-          value={initialValues()}
-          Field={Field}
-        />
-      </div>
-    </Form>
+      onSubmit={props.onSubmit}
+      values={props.config}
+      defaults={props.reference}
+      schema={jsonSchemaOfPermutation()}
+    />
   );
 }
 

@@ -1,10 +1,10 @@
 import { type Config, jsonSchemaOfConfig } from "@classmodel/class/config";
-import { overwriteDefaultsInJsonSchema } from "@classmodel/class/config_utils";
 import {
   ValidationError,
   ajv,
   parse as origParse,
 } from "@classmodel/class/validate";
+import { overwriteDefaultsInJsonSchema } from "@classmodel/form/utils";
 import type { DefinedError, JSONSchemaType, ValidateFunction } from "ajv";
 // TODO replace with preset of a forest fire
 import deathValley from "./presets/death-valley.json";

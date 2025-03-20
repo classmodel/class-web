@@ -10,7 +10,7 @@ export function getVerticalProfiles(
   t = -1,
 ): Point[] {
   // Guard against undefined output
-  if (output === undefined) {
+  if (output === undefined || !config.sw_ml) {
     return [];
   }
 
@@ -22,7 +22,7 @@ export function getVerticalProfiles(
     // Extract potential temperature profile
     const theta = output.theta.slice(t)[0];
     const dtheta = output.dtheta.slice(t)[0];
-    const gammatheta = config.mixedLayer.gammatheta;
+    const gammatheta = config.gammatheta;
     const thetaProfile = [
       theta,
       theta,
@@ -35,7 +35,7 @@ export function getVerticalProfiles(
     // Extract humidity profile
     const q = output.q.slice(t)[0];
     const dq = output.dq.slice(t)[0];
-    const gammaq = config.mixedLayer.gammaq;
+    const gammaq = config.gammaq;
     const qProfile = [q, q, q + dq, q + dq + dh * gammaq];
     return hProfile.map((h, i) => ({ x: qProfile[i], y: h }));
   }
@@ -102,7 +102,7 @@ export function getThermodynamicProfiles(
   t = -1,
 ) {
   // Guard against undefined output
-  if (output === undefined) {
+  if (output === undefined || !config.sw_ml) {
     return [];
   }
 
@@ -111,8 +111,8 @@ export function getThermodynamicProfiles(
   const dtheta = output.dtheta.slice(t)[0];
   const dq = output.dq.slice(t)[0];
   const h = output.h.slice(t)[0];
-  const gammaTheta = config.mixedLayer.gammatheta;
-  const gammaq = config.mixedLayer.gammaq;
+  const gammaTheta = config.gammatheta;
+  const gammaq = config.gammaq;
 
   const nz = 25;
   let dz = h / nz;

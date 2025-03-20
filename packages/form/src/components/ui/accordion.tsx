@@ -55,7 +55,7 @@ const AccordionTrigger = <T extends ValidComponent = "button">(
           stroke-linejoin="round"
           class="size-4 shrink-0 transition-transform duration-200"
         >
-          <title>Button</title>
+          <title>Chevron down</title>
           <path d="M6 9l6 6l6 -6" />
         </svg>
       </AccordionPrimitive.Trigger>
