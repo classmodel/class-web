@@ -1,6 +1,6 @@
 {
   "name": "@classmodel/form",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Generate form from JSON schema with Solid UI components",
   "type": "module",
   "repository": {
@@ -18,7 +18,8 @@
     "example:preview": "BUILD_APP=1 vite preview",
     "typecheck": "tsc",
     "test": "tsx --test 'src/**/*.test.ts'",
-    "build": "vite build"
+    "build": "vite build",
+    "clean": "rm -rf dist example-dist"
   },
   "license": "Apache-2.0",
   "devDependencies": {
@@ -72,5 +73,9 @@
   "engines": {
     "node": ">=22",
     "pnpm": ">=9"
+  },
+  "private": false,
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -2,7 +2,7 @@
   "name": "@classmodel/class",
   "description": "Chemistry Land-surface Atmosphere Soil Slab (CLASS) model",
   "type": "module",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "exports": {
     "./package.json": "./package.json",
     "./class": {
@@ -75,7 +75,8 @@
     "test": "tsx --test src/*.test.ts",
     "typecheck": "tsc --noEmit",
     "json2ts": "node scripts/json2ts.mjs",
-    "docs": "typedoc"
+    "docs": "typedoc",
+    "clean": "rm -rf dist"
   },
   "bin": "./dist/cli.js",
   "devDependencies": {

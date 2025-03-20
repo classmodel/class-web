@@ -1,14 +1,15 @@
 {
   "name": "class-solid",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "scripts": {
     "dev": "vinxi dev",
     "build": "vinxi build",
     "typecheck": "tsc --noEmit",
     "start": "serve --no-clipboard .output/public",
-    "test": "playwright test"
+    "test": "playwright test",
+    "clean": "rm -rf .output"
   },
   "dependencies": {
     "@classmodel/class": "workspace:*",
