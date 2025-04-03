@@ -22,7 +22,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20.12.0"
+          node-version: "22"
           cache: "pnpm"
 
       - name: install
@@ -36,6 +36,12 @@ jobs:
       - name: Build package API docs
         run: pnpm run docs --out ../../apps/class-solid/.output/public/docs
         working-directory: ./packages/class
+
+      - name: Form example app
+        run: | 
+          BASE_URL='/class-web/form' pnpm example:build
+          mv example-dist ../../apps/class-solid/.output/public/form
+        working-directory: ./packages/form
 
       - name: upload artifact
         uses: actions/upload-pages-artifact@v3

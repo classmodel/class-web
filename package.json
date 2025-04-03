@@ -1,13 +1,14 @@
 {
   "private": true,
-  "version": "0.0.15",
+  "version": "0.1.2",
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
     "format-and-lint": "biome check .",
     "format-and-lint:fix": "biome check . --write",
     "typecheck": "turbo typecheck",
-    "test": "turbo test"
+    "test": "turbo test",
+    "clean": "turbo clean"
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",

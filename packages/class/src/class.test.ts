@@ -11,10 +11,13 @@ describe("CLASS model", () => {
     const model = new CLASS(config);
     assert.ok(model instanceof CLASS);
     assert.strictEqual(model.t, 0);
-    assert.strictEqual(model._cfg.initialState.h_0, 200);
-    assert.strictEqual(model._cfg.timeControl.dt, 60);
-    assert.strictEqual(model._cfg.mixedLayer.wtheta, 0.1);
-    assert.strictEqual(model._cfg.mixedLayer.wq, 0.0001);
+    if (!model._cfg.sw_ml) {
+      throw new Error("sw_ml not set");
+    }
+    assert.strictEqual(model._cfg.h_0, 200);
+    assert.strictEqual(model._cfg.dt, 60);
+    assert.deepEqual(model._cfg.wtheta, [0.1]);
+    assert.strictEqual(model._cfg.wq, 0.0001);
   });
 
   test("calling update advances the model time", () => {
@@ -27,7 +30,7 @@ describe("CLASS model", () => {
   test("can update until the final time step", () => {
     const config = parse({});
     const model = new CLASS(config);
-    while (model.t < config.timeControl.runtime) {
+    while (model.t < config.runtime) {
       model.update();
     }
     assert.strictEqual(model.t, 12 * 3600);

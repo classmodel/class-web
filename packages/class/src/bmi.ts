@@ -100,7 +100,7 @@ export class BmiClass implements BmiLight<Config> {
   }
 
   get_end_time() {
-    return this.config.timeControl.runtime;
+    return this.config.runtime;
   }
 
   get_time_units() {
@@ -108,7 +108,7 @@ export class BmiClass implements BmiLight<Config> {
   }
 
   get_time_step() {
-    return this.config.timeControl.dt;
+    return this.config.dt;
   }
 
   // Variable getter and setter functions
@@ -145,7 +145,7 @@ export class BmiClass implements BmiLight<Config> {
   }): { t: number[] } & { [K in T[number]]: number[] } {
     const output: { t: number[] } & { [K in T[number]]: number[] } =
       Object.fromEntries([["t", []], ...var_names.map((name) => [name, []])]);
-    while (this.model.t <= this.config.timeControl.runtime) {
+    while (this.model.t <= this.config.runtime) {
       if (this.model.t % freq === 0) {
         output.t.push(this.model.t);
         for (const name of var_names) {

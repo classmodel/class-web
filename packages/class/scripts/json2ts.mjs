@@ -131,4 +131,5 @@ function main() {
   }
 }
 
-main();
+// TODO disabled as json-schema-to-typescript can not handle if/then/else
+// main();

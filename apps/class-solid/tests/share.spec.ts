@@ -6,8 +6,9 @@ test("Create share link from an experiment", async ({ page }) => {
 
   // Create a new experiment
   await page.getByRole("button", { name: "Start from scratch" }).click();
-  await page.getByRole("button", { name: "Initial State" }).click();
-  await page.getByLabel("ABL height").fill("800");
+
+  await page.getByRole("button", { name: "Mixed Layer" }).click();
+  await page.getByLabel("h", { exact: true }).fill("800");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Open share dialog
@@ -29,7 +30,13 @@ test("Create share link from an experiment", async ({ page }) => {
     .getByRole("link", { name: "Configuration", exact: true })
     .click();
   const config1 = await parseDownload(downloadPromise1);
-  expect(config1.reference.initialState?.h_0).toEqual(800);
+  // Workaround that partial config is missing sw_ml, as its part of its preset
+  config1.reference.sw_ml = true;
+  if (!config1.reference.sw_ml) {
+    throw new Error("Mixed layer is turned off");
+  }
+
+  expect(config1.reference.h_0).toEqual(800);
 
   // TODO: finalheight is gone; implement alternative check to see that experiment finished
 });
