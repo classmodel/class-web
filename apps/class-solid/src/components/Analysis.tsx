@@ -229,7 +229,7 @@ export function VerticalProfilePlot({
             <AxisLeft domain={yLim} label="Height[m]" />
             <For each={profileData()}>{(d) => Line(d)}</For>
             <g>
-              <For each={observations()}>{(d) => ObservationPoint(d)}</For>
+              <For each={observations()}>{(d) => d && ObservationPoint(d)}</For>
             </g>
           </Chart>
         </ChartContainer>
