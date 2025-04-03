@@ -32,6 +32,8 @@ interface Chart {
   scalePropsY: ScaleProps;
   scaleX: SupportedScaleTypes;
   scaleY: SupportedScaleTypes;
+  formatX: (value: number) => string;
+  formatY: (value: number) => string;
 }
 type SetChart = SetStoreFunction<Chart>;
 const ChartContext = createContext<[Chart, SetChart]>();
@@ -60,6 +62,8 @@ export function ChartContainer(props: {
     scalePropsY: { type: "linear", domain: [0, 1], range: [innerHeight, 0] },
     scaleX: initialScale,
     scaleY: initialScale,
+    formatX: d3.format(".4"),
+    formatY: d3.format(".4"),
   });
   createEffect(() => {
     // Update scaleXInstance when scaleX props change
@@ -86,12 +90,24 @@ export function ChartContainer(props: {
 }
 
 /** Container for chart elements such as axes and lines */
-export function Chart(props: { children: JSX.Element; title?: string }) {
+export function Chart(props: {
+  children: JSX.Element;
+  title?: string;
+  formatX?: (value: number) => string;
+  formatY?: (value: number) => string;
+}) {
   const [hovering, setHovering] = createSignal(false);
   const [coords, setCoords] = createSignal<[number, number]>([0, 0]);
   const [chart, updateChart] = useChartContext();
   const title = props.title || "Default chart";
   const [marginTop, _, __, marginLeft] = chart.margin;
+
+  if (props.formatX) {
+    updateChart("formatX", () => props.formatX);
+  }
+  if (props.formatY) {
+    updateChart("formatY", () => props.formatY);
+  }
 
   const onMouseMove = (e: MouseEvent) =>
     setCoords([
@@ -99,18 +115,10 @@ export function Chart(props: { children: JSX.Element; title?: string }) {
       chart.scaleY.invert(e.offsetY - marginTop),
     ]);
 
-  const renderXCoord = () => {
-    if (!hovering()) return "";
-
-    const [x, y] = coords();
-    return `x: ${x.toFixed(2)}`;
-  };
-  const renderYCoord = () => {
-    if (!hovering()) return "";
-
-    const [x, y] = coords();
-    return `y: ${y.toFixed(2)}`;
-  };
+  const renderXCoord = () =>
+    hovering() ? `x: ${chart.formatX(coords()[0])}` : "";
+  const renderYCoord = () =>
+    hovering() ? `y: ${chart.formatY(coords()[1])}` : "";
 
   return (
     <svg

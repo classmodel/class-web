@@ -148,18 +148,20 @@ export function SkewTPlot({
   return (
     <ChartContainer>
       <Legend entries={data} />
-      <Chart title="Thermodynamic diagram">
+      <Chart
+        title="Thermodynamic diagram"
+        formatX={d3.format(".0d")}
+        formatY={d3.format(".0d")}
+      >
         <AxisBottom
           domain={() => [-45, 50]}
           tickValues={temperatureLines}
-          tickFormat={d3.format(".0d")}
           label="Temperature [°C]"
         />
         <AxisLeft
           type="log"
           domain={() => [basep, topPressure]}
           tickValues={pressureLines}
-          tickFormat={d3.format(".0d")}
           label="Pressure [hPa]"
         />
         <ClipPath />
