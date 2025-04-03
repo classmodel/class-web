@@ -104,6 +104,9 @@ export async function uploadExperiment(rawData: unknown) {
       running: false,
     },
   };
+  if (upload.observations) {
+    experiment.config.observations = upload.observations;
+  }
   setExperiments(experiments.length, experiment);
   await runExperiment(experiments.length - 1);
 }

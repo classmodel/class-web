@@ -5,6 +5,18 @@ import { overwriteDefaultsInJsonSchema } from "@classmodel/form/utils";
 import type { DefinedError, JSONSchemaType } from "ajv";
 import { findPresetByName } from "./presets";
 
+/*
+Height (m AGL)	 Pressure (mb)	 Temperature (C)	 Relative humidity (%)	 Wind speed (m/s)	 Wind direction (true deg)
+*/
+export interface Observation {
+  height: number[];
+  pressure: number[];
+  temperature: number[];
+  relativeHumidity: number[];
+  windSpeed: number[];
+  windDirection: number[];
+}
+
 /**
  * An experiment configuration is a combination of a preset name and
  * a reference configuration and a set of permutation configurations.
@@ -13,6 +25,7 @@ export interface ExperimentConfig<C = Config> {
   preset: string;
   reference: C;
   permutations: C[];
+  observations?: Observation[];
 }
 
 /**
@@ -41,6 +54,28 @@ const jsonSchemaOfExperimentConfigBase = {
         additionalProperties: true,
       },
       default: [],
+    },
+    observations: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          height: { type: "array", items: { type: "number" } },
+          pressure: { type: "array", items: { type: "number" } },
+          temperature: { type: "array", items: { type: "number" } },
+          relativeHumidity: { type: "array", items: { type: "number" } },
+          windSpeed: { type: "array", items: { type: "number" } },
+          windDirection: { type: "array", items: { type: "number" } },
+        },
+        required: [
+          "height",
+          "pressure",
+          "temperature",
+          "relativeHumidity",
+          "windSpeed",
+          "windDirection",
+        ],
+      },
     },
   },
   required: ["preset", "reference", "permutations"],
@@ -89,9 +124,13 @@ export function parseExperimentConfig(input: unknown): ExperimentConfig {
   }
 
   const permutations = base.permutations.map(permParse);
-  return {
+  const config: ExperimentConfig = {
     reference,
     preset: base.preset,
     permutations,
   };
+  if (base.observations) {
+    config.observations = base.observations;
+  }
+  return config;
 }
