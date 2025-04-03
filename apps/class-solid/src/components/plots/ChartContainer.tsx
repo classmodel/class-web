@@ -1,6 +1,11 @@
 import * as d3 from "d3";
 import type { JSX } from "solid-js";
-import { createContext, createEffect, useContext } from "solid-js";
+import {
+  createContext,
+  createEffect,
+  createSignal,
+  useContext,
+} from "solid-js";
 import { type SetStoreFunction, createStore } from "solid-js/store";
 
 type SupportedScaleTypes =
@@ -82,29 +87,49 @@ export function ChartContainer(props: {
 
 /** Container for chart elements such as axes and lines */
 export function Chart(props: { children: JSX.Element; title?: string }) {
+  const [hovering, setHovering] = createSignal(false);
+  const [coords, setCoords] = createSignal<[number, number]>([0, 0]);
   const [chart, updateChart] = useChartContext();
   const title = props.title || "Default chart";
   const [marginTop, _, __, marginLeft] = chart.margin;
+
+  const onMouseMove = (e: MouseEvent) =>
+    setCoords([
+      chart.scaleX.invert(e.offsetX - marginLeft),
+      chart.scaleY.invert(e.offsetY - marginTop),
+    ]);
+
+  const renderXCoord = () => {
+    if (!hovering()) return "";
+
+    const [x, y] = coords();
+    return `x: ${x.toFixed(2)}`;
+  };
+  const renderYCoord = () => {
+    if (!hovering()) return "";
+
+    const [x, y] = coords();
+    return `y: ${y.toFixed(2)}`;
+  };
 
   return (
     <svg
       width={chart.width}
       height={chart.height}
       class="text-slate-500 text-xs tracking-wide"
+      onmouseover={() => setHovering(true)}
+      onmousemove={onMouseMove}
+      onmouseout={() => setHovering(false)}
     >
       <title>{title}</title>
       <g transform={`translate(${marginLeft},${marginTop})`}>
         {props.children}
-        {/* Line along right edge of plot
-        <line
-          x1={chart.innerWidth - 0.5}
-          x2={chart.innerWidth - 0.5}
-          y1="0"
-          y2={chart.innerHeight}
-          stroke="#dfdfdf"
-          stroke-width="0.75px"
-          fill="none"
-        /> */}
+        <text x="5" y="5">
+          {renderXCoord()}
+        </text>
+        <text x="5" y="20">
+          {renderYCoord()}
+        </text>
       </g>
     </svg>
   );
