@@ -6,7 +6,6 @@ import { experiments, uploadExperiment } from "~/lib/store";
 import {
   MdiBackupRestore,
   MdiBeakerPlus,
-  MdiFileDocumentOutline,
   MdiPlusBox,
   MdiUpload,
 } from "./icons";
@@ -47,36 +46,6 @@ function ResumeSessionButton(props: { afterClick: () => void }) {
         </Show>
       </Button>
     </Show>
-  );
-}
-
-function StartFromScratchButton(props: {
-  onClick: () => void;
-  afterClick: () => void;
-}) {
-  return (
-    <Button
-      variant="outline"
-      class="flex h-44 w-56 flex-col gap-2 border border-dashed"
-      onClick={() => {
-        props.onClick();
-        props.afterClick();
-      }}
-    >
-      <MdiBeakerPlus class="h-32 w-32" />
-      <Show
-        when={experiments.length}
-        fallback={
-          <>
-            <p>Start from scratch</p>
-            <p>(default config)</p>
-          </>
-        }
-      >
-        <p>From scratch</p>
-        <p>(default config)</p>
-      </Show>
-    </Button>
   );
 }
 
@@ -219,7 +188,7 @@ function StartFromPresetButton(props: {
         class="flex h-44 w-56 flex-col gap-2 border border-dashed"
         onClick={() => setOpen(true)}
       >
-        <MdiFileDocumentOutline class="h-32 w-32" />
+        <MdiBeakerPlus class="h-32 w-32" />
         <Show when={experiments.length} fallback={<p>Start from preset</p>}>
           <p>From preset</p>
         </Show>
@@ -234,13 +203,9 @@ export function StartButtons(props: {
 }) {
   return (
     <>
-      <StartFromScratchButton
-        onClick={props.onFromSratchClick}
-        afterClick={props.afterClick}
-      />
+      <StartFromPresetButton afterClick={props.afterClick} />
       <StartFromUploadButton afterClick={props.afterClick} />
       <ResumeSessionButton afterClick={props.afterClick} />
-      <StartFromPresetButton afterClick={props.afterClick} />
     </>
   );
 }

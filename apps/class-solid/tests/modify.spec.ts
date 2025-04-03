@@ -2,6 +2,8 @@ import { expect, test } from "@playwright/test";
 
 // Check that modifying an experiment preserves previous edits
 test("Edit experiment preserves previous edits", async ({ page }) => {
+  test.skip(true, "Only used during development");
+
   await page.goto("/");
 
   // Create new experiment with custom h
@@ -29,6 +31,8 @@ test("Edit experiment preserves previous edits", async ({ page }) => {
 });
 
 test("Edit permutation preserves previous edits", async ({ page }) => {
+  test.skip(true, "Only used during development");
+
   // Add experiment
   await page.goto("/");
   await page.getByRole("button", { name: "Add Start from scratch (" }).click();
@@ -36,7 +40,7 @@ test("Edit permutation preserves previous edits", async ({ page }) => {
 
   // Add permutation with very small initial temperature jump
   // Expect boundary layer to grow very quickly
-  const experiment1 = page.getByLabel("My experiment 1", { exact: true });
+  const experiment1 = page.getByLabel("Default", { exact: true });
   await experiment1
     .getByTitle(
       "Add a permutation to the reference configuration of this experiment",

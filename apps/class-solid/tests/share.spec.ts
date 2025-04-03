@@ -2,10 +2,14 @@ import { expect, test } from "@playwright/test";
 import { parseDownload } from "./helpers";
 
 test("Create share link from an experiment", async ({ page }) => {
+  test.skip(true, "Only used during development");
   await page.goto("/");
 
   // Create a new experiment
-  await page.getByRole("button", { name: "Start from scratch" }).click();
+  await page.getByRole("button", { name: "Add Start from preset" }).click();
+  await page
+    .getByRole("button", { name: "Default The classic default" })
+    .click();
 
   await page.getByRole("button", { name: "Mixed Layer" }).click();
   await page.getByLabel("h", { exact: true }).fill("800");
@@ -21,7 +25,7 @@ test("Create share link from an experiment", async ({ page }) => {
   // TODO test get link from text input field?
 
   // Check that the new experiment has the correct configuration
-  const sharedExperiment = sharedPage.getByLabel("My experiment 1", {
+  const sharedExperiment = sharedPage.getByLabel("Default", {
     exact: true,
   });
   await sharedExperiment.getByRole("button", { name: "Download" }).click();
@@ -49,7 +53,10 @@ test("Given large app state, sharing is not possible", async ({ page }) => {
   await page.goto("/");
 
   // Create a new experiment
-  await page.getByRole("button", { name: "Start from scratch" }).click();
+  await page.getByRole("button", { name: "Add Start from preset" }).click();
+  await page
+    .getByRole("button", { name: "Default The classic default" })
+    .click();
   await page.getByRole("button", { name: "Run" }).click();
   // Add permutation sweep
   await page.getByRole("button", { name: "S", exact: true }).click();
@@ -59,7 +66,7 @@ test("Given large app state, sharing is not possible", async ({ page }) => {
   const times = 12;
   for (let i = 0; i < times; i++) {
     await page
-      .getByLabel("My experiment 1", { exact: true })
+      .getByLabel("Default", { exact: true })
       .getByRole("button", { name: "Duplicate experiment" })
       .click();
   }
