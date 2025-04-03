@@ -40,7 +40,7 @@ export function overwriteDefaultsInJsonSchema<C>(
   schema: JSONSchemaType<C>,
   defaults: C,
 ): JSONSchemaType<C> {
-  const newSchema = structuredClone(schema);
+  const newSchema = JSON.parse(JSON.stringify(schema)) as JSONSchemaType<C>;
   // TODO make more generic, now only handles .properties and .allOf[n].then.properties
   for (const key in defaults) {
     const val = defaults[key];
