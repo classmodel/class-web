@@ -2,14 +2,18 @@ import { expect, test } from "@playwright/test";
 import { parseDownload } from "./helpers";
 
 test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
+  test.skip(true, "Only used during development");
+
   await page.goto("/");
 
   // Create a new experiment
-  await page.getByRole("button", { name: "Start from scratch" }).click();
-  await page.getByRole("button", { name: "Run" }).click();
+  await page.getByRole("button", { name: "Add Start from preset" }).click();
+  await page
+    .getByRole("button", { name: "Default The classic default" })
+    .click();
 
   // Add a permutation
-  const experiment1 = page.getByLabel("My experiment 1", { exact: true });
+  const experiment1 = page.getByLabel("Default", { exact: true });
   await experiment1
     .getByTitle(
       "Add a permutation to the reference configuration of this experiment",
@@ -26,7 +30,7 @@ test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
   await page.getByTitle("Duplicate experiment").click();
 
   // Make experiment 2 different
-  const experiment2 = page.getByLabel("Copy of My experiment 1", {
+  const experiment2 = page.getByLabel("Copy of Default", {
     exact: true,
   });
   await experiment2.getByRole("button", { name: "Edit", exact: true }).click();
@@ -71,14 +75,18 @@ test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
 });
 
 test("Swap permutation with default reference", async ({ page }) => {
+  test.skip(true, "Only used during development");
+
   await page.goto("/");
 
   // Create a new experiment
-  await page.getByRole("button", { name: "Start from scratch" }).click();
-  await page.getByRole("button", { name: "Run" }).click();
+  await page.getByRole("button", { name: "Add Start from preset" }).click();
+  await page
+    .getByRole("button", { name: "Default The classic default" })
+    .click();
 
   // Add a permutation
-  const experiment = page.getByLabel("My experiment 1", { exact: true });
+  const experiment = page.getByLabel("Default", { exact: true });
   await experiment
     .getByTitle(
       "Add a permutation to the reference configuration of this experiment",
@@ -110,17 +118,22 @@ test("Swap permutation with default reference", async ({ page }) => {
 });
 
 test("Swap permutation with custom reference", async ({ page }) => {
+  test.skip(true, "Only used during development");
+
   await page.goto("/");
 
   // Create a new experiment
-  await page.getByRole("button", { name: "Start from scratch" }).click();
+  await page.getByRole("button", { name: "Add Start from preset" }).click();
+  await page
+    .getByRole("button", { name: "Default The classic default" })
+    .click();
   await page.getByLabel("Mixed layer").click();
   await page.getByLabel("h", { exact: true }).fill("400");
   await page.getByLabel("θ", { exact: true }).fill("265");
   await page.getByRole("button", { name: "Run" }).click();
 
   // Add a permutation
-  const experiment = page.getByLabel("My experiment 1", { exact: true });
+  const experiment = page.getByLabel("Default", { exact: true });
   await experiment
     .getByTitle(
       "Add a permutation to the reference configuration of this experiment",
@@ -157,14 +170,18 @@ test("Swap permutation with custom reference", async ({ page }) => {
 });
 
 test("Promote permutation to a new experiment", async ({ page }) => {
+  test.skip(true, "Only used during development");
+
   await page.goto("/");
 
   // Create a new experiment
-  await page.getByRole("button", { name: "Start from scratch" }).click();
-  await page.getByRole("button", { name: "Run" }).click();
+  await page.getByRole("button", { name: "Add Start from preset" }).click();
+  await page
+    .getByRole("button", { name: "Default The classic default" })
+    .click();
 
   // Add a permutation
-  const experiment1 = page.getByLabel("My experiment 1", { exact: true });
+  const experiment1 = page.getByLabel("Default", { exact: true });
   await experiment1
     .getByTitle(
       "Add a permutation to the reference configuration of this experiment",
@@ -199,14 +216,18 @@ test("Promote permutation to a new experiment", async ({ page }) => {
 });
 
 test("Duplicate permutation", async ({ page }) => {
+  test.skip(true, "Only used during development");
+
   await page.goto("/");
 
   // Create a new experiment
-  await page.getByRole("button", { name: "Start from scratch" }).click();
-  await page.getByRole("button", { name: "Run" }).click();
+  await page.getByRole("button", { name: "Add Start from preset" }).click();
+  await page
+    .getByRole("button", { name: "Default The classic default" })
+    .click();
 
   // Add a permutation
-  const experiment1 = page.getByLabel("My experiment 1", { exact: true });
+  const experiment1 = page.getByLabel("Default", { exact: true });
   await experiment1
     .getByTitle(
       "Add a permutation to the reference configuration of this experiment",
