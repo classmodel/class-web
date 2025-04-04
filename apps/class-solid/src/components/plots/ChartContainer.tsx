@@ -1,9 +1,14 @@
 import * as d3 from "d3";
 import type { JSX } from "solid-js";
-import { createContext, createEffect, useContext } from "solid-js";
+import {
+  createContext,
+  createEffect,
+  createSignal,
+  useContext,
+} from "solid-js";
 import { type SetStoreFunction, createStore } from "solid-js/store";
 
-type SupportedScaleTypes =
+export type SupportedScaleTypes =
   | d3.ScaleLinear<number, number, never>
   | d3.ScaleLogarithmic<number, number, never>;
 const supportedScales = {
@@ -27,6 +32,9 @@ interface Chart {
   scalePropsY: ScaleProps;
   scaleX: SupportedScaleTypes;
   scaleY: SupportedScaleTypes;
+  formatX: (value: number) => string;
+  formatY: (value: number) => string;
+  transformX?: (x: number, y: number, scaleY: SupportedScaleTypes) => number;
 }
 type SetChart = SetStoreFunction<Chart>;
 const ChartContext = createContext<[Chart, SetChart]>();
@@ -55,6 +63,8 @@ export function ChartContainer(props: {
     scalePropsY: { type: "linear", domain: [0, 1], range: [innerHeight, 0] },
     scaleX: initialScale,
     scaleY: initialScale,
+    formatX: d3.format(".4"),
+    formatY: d3.format(".4"),
   });
   createEffect(() => {
     // Update scaleXInstance when scaleX props change
@@ -81,30 +91,63 @@ export function ChartContainer(props: {
 }
 
 /** Container for chart elements such as axes and lines */
-export function Chart(props: { children: JSX.Element; title?: string }) {
+export function Chart(props: {
+  children: JSX.Element;
+  title?: string;
+  formatX?: (value: number) => string;
+  formatY?: (value: number) => string;
+  transformX?: (x: number, y: number, scaleY: SupportedScaleTypes) => number;
+}) {
+  const [hovering, setHovering] = createSignal(false);
+  const [coords, setCoords] = createSignal<[number, number]>([0, 0]);
   const [chart, updateChart] = useChartContext();
   const title = props.title || "Default chart";
   const [marginTop, _, __, marginLeft] = chart.margin;
+
+  if (props.formatX) {
+    updateChart("formatX", () => props.formatX);
+  }
+  if (props.formatY) {
+    updateChart("formatY", () => props.formatY);
+  }
+  if (props.transformX) {
+    updateChart("transformX", () => props.transformX);
+  }
+
+  const onMouseMove = (e: MouseEvent) => {
+    let x = e.offsetX - marginLeft;
+    const y = e.offsetY - marginTop;
+
+    if (chart.transformX) {
+      x = chart.transformX(x, y, chart.scaleY);
+    }
+
+    setCoords([chart.scaleX.invert(x), chart.scaleY.invert(y)]);
+  };
+
+  const renderXCoord = () =>
+    hovering() ? `x: ${chart.formatX(coords()[0])}` : "";
+  const renderYCoord = () =>
+    hovering() ? `y: ${chart.formatY(coords()[1])}` : "";
 
   return (
     <svg
       width={chart.width}
       height={chart.height}
       class="text-slate-500 text-xs tracking-wide"
+      onmouseover={() => setHovering(true)}
+      onmousemove={onMouseMove}
+      onmouseout={() => setHovering(false)}
     >
       <title>{title}</title>
       <g transform={`translate(${marginLeft},${marginTop})`}>
         {props.children}
-        {/* Line along right edge of plot
-        <line
-          x1={chart.innerWidth - 0.5}
-          x2={chart.innerWidth - 0.5}
-          y1="0"
-          y2={chart.innerHeight}
-          stroke="#dfdfdf"
-          stroke-width="0.75px"
-          fill="none"
-        /> */}
+        <text x="5" y="5">
+          {renderXCoord()}
+        </text>
+        <text x="5" y="20">
+          {renderYCoord()}
+        </text>
       </g>
     </svg>
   );

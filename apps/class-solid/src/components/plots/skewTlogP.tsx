@@ -2,10 +2,9 @@
 import * as d3 from "d3";
 import { For, createSignal } from "solid-js";
 import { AxisBottom, AxisLeft } from "./Axes";
-import type { ChartData } from "./ChartContainer";
+import type { ChartData, SupportedScaleTypes } from "./ChartContainer";
 import { Chart, ChartContainer, useChartContext } from "./ChartContainer";
 import { Legend } from "./Legend";
-
 interface SoundingRecord {
   p: number;
   T: number;
@@ -16,6 +15,10 @@ const deg2rad = Math.PI / 180;
 const tan = Math.tan(55 * deg2rad);
 const basep = 1050;
 const topPressure = 100;
+
+function getTempAtCursor(x: number, y: number, scaleY: SupportedScaleTypes) {
+  return x + 0.5 - (scaleY(basep) - y) / tan;
+}
 
 function ClipPath() {
   const [chart, updateChart] = useChartContext();
@@ -148,18 +151,21 @@ export function SkewTPlot({
   return (
     <ChartContainer>
       <Legend entries={data} />
-      <Chart title="Thermodynamic diagram">
+      <Chart
+        title="Thermodynamic diagram"
+        formatX={d3.format(".0d")}
+        formatY={d3.format(".0d")}
+        transformX={getTempAtCursor}
+      >
         <AxisBottom
           domain={() => [-45, 50]}
           tickValues={temperatureLines}
-          tickFormat={d3.format(".0d")}
           label="Temperature [°C]"
         />
         <AxisLeft
           type="log"
           domain={() => [basep, topPressure]}
           tickValues={pressureLines}
-          tickFormat={d3.format(".0d")}
           label="Pressure [hPa]"
         />
         <ClipPath />
