@@ -12,7 +12,11 @@ import {
   createUniqueId,
 } from "solid-js";
 import type { Observation } from "~/lib/experiment_config";
-import { getThermodynamicProfiles, getVerticalProfiles } from "~/lib/profiles";
+import {
+  getThermodynamicProfiles,
+  getVerticalProfiles,
+  observationsForProfile,
+} from "~/lib/profiles";
 import {
   type Analysis,
   type ProfilesAnalysis,
@@ -27,7 +31,6 @@ import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./plots/Axes";
 import { Chart, ChartContainer } from "./plots/ChartContainer";
 import { Legend } from "./plots/Legend";
 import { Line } from "./plots/Line";
-import { ObservationPoint } from "./plots/ObservationPoint";
 import { SkewTPlot } from "./plots/skewTlogP";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -63,7 +66,6 @@ interface FlatExperiment {
   linestyle: string;
   config: Config;
   output?: ClassOutput;
-  observations?: Observation[];
 }
 
 // Create a derived store for looping over all outputs:
@@ -78,9 +80,6 @@ const flatExperiments: () => FlatExperiment[] = createMemo(() => {
         config: e.config.reference,
         output: e.output.reference,
       };
-      if (e.config.observations) {
-        reference.observations = e.config.observations;
-      }
 
       const permutations = e.config.permutations.map((config, j) => {
         const output = e.output.permutations[j];
@@ -93,6 +92,15 @@ const flatExperiments: () => FlatExperiment[] = createMemo(() => {
         };
       });
       return [reference, ...permutations];
+    });
+});
+
+// Derived store for all observations of all experiments combined
+const flatObservations: () => Observation[] = createMemo(() => {
+  return experiments
+    .filter((e) => e.config.observations)
+    .flatMap((e) => {
+      return e.config.observations || [];
     });
 });
 
@@ -172,12 +180,23 @@ export function VerticalProfilePlot({
   const classVariable = () =>
     variableOptions[analysis.variable as keyof typeof variableOptions];
 
-  const allValues = () =>
-    flatExperiments().flatMap((e) =>
+  const observations = () =>
+    flatObservations().map((o) => observationsForProfile(o, classVariable()));
+  const obsAllX = () =>
+    observations().flatMap((obs) => obs.data.map((d) => d.x));
+  const obsAllY = () =>
+    observations().flatMap((obs) => obs.data.map((d) => d.x));
+
+  const allValues = () => [
+    ...flatExperiments().flatMap((e) =>
       e.output ? e.output[classVariable()] : [],
-    );
-  const allHeights = () =>
-    flatExperiments().flatMap((e) => (e.output ? e.output.h : []));
+    ),
+    ...obsAllX(),
+  ];
+  const allHeights = () => [
+    ...flatExperiments().flatMap((e) => (e.output ? e.output.h : [])),
+    ...obsAllY(),
+  ];
 
   // TODO: better to include jump at top in extent calculation rather than adding random margin.
   const xLim = () => getNiceAxisLimits(allValues(), 1);
@@ -201,24 +220,6 @@ export function VerticalProfilePlot({
       };
     });
 
-  const observations = () => {
-    const lookup = {
-      "Potential temperature [K]": "temperature",
-      "Specific humidity [kg/kg]": "relativeHumidity",
-    } as const;
-    const key = lookup[analysis.variable as keyof typeof lookup];
-    return flatExperiments()
-      .filter((e) => e.observations)
-      .flatMap((e) => {
-        return e.observations?.flatMap((obs) => {
-          return obs.height.map((h, i) => {
-            return { y: h, x: obs[key][i] };
-          });
-        });
-      })
-      .filter((d) => d !== undefined);
-  };
-
   return (
     <>
       <div class="flex flex-col gap-2">
@@ -228,9 +229,7 @@ export function VerticalProfilePlot({
             <AxisBottom domain={xLim} label={analysis.variable} />
             <AxisLeft domain={yLim} label="Height[m]" />
             <For each={profileData()}>{(d) => Line(d)}</For>
-            <g>
-              <For each={observations()}>{(d) => d && ObservationPoint(d)}</For>
-            </g>
+            <For each={observations()}>{(d) => Line(d)}</For>
           </Chart>
         </ChartContainer>
         <Picker

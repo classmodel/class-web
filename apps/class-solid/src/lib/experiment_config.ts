@@ -9,6 +9,7 @@ import { findPresetByName } from "./presets";
 Height (m AGL)	 Pressure (mb)	 Temperature (C)	 Relative humidity (%)	 Wind speed (m/s)	 Wind direction (true deg)
 */
 export interface Observation {
+  name?: string;
   height: number[];
   pressure: number[];
   temperature: number[];
