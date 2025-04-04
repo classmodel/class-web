@@ -8,7 +8,7 @@ import {
 } from "solid-js";
 import { type SetStoreFunction, createStore } from "solid-js/store";
 
-type SupportedScaleTypes =
+export type SupportedScaleTypes =
   | d3.ScaleLinear<number, number, never>
   | d3.ScaleLogarithmic<number, number, never>;
 const supportedScales = {
@@ -34,6 +34,7 @@ interface Chart {
   scaleY: SupportedScaleTypes;
   formatX: (value: number) => string;
   formatY: (value: number) => string;
+  transformX?: (x: number, y: number, scaleY: SupportedScaleTypes) => number;
 }
 type SetChart = SetStoreFunction<Chart>;
 const ChartContext = createContext<[Chart, SetChart]>();
@@ -95,6 +96,7 @@ export function Chart(props: {
   title?: string;
   formatX?: (value: number) => string;
   formatY?: (value: number) => string;
+  transformX?: (x: number, y: number, scaleY: SupportedScaleTypes) => number;
 }) {
   const [hovering, setHovering] = createSignal(false);
   const [coords, setCoords] = createSignal<[number, number]>([0, 0]);
@@ -108,12 +110,20 @@ export function Chart(props: {
   if (props.formatY) {
     updateChart("formatY", () => props.formatY);
   }
+  if (props.transformX) {
+    updateChart("transformX", () => props.transformX);
+  }
 
-  const onMouseMove = (e: MouseEvent) =>
-    setCoords([
-      chart.scaleX.invert(e.offsetX - marginLeft),
-      chart.scaleY.invert(e.offsetY - marginTop),
-    ]);
+  const onMouseMove = (e: MouseEvent) => {
+    let x = e.offsetX - marginLeft;
+    const y = e.offsetY - marginTop;
+
+    if (chart.transformX) {
+      x = chart.transformX(x, y, chart.scaleY);
+    }
+
+    setCoords([chart.scaleX.invert(x), chart.scaleY.invert(y)]);
+  };
 
   const renderXCoord = () =>
     hovering() ? `x: ${chart.formatX(coords()[0])}` : "";
