@@ -16,6 +16,7 @@ import {
   getThermodynamicProfiles,
   getVerticalProfiles,
   observationsForProfile,
+  observationsForSounding,
 } from "~/lib/profiles";
 import {
   type Analysis,
@@ -224,7 +225,7 @@ export function VerticalProfilePlot({
     <>
       <div class="flex flex-col gap-2">
         <ChartContainer>
-          <Legend entries={profileData} />
+          <Legend entries={() => [...profileData(), ...observations()]} />
           <Chart title="Vertical profile plot">
             <AxisBottom domain={xLim} label={analysis.variable} />
             <AxisLeft domain={yLim} label="Height[m]" />
@@ -333,9 +334,12 @@ export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
       };
     });
 
+  const observations = () =>
+    flatObservations().map((o) => observationsForSounding(o));
+
   return (
     <>
-      <SkewTPlot data={skewTData} />
+      <SkewTPlot data={() => [...skewTData(), ...observations()]} />
       {TimeSlider(
         () => analysis.time,
         uniqueTimes,

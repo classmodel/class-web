@@ -202,11 +202,8 @@ export function observationsForProfile(obs: Observation, variable = "theta") {
   };
 }
 
-function observationsForSounding(obs: Observation) {
+export function observationsForSounding(obs: Observation) {
   return {
-    label: obs.name || "Unnamed observations",
-    color: "red",
-    linestyle: "3,10",
     data: obs.height.map((h, i) => {
       const T = obs.temperature[i] + 273.15;
       const p = obs.pressure[i];
@@ -215,5 +212,8 @@ function observationsForSounding(obs: Observation) {
       const Td = dewpoint(q, p);
       return { p, T, Td };
     }),
+    label: obs.name || "Unnamed observations",
+    color: "red",
+    linestyle: "3,10",
   };
 }
