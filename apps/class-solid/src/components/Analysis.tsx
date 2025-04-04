@@ -186,7 +186,7 @@ export function VerticalProfilePlot({
   const obsAllX = () =>
     observations().flatMap((obs) => obs.data.map((d) => d.x));
   const obsAllY = () =>
-    observations().flatMap((obs) => obs.data.map((d) => d.x));
+    observations().flatMap((obs) => obs.data.map((d) => d.y));
 
   const allValues = () => [
     ...flatExperiments().flatMap((e) =>
