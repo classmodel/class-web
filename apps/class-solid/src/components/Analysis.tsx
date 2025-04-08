@@ -1,6 +1,8 @@
 import { BmiClass } from "@classmodel/class/bmi";
 import type { Config } from "@classmodel/class/config";
 import type { ClassOutput } from "@classmodel/class/runner";
+import { saveAs } from "file-saver";
+import { toBlob } from "html-to-image";
 import {
   type Accessor,
   For,
@@ -27,7 +29,7 @@ import {
   experiments,
   updateAnalysis,
 } from "~/lib/store";
-import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
+import { MdiCamera, MdiDelete } from "./icons";
 import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./plots/Axes";
 import { Chart, ChartContainer } from "./plots/ChartContainer";
 import { Legend } from "./plots/Legend";
@@ -348,6 +350,45 @@ export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
   );
 }
 
+async function takeScreenshot(event: MouseEvent, analyse: Analysis) {
+  const target = event.target as HTMLElement;
+  const article = target.closest("[role='article']") as HTMLElement;
+  const figure = article?.querySelector("figure") as HTMLElement;
+
+  if (!figure) {
+    console.error("Could not find figure element");
+    return;
+  }
+
+  // TODO Make screenshot bigger than the original?
+  const scale = 1;
+  // Can not use toSvg as legend is written in HTML
+  // generated svg document contains foreignObject with html tag
+  // which can only be rendered using web browser, not Inkscape or PowerPoint
+  const blob = await toBlob(figure, {
+    backgroundColor: "white",
+    canvasWidth: figure.clientWidth * scale,
+    canvasHeight: figure.clientHeight * scale,
+  });
+  if (!blob) {
+    throw new Error("Failed to create blob");
+  }
+  // TODO put experiments/permutation names in filename?
+  const parts = [analyse.type];
+  if ("time" in analyse) {
+    const timesAnalyse = analyse as ProfilesAnalysis | SkewTAnalysis;
+    const time = uniqueTimes()[timesAnalyse.time];
+    const formattedTime = formatSeconds(time);
+    parts.push(formattedTime);
+  }
+  const fn = `class-${parts.join("-")}.png`;
+  console.log("Saving screenshot as", fn);
+  const file = new File([blob], fn, {
+    type: "image/png",
+  });
+  saveAs(file);
+}
+
 export function AnalysisCard(analysis: Analysis) {
   const id = createUniqueId();
   return (
@@ -356,18 +397,12 @@ export function AnalysisCard(analysis: Analysis) {
         {/* TODO: make name & description editable */}
         <CardTitle id={id}>{analysis.name}</CardTitle>
 
-        <div class="flex">
-          {/* TODO: implement download functionality */}
-          <Button variant="outline" title="Download">
-            <MdiDownload />
-          </Button>
-          {/* TODO: implement "configure" functionality */}
-          <Button variant="outline" title="Configure">
-            <MdiCog />
-          </Button>
-          {/* TODO: implement duplicate functionality */}
-          <Button variant="outline" title="Duplicate">
-            <MdiContentCopy />
+        <div class="flex gap-1">
+          <Button
+            variant="outline"
+            onClick={(e) => takeScreenshot(e, analysis)}
+          >
+            <MdiCamera />
           </Button>
           <Button
             variant="outline"
