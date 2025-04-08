@@ -7,7 +7,7 @@
   "q_0": 0.008,
   "dq_0": -0.001,
   "dt": 60,
-  "runtime": 4320,
+  "runtime": 43200,
   "wtheta": [0.1],
   "advtheta": 0,
   "gammatheta": 0.006,
