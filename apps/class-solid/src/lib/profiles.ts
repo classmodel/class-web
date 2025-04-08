@@ -186,8 +186,8 @@ export function getThermodynamicProfiles(
 export function observationsForProfile(obs: Observation, variable = "theta") {
   return {
     label: obs.name,
-    color: "red",
-    linestyle: "3,10",
+    color: "#000000",
+    linestyle: "none",
     data: obs.height.map((h, i) => {
       const T = obs.temperature[i] + 273.15;
       const rh = obs.relativeHumidity[i];
@@ -213,7 +213,7 @@ export function observationsForSounding(obs: Observation) {
       return { p, T, Td };
     }),
     label: obs.name,
-    color: "red",
-    linestyle: "3,10",
+    color: "#000000",
+    linestyle: "none",
   };
 }

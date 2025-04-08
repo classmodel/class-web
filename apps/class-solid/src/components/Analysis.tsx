@@ -59,8 +59,6 @@ const colors = [
   "#b0ab0b",
 ];
 
-const linestyles = ["none", "5,5", "10,10", "15,5,5,5", "20,10,5,5,5,10"];
-
 interface FlatExperiment {
   label: string;
   color: string;
@@ -71,12 +69,13 @@ interface FlatExperiment {
 
 // Create a derived store for looping over all outputs:
 const flatExperiments: () => FlatExperiment[] = createMemo(() => {
+  let nextColor = 0;
   return experiments
     .filter((e) => e.output.running === false) // skip running experiments
-    .flatMap((e, i) => {
+    .flatMap((e) => {
       const reference: FlatExperiment = {
-        color: colors[0],
-        linestyle: linestyles[i % 5],
+        color: colors[nextColor++ % 10],
+        linestyle: "none",
         label: e.config.reference.name,
         config: e.config.reference,
         output: e.output.reference,
@@ -86,8 +85,8 @@ const flatExperiments: () => FlatExperiment[] = createMemo(() => {
         const output = e.output.permutations[j];
         return {
           label: `${e.config.reference.name}/${config.name}`,
-          color: colors[(j + 1) % 10],
-          linestyle: linestyles[i % 5],
+          color: colors[nextColor++ % 10],
+          linestyle: "none",
           config,
           output,
         };
@@ -146,7 +145,7 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
       {/* TODO: get label for yVariable from model config */}
       <ChartContainer>
         <Legend entries={chartData} />
-        <Chart title="Vertical profile plot" formatX={formatSeconds}>
+        <Chart title="Timeseries plot" formatX={formatSeconds}>
           <AxisBottom domain={xLim} label="Time [s]" />
           <AxisLeft domain={yLim} label={analysis.yVariable} />
           <For each={chartData()}>{(d) => Line(d)}</For>
