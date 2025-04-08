@@ -270,8 +270,20 @@ export function VerticalProfilePlot({
           <Chart title="Vertical profile plot">
             <AxisBottom domain={xLim} label={analysis.variable} />
             <AxisLeft domain={yLim} label="Height[m]" />
-            <For each={profileData()}>{(d) => Line(d)}</For>
-            <For each={observations()}>{(d) => Line(d)}</For>
+            <For each={profileData()}>
+              {(d) => (
+                <Show when={toggles[d.label]}>
+                  <Line {...d} />
+                </Show>
+              )}
+            </For>
+            <For each={observations()}>
+              {(d) => (
+                <Show when={toggles[d.label]}>
+                  <Line {...d} />
+                </Show>
+              )}
+            </For>
           </Chart>
         </ChartContainer>
         <Picker
