@@ -18,6 +18,7 @@ import {
   modifyExperiment,
 } from "~/lib/store";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
+import { ObservationsList } from "./ObservationsList";
 import { PermutationsList } from "./PermutationsList";
 import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
 import {
@@ -249,6 +250,7 @@ export function ExperimentCard(props: {
           experiment={experiment()}
           experimentIndex={experimentIndex()}
         />
+        <ObservationsList observations={experiment().config.observations} />
       </CardContent>
       <CardFooter class="gap-1">
         <Show
