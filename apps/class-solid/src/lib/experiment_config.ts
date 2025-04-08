@@ -61,7 +61,7 @@ const jsonSchemaOfExperimentConfigBase = {
       items: {
         type: "object",
         properties: {
-          name: {type: "string"},
+          name: { type: "string" },
           height: { type: "array", items: { type: "number" } },
           pressure: { type: "array", items: { type: "number" } },
           temperature: { type: "array", items: { type: "number" } },
