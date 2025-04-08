@@ -146,7 +146,7 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
       {/* TODO: get label for yVariable from model config */}
       <ChartContainer>
         <Legend entries={chartData} />
-        <Chart title="Vertical profile plot" formatX={formatSeconds}>
+        <Chart title="Timeseries plot" formatX={formatSeconds}>
           <AxisBottom domain={xLim} label="Time [s]" />
           <AxisLeft domain={yLim} label={analysis.yVariable} />
           <For each={chartData()}>{(d) => Line(d)}</For>
