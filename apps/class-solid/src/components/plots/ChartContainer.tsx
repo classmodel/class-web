@@ -162,9 +162,21 @@ export function useChartContext() {
   }
   return context;
 }
+
 export interface ChartData<T> {
   label: string;
   color: string;
   linestyle: string;
   data: T[];
+}
+
+export function highlight(hex: string) {
+  const g = 246; // gray level
+  const b = (h: string, i: number) =>
+    Math.round(Number.parseInt(h.slice(i, i + 2), 16) * 0.5 + g * 0.5)
+      .toString(16)
+      .padStart(2, "0");
+  const m = `#${b(hex, 1)}${b(hex, 3)}${b(hex, 5)}`;
+  console.log(hex, m);
+  return m;
 }

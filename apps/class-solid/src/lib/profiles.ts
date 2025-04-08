@@ -213,7 +213,7 @@ export function observationsForSounding(obs: Observation) {
       return { p, T, Td };
     }),
     label: obs.name,
-    color: "red",
-    linestyle: "3,10",
+    color: "black",
+    linestyle: "none",
   };
 }

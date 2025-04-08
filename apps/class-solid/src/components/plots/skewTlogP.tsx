@@ -3,7 +3,12 @@ import * as d3 from "d3";
 import { For, createSignal } from "solid-js";
 import { AxisBottom, AxisLeft } from "./Axes";
 import type { ChartData, SupportedScaleTypes } from "./ChartContainer";
-import { Chart, ChartContainer, useChartContext } from "./ChartContainer";
+import {
+  Chart,
+  ChartContainer,
+  highlight,
+  useChartContext,
+} from "./ChartContainer";
 import { Legend } from "./Legend";
 interface SoundingRecord {
   p: number;
@@ -108,28 +113,36 @@ function Sounding(data: ChartData<SoundingRecord>) {
     .x((d) => x(d.Td - 273.15) + (y(basep) - y(d.p)) / tan)
     .y((d) => y(d.p));
 
+  const titleT = () => `${data.label} T`;
+  const titleTd = () => `${data.label} Td`;
+
+  const stroke = () => (hovered() ? highlight(data.color) : data.color);
+
   return (
     <g
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <title>{data.label}</title>
       <path
         d={temperatureLine(data.data) || ""}
         clip-path="url(#clipper)"
-        stroke={data.color}
+        stroke={stroke()}
         stroke-dasharray={data.linestyle}
-        stroke-width={hovered() ? 5 : 3}
+        stroke-width={3}
         fill="none"
-      />
+      >
+        <title>{titleT()}</title>
+      </path>
       <path
         d={dewpointLine(data.data) || ""}
         clip-path="url(#clipper)"
-        stroke={data.color}
-        stroke-dasharray={data.linestyle}
-        stroke-width={hovered() ? 5 : 3}
+        stroke={stroke()}
+        stroke-dasharray="5,5"
+        stroke-width={3}
         fill="none"
-      />
+      >
+        <title>{titleTd()}</title>
+      </path>
     </g>
   );
 }
