@@ -34,6 +34,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
@@ -238,17 +239,6 @@ function PermutationInfo(props: {
             &nbsp;Edit permutation
           </DropdownMenuItem>
           <DropdownMenuItem
-            onSelect={() =>
-              deletePermutationFromExperiment(
-                props.experimentIndex,
-                props.permutationIndex,
-              )
-            }
-          >
-            <MdiDelete />
-            &nbsp;Delete permutation
-          </DropdownMenuItem>
-          <DropdownMenuItem
             onSelect={() => {
               duplicatePermutation(
                 props.experimentIndex,
@@ -259,6 +249,7 @@ function PermutationInfo(props: {
             <MdiContentCopy />
             &nbsp;Duplicate permutation
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             onSelect={() => {
               promotePermutationToExperiment(
@@ -280,6 +271,18 @@ function PermutationInfo(props: {
           >
             <MdiRotateLeft />
             &nbsp;Swap permutation with reference configuration
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onSelect={() =>
+              deletePermutationFromExperiment(
+                props.experimentIndex,
+                props.permutationIndex,
+              )
+            }
+          >
+            <MdiDelete />
+            &nbsp;Delete permutation
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
