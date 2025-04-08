@@ -185,7 +185,7 @@ export function getThermodynamicProfiles(
 
 export function observationsForProfile(obs: Observation, variable = "theta") {
   return {
-    label: obs.name || "Unnamed observations",
+    label: obs.name,
     color: "red",
     linestyle: "3,10",
     data: obs.height.map((h, i) => {
@@ -212,7 +212,7 @@ export function observationsForSounding(obs: Observation) {
       const Td = dewpoint(q, p);
       return { p, T, Td };
     }),
-    label: obs.name || "Unnamed observations",
+    label: obs.name,
     color: "red",
     linestyle: "3,10",
   };
