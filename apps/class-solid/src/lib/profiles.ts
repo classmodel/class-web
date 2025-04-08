@@ -1,6 +1,7 @@
 import type { Config } from "@classmodel/class/config";
 import type { ClassOutput } from "@classmodel/class/runner";
 import type { Point } from "~/components/plots/Line";
+import type { Observation } from "./experiment_config";
 
 // Get vertical profiles for a single class run
 export function getVerticalProfiles(
@@ -71,6 +72,16 @@ const thetaToT = (theta: number, p: number, p0 = 1000) => {
 };
 
 /**
+ * Calculate potential temperature from temperature
+ */
+const tToTheta = (T: number, p: number, p0 = 1000) => {
+  const R = 287; // specific gas constant for dry air
+  const cp = 1004; // specific heat of dry air at constant pressure
+  const theta = T * (p / p0) ** -(R / cp);
+  return theta;
+};
+
+/**
  * Calculate pressure difference over layer using hypsometric equation
  * Wallace & Hobbs eq (3.23)
  */
@@ -95,6 +106,24 @@ const thickness = (T: number, q: number, p: number, dp: number) => {
   const dz = (dp * Rd * Tv) / (p * g);
   return dz;
 };
+
+function calculateSpecificHumidity(T: number, p: number, rh: number) {
+  // Constants
+  const epsilon = 0.622; // Ratio of gas constants for dry air and water vapor
+  const es0 = 6.112; // Reference saturation vapor pressure in hPa
+
+  // Calculate saturation vapor pressure (Tetens formula)
+  const es = es0 * Math.exp((17.67 * (T - 273.15)) / (T - 29.65));
+
+  // Actual vapor pressure
+  const e = (rh / 100) * es;
+
+  // Mixing ratio (kg/kg)
+  const w = (epsilon * e) / (p - e);
+
+  // Specific humidity
+  return w / (1 + w);
+}
 
 export function getThermodynamicProfiles(
   output: ClassOutput | undefined,
@@ -152,4 +181,39 @@ export function getThermodynamicProfiles(
   }
 
   return soundingData;
+}
+
+export function observationsForProfile(obs: Observation, variable = "theta") {
+  return {
+    label: obs.name,
+    color: "red",
+    linestyle: "3,10",
+    data: obs.height.map((h, i) => {
+      const T = obs.temperature[i] + 273.15;
+      const rh = obs.relativeHumidity[i];
+      const p = obs.pressure[i];
+      const theta = tToTheta(T, p);
+      const q = calculateSpecificHumidity(T, p, rh);
+      if (variable === "theta") {
+        return { y: h, x: theta };
+      }
+      return { y: h, x: q };
+    }),
+  };
+}
+
+export function observationsForSounding(obs: Observation) {
+  return {
+    data: obs.height.map((h, i) => {
+      const T = obs.temperature[i] + 273.15;
+      const p = obs.pressure[i];
+      const rh = obs.relativeHumidity[i];
+      const q = calculateSpecificHumidity(T, p, rh);
+      const Td = dewpoint(q, p);
+      return { p, T, Td };
+    }),
+    label: obs.name,
+    color: "red",
+    linestyle: "3,10",
+  };
 }

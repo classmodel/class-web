@@ -53,6 +53,7 @@ export function toPartial(config: ExperimentConfig): PartialExperimentConfig {
     permutations: config.permutations.map((perm) =>
       pruneConfig(perm, config.reference, preset.config),
     ),
+    observations: config.observations,
   };
 }
 

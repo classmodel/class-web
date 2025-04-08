@@ -11,7 +11,13 @@ import {
   createMemo,
   createUniqueId,
 } from "solid-js";
-import { getThermodynamicProfiles, getVerticalProfiles } from "~/lib/profiles";
+import type { Observation } from "~/lib/experiment_config";
+import {
+  getThermodynamicProfiles,
+  getVerticalProfiles,
+  observationsForProfile,
+  observationsForSounding,
+} from "~/lib/profiles";
 import {
   type Analysis,
   type ProfilesAnalysis,
@@ -68,7 +74,7 @@ const flatExperiments: () => FlatExperiment[] = createMemo(() => {
   return experiments
     .filter((e) => e.output.running === false) // skip running experiments
     .flatMap((e, i) => {
-      const reference = {
+      const reference: FlatExperiment = {
         color: colors[0],
         linestyle: linestyles[i % 5],
         label: e.config.reference.name,
@@ -87,6 +93,15 @@ const flatExperiments: () => FlatExperiment[] = createMemo(() => {
         };
       });
       return [reference, ...permutations];
+    });
+});
+
+// Derived store for all observations of all experiments combined
+const flatObservations: () => Observation[] = createMemo(() => {
+  return experiments
+    .filter((e) => e.config.observations)
+    .flatMap((e) => {
+      return e.config.observations || [];
     });
 });
 
@@ -166,12 +181,23 @@ export function VerticalProfilePlot({
   const classVariable = () =>
     variableOptions[analysis.variable as keyof typeof variableOptions];
 
-  const allValues = () =>
-    flatExperiments().flatMap((e) =>
+  const observations = () =>
+    flatObservations().map((o) => observationsForProfile(o, classVariable()));
+  const obsAllX = () =>
+    observations().flatMap((obs) => obs.data.map((d) => d.x));
+  const obsAllY = () =>
+    observations().flatMap((obs) => obs.data.map((d) => d.y));
+
+  const allValues = () => [
+    ...flatExperiments().flatMap((e) =>
       e.output ? e.output[classVariable()] : [],
-    );
-  const allHeights = () =>
-    flatExperiments().flatMap((e) => (e.output ? e.output.h : []));
+    ),
+    ...obsAllX(),
+  ];
+  const allHeights = () => [
+    ...flatExperiments().flatMap((e) => (e.output ? e.output.h : [])),
+    ...obsAllY(),
+  ];
 
   // TODO: better to include jump at top in extent calculation rather than adding random margin.
   const xLim = () => getNiceAxisLimits(allValues(), 1);
@@ -199,11 +225,12 @@ export function VerticalProfilePlot({
     <>
       <div class="flex flex-col gap-2">
         <ChartContainer>
-          <Legend entries={profileData} />
+          <Legend entries={() => [...profileData(), ...observations()]} />
           <Chart title="Vertical profile plot">
             <AxisBottom domain={xLim} label={analysis.variable} />
             <AxisLeft domain={yLim} label="Height[m]" />
             <For each={profileData()}>{(d) => Line(d)}</For>
+            <For each={observations()}>{(d) => Line(d)}</For>
           </Chart>
         </ChartContainer>
         <Picker
@@ -307,9 +334,12 @@ export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
       };
     });
 
+  const observations = () =>
+    flatObservations().map((o) => observationsForSounding(o));
+
   return (
     <>
-      <SkewTPlot data={skewTData} />
+      <SkewTPlot data={() => [...skewTData(), ...observations()]} />
       {TimeSlider(
         () => analysis.time,
         uniqueTimes,
