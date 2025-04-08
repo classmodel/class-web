@@ -167,6 +167,7 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
           label="y-axis"
         />
       </div>
+      <div class="h-10" />
     </>
   );
 }
@@ -346,6 +347,7 @@ export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
         uniqueTimes,
         (t) => updateAnalysis(analysis, { time: t }),
       )}
+      <div class="h-14" />
     </>
   );
 }
@@ -400,7 +402,7 @@ export function AnalysisCard(analysis: Analysis) {
         <div class="flex gap-1">
           <Button
             variant="outline"
-            onClick={(e) => takeScreenshot(e, analysis)}
+            onClick={(e: MouseEvent) => takeScreenshot(e, analysis)}
           >
             <MdiCamera />
           </Button>
