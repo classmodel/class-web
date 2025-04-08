@@ -176,7 +176,5 @@ export function highlight(hex: string) {
     Math.round(Number.parseInt(h.slice(i, i + 2), 16) * 0.5 + g * 0.5)
       .toString(16)
       .padStart(2, "0");
-  const m = `#${b(hex, 1)}${b(hex, 3)}${b(hex, 5)}`;
-  console.log(hex, m);
-  return m;
+  return `#${b(hex, 1)}${b(hex, 3)}${b(hex, 5)}`;
 }
