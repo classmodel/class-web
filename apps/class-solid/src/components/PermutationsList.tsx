@@ -14,7 +14,6 @@ import {
   setPermutationConfigInExperiment,
   swapPermutationAndReferenceConfiguration,
 } from "~/lib/store";
-import { PermutationSweepButton } from "./PermutationSweepButton";
 import {
   MdiCakeVariantOutline,
   MdiCog,
@@ -300,10 +299,6 @@ export function PermutationsList(props: {
       <legend class="flex flex-row items-center gap-2">
         Permutations
         <AddPermutationButton
-          experiment={props.experiment}
-          experimentIndex={props.experimentIndex}
-        />
-        <PermutationSweepButton
           experiment={props.experiment}
           experimentIndex={props.experimentIndex}
         />

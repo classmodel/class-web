@@ -44,35 +44,3 @@ test("Create share link from an experiment", async ({ page }) => {
 
   // TODO: finalheight is gone; implement alternative check to see that experiment finished
 });
-
-test("Given large app state, sharing is not possible", async ({ page }) => {
-  test.skip(
-    true,
-    "Plotting is too slow, to render 13 experiments with 24 permuations each",
-  );
-  await page.goto("/");
-
-  // Create a new experiment
-  await page.getByRole("button", { name: "Add Start from preset" }).click();
-  await page
-    .getByRole("button", { name: "Default The classic default" })
-    .click();
-  await page.getByRole("button", { name: "Run" }).click();
-  // Add permutation sweep
-  await page.getByRole("button", { name: "S", exact: true }).click();
-  await page.getByRole("button", { name: "Perform sweep" }).click();
-
-  // Duplicate the experiment 12 times
-  const times = 12;
-  for (let i = 0; i < times; i++) {
-    await page
-      .getByLabel("Default", { exact: true })
-      .getByRole("button", { name: "Duplicate experiment" })
-      .click();
-  }
-
-  await page.getByRole("button", { name: "Share" }).click();
-  await page.waitForSelector(
-    "text=Cannot share application state, it is too large. Please download each experiment by itself or make it smaller by removing permutations and/or experiments.",
-  );
-});
