@@ -2,7 +2,7 @@ import type { Config } from "@classmodel/class/config";
 import { pruneConfig } from "@classmodel/class/config_utils";
 import { Form } from "@classmodel/form";
 import { overwriteDefaultsInJsonSchema } from "@classmodel/form/utils";
-import { For, createMemo, createSignal, createUniqueId } from "solid-js";
+import { For, createMemo, createSignal } from "solid-js";
 import { unwrap } from "solid-js/store";
 import { Button } from "~/components/ui/button";
 import { findPresetByName } from "~/lib/presets";
@@ -20,7 +20,6 @@ import {
   MdiContentCopy,
   MdiDelete,
   MdiLightVectorDifference,
-  MdiMenu,
   MdiRotateLeft,
 } from "./icons";
 import {
@@ -78,8 +77,8 @@ function AddPermutationButton(props: {
     <Dialog open={open()} onOpenChange={setOpen}>
       <DialogTrigger
         title="Add a permutation to the reference configuration of this experiment"
-        variant="secondary"
-        size="icon"
+        variant="outline"
+        size="tinyicon"
         as={Button<"button">}
       >
         +
@@ -115,18 +114,11 @@ function EditPermutationButton(props: {
   experiment: Experiment;
   experimentIndex: number;
   permutationIndex: number;
+  open: boolean;
+  setOpen: (open: boolean) => void;
 }) {
-  const [open, setOpen] = createSignal(false);
-
   return (
-    <Dialog open={open()} onOpenChange={setOpen}>
-      <DialogTrigger
-        title="Edit permutation"
-        variant="outline"
-        as={Button<"button">}
-      >
-        <MdiCog />
-      </DialogTrigger>
+    <Dialog open={props.open} onOpenChange={props.setOpen}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
@@ -145,7 +137,7 @@ function EditPermutationButton(props: {
               props.permutationIndex,
               config,
             );
-            setOpen(false);
+            props.setOpen(false);
           }}
         />
         <DialogFooter>
@@ -158,14 +150,14 @@ function EditPermutationButton(props: {
   );
 }
 
-function PermutationDifferenceButton(props: {
+function PermutationDifferenceDialog(props: {
   reference: Config;
   permutation: Config;
+  open: boolean;
+  setOpen: (open: boolean) => void;
 }) {
-  const [open, setOpen] = createSignal(false);
-
   const prunedReference = createMemo(() => {
-    if (!open()) {
+    if (!props.open) {
       return ""; // Don't compute anything if the dialog is closed
     }
     const { name, description, ...pruned } = pruneConfig(
@@ -175,7 +167,7 @@ function PermutationDifferenceButton(props: {
     return JSON.stringify(pruned, null, 2);
   });
   const prunedPermutation = createMemo(() => {
-    if (!open()) {
+    if (!props.open) {
       return "";
     }
     const { name, description, ...pruned } = pruneConfig(
@@ -185,25 +177,18 @@ function PermutationDifferenceButton(props: {
     return JSON.stringify(pruned, null, 2);
   });
   return (
-    <Dialog open={open()} onOpenChange={setOpen}>
-      <DialogTrigger
-        variant="outline"
-        title="View differences between this permutation and reference configuration"
-        as={Button<"button">}
-      >
-        <MdiLightVectorDifference />
-      </DialogTrigger>
+    <Dialog open={props.open} onOpenChange={props.setOpen}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Differences between configurations</DialogTitle>
         </DialogHeader>
-        <div class="grid grid-cols-2">
+        <div class="grid min-w-96 grid-cols-2 gap-2">
           <fieldset class="border">
-            <legend>Reference configuration</legend>
+            <legend>Reference</legend>
             <pre>{prunedReference()}</pre>
           </fieldset>
           <fieldset class="border">
-            <legend>Permutation configuration</legend>
+            <legend>Permutation</legend>
             <pre title="PermutationConfig">{prunedPermutation()}</pre>
           </fieldset>
         </div>
@@ -218,75 +203,87 @@ function PermutationInfo(props: {
   permutationIndex: number;
   perm: Config;
 }) {
-  const id = createUniqueId();
-
+  const [openDifferenceDialog, setOpenDifferenceDialog] = createSignal(false);
+  const [openEditDialog, setOpenEditDialog] = createSignal(false);
   return (
-    <article
-      class="flex flex-row items-center justify-center gap-1 p-2"
-      aria-labelledby={id}
-    >
-      <span id={id}>{props.perm.name}</span>
-      <PermutationDifferenceButton
+    <>
+      <PermutationDifferenceDialog
         reference={props.experiment.config.reference}
         permutation={props.perm}
+        open={openDifferenceDialog()}
+        setOpen={setOpenDifferenceDialog}
       />
       <EditPermutationButton
         experiment={props.experiment}
         experimentIndex={props.experimentIndex}
         permutationIndex={props.permutationIndex}
+        open={openEditDialog()}
+        setOpen={setOpenEditDialog}
       />
       <DropdownMenu>
         <DropdownMenuTrigger
           as={Button}
           variant="outline"
-          title="Other actions"
+          title="Click for permutation actions"
         >
-          <MdiMenu />
+          {props.perm.name}
         </DropdownMenuTrigger>
         <DropdownMenuContent>
+          <DropdownMenuItem onSelect={() => setOpenDifferenceDialog(true)}>
+            <MdiLightVectorDifference />
+            &nbsp;View differences with reference configuration
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setOpenEditDialog(true)}>
+            <MdiCog />
+            &nbsp;Edit permutation
+          </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() =>
+            onSelect={() =>
               deletePermutationFromExperiment(
                 props.experimentIndex,
                 props.permutationIndex,
               )
             }
           >
-            <MdiDelete /> Delete permutation
+            <MdiDelete />
+            &nbsp;Delete permutation
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => {
+            onSelect={() => {
               duplicatePermutation(
                 props.experimentIndex,
                 props.permutationIndex,
               );
             }}
           >
-            <MdiContentCopy /> Duplicate permutation
+            <MdiContentCopy />
+            &nbsp;Duplicate permutation
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => {
+            onSelect={() => {
               promotePermutationToExperiment(
                 props.experimentIndex,
                 props.permutationIndex,
               );
             }}
           >
-            <MdiCakeVariantOutline /> Promote permutation to a new experiment
+            <MdiCakeVariantOutline />
+            &nbsp;Promote permutation to a new experiment
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => {
+            onSelect={() => {
               swapPermutationAndReferenceConfiguration(
                 props.experimentIndex,
                 props.permutationIndex,
               );
             }}
           >
-            <MdiRotateLeft /> Swap permutation with reference configuration
+            <MdiRotateLeft />
+            &nbsp;Swap permutation with reference configuration
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    </article>
+    </>
   );
 }
 
@@ -295,15 +292,15 @@ export function PermutationsList(props: {
   experiment: Experiment;
 }) {
   return (
-    <fieldset class="border">
-      <legend class="flex flex-row items-center gap-2">
+    <section aria-label="permutations" class="justify-self-center">
+      <h2 class="flex items-center gap-1 text-lg">
         Permutations
         <AddPermutationButton
           experiment={props.experiment}
           experimentIndex={props.experimentIndex}
         />
-      </legend>
-      <ul class="max-h-40 overflow-auto">
+      </h2>
+      <ul class="max-h-40 overflow-auto py-2">
         <For each={props.experiment.config.permutations}>
           {(perm, permutationIndex) => (
             <li>
@@ -317,6 +314,6 @@ export function PermutationsList(props: {
           )}
         </For>
       </ul>
-    </fieldset>
+    </section>
   );
 }
