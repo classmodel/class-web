@@ -173,7 +173,7 @@ export function SkewTPlot(props: { data: () => ChartData<SoundingRecord>[] }) {
     setToggles(label, value);
   }
 
-  function whendryAdiabat(i: number) {
+  function showSounding(i: number) {
     const cd = props.data()[i];
     if (!toggles || !cd) {
       return true;
@@ -207,7 +207,7 @@ export function SkewTPlot(props: { data: () => ChartData<SoundingRecord>[] }) {
         <For each={dryAdiabats}>{(d) => <DryAdiabat {...d} />}</For>
         <For each={props.data()}>
           {(d, i) => (
-            <Show when={whendryAdiabat(i())}>
+            <Show when={showSounding(i())}>
               <Sounding {...d} />
             </Show>
           )}
