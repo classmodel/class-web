@@ -1,5 +1,6 @@
 import { For } from "solid-js";
 import { cn } from "~/lib/utils";
+import { Checkbox } from "../ui/checkbox";
 import type { ChartData } from "./ChartContainer";
 import { useChartContext } from "./ChartContainer";
 
@@ -19,26 +20,10 @@ export function Legend<T>(props: LegendProps<T>) {
     >
       <For each={props.entries()}>
         {(d) => (
-          <>
-            <span class="flex items-center">
-              <svg
-                width="1.5rem"
-                height="1rem"
-                overflow="visible"
-                viewBox="0 0 50 20"
-              >
-                <title>legend</title>
-                <path
-                  fill="none"
-                  stroke={d.color}
-                  stroke-dasharray={d.linestyle}
-                  stroke-width="4"
-                  d="M 0 12 L 45 12"
-                />
-              </svg>
-              <p style={`color: ${d.color}`}>{d.label}</p>
-            </span>
-          </>
+          <div class=" flex gap-1">
+            <Checkbox checked />
+            <p style={`color: ${d.color}`}>{d.label}</p>
+          </div>
         )}
       </For>
     </div>
