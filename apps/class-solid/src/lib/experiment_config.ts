@@ -9,7 +9,7 @@ import { findPresetByName } from "./presets";
 Height (m AGL)	 Pressure (mb)	 Temperature (C)	 Relative humidity (%)	 Wind speed (m/s)	 Wind direction (true deg)
 */
 export interface Observation {
-  name?: string;
+  name: string;
   height: number[];
   pressure: number[];
   temperature: number[];
@@ -61,6 +61,7 @@ const jsonSchemaOfExperimentConfigBase = {
       items: {
         type: "object",
         properties: {
+          name: {type: "string"},
           height: { type: "array", items: { type: "number" } },
           pressure: { type: "array", items: { type: "number" } },
           temperature: { type: "array", items: { type: "number" } },
@@ -69,6 +70,7 @@ const jsonSchemaOfExperimentConfigBase = {
           windDirection: { type: "array", items: { type: "number" } },
         },
         required: [
+          "name",
           "height",
           "pressure",
           "temperature",
