@@ -1,6 +1,7 @@
 // Code modified from https://github.com/rsobash/d3-skewt/ (MIT license)
 import * as d3 from "d3";
-import { For, createSignal } from "solid-js";
+import { For, Show, createEffect, createSignal } from "solid-js";
+import { createStore } from "solid-js/store";
 import { AxisBottom, AxisLeft } from "./Axes";
 import type { ChartData, SupportedScaleTypes } from "./ChartContainer";
 import {
@@ -149,9 +150,7 @@ function Sounding(data: ChartData<SoundingRecord>) {
 
 // Note: using temperatures in Kelvin as that's easiest to get from CLASS, but
 // perhaps not the most interoperable with other sounding data sources.
-export function SkewTPlot({
-  data,
-}: { data: () => ChartData<SoundingRecord>[] }) {
+export function SkewTPlot(props: { data: () => ChartData<SoundingRecord>[] }) {
   const pressureLines = [1000, 850, 700, 500, 300, 200, 100];
   const temperatureLines = d3.range(-100, 45, 10);
 
@@ -161,9 +160,30 @@ export function SkewTPlot({
     pressureGrid.map((pressure) => [pressure, temperature]),
   );
 
+  const [toggles, setToggles] = createStore<Record<string, boolean>>({});
+
+  // Initialize all lines as visible
+  createEffect(() => {
+    for (const d of props.data()) {
+      setToggles(d.label, true);
+    }
+  });
+
+  function toggleLine(label: string, value: boolean) {
+    setToggles(label, value);
+  }
+
+  function whendryAdiabat(i: number) {
+    const cd = props.data()[i];
+    if (!toggles || !cd) {
+      return true;
+    }
+    return toggles[cd.label];
+  }
+
   return (
     <ChartContainer>
-      <Legend entries={data} />
+      <Legend entries={props.data} toggles={toggles} onChange={toggleLine} />
       <Chart
         title="Thermodynamic diagram"
         formatX={d3.format(".0d")}
@@ -184,8 +204,14 @@ export function SkewTPlot({
         <ClipPath />
         <For each={temperatureLines}>{(t) => SkewTGridLine(t)}</For>
         <For each={pressureLines}>{(p) => LogPGridLine(p)}</For>
-        <For each={dryAdiabats}>{(d) => DryAdiabat(d)}</For>
-        <For each={data()}>{(d) => Sounding(d)}</For>
+        <For each={dryAdiabats}>{(d) => <DryAdiabat {...d} />}</For>
+        <For each={props.data()}>
+          {(d, i) => (
+            <Show when={whendryAdiabat(i())}>
+              <Sounding {...d} />
+            </Show>
+          )}
+        </For>
       </Chart>
     </ChartContainer>
   );

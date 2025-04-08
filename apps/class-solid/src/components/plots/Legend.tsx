@@ -6,6 +6,8 @@ import { useChartContext } from "./ChartContainer";
 
 export interface LegendProps<T> {
   entries: () => ChartData<T>[];
+  toggles: Record<string, boolean>;
+  onChange: (key: string, value: boolean) => void;
 }
 
 export function Legend<T>(props: LegendProps<T>) {
@@ -21,7 +23,10 @@ export function Legend<T>(props: LegendProps<T>) {
       <For each={props.entries()}>
         {(d) => (
           <div class=" flex gap-1">
-            <Checkbox checked />
+            <Checkbox
+              checked={props.toggles[d.label]}
+              onChange={(v) => props.onChange(d.label, v)}
+            />
             <p style={`color: ${d.color}`}>{d.label}</p>
           </div>
         )}

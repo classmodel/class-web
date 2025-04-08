@@ -6,11 +6,13 @@ import {
   For,
   Match,
   type Setter,
+  Show,
   Switch,
   createEffect,
   createMemo,
   createUniqueId,
 } from "solid-js";
+import { createStore } from "solid-js/store";
 import type { Observation } from "~/lib/experiment_config";
 import {
   getThermodynamicProfiles,
@@ -140,15 +142,34 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
       };
     });
 
+  const [toggles, setToggles] = createStore<Record<string, boolean>>({});
+
+  // Initialize all lines as visible
+  createEffect(() => {
+    for (const d of chartData()) {
+      setToggles(d.label, true);
+    }
+  });
+
+  function toggleLine(label: string, value: boolean) {
+    setToggles(label, value);
+  }
+
   return (
     <>
       {/* TODO: get label for yVariable from model config */}
       <ChartContainer>
-        <Legend entries={chartData} />
+        <Legend entries={chartData} toggles={toggles} onChange={toggleLine} />
         <Chart title="Timeseries plot" formatX={formatSeconds}>
           <AxisBottom domain={xLim} label="Time [s]" />
           <AxisLeft domain={yLim} label={analysis.yVariable} />
-          <For each={chartData()}>{(d) => Line(d)}</For>
+          <For each={chartData()}>
+            {(d) => (
+              <Show when={toggles[d.label]}>
+                <Line {...d} />
+              </Show>
+            )}
+          </For>
         </Chart>
       </ChartContainer>
       <div class="flex justify-around">
@@ -220,11 +241,32 @@ export function VerticalProfilePlot({
       };
     });
 
+  function chartData() {
+    return [...profileData(), ...observations()];
+  }
+
+  const [toggles, setToggles] = createStore<Record<string, boolean>>({});
+
+  // Initialize all lines as visible
+  createEffect(() => {
+    for (const d of chartData()) {
+      setToggles(d.label, true);
+    }
+  });
+
+  function toggleLine(label: string, value: boolean) {
+    setToggles(label, value);
+  }
+
   return (
     <>
       <div class="flex flex-col gap-2">
         <ChartContainer>
-          <Legend entries={() => [...profileData(), ...observations()]} />
+          <Legend
+            entries={() => [...profileData(), ...observations()]}
+            toggles={toggles}
+            onChange={toggleLine}
+          />
           <Chart title="Vertical profile plot">
             <AxisBottom domain={xLim} label={analysis.variable} />
             <AxisLeft domain={yLim} label="Height[m]" />
