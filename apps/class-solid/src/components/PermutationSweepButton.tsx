@@ -17,6 +17,8 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 
+// TODO remove
+
 function nameForPermutation(config: PartialConfig): string {
   const chunks = [];
   for (const [section, params] of Object.entries(config)) {
