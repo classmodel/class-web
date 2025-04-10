@@ -207,7 +207,6 @@ function PermutationInfo(props: {
 }) {
   const [openDifferenceDialog, setOpenDifferenceDialog] = createSignal(false);
   const [openEditDialog, setOpenEditDialog] = createSignal(false);
-  console.log(props.perm.description);
   return (
     <>
       <div class="mb-1 flex flex-row items-center justify-between border-l-4 px-2 py-1 shadow">
