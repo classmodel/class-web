@@ -188,7 +188,6 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
           label="y-axis"
         />
       </div>
-      <div class="h-10" />
     </>
   );
 }
@@ -401,7 +400,6 @@ export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
         uniqueTimes,
         (t) => updateAnalysis(analysis, { time: t }),
       )}
-      <div class="h-14" />
     </>
   );
 }
@@ -452,7 +450,6 @@ export function AnalysisCard(analysis: Analysis) {
       <CardHeader class="flex-row items-center justify-between py-2 pb-6">
         {/* TODO: make name & description editable */}
         <CardTitle id={id}>{analysis.name}</CardTitle>
-
         <div class="flex gap-1">
           <Button
             variant="outline"

@@ -36,7 +36,11 @@ export default function Home() {
         onClose={() => setOpenAddDialog(false)}
       />
 
-      <Flex justifyContent="center" class="flex-wrap gap-4">
+      <Flex
+        justifyContent="center"
+        alignItems="stretch"
+        class="flex-wrap gap-4"
+      >
         <Show when={!experiments.length}>
           <StartButtons
             onFromSratchClick={() => setOpenAddDialog(true)}
@@ -72,7 +76,11 @@ export default function Home() {
         </Show>
       </h2>
       <Show when={experiments.length} fallback={<p>Add an experiment first</p>}>
-        <Flex justifyContent="center" class="flex-wrap gap-4">
+        <Flex
+          justifyContent="center"
+          alignItems="stretch"
+          class="flex-wrap gap-4"
+        >
           <For each={analyses}>{(analysis) => AnalysisCard(analysis)}</For>
         </Flex>
       </Show>
