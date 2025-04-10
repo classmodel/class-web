@@ -231,11 +231,7 @@ function PermutationInfo(props: {
           setOpen={setOpenEditDialog}
         />
         <DropdownMenu>
-          <DropdownMenuTrigger
-            as={Button}
-            variant="ghost"
-            title="Click for permutation actions"
-          >
+          <DropdownMenuTrigger as={Button} variant="ghost">
             <MdiDotsHorizontal />
           </DropdownMenuTrigger>
           <DropdownMenuContent>

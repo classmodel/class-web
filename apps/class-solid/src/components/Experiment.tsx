@@ -7,7 +7,7 @@ import {
   onCleanup,
 } from "solid-js";
 import { unwrap } from "solid-js/store";
-import { Button, buttonVariants } from "~/components/ui/button";
+import { Button } from "~/components/ui/button";
 import { createArchive, toConfigBlob } from "~/lib/download";
 import { findPresetByName } from "~/lib/presets";
 import {
@@ -20,12 +20,17 @@ import {
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import { ObservationsList } from "./ObservationsList";
 import { PermutationsList } from "./PermutationsList";
-import { MdiCog, MdiContentCopy, MdiDelete, MdiDownload } from "./icons";
+import {
+  MdiCog,
+  MdiContentCopy,
+  MdiDelete,
+  MdiDotsHorizontal,
+  MdiDownload,
+} from "./icons";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "./ui/card";
@@ -41,6 +46,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
@@ -203,27 +212,6 @@ function DownloadExperimentArchive(props: { experiment: Experiment }) {
   );
 }
 
-function DownloadExperiment(props: { experiment: Experiment }) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        class={buttonVariants({ variant: "outline" })}
-        title="Download"
-      >
-        <MdiDownload />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuItem>
-          <DownloadExperimentConfiguration experiment={props.experiment} />
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <DownloadExperimentArchive experiment={props.experiment} />
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
 export function ExperimentCard(props: {
   experiment: Experiment;
   experimentIndex: number;
@@ -234,58 +222,92 @@ export function ExperimentCard(props: {
   const descriptionId = `${id}-description`;
   return (
     <Card
-      class="w-[380px]"
+      class="min-w-[320px]"
       role="article"
       aria-labelledby={id}
       aria-describedby={descriptionId}
     >
-      <CardHeader>
+      <CardHeader class="flex-row items-center justify-between gap-4 py-2">
+        {/* Card title and buttons */}
         <CardTitle id={id}>{experiment().config.reference.name}</CardTitle>
-        <CardDescription id={descriptionId}>
-          {experiment().config.reference.description}
-        </CardDescription>
+        <div class="flex gap-1">
+          <Show
+            when={!experiment().output.running}
+            fallback={
+              <RunningIndicator progress={experiment().output.running} />
+            }
+          >
+            <ExperimentSettingsDialog
+              experiment={experiment()}
+              experimentIndex={experimentIndex()}
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger as={Button} variant="outline">
+                <MdiDotsHorizontal />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuSub overlap>
+                  <DropdownMenuSubTrigger>
+                    {" "}
+                    <div class="flex items-end gap-1">
+                      <MdiDownload />
+                      Download{" "}
+                    </div>{" "}
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem>
+                        <DownloadExperimentConfiguration
+                          experiment={props.experiment}
+                        />
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <DownloadExperimentArchive
+                          experiment={props.experiment}
+                        />
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+                <DropdownMenuItem
+                  class="flex gap-2"
+                  onSelect={() => {
+                    duplicateExperiment(experimentIndex());
+                  }}
+                >
+                  <MdiContentCopy />
+                  Duplicate experiment
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  class="flex gap-2"
+                  onSelect={() => {
+                    if (
+                      window.confirm(
+                        "Are you sure you want to delete this experiment?",
+                      )
+                    ) {
+                      deleteExperiment(experimentIndex());
+                    }
+                  }}
+                >
+                  <MdiDelete />
+                  Delete experiment
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </Show>
+        </div>
       </CardHeader>
       <CardContent class="text-left">
+        <CardDescription class="pb-4 text-left" id={descriptionId}>
+          {experiment().config.reference.description}
+        </CardDescription>
         <PermutationsList
           experiment={experiment()}
           experimentIndex={experimentIndex()}
         />
         <ObservationsList observations={experiment().config.observations} />
       </CardContent>
-      <CardFooter class="gap-1">
-        <Show
-          when={!experiment().output.running}
-          fallback={<RunningIndicator progress={experiment().output.running} />}
-        >
-          <DownloadExperiment experiment={experiment()} />
-          <ExperimentSettingsDialog
-            experiment={experiment()}
-            experimentIndex={experimentIndex()}
-          />
-          <Button
-            variant="outline"
-            title="Duplicate experiment"
-            onClick={() => duplicateExperiment(experimentIndex())}
-          >
-            <MdiContentCopy />
-          </Button>
-          <Button
-            variant="outline"
-            title="Delete experiment"
-            onClick={() => {
-              if (
-                window.confirm(
-                  "Are you sure you want to delete this experiment?",
-                )
-              ) {
-                deleteExperiment(experimentIndex());
-              }
-            }}
-          >
-            <MdiDelete />
-          </Button>
-        </Show>
-      </CardFooter>
     </Card>
   );
 }
