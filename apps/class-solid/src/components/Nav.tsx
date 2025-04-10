@@ -1,4 +1,4 @@
-import { useLocation } from "@solidjs/router";
+import { A, useLocation } from "@solidjs/router";
 import { saveToLocalStorage } from "~/lib/state";
 import { ShareButton } from "./ShareButton";
 import { MdiContentSave } from "./icons";
@@ -13,11 +13,11 @@ export default function Nav() {
     <nav class="bg-sky-800">
       <ul class="container flex items-center gap-4 p-3 text-gray-200">
         <li class={`border-b-2 ${active("/")}l`}>
-          <a href="/">CLASS</a>
+          <A href="/">CLASS</A>
         </li>
         <li class=" w-full" />
         <li class={`border-b-2 ${active("/about")}`}>
-          <a href="/about">About</a>
+          <A href="/about">About</A>
         </li>
         <li>
           <button
