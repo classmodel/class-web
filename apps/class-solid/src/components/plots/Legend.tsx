@@ -1,6 +1,5 @@
 import { For } from "solid-js";
-import { cn } from "~/lib/utils";
-import { Checkbox } from "../ui/checkbox";
+import { createUniqueId } from "solid-js";
 import type { ChartData } from "./ChartContainer";
 import { useChartContext } from "./ChartContainer";
 
@@ -15,21 +14,29 @@ export function Legend<T>(props: LegendProps<T>) {
 
   return (
     <div
-      class={cn(
-        "flex flex-wrap justify-end text-sm tracking-tight",
-        `w-[${chart.width}px]`,
-      )}
+      class={"flex flex-wrap justify-end gap-2 text-sm tracking-tight"}
+      style={`max-width: ${chart.width}px;`}
     >
       <For each={props.entries()}>
-        {(d) => (
-          <div class=" flex gap-1">
-            <Checkbox
-              checked={props.toggles[d.label]}
-              onChange={(v) => props.onChange(d.label, v)}
-            />
-            <p style={`color: ${d.color}`}>{d.label}</p>
-          </div>
-        )}
+        {(d) => {
+          const id = createUniqueId();
+          return (
+            <div
+              class="flex items-center gap-1"
+              style={`color: ${d.color}; accent-color: ${d.color}`}
+            >
+              <input
+                type="checkbox"
+                checked={props.toggles[d.label]}
+                onChange={(v) =>
+                  props.onChange(d.label, v.currentTarget.checked)
+                }
+                id={id}
+              />
+              <label for={id}>{d.label}</label>
+            </div>
+          );
+        }}
       </For>
     </div>
   );
