@@ -245,7 +245,7 @@ export function ExperimentCard(props: {
           {experiment().config.reference.description}
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent class="text-left">
         <PermutationsList
           experiment={experiment()}
           experimentIndex={experimentIndex()}
