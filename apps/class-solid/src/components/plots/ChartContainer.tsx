@@ -35,6 +35,8 @@ interface Chart {
   formatX: (value: number) => string;
   formatY: (value: number) => string;
   transformX?: (x: number, y: number, scaleY: SupportedScaleTypes) => number;
+  zoom: number;
+  pan: [number, number];
 }
 type SetChart = SetStoreFunction<Chart>;
 const ChartContext = createContext<[Chart, SetChart]>();
@@ -65,24 +67,40 @@ export function ChartContainer(props: {
     scaleY: initialScale,
     formatX: d3.format(".4"),
     formatY: d3.format(".4"),
-  });
-  createEffect(() => {
-    // Update scaleXInstance when scaleX props change
-    const scaleX = supportedScales[chart.scalePropsX.type]()
-      .range(chart.scalePropsX.range)
-      .domain(chart.scalePropsX.domain);
-    // .nice(); // TODO: could use this instead of getNiceAxisLimits but messes up skewT
-    updateChart("scaleX", () => scaleX);
+    zoom: 1,
+    pan: [0, 0],
   });
 
+  // Update scales when props change
   createEffect(() => {
-    // Update scaleYInstance when scaleY props change
+    const [minX, maxX] = chart.scalePropsX.domain;
+    const [minY, maxY] = chart.scalePropsY.domain;
+    const [panX, panY] = chart.pan;
+    const zoom = chart.zoom;
+
+    const zoomedXDomain = getZoomedAndPannedDomainLinear(
+      minX,
+      maxX,
+      panX,
+      zoom,
+    );
+    const scaleX = supportedScales[chart.scalePropsX.type]()
+      .range(chart.scalePropsX.range)
+      .domain(zoomedXDomain);
+
+    const zoomedYDomain =
+      chart.scalePropsY.type === "log"
+        ? getZoomedAndPannedDomainLog(minY, maxY, panY, zoom)
+        : getZoomedAndPannedDomainLinear(minY, maxY, panY, zoom);
+
     const scaleY = supportedScales[chart.scalePropsY.type]()
       .range(chart.scalePropsY.range)
-      .domain(chart.scalePropsY.domain);
-    // .nice();
+      .domain(zoomedYDomain);
+
+    updateChart("scaleX", () => scaleX);
     updateChart("scaleY", () => scaleY);
   });
+
   return (
     <ChartContext.Provider value={[chart, updateChart]}>
       <figure>{props.children}</figure>
@@ -99,10 +117,12 @@ export function Chart(props: {
   transformX?: (x: number, y: number, scaleY: SupportedScaleTypes) => number;
 }) {
   const [hovering, setHovering] = createSignal(false);
-  const [coords, setCoords] = createSignal<[number, number]>([0, 0]);
+  const [panning, setPanning] = createSignal(false);
+  const [dataCoords, setDataCoords] = createSignal<[number, number]>([0, 0]);
   const [chart, updateChart] = useChartContext();
   const title = props.title || "Default chart";
   const [marginTop, _, __, marginLeft] = chart.margin;
+  let panstart = [0, 0];
 
   if (props.formatX) {
     updateChart("formatX", () => props.formatX);
@@ -114,7 +134,8 @@ export function Chart(props: {
     updateChart("transformX", () => props.transformX);
   }
 
-  const onMouseMove = (e: MouseEvent) => {
+  // Utility function to calculate coordinates from mouse event
+  const getDataCoordsFromEvent = (e: MouseEvent) => {
     let x = e.offsetX - marginLeft;
     const y = e.offsetY - marginTop;
 
@@ -122,13 +143,52 @@ export function Chart(props: {
       x = chart.transformX(x, y, chart.scaleY);
     }
 
-    setCoords([chart.scaleX.invert(x), chart.scaleY.invert(y)]);
+    return [chart.scaleX.invert(x), chart.scaleY.invert(y)];
+  };
+
+  const onMouseDown = (e: MouseEvent) => {
+    setPanning(true);
+    panstart = getDataCoordsFromEvent(e);
+  };
+
+  let animationFrameId: number | null = null;
+  const onMouseMove = (e: MouseEvent) => {
+    // If an animation frame is already scheduled, cancel it to prevent multiple frames being scheduled unnecessarily
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+    }
+
+    // Request a new animation frame for the next paint cycle
+    animationFrameId = requestAnimationFrame(() => handlePanMove(e));
+  };
+
+  const handlePanMove = (e: MouseEvent) => {
+    const [x, y] = getDataCoordsFromEvent(e);
+
+    if (panning()) {
+      const [startX, startY] = panstart;
+      const dx = x - startX;
+      const dy = y - startY;
+      panstart = [x, y];
+      updateChart("pan", (prev) => [prev[0] - dx, prev[1] - dy]);
+    } else {
+      // Update the coordinate tracker in the plot when not panning
+      setDataCoords([x, y]);
+    }
+  };
+
+  const onWheel = (e: WheelEvent) => {
+    e.preventDefault();
+    const zoomFactor = 1.1;
+    updateChart("zoom", (prev) =>
+      e.deltaY < 0 ? prev * zoomFactor : prev / zoomFactor,
+    );
   };
 
   const renderXCoord = () =>
-    hovering() ? `x: ${chart.formatX(coords()[0])}` : "";
+    hovering() ? `x: ${chart.formatX(dataCoords()[0])}` : "";
   const renderYCoord = () =>
-    hovering() ? `y: ${chart.formatY(coords()[1])}` : "";
+    hovering() ? `y: ${chart.formatY(dataCoords()[1])}` : "";
 
   return (
     <svg
@@ -136,8 +196,12 @@ export function Chart(props: {
       height={chart.height}
       class="text-slate-500 text-xs tracking-wide"
       onmouseover={() => setHovering(true)}
-      onmousemove={onMouseMove}
       onmouseout={() => setHovering(false)}
+      onmousedown={onMouseDown}
+      onmouseup={() => setPanning(false)}
+      onmousemove={onMouseMove}
+      onmouseleave={() => setPanning(false)}
+      onwheel={onWheel}
     >
       <title>{title}</title>
       <g transform={`translate(${marginLeft},${marginTop})`}>
@@ -149,6 +213,7 @@ export function Chart(props: {
           {renderYCoord()}
         </text>
       </g>
+      <ClipPath />
     </svg>
   );
 }
@@ -161,6 +226,17 @@ export function useChartContext() {
     );
   }
   return context;
+}
+
+// To constrain lines and other elements to the axes' extent
+function ClipPath() {
+  const [chart, _updateChart] = useChartContext();
+
+  return (
+    <clipPath id="clipper">
+      <rect x="0" y="0" width={chart.innerWidth} height={chart.innerHeight} />
+    </clipPath>
+  );
 }
 
 export interface ChartData<T> {
@@ -177,4 +253,33 @@ export function highlight(hex: string) {
       .toString(16)
       .padStart(2, "0");
   return `#${b(hex, 1)}${b(hex, 3)}${b(hex, 5)}`;
+}
+
+function getZoomedAndPannedDomainLinear(
+  min: number,
+  max: number,
+  pan: number,
+  zoom: number,
+): [number, number] {
+  const center = (min + max) / 2 + pan;
+  const halfExtent = (max - min) / (2 * zoom);
+  return [center - halfExtent, center + halfExtent];
+}
+
+function getZoomedAndPannedDomainLog(
+  min: number,
+  max: number,
+  pan: number,
+  zoom: number,
+): [number, number] {
+  const logMin = Math.log10(min);
+  const logMax = Math.log10(max);
+
+  const logCenter = (logMin + logMax) / 2 + pan;
+  const halfExtent = (logMax - logMin) / (2 * zoom);
+
+  const newLogMin = logCenter - halfExtent;
+  const newLogMax = logCenter + halfExtent;
+
+  return [10 ** newLogMin, 10 ** newLogMax];
 }
