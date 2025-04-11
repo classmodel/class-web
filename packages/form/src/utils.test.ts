@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import { describe, test } from "node:test";
 import type { JSONSchemaType } from "ajv/dist/2020";
-import { type Item, overwriteDefaultsInJsonSchema, schema2tree } from "./utils";
+import { type Item, deepCopy, overwriteDefaultsInJsonSchema, schema2tree } from "./utils";
 
 type Config = {
   s1: string;
@@ -274,11 +274,11 @@ describe("schema2tree", () => {
 
 describe("overwriteDefaultsInJsonSchema", () => {
   test("given new default for s1 should return schema with given default", () => {
-    const schema = structuredClone(jsonSchemaOfConfig);
+    const schema = deepCopy(jsonSchemaOfConfig);
 
     const result = overwriteDefaultsInJsonSchema(schema, defaults);
 
-    const expected = structuredClone(jsonSchemaOfConfig);
+    const expected = deepCopy(jsonSchemaOfConfig);
     expected.properties.s1.default = "string2";
 
     assert.deepEqual(result, expected);

@@ -17,6 +17,7 @@ import {
   duplicateExperiment,
   modifyExperiment,
 } from "~/lib/store";
+import { deepCopy } from "~/lib/utils";
 import { ExperimentConfigForm } from "./ExperimentConfigForm";
 import { ObservationsList } from "./ObservationsList";
 import { PermutationsList } from "./PermutationsList";
@@ -63,7 +64,7 @@ export function AddExperimentDialog(props: {
     return {
       preset: "Default",
       reference: {
-        ...structuredClone(defaultPreset.config),
+        ...deepCopy(defaultPreset.config),
         name: `My experiment ${props.nextIndex}`,
       },
       permutations: [],
