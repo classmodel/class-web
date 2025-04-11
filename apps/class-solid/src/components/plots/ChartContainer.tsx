@@ -35,6 +35,7 @@ interface Chart {
   formatX: (value: number) => string;
   formatY: (value: number) => string;
   transformX?: (x: number, y: number, scaleY: SupportedScaleTypes) => number;
+  zoom: number;
 }
 type SetChart = SetStoreFunction<Chart>;
 const ChartContext = createContext<[Chart, SetChart]>();
@@ -65,24 +66,45 @@ export function ChartContainer(props: {
     scaleY: initialScale,
     formatX: d3.format(".4"),
     formatY: d3.format(".4"),
+    zoom: 1,
   });
+
+  // Update scaleXInstance when scaleX props change
   createEffect(() => {
-    // Update scaleXInstance when scaleX props change
+    const fullExtent =
+      chart.scalePropsX.domain[1] - chart.scalePropsX.domain[0];
+    const centerExtent = chart.scalePropsX.domain[0] + fullExtent / 2;
+    const zoomedExtent = fullExtent / chart.zoom;
+    const zoomedDomain = [
+      centerExtent - zoomedExtent / 2,
+      centerExtent + zoomedExtent / 2,
+    ];
+
     const scaleX = supportedScales[chart.scalePropsX.type]()
       .range(chart.scalePropsX.range)
-      .domain(chart.scalePropsX.domain);
+      .domain(zoomedDomain);
     // .nice(); // TODO: could use this instead of getNiceAxisLimits but messes up skewT
     updateChart("scaleX", () => scaleX);
   });
 
+  // Update scaleYInstance when scaleY props change
   createEffect(() => {
-    // Update scaleYInstance when scaleY props change
+    const fullExtent =
+      chart.scalePropsY.domain[1] - chart.scalePropsY.domain[0];
+    const centerExtent = chart.scalePropsY.domain[0] + fullExtent / 2;
+    const zoomedExtent = fullExtent / chart.zoom;
+    const zoomedDomain = [
+      centerExtent - zoomedExtent / 2,
+      centerExtent + zoomedExtent / 2,
+    ];
+
     const scaleY = supportedScales[chart.scalePropsY.type]()
       .range(chart.scalePropsY.range)
-      .domain(chart.scalePropsY.domain);
+      .domain(zoomedDomain);
     // .nice();
     updateChart("scaleY", () => scaleY);
   });
+
   return (
     <ChartContext.Provider value={[chart, updateChart]}>
       <figure>{props.children}</figure>
@@ -125,6 +147,14 @@ export function Chart(props: {
     setCoords([chart.scaleX.invert(x), chart.scaleY.invert(y)]);
   };
 
+  const onWheel = (e: WheelEvent) => {
+    e.preventDefault();
+    const zoomFactor = 1.1;
+    updateChart("zoom", (prev) =>
+      e.deltaY < 0 ? prev * zoomFactor : prev / zoomFactor,
+    );
+  };
+
   const renderXCoord = () =>
     hovering() ? `x: ${chart.formatX(coords()[0])}` : "";
   const renderYCoord = () =>
@@ -138,6 +168,7 @@ export function Chart(props: {
       onmouseover={() => setHovering(true)}
       onmousemove={onMouseMove}
       onmouseout={() => setHovering(false)}
+      onwheel={onWheel}
     >
       <title>{title}</title>
       <g transform={`translate(${marginLeft},${marginTop})`}>
@@ -149,6 +180,7 @@ export function Chart(props: {
           {renderYCoord()}
         </text>
       </g>
+      <ClipPath />
     </svg>
   );
 }
@@ -161,6 +193,17 @@ export function useChartContext() {
     );
   }
   return context;
+}
+
+// To constrain lines and other elements to the axes' extent
+function ClipPath() {
+  const [chart, _updateChart] = useChartContext();
+
+  return (
+    <clipPath id="clipper">
+      <rect x="0" y="0" width={chart.innerWidth} height={chart.innerHeight} />
+    </clipPath>
+  );
 }
 
 export interface ChartData<T> {

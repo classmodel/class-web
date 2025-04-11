@@ -26,16 +26,6 @@ function getTempAtCursor(x: number, y: number, scaleY: SupportedScaleTypes) {
   return x + 0.5 - (scaleY(basep) - y) / tan;
 }
 
-function ClipPath() {
-  const [chart, updateChart] = useChartContext();
-
-  return (
-    <clipPath id="clipper">
-      <rect x="0" y="0" width={chart.innerWidth} height={chart.innerHeight} />
-    </clipPath>
-  );
-}
-
 function SkewTGridLine(temperature: number) {
   const [chart, updateChart] = useChartContext();
   const x = (temp: number) => chart.scaleX(temp);
@@ -201,7 +191,6 @@ export function SkewTPlot(props: { data: () => ChartData<SoundingRecord>[] }) {
           tickValues={pressureLines}
           label="Pressure [hPa]"
         />
-        <ClipPath />
         <For each={temperatureLines}>{(t) => SkewTGridLine(t)}</For>
         <For each={pressureLines}>{(p) => LogPGridLine(p)}</For>
         <For each={dryAdiabats}>{(d) => <DryAdiabat {...d} />}</For>

@@ -21,6 +21,7 @@ export function Line(d: ChartData<Point>) {
 
   return (
     <path
+      clip-path="url(#clipper)"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       fill="none"
