@@ -139,7 +139,7 @@ function createFormStore(
       setStore("errors", errors);
     },
     reset: () => {
-      setStore("values", deepCopy(initialValues));
+      setStore("values", deepCopy(unwrap(initialValues)));
       setStore("errors", []);
     },
     get errors() {
