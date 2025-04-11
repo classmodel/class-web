@@ -71,37 +71,31 @@ export function ChartContainer(props: {
 
   // Update scaleXInstance when scaleX props change
   createEffect(() => {
-    const fullExtent =
-      chart.scalePropsX.domain[1] - chart.scalePropsX.domain[0];
-    const centerExtent = chart.scalePropsX.domain[0] + fullExtent / 2;
-    const zoomedExtent = fullExtent / chart.zoom;
-    const zoomedDomain = [
-      centerExtent - zoomedExtent / 2,
-      centerExtent + zoomedExtent / 2,
-    ];
+    const [min, max] = chart.scalePropsX.domain;
+    const zoom = chart.zoom;
+    const zoomedDomain = linearZoom(min, max, zoom);
 
     const scaleX = supportedScales[chart.scalePropsX.type]()
       .range(chart.scalePropsX.range)
       .domain(zoomedDomain);
-    // .nice(); // TODO: could use this instead of getNiceAxisLimits but messes up skewT
+
     updateChart("scaleX", () => scaleX);
   });
 
   // Update scaleYInstance when scaleY props change
   createEffect(() => {
-    const fullExtent =
-      chart.scalePropsY.domain[1] - chart.scalePropsY.domain[0];
-    const centerExtent = chart.scalePropsY.domain[0] + fullExtent / 2;
-    const zoomedExtent = fullExtent / chart.zoom;
-    const zoomedDomain = [
-      centerExtent - zoomedExtent / 2,
-      centerExtent + zoomedExtent / 2,
-    ];
+    const [min, max] = chart.scalePropsY.domain;
+    const zoom = chart.zoom;
+
+    const zoomedDomain =
+      chart.scalePropsY.type === "log"
+        ? logarithmicZoom(min, max, zoom)
+        : linearZoom(min, max, zoom);
 
     const scaleY = supportedScales[chart.scalePropsY.type]()
       .range(chart.scalePropsY.range)
       .domain(zoomedDomain);
-    // .nice();
+
     updateChart("scaleY", () => scaleY);
   });
 
@@ -220,4 +214,30 @@ export function highlight(hex: string) {
       .toString(16)
       .padStart(2, "0");
   return `#${b(hex, 1)}${b(hex, 3)}${b(hex, 5)}`;
+}
+
+function linearZoom(
+  min: number,
+  max: number,
+  zoomFactor: number,
+): [number, number] {
+  const center = (min + max) / 2;
+  const halfExtent = (max - min) / (2 * zoomFactor);
+  return [center - halfExtent, center + halfExtent];
+}
+
+function logarithmicZoom(
+  min: number,
+  max: number,
+  zoomFactor: number,
+): [number, number] {
+  const logMin = Math.log10(min);
+  const logMax = Math.log10(max);
+  const center = (logMin + logMax) / 2;
+  const halfExtent = (logMax - logMin) / (2 * zoomFactor);
+
+  const newLogMin = center - halfExtent;
+  const newLogMax = center + halfExtent;
+
+  return [10 ** newLogMin, 10 ** newLogMax];
 }
