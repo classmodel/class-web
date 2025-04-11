@@ -64,7 +64,7 @@ export function pruneConfig(
   reference: Config,
   preset?: Config,
 ): PartialConfig {
-  let config = structuredClone(permutation);
+  let config = JSON.parse(JSON.stringify(permutation)) as Config;
   let config2 = reference;
   if (preset) {
     config = pruneConfig(permutation, reference) as Config;

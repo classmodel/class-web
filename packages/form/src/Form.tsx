@@ -50,6 +50,7 @@ import {
   type Item,
   type SchemaOfProperty,
   buildValidate,
+  deepCopy,
   isBase,
   isBooleanChoices,
   isGroup,
@@ -123,7 +124,7 @@ function createFormStore(
     schema: JSONSchemaType<GenericConfig>;
   }>({
     // Copy props.values as initial form values
-    values: structuredClone(unwrap(initialValues)),
+    values: deepCopy(unwrap(initialValues)),
     errors: [],
     schema: schema(),
   });
@@ -138,7 +139,7 @@ function createFormStore(
       setStore("errors", errors);
     },
     reset: () => {
-      setStore("values", structuredClone(initialValues));
+      setStore("values", deepCopy(initialValues));
       setStore("errors", []);
     },
     get errors() {

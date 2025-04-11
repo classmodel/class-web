@@ -14,6 +14,7 @@ import {
   setPermutationConfigInExperiment,
   swapPermutationAndReferenceConfiguration,
 } from "~/lib/store";
+import { deepCopy } from "~/lib/utils";
 import {
   MdiCakeVariantOutline,
   MdiCog,
@@ -69,7 +70,7 @@ function AddPermutationButton(props: {
   const [open, setOpen] = createSignal(false);
 
   const initialPermutationConfig = createMemo(() => {
-    const config = structuredClone(unwrap(props.experiment.config.reference));
+    const config = deepCopy(unwrap(props.experiment.config.reference));
     config.name = `${props.experiment.config.permutations.length + 1}`;
     config.description = "";
     return config;

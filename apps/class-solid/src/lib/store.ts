@@ -13,6 +13,7 @@ import { parseExperimentConfig } from "./experiment_config";
 import type { ExperimentConfig } from "./experiment_config";
 import { findPresetByName } from "./presets";
 import { runClass } from "./runner";
+import { deepCopy } from "./utils";
 
 interface ExperimentOutput {
   reference?: ClassOutput;
@@ -112,7 +113,7 @@ export async function uploadExperiment(rawData: unknown) {
 }
 
 export function duplicateExperiment(id: number) {
-  const config = structuredClone(findExperiment(id).config);
+  const config = deepCopy(findExperiment(id).config);
   config.reference.name = `Copy of ${config.reference.name}`;
   const newExperiment: Experiment = {
     config: config,
@@ -191,7 +192,7 @@ export function promotePermutationToExperiment(
   const exp = findExperiment(experimentIndex);
   const perm = exp.config.permutations[permutationIndex];
 
-  const newConfig = structuredClone(perm);
+  const newConfig = deepCopy(perm);
   addExperiment(newConfig);
   // TODO should permutation be removed from original experiment?
 }
@@ -201,7 +202,7 @@ export function duplicatePermutation(
   permutationIndex: number,
 ) {
   const exp = findExperiment(experimentIndex);
-  const perm = structuredClone(exp.config.permutations[permutationIndex]);
+  const perm = deepCopy(exp.config.permutations[permutationIndex]);
   perm.name = `Copy of ${perm.name}`;
   setPermutationConfigInExperiment(experimentIndex, -1, perm);
   runExperiment(experimentIndex);
@@ -212,9 +213,9 @@ export function swapPermutationAndReferenceConfiguration(
   permutationIndex: number,
 ) {
   const exp = findExperiment(experimentIndex);
-  const refConfig = structuredClone(exp.config.reference);
+  const refConfig = deepCopy(exp.config.reference);
   const perm = exp.config.permutations[permutationIndex];
-  const permConfig = structuredClone(perm);
+  const permConfig = deepCopy(perm);
 
   setExperiments(experimentIndex, "config", "reference", permConfig);
   setExperiments(
