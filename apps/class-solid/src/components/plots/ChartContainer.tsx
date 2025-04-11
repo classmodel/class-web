@@ -71,35 +71,33 @@ export function ChartContainer(props: {
     pan: [0, 0],
   });
 
-  // Update scaleXInstance when scaleX props change
-  createEffect(() => {
-    const [min, max] = chart.scalePropsX.domain;
-    const pan = chart.pan[0];
-    const zoom = chart.zoom;
-    const zoomedDomain = getZoomedAndPannedDomainLinear(min, max, pan, zoom);
-
-    const scaleX = supportedScales[chart.scalePropsX.type]()
-      .range(chart.scalePropsX.range)
-      .domain(zoomedDomain);
-
-    updateChart("scaleX", () => scaleX);
-  });
-
   // Update scales when props change
   createEffect(() => {
-    const [min, max] = chart.scalePropsY.domain;
-    const pan = chart.pan[1];
+    const [minX, maxX] = chart.scalePropsX.domain;
+    const [minY, maxY] = chart.scalePropsY.domain;
+    const [panX, panY] = chart.pan;
     const zoom = chart.zoom;
 
-    const zoomedDomain =
+    const zoomedXDomain = getZoomedAndPannedDomainLinear(
+      minX,
+      maxX,
+      panX,
+      zoom,
+    );
+    const scaleX = supportedScales[chart.scalePropsX.type]()
+      .range(chart.scalePropsX.range)
+      .domain(zoomedXDomain);
+
+    const zoomedYDomain =
       chart.scalePropsY.type === "log"
-        ? getZoomedAndPannedDomainLog(min, max, pan, zoom)
-        : getZoomedAndPannedDomainLinear(min, max, pan, zoom);
+        ? getZoomedAndPannedDomainLog(minY, maxY, panY, zoom)
+        : getZoomedAndPannedDomainLinear(minY, maxY, panY, zoom);
 
     const scaleY = supportedScales[chart.scalePropsY.type]()
       .range(chart.scalePropsY.range)
-      .domain(zoomedDomain);
+      .domain(zoomedYDomain);
 
+    updateChart("scaleX", () => scaleX);
     updateChart("scaleY", () => scaleY);
   });
 
