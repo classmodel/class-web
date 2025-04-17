@@ -2,7 +2,7 @@
   "name": "@classmodel/class",
   "description": "Chemistry Land-surface Atmosphere Soil Slab (CLASS) model",
   "type": "module",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "exports": {
     "./package.json": "./package.json",
     "./class": {
