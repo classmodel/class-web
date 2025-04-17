@@ -112,6 +112,12 @@ function useFormContext() {
   return value;
 }
 
+function cloneAndUnwrap<T>(value: T): T {
+  const s = JSON.stringify(value);
+  const val = JSON.parse(s);
+  return val;
+}
+
 function createFormStore(
   schema: Accessor<JSONSchemaType<GenericConfig>>,
   initialValues: GenericConfig,
@@ -123,7 +129,7 @@ function createFormStore(
     schema: JSONSchemaType<GenericConfig>;
   }>({
     // Copy props.values as initial form values
-    values: structuredClone(unwrap(initialValues)),
+    values: cloneAndUnwrap(initialValues),
     errors: [],
     schema: schema(),
   });
@@ -138,7 +144,7 @@ function createFormStore(
       setStore("errors", errors);
     },
     reset: () => {
-      setStore("values", structuredClone(initialValues));
+      setStore("values", cloneAndUnwrap(initialValues));
       setStore("errors", []);
     },
     get errors() {
@@ -177,11 +183,16 @@ export function Form<C extends GenericConfig>(props: Props<C>) {
     : DEFAULT_UI_COMPONENTS;
   const schemaWithDefaults = createMemo(() => {
     // TODO do not cast, but without it ajv and solidjs complain
-    const uschema = unwrap(props.schema as JSONSchemaType<GenericConfig>);
+    const uschema = cloneAndUnwrap(
+      props.schema as JSONSchemaType<GenericConfig>,
+    );
     if (!props.defaults) {
       return uschema;
     }
-    return overwriteDefaultsInJsonSchema(uschema, unwrap(props.defaults));
+    return overwriteDefaultsInJsonSchema(
+      uschema,
+      cloneAndUnwrap(props.defaults),
+    );
   });
   const validate = createMemo(() => buildValidate(schemaWithDefaults()));
   const store = createFormStore(schemaWithDefaults, props.values, uiComponents);
