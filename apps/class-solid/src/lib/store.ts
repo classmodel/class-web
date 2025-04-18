@@ -12,7 +12,7 @@ import { decodeAppState } from "./encode";
 import { parseExperimentConfig } from "./experiment_config";
 import type { ExperimentConfig } from "./experiment_config";
 import { findPresetByName } from "./presets";
-import { runClass } from "./runner";
+import { runClassAsync } from "./runner";
 
 interface ExperimentOutput {
   reference?: ClassOutput;
@@ -38,7 +38,7 @@ export async function runExperiment(id: number) {
 
   // Run reference
   const referenceConfig = unwrap(exp.config.reference);
-  const newOutput = await runClass(referenceConfig);
+  const newOutput = await runClassAsync(referenceConfig);
 
   setExperiments(id, "output", "reference", newOutput);
 
@@ -50,7 +50,7 @@ export async function runExperiment(id: number) {
       referenceConfig,
       permConfig,
     ) as Config;
-    const newOutput = await runClass(combinedConfig);
+    const newOutput = await runClassAsync(combinedConfig);
     setExperiments(id, "output", "permutations", permCounter, newOutput);
     permCounter++;
   }

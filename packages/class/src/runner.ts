@@ -7,20 +7,104 @@ import { CLASS } from "./class.js";
 import type { Config } from "./config.js";
 import { parse } from "./validate.js";
 
-export type ClassOutput = Record<string, number[]>;
+export interface OutputVariable {
+  key: string;
+  title: string;
+  unit: string;
+  symbol?: string
+}
+
+export const outputVariables: OutputVariable[] = [
+  {
+    key: "t",
+    title: "Time",
+    unit: "s",
+    symbol: "t",
+  },
+  {
+    key: "h",
+    title: "ABL height",
+    unit: "m",
+    symbol: "h",
+  },
+  {
+    key: "theta",
+    title: "Potential temperature",
+    unit: "K",
+    symbol: "θ",
+  },
+  {
+    key: "dtheta",
+    title: "Potential temperature jump",
+    unit: "K",
+    symbol: "Δθ",
+  },
+  {
+    key: "q",
+    title: "Specific humidity",
+    unit: "kg kg⁻¹",
+    symbol: "q",
+  },
+  {
+    key: "dq",
+    title: "Specific humidity jump",
+    unit: "kg kg⁻¹",
+    symbol: "Δq",
+  },
+  {
+    key: "dthetav",
+    title: "Virtual temperature jump at h",
+    unit: "K",
+    symbol: "Δθ<sub>v</sub>",
+  },
+  {
+    key: "we",
+    title: "Entrainment velocity",
+    unit: "m s⁻¹",
+    symbol: "w<sub>e</sub>",
+  },
+  {
+    key: "ws",
+    title: "Large-scale vertical velocity",
+    unit: "m s⁻¹",
+    symbol: "w<sub>s</sub>",
+  },
+  {
+    key: "wthetave",
+    title: "Entrainment virtual heat flux",
+    unit: "K m s⁻¹",
+    symbol: "(w'θ')<sub>ve</sub>",
+  },
+  {
+    key: "wthetav",
+    title: "Surface virtual heat flux",
+    unit: "K m s⁻¹",
+    symbol: "(w'θ')<sub>vs</sub>",
+  },
+];
+
+export type ClassOutput = {
+  [K in (typeof outputVariables)[number]['key']]: number[];
+};
+
 
 export function runClass(config: Config): ClassOutput {
-  // TODO should we do validation/coercion here, in form, or both?
+  
   const validatedConfig = parse(config);
   const model = new CLASS(validatedConfig);
-  const output: ClassOutput = { t: [], h: [] };
+
+  const output = Object.fromEntries(
+    outputVariables.map(v => [v.key, []])
+  ) as ClassOutput;
 
   while (model.t < config.runtime) {
     model.update();
 
-    if (model.t % 60 === 0) {
-      output.t.push(model.t);
-      output.h.push(model.h);
+    if (model.t % 600 === 0) {
+      for (const v of outputVariables) {
+          output[v.key].push(model[v.key as keyof CLASS] as number);
+        output[v.key].push();
+      }
     }
   }
 

@@ -1,22 +1,15 @@
-import { BmiClass } from "@classmodel/class/bmi";
 import type { Config } from "@classmodel/class/config";
-import type { ClassOutput } from "@classmodel/class/runner";
-import { parse } from "@classmodel/class/validate";
+import type { ClassOutput, runClass } from "@classmodel/class/runner";
 import { wrap } from "comlink";
 
 const worker = new Worker(new URL("./worker.ts", import.meta.url), {
   type: "module",
 });
-export const AsyncBmiClass = wrap<typeof BmiClass>(worker);
 
-export async function runClass(config: Config): Promise<ClassOutput> {
+export async function runClassAsync(config: Config): Promise<ClassOutput> {
+  const asyncRunner = wrap<typeof runClass>(worker);
   try {
-    const parsedConfig: Config = parse(config);
-    const model = await new AsyncBmiClass();
-    await model.initialize(parsedConfig);
-    const output = await model.run({
-      var_names: new BmiClass().get_output_var_names(),
-    });
+    const output = asyncRunner(config)
     return output;
   } catch (error) {
     console.error({ config, error });
