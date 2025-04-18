@@ -12,6 +12,7 @@ import {
   Switch,
   createEffect,
   createMemo,
+  createSignal,
   createUniqueId,
 } from "solid-js";
 import { createStore } from "solid-js/store";
@@ -31,7 +32,7 @@ import {
   experiments,
   updateAnalysis,
 } from "~/lib/store";
-import { MdiCamera, MdiDelete } from "./icons";
+import { MaterialSymbolsLightResetImage, MdiCamera, MdiDelete } from "./icons";
 import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./plots/Axes";
 import { Chart, ChartContainer } from "./plots/ChartContainer";
 import { Legend } from "./plots/Legend";
@@ -162,7 +163,7 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
       {/* TODO: get label for yVariable from model config */}
       <ChartContainer>
         <Legend entries={chartData} toggles={toggles} onChange={toggleLine} />
-        <Chart title="Timeseries plot" formatX={formatSeconds}>
+        <Chart id={analysis.id} title="Timeseries plot" formatX={formatSeconds}>
           <AxisBottom domain={xLim} label="Time [s]" />
           <AxisLeft domain={yLim} label={analysis.yVariable} />
           <For each={chartData()}>
@@ -269,7 +270,7 @@ export function VerticalProfilePlot({
             toggles={toggles}
             onChange={toggleLine}
           />
-          <Chart title="Vertical profile plot">
+          <Chart id={analysis.id} title="Vertical profile plot">
             <AxisBottom domain={xLim} label={analysis.variable} />
             <AxisLeft domain={yLim} label="Height[m]" />
             <For each={profileData()}>
@@ -394,7 +395,10 @@ export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
 
   return (
     <>
-      <SkewTPlot data={() => [...skewTData(), ...observations()]} />
+      <SkewTPlot
+        id={analysis.id}
+        data={() => [...skewTData(), ...observations()]}
+      />
       {TimeSlider(
         () => analysis.time,
         uniqueTimes,
@@ -443,6 +447,9 @@ async function takeScreenshot(event: MouseEvent, analyse: Analysis) {
   saveAs(file);
 }
 
+// Emit a signal when plot reset button is pressed
+export const [resetPlot, setResetPlot] = createSignal("", { equals: false });
+
 export function AnalysisCard(analysis: Analysis) {
   const id = createUniqueId();
   return (
@@ -451,6 +458,9 @@ export function AnalysisCard(analysis: Analysis) {
         {/* TODO: make name & description editable */}
         <CardTitle id={id}>{analysis.name}</CardTitle>
         <div class="flex gap-1">
+          <Button variant="outline" onclick={() => setResetPlot(analysis.id)}>
+            <MaterialSymbolsLightResetImage />
+          </Button>
           <Button
             variant="outline"
             onClick={(e: MouseEvent) => takeScreenshot(e, analysis)}

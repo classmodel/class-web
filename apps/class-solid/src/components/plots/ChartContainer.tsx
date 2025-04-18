@@ -7,6 +7,7 @@ import {
   useContext,
 } from "solid-js";
 import { type SetStoreFunction, createStore, produce } from "solid-js/store";
+import { resetPlot } from "../Analysis";
 
 export type SupportedScaleTypes =
   | d3.ScaleLinear<number, number, never>
@@ -115,6 +116,7 @@ export function ChartContainer(props: {
 /** Container for chart elements such as axes and lines */
 export function Chart(props: {
   children: JSX.Element;
+  id: string;
   title?: string;
   formatX?: (value: number) => string;
   formatY?: (value: number) => string;
@@ -127,6 +129,17 @@ export function Chart(props: {
   const title = props.title || "Default chart";
   const [marginTop, _, __, marginLeft] = chart.margin;
   let panstart = [0, 0];
+
+  createEffect(() => {
+    if (resetPlot() === props.id) {
+      updateChart(
+        produce((prev) => {
+          prev.zoom = 1;
+          prev.pan = [0, 0];
+        }),
+      );
+    }
+  });
 
   if (props.formatX) {
     updateChart("formatX", () => props.formatX);

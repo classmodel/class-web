@@ -143,7 +143,10 @@ function Sounding(data: ChartData<SoundingRecord>) {
 
 // Note: using temperatures in Kelvin as that's easiest to get from CLASS, but
 // perhaps not the most interoperable with other sounding data sources.
-export function SkewTPlot(props: { data: () => ChartData<SoundingRecord>[] }) {
+export function SkewTPlot(props: {
+  data: () => ChartData<SoundingRecord>[];
+  id: string;
+}) {
   const pressureLines = [1000, 850, 700, 500, 300, 200, 100];
   const temperatureLines = d3.range(-100, 45, 10);
 
@@ -185,6 +188,7 @@ export function SkewTPlot(props: { data: () => ChartData<SoundingRecord>[] }) {
     <ChartContainer>
       <Legend entries={props.data} toggles={toggles} onChange={toggleLine} />
       <Chart
+        id={props.id}
         title="Thermodynamic diagram"
         formatX={d3.format(".0d")}
         formatY={d3.format(".0d")}
