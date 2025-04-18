@@ -162,7 +162,7 @@ export function Chart(props: {
       const [startX, startY] = panstart;
       const dx = x - startX;
       const dy = y - startY;
-      panstart = [x, y];
+      // panstart = [x, y];
       updateChart("pan", (prev) => [prev[0] - dx, prev[1] - dy]);
     } else {
       // Update the coordinate tracker in the plot
