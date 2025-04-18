@@ -128,7 +128,7 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
       e.output ? e.output[analysis.yVariable] : [],
     );
 
-  const xLim = () => getNiceAxisLimits(allX());
+  const xLim = () => getNiceAxisLimits(allX(), 0, 600);
   const yLim = () => getNiceAxisLimits(allY());
 
   const chartData = () =>
