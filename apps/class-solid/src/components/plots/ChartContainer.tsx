@@ -6,7 +6,7 @@ import {
   createSignal,
   useContext,
 } from "solid-js";
-import { type SetStoreFunction, createStore } from "solid-js/store";
+import { type SetStoreFunction, createStore, produce } from "solid-js/store";
 
 export type SupportedScaleTypes =
   | d3.ScaleLinear<number, number, never>
@@ -97,8 +97,12 @@ export function ChartContainer(props: {
       .range(chart.scalePropsY.range)
       .domain(zoomedYDomain);
 
-    updateChart("scaleX", () => scaleX);
-    updateChart("scaleY", () => scaleY);
+    updateChart(
+      produce((prev) => {
+        prev.scaleX = scaleX;
+        prev.scaleY = scaleY;
+      }),
+    );
   });
 
   return (
