@@ -6,8 +6,9 @@ const worker = new Worker(new URL("./worker.ts", import.meta.url), {
   type: "module",
 });
 
+const asyncRunner = wrap<typeof runClass>(worker);
+
 export async function runClassAsync(config: Config): Promise<ClassOutput> {
-  const asyncRunner = wrap<typeof runClass>(worker);
   try {
     const output = asyncRunner(config)
     return output;
