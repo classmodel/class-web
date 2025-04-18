@@ -180,10 +180,41 @@ export function Chart(props: {
   };
 
   const onWheel = (e: WheelEvent) => {
+    // Zoom towards cursor
     e.preventDefault();
     const zoomFactor = 1.1;
-    updateChart("zoom", (prev) =>
-      e.deltaY < 0 ? prev * zoomFactor : prev / zoomFactor,
+    const zoomDirection = e.deltaY < 0 ? 1 : -1;
+    const zoomChange = zoomFactor ** zoomDirection;
+
+    const [cursorX, cursorY] = getDataCoordsFromEvent(e);
+
+    updateChart(
+      produce((draft) => {
+        const { scalePropsX, scalePropsY, pan } = draft;
+        const [panX, panY] = pan;
+
+        // Calculate x-pan (linear only for now)
+        const [xmin, xmax] = scalePropsX.domain;
+        const centerX = (xmin + xmax) / 2 + panX;
+        const dx = cursorX - centerX;
+
+        // Calculate y-pan
+        const [ymin, ymax] = scalePropsY.domain;
+        let dy: number;
+        if (scalePropsY.type === "log") {
+          const logCursor = Math.log10(Math.max(cursorY, 1e-10));
+          const logCenter = (Math.log10(ymin) + Math.log10(ymax)) / 2 + panY;
+          dy = logCursor - logCenter;
+        } else {
+          const centerY = (ymin + ymax) / 2 + panY;
+          dy = cursorY - centerY;
+        }
+
+        // Update the chart (mutating plays nicely with produce)
+        draft.zoom *= zoomChange;
+        draft.pan[0] += dx * (1 - 1 / zoomChange);
+        draft.pan[1] += dy * (1 - 1 / zoomChange);
+      }),
     );
   };
 
