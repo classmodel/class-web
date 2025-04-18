@@ -10,7 +10,7 @@ const asyncRunner = wrap<typeof runClass>(worker);
 
 export async function runClassAsync(config: Config): Promise<ClassOutput> {
   try {
-    const output = asyncRunner(config)
+    const output = asyncRunner(config);
     return output;
   } catch (error) {
     console.error({ config, error });

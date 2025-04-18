@@ -11,7 +11,7 @@ export interface OutputVariable {
   key: string;
   title: string;
   unit: string;
-  symbol?: string
+  symbol?: string;
 }
 
 export const outputVariables: OutputVariable[] = [
@@ -84,9 +84,8 @@ export const outputVariables: OutputVariable[] = [
 ];
 
 export type ClassOutput = {
-  [K in (typeof outputVariables)[number]['key']]: number[];
+  [K in (typeof outputVariables)[number]["key"]]: number[];
 };
-
 
 export function runClass(config: Config): ClassOutput {
   const validatedConfig = parse(config);
@@ -94,16 +93,16 @@ export function runClass(config: Config): ClassOutput {
 
   const writeOutput = () => {
     for (const v of outputVariables) {
-      const value = model[v.key as keyof CLASS] ?? (v.key === "t" ? model.t : undefined);
+      const value =
+        model[v.key as keyof CLASS] ?? (v.key === "t" ? model.t : undefined);
       if (value !== undefined) {
         (output[v.key] as number[]).push(value as number);
       }
     }
   };
 
-
   const output = Object.fromEntries(
-    outputVariables.map(v => [v.key, []])
+    outputVariables.map((v) => [v.key, []]),
   ) as ClassOutput;
 
   // Initial time
