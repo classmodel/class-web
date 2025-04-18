@@ -161,16 +161,17 @@ export function Chart(props: {
 
     if (panning()) {
       const [startX, startY] = panstart;
-      const dx = x - startX;
-      let dy: number;
 
-      if (chart.scalePropsY.type === "log") {
-        const logStartY = Math.log10(startY);
-        const logY = Math.log10(y);
-        dy = logY - logStartY;
-      } else {
-        dy = y - startY;
-      }
+      const dx =
+        chart.scalePropsX.type === "log"
+          ? Math.log10(x) - Math.log10(startX)
+          : x - startX;
+
+      const dy =
+        chart.scalePropsY.type === "log"
+          ? Math.log10(y) - Math.log10(startY)
+          : y - startY;
+
       updateChart("pan", (prev) => [prev[0] - dx, prev[1] - dy]);
     } else {
       // Update the coordinate tracker in the plot
