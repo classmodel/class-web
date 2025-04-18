@@ -158,6 +158,16 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
     setToggles(label, value);
   }
 
+  const setXVar = (v: string) => {
+    updateAnalysis(analysis, { xVariable: v });
+    setResetPlot(analysis.id);
+  };
+
+  const setYVar = (v: string) => {
+    updateAnalysis(analysis, { yVariable: v });
+    setResetPlot(analysis.id);
+  };
+
   return (
     <>
       {/* TODO: get label for yVariable from model config */}
@@ -178,13 +188,13 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
       <div class="flex justify-around">
         <Picker
           value={() => analysis.xVariable}
-          setValue={(v) => updateAnalysis(analysis, { xVariable: v })}
+          setValue={(v) => setXVar(v)}
           options={xVariableOptions}
           label="x-axis"
         />
         <Picker
           value={() => analysis.yVariable}
-          setValue={(v) => updateAnalysis(analysis, { yVariable: v })}
+          setValue={(v) => setYVar(v)}
           options={yVariableOptions}
           label="y-axis"
         />
@@ -261,6 +271,11 @@ export function VerticalProfilePlot({
     setToggles(label, value);
   }
 
+  function changeVar(v: string) {
+    updateAnalysis(analysis, { variable: v });
+    setResetPlot(analysis.id);
+  }
+
   return (
     <>
       <div class="flex flex-col gap-2">
@@ -291,7 +306,7 @@ export function VerticalProfilePlot({
         </ChartContainer>
         <Picker
           value={() => analysis.variable}
-          setValue={(v) => updateAnalysis(analysis, { variable: v })}
+          setValue={(v) => changeVar(v)}
           options={Object.keys(variableOptions)}
           label="variable: "
         />
@@ -307,7 +322,7 @@ export function VerticalProfilePlot({
 
 type PickerProps = {
   value: Accessor<string>;
-  setValue: Setter<string>;
+  setValue: (value: string) => void;
   options: string[];
   label?: string;
 };
