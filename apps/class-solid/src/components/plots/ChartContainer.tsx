@@ -144,6 +144,7 @@ export function Chart(props: {
     const y = e.offsetY - marginTop;
 
     if (chart.transformX) {
+      // Correct for skewed lines in thermodynamic diagram
       x = chart.transformX(x, y, chart.scaleY);
     }
 
@@ -161,8 +162,15 @@ export function Chart(props: {
     if (panning()) {
       const [startX, startY] = panstart;
       const dx = x - startX;
-      const dy = y - startY;
-      // panstart = [x, y];
+      let dy: number;
+
+      if (chart.scalePropsY.type === "log") {
+        const logStartY = Math.log10(startY);
+        const logY = Math.log10(y);
+        dy = logY - logStartY;
+      } else {
+        dy = y - startY;
+      }
       updateChart("pan", (prev) => [prev[0] - dx, prev[1] - dy]);
     } else {
       // Update the coordinate tracker in the plot
