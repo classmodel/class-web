@@ -151,18 +151,7 @@ export function Chart(props: {
     panstart = getDataCoordsFromEvent(e);
   };
 
-  let animationFrameId: number | null = null;
   const onMouseMove = (e: MouseEvent) => {
-    // If an animation frame is already scheduled, cancel it to prevent multiple frames being scheduled unnecessarily
-    if (animationFrameId) {
-      cancelAnimationFrame(animationFrameId);
-    }
-
-    // Request a new animation frame for the next paint cycle
-    animationFrameId = requestAnimationFrame(() => handlePanMove(e));
-  };
-
-  const handlePanMove = (e: MouseEvent) => {
     const [x, y] = getDataCoordsFromEvent(e);
 
     if (panning()) {
@@ -172,7 +161,7 @@ export function Chart(props: {
       panstart = [x, y];
       updateChart("pan", (prev) => [prev[0] - dx, prev[1] - dy]);
     } else {
-      // Update the coordinate tracker in the plot when not panning
+      // Update the coordinate tracker in the plot
       setDataCoords([x, y]);
     }
   };
