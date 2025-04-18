@@ -190,8 +190,8 @@ export function SkewTPlot(props: {
       <Chart
         id={props.id}
         title="Thermodynamic diagram"
-        formatX={d3.format(".0d")}
-        formatY={d3.format(".0d")}
+        formatX={() => d3.format(".0d")}
+        formatY={() => d3.format(".0d")}
         transformX={getTempAtCursor}
       >
         <AxisBottom

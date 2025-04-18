@@ -118,8 +118,8 @@ export function Chart(props: {
   children: JSX.Element;
   id: string;
   title?: string;
-  formatX?: (value: number) => string;
-  formatY?: (value: number) => string;
+  formatX?: () => (value: number) => string;
+  formatY?: () => (value: number) => string;
   transformX?: (x: number, y: number, scaleY: SupportedScaleTypes) => number;
 }) {
   const [hovering, setHovering] = createSignal(false);
@@ -141,12 +141,17 @@ export function Chart(props: {
     }
   });
 
-  if (props.formatX) {
-    updateChart("formatX", () => props.formatX);
-  }
-  if (props.formatY) {
-    updateChart("formatY", () => props.formatY);
-  }
+  createEffect(() => {
+    if (props.formatX) {
+      updateChart("formatX", () => props.formatX?.());
+    }
+  });
+  createEffect(() => {
+    if (props.formatY) {
+      updateChart("formatY", () => props.formatY?.());
+    }
+  });
+
   if (props.transformX) {
     updateChart("transformX", () => props.transformX);
   }

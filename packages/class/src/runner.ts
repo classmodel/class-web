@@ -11,7 +11,7 @@ export interface OutputVariable {
   key: string;
   title: string;
   unit: string;
-  symbol?: string;
+  symbol: string;
 }
 
 export const outputVariables: OutputVariable[] = [
@@ -55,31 +55,31 @@ export const outputVariables: OutputVariable[] = [
     key: "dthetav",
     title: "Virtual temperature jump at h",
     unit: "K",
-    symbol: "Δθ<sub>v</sub>",
+    symbol: "Δθᵥ",
   },
   {
     key: "we",
     title: "Entrainment velocity",
     unit: "m s⁻¹",
-    symbol: "w<sub>e</sub>",
+    symbol: "wₑ",
   },
   {
     key: "ws",
     title: "Large-scale vertical velocity",
     unit: "m s⁻¹",
-    symbol: "w<sub>s</sub>",
+    symbol: "wₛ",
   },
   {
     key: "wthetave",
     title: "Entrainment virtual heat flux",
     unit: "K m s⁻¹",
-    symbol: "(w'θ')<sub>ve</sub>",
+    symbol: "(w'θ')ᵥₑ",
   },
   {
     key: "wthetav",
     title: "Surface virtual heat flux",
     unit: "K m s⁻¹",
-    symbol: "(w'θ')<sub>vs</sub>",
+    symbol: "(w'θ')ᵥ",
   },
 ];
 

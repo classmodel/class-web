@@ -1,6 +1,6 @@
-import { BmiClass } from "@classmodel/class/bmi";
 import type { Config } from "@classmodel/class/config";
-import type { ClassOutput } from "@classmodel/class/runner";
+import { type ClassOutput, outputVariables } from "@classmodel/class/runner";
+import * as d3 from "d3";
 import { saveAs } from "file-saver";
 import { toBlob } from "html-to-image";
 import {
@@ -115,9 +115,15 @@ const uniqueTimes = () => [...new Set(_allTimes())].sort((a, b) => a - b);
 
 // TODO: could memoize all reactive elements here, would it make a difference?
 export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
-  const xVariableOptions = ["t"]; // TODO: separate plot types for timeseries and x-vs-y? Use time axis?
-  // TODO: add nice description from config as title and dropdown option for the variable picker.
-  const yVariableOptions = new BmiClass().get_output_var_names();
+  const symbols = Object.fromEntries(
+    outputVariables.map((v) => [v.key, v.symbol]),
+  );
+  const getKey = Object.fromEntries(
+    outputVariables.map((v) => [v.symbol, v.key]),
+  );
+  const labels = Object.fromEntries(
+    outputVariables.map((v) => [v.key, `${v.symbol} [${v.unit}]`]),
+  );
 
   const allX = () =>
     flatExperiments().flatMap((e) =>
@@ -158,24 +164,34 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
     setToggles(label, value);
   }
 
-  const setXVar = (v: string) => {
-    updateAnalysis(analysis, { xVariable: v });
+  const setXVar = (symbol: string) => {
+    updateAnalysis(analysis, { xVariable: getKey[symbol] });
     setResetPlot(analysis.id);
   };
 
-  const setYVar = (v: string) => {
-    updateAnalysis(analysis, { yVariable: v });
+  const setYVar = (symbol: string) => {
+    updateAnalysis(analysis, { yVariable: getKey[symbol] });
     setResetPlot(analysis.id);
   };
+
+  const formatX = () =>
+    analysis.xVariable === "t" ? formatSeconds : d3.format(".4");
+  const formatY = () =>
+    analysis.yVariable === "t" ? formatSeconds : d3.format(".4");
 
   return (
     <>
       {/* TODO: get label for yVariable from model config */}
       <ChartContainer>
         <Legend entries={chartData} toggles={toggles} onChange={toggleLine} />
-        <Chart id={analysis.id} title="Timeseries plot" formatX={formatSeconds}>
+        <Chart
+          id={analysis.id}
+          title="Timeseries plot"
+          formatX={formatX}
+          formatY={formatY}
+        >
           <AxisBottom domain={xLim} label="Time [s]" />
-          <AxisLeft domain={yLim} label={analysis.yVariable} />
+          <AxisLeft domain={yLim} label={labels[analysis.yVariable]} />
           <For each={chartData()}>
             {(d) => (
               <Show when={toggles[d.label]}>
@@ -187,15 +203,15 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
       </ChartContainer>
       <div class="flex justify-around">
         <Picker
-          value={() => analysis.xVariable}
+          value={() => symbols[analysis.xVariable]}
           setValue={(v) => setXVar(v)}
-          options={xVariableOptions}
+          options={Object.values(symbols)}
           label="x-axis"
         />
         <Picker
-          value={() => analysis.yVariable}
+          value={() => symbols[analysis.yVariable]}
           setValue={(v) => setYVar(v)}
-          options={yVariableOptions}
+          options={Object.values(symbols)}
           label="y-axis"
         />
       </div>
