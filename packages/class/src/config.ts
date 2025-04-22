@@ -187,6 +187,34 @@ const untypedSchema = {
             default: 0.2,
             title: "Entrainment ratio for virtual heat",
           },
+          z_theta: {
+            symbol: "z<sub>θ</sub>",
+            type: "array",
+            items: {
+              type: "number",
+            },
+            minItems: 1,
+            "ui:group": "Mixed layer",
+            unit: "m",
+            default: [5000],
+            title: "Anchor point(s) for γ_θ",
+            description:
+              "Each value specifies the end of the corresponding segment in γ_θ",
+          },
+          z_q: {
+            symbol: "z<sub>q</sub>",
+            type: "array",
+            items: {
+              type: "number",
+            },
+            minItems: 1,
+            "ui:group": "Mixed layer",
+            unit: "m",
+            default: [5000],
+            title: "Anchor point(s) for γ_q",
+            description:
+              "Each value specifies the end of the corresponding segment in γ_q",
+          },
         },
         required: [
           "h",
@@ -202,6 +230,8 @@ const untypedSchema = {
           "gammaq",
           "divU",
           "beta",
+          "z_theta",
+          "z_q",
         ],
       },
     },
@@ -232,6 +262,8 @@ export type Config = {
       gammaq: number[];
       divU: number;
       beta: number;
+      z_theta: number[];
+      z_q: number[];
     }
   // Else, sw_ml key should be absent or false
   | { sw_ml?: false }
