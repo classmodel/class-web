@@ -345,50 +345,56 @@ const untypedSchema = {
   ],
 };
 
-// TODO generate this from ./config.schema.json
-// at the momemt json-schema-to-typescript does not understand if/then/else
-// and cannot generate such minimalistic types
-export type Config = {
+
+type GeneralConfig = {
   name: string;
   description?: string;
   dt: number;
   runtime: number;
-} & ( // Mixed layer
-  | {
-      sw_ml: true;
-      h: number;
-      theta: number;
-      dtheta: number;
-      q: number;
-      dq: number;
-      wtheta: number[];
-      advtheta: number;
-      gammatheta: number[];
-      wq: number[];
-      advq: number;
-      gammaq: number[];
-      divU: number;
-      beta: number;
-      z_theta: number[];
-      z_q: number[];
-    }
-  // Else, sw_ml key should be absent or false
-  | { sw_ml?: false }
-) & // Wind
-  (
-    | {
-        sw_wind: true;
-        u: number;
-        du: number;
-        gamma_u: number[];
-        z_u: number[];
-        v: number;
-        dv: number;
-        gamma_v: number[];
-        z_v: number[];
-      } // Else, sw_wind key should be absent or false
-    | { sw_wind?: true }
-  );
+}
+
+export type WindConfig = {
+  sw_wind: true;
+  u: number;
+  v: number;
+  du: number;
+  dv: number;
+  gamma_u: number[];
+  z_u: number[];
+  gamma_v: number[];
+  z_v: number[];
+};
+type NoWindConfig = {
+  sw_wind?: false;
+};
+
+export type MixedLayerConfig = {
+  sw_ml: true;
+  h: number;
+  theta: number;
+  dtheta: number;
+  q: number;
+  dq: number;
+  wtheta: number[];
+  advtheta: number;
+  gammatheta: number[];
+  wq: number[];
+  advq: number;
+  gammaq: number[];
+  divU: number;
+  beta: number;
+  z_theta: number[];
+  z_q: number[];
+}
+type NoMixedLayerConfig = {
+  sw_ml?: false 
+}
+
+export type Config = (
+  GeneralConfig 
+  & (MixedLayerConfig | NoMixedLayerConfig) 
+  & (WindConfig | NoWindConfig)
+);
 
 export type JsonSchemaOfConfig = JSONSchemaType<Config>;
 export const jsonSchemaOfConfig =

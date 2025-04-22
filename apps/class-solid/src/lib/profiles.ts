@@ -41,7 +41,6 @@ export function getVerticalProfiles(
       const dz = z_theta[idx] - z;
       z += dz;
       theta += lapse_rate * dz;
-      console.log(theta, z, dz);
       profile.push({ x: theta, y: z });
     }
     return profile;

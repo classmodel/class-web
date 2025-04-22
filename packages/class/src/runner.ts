@@ -14,8 +14,7 @@ export function runClass(config: Config): ClassOutput {
 
   const writeOutput = () => {
     for (const v of outputVariables) {
-      const value =
-        model[v.key as keyof CLASS] ?? (v.key === "t" ? model.t : undefined);
+      const value = model.getValue(v.key);
       if (value !== undefined) {
         (output[v.key] as number[]).push(value as number);
       }
