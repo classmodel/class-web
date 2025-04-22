@@ -1,5 +1,5 @@
 import type { Config } from "@classmodel/class/config";
-import type { ClassOutput } from "@classmodel/class/runner";
+import type { ClassOutput } from "@classmodel/class/output";
 import type { Point } from "~/components/plots/Line";
 import type { Observation } from "./experiment_config";
 

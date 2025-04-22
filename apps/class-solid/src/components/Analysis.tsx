@@ -1,5 +1,5 @@
 import type { Config } from "@classmodel/class/config";
-import { type ClassOutput, outputVariables } from "@classmodel/class/runner";
+import { type ClassOutput, outputVariables } from "@classmodel/class/output";
 import * as d3 from "d3";
 import { saveAs } from "file-saver";
 import { toBlob } from "html-to-image";

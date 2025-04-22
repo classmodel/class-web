@@ -3,10 +3,7 @@
  * @module
  */
 import type { Config } from "./config.js";
-
-// Constants
-const rho = 1.2; /** Density of air [kg m-3] */
-const cp = 1005.0; /** Specific heat of dry air [J kg-1 K-1] */
+import { interpolateHourly } from "./utils.js";
 
 /**
  * CLASS model definition
@@ -75,12 +72,6 @@ export class CLASS {
     }
   }
 
-  private interpolatedWtheta(): number {
-    this.hasMixedLayer();
-    // TODO interpolated based on this.t / this.runtime and the wtheta values
-    return this._cfg.wtheta[0];
-  }
-
   /** Tendency of CLB [m s-1]*/
   get htend(): number {
     return this.we + this.ws;
@@ -89,8 +80,7 @@ export class CLASS {
   /** Tendency of mixed-layer potential temperature [K s-1] */
   get thetatend(): number {
     this.hasMixedLayer();
-    const wtheta = this.interpolatedWtheta();
-    return (wtheta - this.wthetae) / this.h + this._cfg.advtheta;
+    return (this.wtheta - this.wthetae) / this.h + this._cfg.advtheta;
   }
 
   /** Tendency of potential temperature jump at h [K s-1] */
@@ -104,8 +94,7 @@ export class CLASS {
   /** Tendency of mixed-layer specific humidity [kg kg-1 s-1] */
   get qtend(): number {
     this.hasMixedLayer();
-    const wq = this._cfg.wq[0]; // TODO: interpolate
-    return (wq - this.wqe) / this.h + this._cfg.advq;
+    return (this.wq - this.wqe) / this.h + this._cfg.advq;
   }
 
   /** Tendency of specific humidity jump at h[kg kg-1 s-1] */
@@ -158,11 +147,20 @@ export class CLASS {
     );
   }
 
+  get wtheta(): number {
+    this.hasMixedLayer();
+    return interpolateHourly(this._cfg.wtheta, this.t)
+  }
+
+  get wq(): number {
+    this.hasMixedLayer();
+    return interpolateHourly(this._cfg.wq, this.t)
+  }
+
   /** Surface kinematic virtual heat flux [K m s-1]. */
   get wthetav(): number {
     this.hasMixedLayer();
-    const wtheta = this.interpolatedWtheta();
-    const wq = this._cfg.wq[0]; // TODO: interpolate
-    return wtheta + 0.61 * this.theta * wq;
+    return this.wtheta + 0.61 * this.theta * this.wq;
   }
 }
+

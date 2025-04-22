@@ -123,7 +123,7 @@ const untypedSchema = {
             "ui:group": "Mixed layer",
             unit: "K m s⁻¹",
             title: "Surface kinematic heat flux",
-            default: [0.1],
+            default: [0.1, 0.2, 0.3, 0.4, 0.3, 0.2, 0.1],
             minItems: 1,
           },
           advtheta: {
@@ -154,7 +154,7 @@ const untypedSchema = {
             },
             "ui:group": "Mixed layer",
             unit: "kg kg⁻¹ m s⁻¹",
-            default: [0.0001],
+            default: [0.0001, 0.0001, 0.0001, 0.0001, 0.0001],
             minItems: 1,
             title: "Surface kinematic moisture flux",
           },

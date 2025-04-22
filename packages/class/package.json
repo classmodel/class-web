@@ -35,6 +35,12 @@
         "types": "./dist/runner.d.ts"
       }
     },
+    "./output": {
+      "import": {
+        "default": "./dist/output.js",
+        "types": "./dist/output.d.ts"
+      }
+    },
     "./validate": {
       "import": {
         "default": "./dist/validate.js",
