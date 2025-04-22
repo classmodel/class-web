@@ -17,7 +17,7 @@ describe("CLASS model", () => {
     assert.strictEqual(model._cfg.h, 200);
     assert.strictEqual(model._cfg.dt, 60);
     assert.deepEqual(model._cfg.wtheta, [0.1]);
-    assert.strictEqual(model._cfg.wq, 0.0001);
+    assert.deepEqual(model._cfg.wq, [0.0001]);
   });
 
   test("calling update advances the model time", () => {
