@@ -45,6 +45,7 @@ export function getVerticalProfiles(
     }
     return profile;
   }
+
   if (variable === "q") {
     let z = output.h.slice(t)[0];
     let q = output.q.slice(t)[0];
@@ -74,6 +75,67 @@ export function getVerticalProfiles(
     }
     return profile;
   }
+
+  if (config.sw_wind && variable === "u") {
+    let z = output.h.slice(t)[0];
+    let u = output.u.slice(t)[0];
+    const du = output.du.slice(t)[0];
+    const gammau = config.gamma_u;
+    const z_u = config.z_u;
+    const maxHeight = z_u.slice(-1)[0];
+
+    // Mixed layer
+    const profile = [
+      { x: u, y: 0 },
+      { x: u, y: z },
+    ];
+
+    // Inversion
+    u += du;
+    profile.push({ x: u, y: z });
+
+    // Free troposphere
+    while (z < maxHeight) {
+      const idx = findInsertIndex(z_u, z);
+      const lapse_rate = gammau[idx] ?? 0;
+      const dz = z_u[idx] - z;
+      z += dz;
+      u += lapse_rate * dz;
+      profile.push({ x: u, y: z });
+    }
+    return profile;
+  }
+
+  if (config.sw_wind && variable === "v") {
+    let z = output.h.slice(t)[0];
+    let v = output.v.slice(t)[0];
+    const dv = output.dv.slice(t)[0];
+    const gammav = config.gamma_v;
+    const z_v = config.z_v;
+    const maxHeight = z_v.slice(-1)[0];
+
+    // Mixed layer
+    const profile = [
+      { x: v, y: 0 },
+      { x: v, y: z },
+    ];
+
+    // Inversion
+    v += dv;
+    profile.push({ x: v, y: z });
+
+    // Free troposphere
+    while (z < maxHeight) {
+      const idx = findInsertIndex(z_v, z);
+      const lapse_rate = gammav[idx] ?? 0;
+      const dz = z_v[idx] - z;
+      z += dz;
+      v += lapse_rate * dz;
+      profile.push({ x: v, y: z });
+    }
+    return profile;
+  }
+
   return [];
 }
 

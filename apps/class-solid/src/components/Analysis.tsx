@@ -226,6 +226,8 @@ export function VerticalProfilePlot({
   const variableOptions = {
     "Potential temperature [K]": "theta",
     "Specific humidity [kg/kg]": "q",
+    "u-wind component [m/s]": "u",
+    "v-wind component [m/s]": "v",
   };
 
   const classVariable = () =>

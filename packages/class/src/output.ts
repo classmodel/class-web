@@ -96,6 +96,18 @@ export const outputVariables: OutputVariable[] = [
     unit: "m s⁻¹",
     symbol: "v",
   },
+  {
+    key: "du",
+    title: "U-wind jump at h",
+    unit: "m s⁻¹",
+    symbol: "u",
+  },
+  {
+    key: "dv",
+    title: "V-wind jump at h",
+    unit: "m s⁻¹",
+    symbol: "v",
+  },
 ];
 
 export type ClassOutput = {
