@@ -299,10 +299,23 @@ export function observationsForProfile(obs: Observation, variable = "theta") {
       const p = obs.pressure[i];
       const theta = tToTheta(T, p);
       const q = calculateSpecificHumidity(T, p, rh);
-      if (variable === "theta") {
-        return { y: h, x: theta };
+      const { u, v } = windSpeedDirectionToUV(
+        obs.windSpeed[i],
+        obs.windDirection[i],
+      );
+
+      switch (variable) {
+        case "theta":
+          return { y: h, x: theta };
+        case "q":
+          return { y: h, x: q };
+        case "u":
+          return { y: h, x: u };
+        case "v":
+          return { y: h, x: v };
+        default:
+          throw new Error(`Unknown variable '${variable}'`);
       }
-      return { y: h, x: q };
     }),
   };
 }
@@ -321,4 +334,16 @@ export function observationsForSounding(obs: Observation) {
     color: "#000000",
     linestyle: "none",
   };
+}
+
+function windSpeedDirectionToUV(
+  speed: number,
+  directionDeg: number,
+): { u: number; v: number } {
+  const directionRad = (directionDeg * Math.PI) / 180;
+
+  const u = -speed * Math.sin(directionRad); // zonal (east-west)
+  const v = -speed * Math.cos(directionRad); // meridional (north-south)
+
+  return { u, v };
 }
