@@ -134,7 +134,8 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
       e.output ? e.output[analysis.yVariable] : [],
     );
 
-  const xLim = () => getNiceAxisLimits(allX(), 0, 600);
+  const granularity = () => (analysis.xVariable === "t" ? 600 : undefined);
+  const xLim = () => getNiceAxisLimits(allX(), 0, granularity());
   const yLim = () => getNiceAxisLimits(allY());
 
   const chartData = () =>
@@ -190,7 +191,7 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
           formatX={formatX}
           formatY={formatY}
         >
-          <AxisBottom domain={xLim} label="Time [s]" />
+          <AxisBottom domain={xLim} label={labels[analysis.xVariable]} />
           <AxisLeft domain={yLim} label={labels[analysis.yVariable]} />
           <For each={chartData()}>
             {(d) => (
