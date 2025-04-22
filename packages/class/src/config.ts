@@ -64,7 +64,7 @@ const untypedSchema = {
       // biome-ignore lint/suspicious/noThenProperty: part of JSON Schema
       then: {
         properties: {
-          h_0: {
+          h: {
             symbol: "h",
             type: "number",
             title: "ABL height",
@@ -72,7 +72,7 @@ const untypedSchema = {
             default: 200,
             "ui:group": "Mixed layer",
           },
-          theta_0: {
+          theta: {
             symbol: "θ",
             type: "number",
             "ui:group": "Mixed layer",
@@ -84,7 +84,7 @@ const untypedSchema = {
               "The potential temperature of the mixed layer at the initial time.",
             unit: "K",
           },
-          dtheta_0: {
+          dtheta: {
             symbol: "Δθ",
             type: "number",
             title: "Temperature jump at h",
@@ -92,7 +92,7 @@ const untypedSchema = {
             default: 1,
             unit: "K",
           },
-          q_0: {
+          q: {
             symbol: "q",
             type: "number",
             "ui:group": "Mixed layer",
@@ -100,7 +100,7 @@ const untypedSchema = {
             default: 0.008,
             title: "Mixed-layer specific humidity",
           },
-          dq_0: {
+          dq: {
             symbol: "Δq",
             type: "number",
             description: "Specific humidity jump at h",
@@ -177,11 +177,11 @@ const untypedSchema = {
           },
         },
         required: [
-          "h_0",
-          "theta_0",
-          "dtheta_0",
-          "q_0",
-          "dq_0",
+          "h",
+          "theta",
+          "dtheta",
+          "q",
+          "dq",
           "wtheta",
           "advtheta",
           "gammatheta",
@@ -207,11 +207,11 @@ export type Config = {
 } & ( // Mixed layer
   | {
       sw_ml: true;
-      h_0: number;
-      theta_0: number;
-      dtheta_0: number;
-      q_0: number;
-      dq_0: number;
+      h: number;
+      theta: number;
+      dtheta: number;
+      q: number;
+      dq: number;
       wtheta: number[];
       advtheta: number;
       gammatheta: number;

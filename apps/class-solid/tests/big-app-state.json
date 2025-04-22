@@ -3,11 +3,11 @@
   "description": "",
   "reference": {
     "initialState": {
-      "h_0": 200,
-      "theta_0": 288,
-      "dtheta_0": 1,
-      "q_0": 0.008,
-      "dq_0": -0.001
+      "h": 200,
+      "theta": 288,
+      "dtheta": 1,
+      "q": 0.008,
+      "dq": -0.001
     },
     "timeControl": {
       "dt": 60,
@@ -26,10 +26,10 @@
   },
   "permutations": [
     {
-      "name": "h_0=100, beta=0.1",
+      "name": "h=100, beta=0.1",
       "config": {
         "initialState": {
-          "h_0": 100
+          "h": 100
         },
         "mixedLayer": {
           "beta": 0.1
@@ -37,10 +37,10 @@
       }
     },
     {
-      "name": "h_0=100, beta=0.3",
+      "name": "h=100, beta=0.3",
       "config": {
         "initialState": {
-          "h_0": 100
+          "h": 100
         },
         "mixedLayer": {
           "beta": 0.3
@@ -48,10 +48,10 @@
       }
     },
     {
-      "name": "h_0=100, beta=0.4",
+      "name": "h=100, beta=0.4",
       "config": {
         "initialState": {
-          "h_0": 100
+          "h": 100
         },
         "mixedLayer": {
           "beta": 0.4
@@ -59,10 +59,10 @@
       }
     },
     {
-      "name": "h_0=100, beta=0.5",
+      "name": "h=100, beta=0.5",
       "config": {
         "initialState": {
-          "h_0": 100
+          "h": 100
         },
         "mixedLayer": {
           "beta": 0.5
@@ -70,10 +70,10 @@
       }
     },
     {
-      "name": "h_0=100, beta=0.6",
+      "name": "h=100, beta=0.6",
       "config": {
         "initialState": {
-          "h_0": 100
+          "h": 100
         },
         "mixedLayer": {
           "beta": 0.6
@@ -81,10 +81,10 @@
       }
     },
     {
-      "name": "h_0=300, beta=0.1",
+      "name": "h=300, beta=0.1",
       "config": {
         "initialState": {
-          "h_0": 300
+          "h": 300
         },
         "mixedLayer": {
           "beta": 0.1
@@ -92,10 +92,10 @@
       }
     },
     {
-      "name": "h_0=300, beta=0.3",
+      "name": "h=300, beta=0.3",
       "config": {
         "initialState": {
-          "h_0": 300
+          "h": 300
         },
         "mixedLayer": {
           "beta": 0.3
@@ -103,10 +103,10 @@
       }
     },
     {
-      "name": "h_0=300, beta=0.4",
+      "name": "h=300, beta=0.4",
       "config": {
         "initialState": {
-          "h_0": 300
+          "h": 300
         },
         "mixedLayer": {
           "beta": 0.4
@@ -114,10 +114,10 @@
       }
     },
     {
-      "name": "h_0=300, beta=0.5",
+      "name": "h=300, beta=0.5",
       "config": {
         "initialState": {
-          "h_0": 300
+          "h": 300
         },
         "mixedLayer": {
           "beta": 0.5
@@ -125,10 +125,10 @@
       }
     },
     {
-      "name": "h_0=300, beta=0.6",
+      "name": "h=300, beta=0.6",
       "config": {
         "initialState": {
-          "h_0": 300
+          "h": 300
         },
         "mixedLayer": {
           "beta": 0.6
@@ -136,10 +136,10 @@
       }
     },
     {
-      "name": "h_0=400, beta=0.1",
+      "name": "h=400, beta=0.1",
       "config": {
         "initialState": {
-          "h_0": 400
+          "h": 400
         },
         "mixedLayer": {
           "beta": 0.1
@@ -147,10 +147,10 @@
       }
     },
     {
-      "name": "h_0=400, beta=0.3",
+      "name": "h=400, beta=0.3",
       "config": {
         "initialState": {
-          "h_0": 400
+          "h": 400
         },
         "mixedLayer": {
           "beta": 0.3
@@ -158,10 +158,10 @@
       }
     },
     {
-      "name": "h_0=400, beta=0.4",
+      "name": "h=400, beta=0.4",
       "config": {
         "initialState": {
-          "h_0": 400
+          "h": 400
         },
         "mixedLayer": {
           "beta": 0.4
@@ -169,10 +169,10 @@
       }
     },
     {
-      "name": "h_0=400, beta=0.5",
+      "name": "h=400, beta=0.5",
       "config": {
         "initialState": {
-          "h_0": 400
+          "h": 400
         },
         "mixedLayer": {
           "beta": 0.5
@@ -180,10 +180,10 @@
       }
     },
     {
-      "name": "h_0=400, beta=0.6",
+      "name": "h=400, beta=0.6",
       "config": {
         "initialState": {
-          "h_0": 400
+          "h": 400
         },
         "mixedLayer": {
           "beta": 0.6
@@ -191,10 +191,10 @@
       }
     },
     {
-      "name": "h_0=500, beta=0.1",
+      "name": "h=500, beta=0.1",
       "config": {
         "initialState": {
-          "h_0": 500
+          "h": 500
         },
         "mixedLayer": {
           "beta": 0.1
@@ -202,10 +202,10 @@
       }
     },
     {
-      "name": "h_0=500, beta=0.3",
+      "name": "h=500, beta=0.3",
       "config": {
         "initialState": {
-          "h_0": 500
+          "h": 500
         },
         "mixedLayer": {
           "beta": 0.3
@@ -213,10 +213,10 @@
       }
     },
     {
-      "name": "h_0=500, beta=0.4",
+      "name": "h=500, beta=0.4",
       "config": {
         "initialState": {
-          "h_0": 500
+          "h": 500
         },
         "mixedLayer": {
           "beta": 0.4
@@ -224,10 +224,10 @@
       }
     },
     {
-      "name": "h_0=500, beta=0.5",
+      "name": "h=500, beta=0.5",
       "config": {
         "initialState": {
-          "h_0": 500
+          "h": 500
         },
         "mixedLayer": {
           "beta": 0.5
@@ -235,10 +235,10 @@
       }
     },
     {
-      "name": "h_0=500, beta=0.6",
+      "name": "h=500, beta=0.6",
       "config": {
         "initialState": {
-          "h_0": 500
+          "h": 500
         },
         "mixedLayer": {
           "beta": 0.6
@@ -246,10 +246,10 @@
       }
     },
     {
-      "name": "h_0=600, beta=0.1",
+      "name": "h=600, beta=0.1",
       "config": {
         "initialState": {
-          "h_0": 600
+          "h": 600
         },
         "mixedLayer": {
           "beta": 0.1
@@ -257,10 +257,10 @@
       }
     },
     {
-      "name": "h_0=600, beta=0.3",
+      "name": "h=600, beta=0.3",
       "config": {
         "initialState": {
-          "h_0": 600
+          "h": 600
         },
         "mixedLayer": {
           "beta": 0.3
@@ -268,10 +268,10 @@
       }
     },
     {
-      "name": "h_0=600, beta=0.4",
+      "name": "h=600, beta=0.4",
       "config": {
         "initialState": {
-          "h_0": 600
+          "h": 600
         },
         "mixedLayer": {
           "beta": 0.4
@@ -279,10 +279,10 @@
       }
     },
     {
-      "name": "h_0=600, beta=0.5",
+      "name": "h=600, beta=0.5",
       "config": {
         "initialState": {
-          "h_0": 600
+          "h": 600
         },
         "mixedLayer": {
           "beta": 0.5
@@ -290,10 +290,10 @@
       }
     },
     {
-      "name": "h_0=600, beta=0.6",
+      "name": "h=600, beta=0.6",
       "config": {
         "initialState": {
-          "h_0": 600
+          "h": 600
         },
         "mixedLayer": {
           "beta": 0.6

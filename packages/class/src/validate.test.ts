@@ -35,11 +35,11 @@ describe("validate", () => {
   );
 
   test("given string should coerce to number", () => {
-    const input = { sw_ml: true, h_0: "42" };
+    const input = { sw_ml: true, h: "42" };
 
     validate(input);
 
-    assert.ok(typeof input.h_0 === "number");
+    assert.ok(typeof input.h === "number");
   });
 });
 
@@ -53,11 +53,11 @@ describe("parse", () => {
       name: "",
       description: "",
       sw_ml: true,
-      h_0: 200,
-      theta_0: 288,
-      dtheta_0: 1,
-      q_0: 0.008,
-      dq_0: -0.001,
+      h: 200,
+      theta: 288,
+      dtheta: 1,
+      q: 0.008,
+      dq: -0.001,
       dt: 60,
       runtime: 43200,
       wtheta: [0.1],
@@ -73,7 +73,7 @@ describe("parse", () => {
   });
 
   test("given partial config should return full config", () => {
-    const input = { h_0: 100, sw_ml: true };
+    const input = { h: 100, sw_ml: true };
 
     const output = parse(input);
 
@@ -81,12 +81,12 @@ describe("parse", () => {
     if (!expected.sw_ml) {
       throw new Error("sw_ml is enabled");
     }
-    expected.h_0 = 100;
+    expected.h = 100;
     assert.deepEqual(output, expected);
   });
 
   test("given partial string config should return full coerced config", () => {
-    const input = { h_0: "100", sw_ml: true };
+    const input = { h: "100", sw_ml: true };
 
     const output = parse(input);
 
@@ -94,12 +94,12 @@ describe("parse", () => {
     if (!expected.sw_ml) {
       throw new Error("sw_ml is enabled");
     }
-    expected.h_0 = 100;
+    expected.h = 100;
     assert.deepEqual(output, expected);
   });
 
   test("given emptry string should return default", () => {
-    const input = { h_0: "", sw_ml: true };
+    const input = { h: "", sw_ml: true };
 
     const output = parse(input);
 

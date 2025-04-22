@@ -34,11 +34,11 @@ export class CLASS {
   constructor(config: Config) {
     this._cfg = config;
     if (config.sw_ml) {
-      this.h = config.h_0;
-      this.theta = config.theta_0;
-      this.dtheta = config.dtheta_0;
-      this.q = config.q_0;
-      this.dq = config.dq_0;
+      this.h = config.h;
+      this.theta = config.theta;
+      this.dtheta = config.dtheta;
+      this.q = config.q;
+      this.dq = config.dq;
     } else {
       // TODO dont have defaults here, but have it work without this else block
       this.h = 200;
