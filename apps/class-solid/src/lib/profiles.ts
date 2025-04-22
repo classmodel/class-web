@@ -1,5 +1,6 @@
 import type { Config } from "@classmodel/class/config";
 import type { ClassOutput } from "@classmodel/class/output";
+import { findInsertIndex } from "@classmodel/class/utils";
 import type { Point } from "~/components/plots/Line";
 import type { Observation } from "./experiment_config";
 
@@ -15,30 +16,64 @@ export function getVerticalProfiles(
     return [];
   }
 
-  // Extract height profile
-  const height = output.h.slice(t)[0];
-  const dh = 1600; // how much free troposphere to display?
-  const hProfile = [0, height, height, height + dh];
   if (variable === "theta") {
-    // Extract potential temperature profile
-    const theta = output.theta.slice(t)[0];
+    let z = output.h.slice(t)[0];
+    let theta = output.theta.slice(t)[0];
     const dtheta = output.dtheta.slice(t)[0];
     const gammatheta = config.gammatheta;
-    const thetaProfile = [
-      theta,
-      theta,
-      theta + dtheta,
-      theta + dtheta + dh * gammatheta,
+    const z_theta = config.z_theta;
+    const maxHeight = z_theta.slice(-1)[0];
+
+    // Mixed layer
+    const profile = [
+      { x: theta, y: 0 },
+      { x: theta, y: z },
     ];
-    return hProfile.map((h, i) => ({ x: thetaProfile[i], y: h }));
+
+    // Inversion
+    theta += dtheta;
+    profile.push({ x: theta, y: z });
+
+    // Free troposphere
+    while (z < maxHeight) {
+      const idx = findInsertIndex(z_theta, z);
+      const lapse_rate = gammatheta[idx] ?? 0;
+      const dz = z_theta[idx] - z;
+      z += dz;
+      theta += lapse_rate * dz;
+      console.log(theta, z, dz);
+      profile.push({ x: theta, y: z });
+    }
+    return profile;
   }
   if (variable === "q") {
-    // Extract humidity profile
-    const q = output.q.slice(t)[0];
+    let z = output.h.slice(t)[0];
+    let q = output.q.slice(t)[0];
     const dq = output.dq.slice(t)[0];
     const gammaq = config.gammaq;
-    const qProfile = [q, q, q + dq, q + dq + dh * gammaq];
-    return hProfile.map((h, i) => ({ x: qProfile[i], y: h }));
+    const z_q = config.z_q;
+    const maxHeight = z_q.slice(-1)[0];
+
+    // Mixed layer
+    const profile = [
+      { x: q, y: 0 },
+      { x: q, y: z },
+    ];
+
+    // Inversion
+    q += dq;
+    profile.push({ x: q, y: z });
+
+    // Free troposphere
+    while (z < maxHeight) {
+      const idx = findInsertIndex(z_q, z);
+      const lapse_rate = gammaq[idx] ?? 0;
+      const dz = z_q[idx] - z;
+      z += dz;
+      q += lapse_rate * dz;
+      profile.push({ x: q, y: z });
+    }
+    return profile;
   }
   return [];
 }

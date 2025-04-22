@@ -41,6 +41,12 @@
         "types": "./dist/output.d.ts"
       }
     },
+    "./utils": {
+      "import": {
+        "default": "./dist/utils.js",
+        "types": "./dist/utils.d.ts"
+      }
+    },
     "./validate": {
       "import": {
         "default": "./dist/validate.js",
