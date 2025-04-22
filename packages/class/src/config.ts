@@ -50,6 +50,12 @@ const untypedSchema = {
       title: "Mixed-layer switch",
       default: true,
     },
+    sw_wind: {
+      type: "boolean",
+      "ui:group": "Wind",
+      title: "Wind switch",
+      default: false,
+    },
   },
   required: ["name", "dt", "runtime"],
   allOf: [
@@ -235,6 +241,107 @@ const untypedSchema = {
         ],
       },
     },
+    {
+      if: {
+        properties: {
+          sw_wind: {
+            const: true,
+          },
+        },
+      },
+      // biome-ignore lint/suspicious/noThenProperty: part of JSON Schema
+      then: {
+        properties: {
+          u: {
+            symbol: "u",
+            type: "number",
+            unit: "m s-1",
+            default: 0,
+            title: "Mixed-layer u-wind speed",
+            "ui:group": "Wind",
+          },
+          du: {
+            symbol: "Δu",
+            type: "number",
+            unit: "m s-1",
+            default: 0,
+            title: "U-wind jump at h",
+            "ui:group": "Wind",
+          },
+          gamma_u: {
+            symbol: "γ<sub>u</sub>",
+            type: "array",
+            items: {
+              type: "number",
+            },
+            minItems: 1,
+            unit: "s-1",
+            default: [0],
+            title: "Free atmosphere u-wind speed lapse rate",
+            description: "Specify one or multiple segments",
+            "ui:group": "Wind",
+          },
+          z_u: {
+            symbol: "z_u",
+            type: "array",
+            items: {
+              type: "number",
+            },
+            minItems: 1,
+            unit: "m",
+            default: [0],
+            title: "Anchor point(s) for γ_u",
+            description:
+              "Each value specifies the end of the corresponding segment in γ_u",
+            "ui:group": "Wind",
+          },
+          v: {
+            symbol: "v",
+            type: "number",
+            unit: "m s-1",
+            default: 0,
+            title: "Mixed-layer v-wind speed",
+            "ui:group": "Wind",
+          },
+          dv: {
+            symbol: "Δv",
+            type: "number",
+            unit: "m s-1",
+            default: 0,
+            title: "V-wind jump at h",
+            "ui:group": "Wind",
+          },
+          gamma_v: {
+            symbol: "γ<sub>v</sub>",
+            type: "array",
+            items: {
+              type: "number",
+            },
+            minItems: 1,
+            unit: "s-1",
+            default: [0],
+            title: "Free atmosphere v-wind speed lapse rate",
+            description: "Specify one or multiple segments",
+            "ui:group": "Wind",
+          },
+          z_v: {
+            symbol: "z_v",
+            type: "array",
+            items: {
+              type: "number",
+            },
+            minItems: 1,
+            unit: "m",
+            default: [0],
+            title: "Anchor point(s) for γ_v",
+            description:
+              "Each value specifies the end of the corresponding segment in γ_v",
+            "ui:group": "Wind",
+          },
+        },
+        required: ["u", "du", "gamma_u", "z_u", "v", "dv", "gamma_v", "z_v"],
+      },
+    },
   ],
 };
 
@@ -267,7 +374,21 @@ export type Config = {
     }
   // Else, sw_ml key should be absent or false
   | { sw_ml?: false }
-);
+) & // Wind
+  (
+    | {
+        sw_wind: true;
+        u: number;
+        du: number;
+        gamma_u: number[];
+        z_u: number[];
+        v: number;
+        dv: number;
+        gamma_v: number[];
+        z_v: number[];
+      } // Else, sw_wind key should be absent or false
+    | { sw_wind?: true }
+  );
 
 export type JsonSchemaOfConfig = JSONSchemaType<Config>;
 export const jsonSchemaOfConfig =
