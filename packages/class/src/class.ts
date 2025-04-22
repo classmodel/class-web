@@ -163,12 +163,12 @@ export class CLASS {
 
   get wtheta(): number {
     this.hasMixedLayer();
-    return interpolateHourly(this._cfg.wtheta, this.t)
+    return interpolateHourly(this._cfg.wtheta, this.t);
   }
 
   get wq(): number {
     this.hasMixedLayer();
-    return interpolateHourly(this._cfg.wq, this.t)
+    return interpolateHourly(this._cfg.wq, this.t);
   }
 
   /** Surface kinematic virtual heat flux [K m s-1]. */
@@ -177,4 +177,3 @@ export class CLASS {
     return this.wtheta + 0.61 * this.theta * this.wq;
   }
 }
-
