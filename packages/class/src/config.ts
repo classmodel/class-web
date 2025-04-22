@@ -138,10 +138,14 @@ const untypedSchema = {
           },
           wq: {
             symbol: "(w'q')ₛ",
-            type: "number",
+            type: "array",
+            items: {
+              type: "number",
+            },
             "ui:group": "Mixed layer",
             unit: "kg kg⁻¹ m s⁻¹",
-            default: 0.0001,
+            default: [0.0001],
+            minItems: 1,
             title: "Surface kinematic moisture flux",
           },
           advq: {
@@ -215,7 +219,7 @@ export type Config = {
       wtheta: number[];
       advtheta: number;
       gammatheta: number;
-      wq: number;
+      wq: number[];
       advq: number;
       gammaq: number;
       divU: number;

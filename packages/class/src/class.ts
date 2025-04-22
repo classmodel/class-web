@@ -103,7 +103,8 @@ export class CLASS {
   /** Tendency of mixed-layer specific humidity [kg kg-1 s-1] */
   get qtend(): number {
     this.hasMixedLayer();
-    return (this._cfg.wq - this.wqe) / this.h + this._cfg.advq;
+    const wq = this._cfg.wq[0]; // TODO: interpolate
+    return (wq - this.wqe) / this.h + this._cfg.advq;
   }
 
   /** Tendency of specific humidity jump at h[kg kg-1 s-1] */
@@ -159,6 +160,7 @@ export class CLASS {
   get wthetav(): number {
     this.hasMixedLayer();
     const wtheta = this.interpolatedWtheta();
-    return wtheta + 0.61 * this.theta * this._cfg.wq;
+    const wq = this._cfg.wq[0]; // TODO: interpolate
+    return wtheta + 0.61 * this.theta * wq;
   }
 }
