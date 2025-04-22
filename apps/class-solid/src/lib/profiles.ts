@@ -238,6 +238,8 @@ export function getThermodynamicProfiles(
   const h = output.h.slice(t)[0];
   const gammaTheta = config.gammatheta;
   const gammaq = config.gammaq;
+  const z_theta = config.z_theta;
+  const z_q = config.z_q;
 
   const nz = 25;
   let dz = h / nz;
@@ -265,11 +267,18 @@ export function getThermodynamicProfiles(
   soundingData.push({ p, T, Td });
 
   // Free troposphere
+  let z = zArrayMixedLayer.slice(-1)[0];
   dz = 200;
   while (p > 100) {
-    theta += dz * gammaTheta;
-    q += dz * gammaq;
+    // Note: idx can exceed length of anchor points, then lapse becomes undefined and profile stops
+    const idx_th = findInsertIndex(z_theta, z);
+    const lapse_theta = gammaTheta[idx_th];
+    const idx_q = findInsertIndex(z_q, z);
+    const lapse_q = gammaq[idx_q];
+    theta += dz * lapse_theta;
+    q += dz * lapse_q;
     p += pressureDiff(T, q, p, dz);
+    z += dz;
     T = thetaToT(theta, p);
     Td = dewpoint(q, p);
 
