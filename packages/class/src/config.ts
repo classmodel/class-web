@@ -255,18 +255,26 @@ const untypedSchema = {
           u: {
             symbol: "u",
             type: "number",
-            unit: "m s-1",
-            default: 0,
+            unit: "m s⁻¹",
+            default: 6,
             title: "Mixed-layer u-wind speed",
             "ui:group": "Wind",
           },
           du: {
             symbol: "Δu",
             type: "number",
-            unit: "m s-1",
-            default: 0,
+            unit: "m s⁻¹",
+            default: 4,
             title: "U-wind jump at h",
             "ui:group": "Wind",
+          },
+          advu: {
+            symbol: "adv(u)", // _adv not possible in unicode
+            type: "number",
+            "ui:group": "Wind",
+            unit: "m s⁻²",
+            default: 0,
+            title: "Advection of u-wind",
           },
           gamma_u: {
             symbol: "γ<sub>u</sub>",
@@ -275,7 +283,7 @@ const untypedSchema = {
               type: "number",
             },
             minItems: 1,
-            unit: "s-1",
+            unit: "s⁻¹",
             default: [0],
             title: "Free atmosphere u-wind speed lapse rate",
             description: "Specify one or multiple segments",
@@ -289,7 +297,7 @@ const untypedSchema = {
             },
             minItems: 1,
             unit: "m",
-            default: [0],
+            default: [5000],
             title: "Anchor point(s) for γ_u",
             description:
               "Each value specifies the end of the corresponding segment in γ_u",
@@ -298,18 +306,26 @@ const untypedSchema = {
           v: {
             symbol: "v",
             type: "number",
-            unit: "m s-1",
-            default: 0,
+            unit: "m s⁻¹",
+            default: -4,
             title: "Mixed-layer v-wind speed",
             "ui:group": "Wind",
           },
           dv: {
             symbol: "Δv",
             type: "number",
-            unit: "m s-1",
-            default: 0,
+            unit: "m s⁻¹",
+            default: 4,
             title: "V-wind jump at h",
             "ui:group": "Wind",
+          },
+          advv: {
+            symbol: "adv(v)", // _adv not possible in unicode
+            type: "number",
+            "ui:group": "Wind",
+            unit: "m s⁻²",
+            default: 0,
+            title: "Advection of v-wind",
           },
           gamma_v: {
             symbol: "γ<sub>v</sub>",
@@ -318,7 +334,7 @@ const untypedSchema = {
               type: "number",
             },
             minItems: 1,
-            unit: "s-1",
+            unit: "s⁻¹",
             default: [0],
             title: "Free atmosphere v-wind speed lapse rate",
             description: "Specify one or multiple segments",
@@ -332,26 +348,45 @@ const untypedSchema = {
             },
             minItems: 1,
             unit: "m",
-            default: [0],
+            default: [5000],
             title: "Anchor point(s) for γ_v",
             description:
               "Each value specifies the end of the corresponding segment in γ_v",
             "ui:group": "Wind",
           },
+          ustar: {
+            symbol: "u*",
+            type: "number",
+            unit: "m s⁻¹",
+            title: "Surface friction velocity",
+            "ui:group": "Wind",
+            default: 0.3,
+          },
         },
-        required: ["u", "du", "gamma_u", "z_u", "v", "dv", "gamma_v", "z_v"],
+        required: [
+          "u",
+          "du",
+          "advu",
+          "gamma_u",
+          "z_u",
+          "v",
+          "dv",
+          "advv",
+          "gamma_v",
+          "z_v",
+          "ustar",
+        ],
       },
     },
   ],
 };
-
 
 type GeneralConfig = {
   name: string;
   description?: string;
   dt: number;
   runtime: number;
-}
+};
 
 export type WindConfig = {
   sw_wind: true;
@@ -359,10 +394,13 @@ export type WindConfig = {
   v: number;
   du: number;
   dv: number;
+  advu: number;
+  advv: number;
   gamma_u: number[];
-  z_u: number[];
   gamma_v: number[];
+  z_u: number[];
   z_v: number[];
+  ustar: number;
 };
 type NoWindConfig = {
   sw_wind?: false;
@@ -385,16 +423,15 @@ export type MixedLayerConfig = {
   beta: number;
   z_theta: number[];
   z_q: number[];
-}
+};
 type NoMixedLayerConfig = {
-  sw_ml?: false 
-}
+  sw_ml?: false;
+};
 
-export type Config = (
-  GeneralConfig 
-  & (MixedLayerConfig | NoMixedLayerConfig) 
-  & (WindConfig | NoWindConfig)
-);
+// TODO: Don't allow WindConfig with NoMixedLayerConfig
+export type Config = GeneralConfig &
+  (MixedLayerConfig | NoMixedLayerConfig) &
+  (WindConfig | NoWindConfig);
 
 export type JsonSchemaOfConfig = JSONSchemaType<Config>;
 export const jsonSchemaOfConfig =

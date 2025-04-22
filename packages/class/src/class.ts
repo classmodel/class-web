@@ -5,13 +5,18 @@
 import type { Config, MixedLayerConfig, WindConfig } from "./config.js";
 import { findInsertIndex, interpolateHourly } from "./utils.js";
 
+// Constants
+const CONSTANTS = {
+  fc: 1e-4, // Coriolis parameter [m s-1]
+};
+
 // Group related variables so we can require them as complete sets
 type Wind = {
   u: number;
   v: number;
   du: number;
   dv: number;
-}
+};
 
 type MixedLayer = {
   h: number;
@@ -19,7 +24,7 @@ type MixedLayer = {
   dtheta: number;
   q: number;
   dq: number;
-}
+};
 
 export class CLASS {
   _cfg: Config;
@@ -37,12 +42,12 @@ export class CLASS {
     if (config.sw_ml) {
       const { h, theta, dtheta, q, dq } = config;
       this.ml = { h, theta, dtheta, q, dq };
-      
-      if (config.sw_wind){
-        const {u, v, du, dv} = config
-        this.wind = {u, v, du, dv}
+
+      if (config.sw_wind) {
+        const { u, v, du, dv } = config;
+        this.wind = { u, v, du, dv };
       }
-    }    
+    }
   }
 
   /**
@@ -50,17 +55,17 @@ export class CLASS {
    */
   update() {
     const dt = this._cfg.dt;
-    if (this.ml){
+    if (this.ml) {
       this.ml.h += dt * this.htend;
       this.ml.theta += dt * this.thetatend;
       this.ml.dtheta += dt * this.dthetatend;
       this.ml.q += dt * this.qtend;
       this.ml.dq += dt * this.dqtend;
-      if (this.wind){
-        this.wind.u += dt * this.utend
-        this.wind.v += dt * this.vtend
-        this.wind.du += dt * this.dutend
-        this.wind.dv += dt * this.dvtend
+      if (this.wind) {
+        this.wind.u += dt * this.utend;
+        this.wind.v += dt * this.vtend;
+        this.wind.du += dt * this.dutend;
+        this.wind.dv += dt * this.dvtend;
       }
     }
     this.t += dt;
@@ -69,25 +74,46 @@ export class CLASS {
   get utend(): number {
     this.assertWind();
     // TODO make sure all variables are available
-    // return -this.fc * this.wind.dv + (this.uw + this.we * this.wind.du) / this.ml.h + this.advu
-    return 0
+    return (
+      -CONSTANTS.fc * this.wind.dv +
+      (this.uw + this.we * this.wind.du) / this.ml.h +
+      this._cfg.advu
+    );
+    // return 0
   }
-  
+
   get vtend(): number {
     this.assertWind();
     // TODO make sure all variables are available
-    // return this.fc * this.wind.du + (this.vw + this.we * this.wind.dv) / this.ml.h + this.advv
-    return 0
+    return (
+      CONSTANTS.fc * this.wind.du +
+      (this.vw + this.we * this.wind.dv) / this.ml.h +
+      this._cfg.advv
+    );
   }
 
   get dutend(): number {
     this.assertWind();
-    return this.gamma_u * this.we - this.utend
+    return this.gamma_u * this.we - this.utend;
   }
 
   get dvtend(): number {
     this.assertWind();
-    return this.gamma_v * this.we - this.vtend
+    return this.gamma_v * this.we - this.vtend;
+  }
+
+  get uw(): number {
+    this.assertWind();
+    const { u, v } = this.wind;
+    const { ustar } = this._cfg;
+    return -Math.sign(u) * (ustar ** 4 / (v ** 2 / u ** 2 + 1)) ** 0.5;
+  }
+
+  get vw(): number {
+    this.assertWind();
+    const { u, v } = this.wind;
+    const { ustar } = this._cfg;
+    return -Math.sign(v) * (ustar ** 4 / (u ** 2 / v ** 2 + 1)) ** 0.5;
   }
 
   /** Tendency of CLB [m s-1]*/
@@ -144,7 +170,7 @@ export class CLASS {
     this.assertMixedLayer();
     return -this.we * this.ml.dtheta;
   }
-  
+
   /** Entrainment moisture flux [kg kg-1 m s-1]. */
   get wqe(): number {
     this.assertMixedLayer();
@@ -159,9 +185,10 @@ export class CLASS {
 
   /** Virtual temperature jump at h [K]. */
   get dthetav(): number {
-    this.assertMixedLayer()
+    this.assertMixedLayer();
     return (
-      (this.ml.theta + this.ml.dtheta) * (1.0 + 0.61 * (this.ml.q + this.ml.dq)) -
+      (this.ml.theta + this.ml.dtheta) *
+        (1.0 + 0.61 * (this.ml.q + this.ml.dq)) -
       this.ml.theta * (1.0 + 0.61 * this.ml.q)
     );
   }
@@ -233,28 +260,30 @@ export class CLASS {
   } {
     this.assertMixedLayer();
     if (!this._cfg.sw_wind || this.wind === undefined) {
-      throw new Error("Wind is not enabled in config or wind state is not initialized.");
+      throw new Error(
+        "Wind is not enabled in config or wind state is not initialized.",
+      );
     }
   }
 
-  get q(){
-    return this.ml?.q || 999
+  get q() {
+    return this.ml?.q || 999;
   }
-  
+
   /**
    * Retrieve a value by name, treating nested state (wind, ml) as if it's flat.
-   * 
+   *
    * Lookup order:
    *  1. Property on the class instance itself.
    *  2. Property on `wind`, if available.
    *  3. Property on `ml`, if available.
-   * 
+   *
    * Returns `999` if the property is not found in any of the above.
    */
   getValue(name: string): number {
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     const self = this as any;
-    if (name in self && typeof self[name]==="number") return self[name];
+    if (name in self && typeof self[name] === "number") return self[name];
     if (this.wind && name in this.wind) return this.wind[name as keyof Wind];
     if (this.ml && name in this.ml) return this.ml[name as keyof MixedLayer];
     return 999;

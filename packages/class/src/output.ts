@@ -84,6 +84,18 @@ export const outputVariables: OutputVariable[] = [
     unit: "kg kg⁻¹ m s⁻¹",
     symbol: "(w'q')ₛ",
   },
+  {
+    key: "u",
+    title: "Mixed-layer u-wind component",
+    unit: "m s⁻¹",
+    symbol: "u",
+  },
+  {
+    key: "v",
+    title: "Mixed-layer v-wind component",
+    unit: "m s⁻¹",
+    symbol: "v",
+  },
 ];
 
 export type ClassOutput = {
