@@ -1,34 +1,5 @@
 import type { JSONSchemaType } from "ajv/dist/2020.js";
 
-// TODO generate this from ./config.schema.json
-// at the momemt json-schema-to-typescript does not understand if/then/else
-// and cannot generate such minimalistic types
-export type Config = {
-  name: string;
-  description?: string;
-  dt: number;
-  runtime: number;
-} & ( // Mixed layer
-  | {
-      sw_ml: true;
-      h_0: number;
-      theta_0: number;
-      dtheta_0: number;
-      q_0: number;
-      dq_0: number;
-      wtheta: number[];
-      advtheta: number;
-      gammatheta: number;
-      wq: number;
-      advq: number;
-      gammaq: number;
-      divU: number;
-      beta: number;
-    }
-  // Else, sw_ml key should be absent or false
-  | { sw_ml?: false }
-);
-
 /*
 Notes for JSON schema
 put here because JSON does not support comments
@@ -41,9 +12,7 @@ put here because JSON does not support comments
 TODO move notes to documentation/issues
 */
 
-export type JsonSchemaOfConfig = JSONSchemaType<Config>;
-
-// TODO unable to use import with assert in app, so made copy of ./config.json here
+// Unable to use import with assert in app, so embedded JSON schema here instead
 const untypedSchema = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
   type: "object",
@@ -227,5 +196,35 @@ const untypedSchema = {
   ],
 };
 
+// TODO generate this from ./config.schema.json
+// at the momemt json-schema-to-typescript does not understand if/then/else
+// and cannot generate such minimalistic types
+export type Config = {
+  name: string;
+  description?: string;
+  dt: number;
+  runtime: number;
+} & ( // Mixed layer
+  | {
+      sw_ml: true;
+      h_0: number;
+      theta_0: number;
+      dtheta_0: number;
+      q_0: number;
+      dq_0: number;
+      wtheta: number[];
+      advtheta: number;
+      gammatheta: number;
+      wq: number;
+      advq: number;
+      gammaq: number;
+      divU: number;
+      beta: number;
+    }
+  // Else, sw_ml key should be absent or false
+  | { sw_ml?: false }
+);
+
+export type JsonSchemaOfConfig = JSONSchemaType<Config>;
 export const jsonSchemaOfConfig =
   untypedSchema as unknown as JsonSchemaOfConfig;
