@@ -18,3 +18,18 @@ const right = i+1 <= maxIndex ? arr[i+1] : pad
 return left + p * (right - left);
 
 }
+
+/**
+ * Find the position in an array where value should be inserted to maintain sorted order.
+ * 
+ * @param arr Sorted array
+ * @param value Value that should be inserted
+ * @returns index where value should be inserted to maintain sorted array
+ */
+export function findInsertIndex(arr: number[], value: number) {
+    let i = 0;
+    while (i < arr.length && value >= arr[i]) {
+      i++;
+    }
+    return i;
+  }

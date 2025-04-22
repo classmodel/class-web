@@ -3,7 +3,7 @@
  * @module
  */
 import type { Config } from "./config.js";
-import { interpolateHourly } from "./utils.js";
+import { findInsertIndex, interpolateHourly } from "./utils.js";
 
 /**
  * CLASS model definition
@@ -83,12 +83,27 @@ export class CLASS {
     return (this.wtheta - this.wthetae) / this.h + this._cfg.advtheta;
   }
 
+  /** Free atmosphere potential temperature lapse rate */
+  get gammatheta(): number {
+    this.hasMixedLayer();
+    const { z_theta, gammatheta } = this._cfg;
+    const i = findInsertIndex(z_theta, this.h);
+    return gammatheta[i] ?? 0;
+  }
+
+  /** Free atmosphere specific humidity lapse rate */
+  get gammaq(): number {
+    this.hasMixedLayer();
+    const { z_q, gammaq } = this._cfg;
+    const i = findInsertIndex(z_q, this.h);
+    return gammaq[i] ?? 0;
+  }
+
   /** Tendency of potential temperature jump at h [K s-1] */
   get dthetatend(): number {
     this.hasMixedLayer();
     const w_th_ft = 0.0; // TODO: add free troposphere switch
-    const gammatheta = this._cfg.gammatheta[0]; // TODO: make conditional on h and z_ft_theta
-    return gammatheta * this.we - this.thetatend + w_th_ft;
+    return this.gammatheta * this.we - this.thetatend + w_th_ft;
   }
 
   /** Tendency of mixed-layer specific humidity [kg kg-1 s-1] */
@@ -101,8 +116,7 @@ export class CLASS {
   get dqtend(): number {
     this.hasMixedLayer();
     const w_q_ft = 0; // TODO: add free troposphere switch
-    const gammaq = this._cfg.gammaq[0]; // TODO: make conditional on h and z_ft_theta
-    return gammaq * this.we - this.qtend + w_q_ft;
+    return this.gammaq * this.we - this.qtend + w_q_ft;
   }
 
   /** Entrainment velocity [m s-1]. */
