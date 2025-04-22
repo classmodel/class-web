@@ -97,7 +97,8 @@ export class CLASS {
   get dthetatend(): number {
     this.hasMixedLayer();
     const w_th_ft = 0.0; // TODO: add free troposphere switch
-    return this._cfg.gammatheta * this.we - this.thetatend + w_th_ft;
+    const gammatheta = this._cfg.gammatheta[0]; // TODO: make conditional on h and z_ft_theta
+    return gammatheta * this.we - this.thetatend + w_th_ft;
   }
 
   /** Tendency of mixed-layer specific humidity [kg kg-1 s-1] */
@@ -111,7 +112,8 @@ export class CLASS {
   get dqtend(): number {
     this.hasMixedLayer();
     const w_q_ft = 0; // TODO: add free troposphere switch
-    return this._cfg.gammaq * this.we - this.qtend + w_q_ft;
+    const gammaq = this._cfg.gammaq[0]; // TODO: make conditional on h and z_ft_theta
+    return gammaq * this.we - this.qtend + w_q_ft;
   }
 
   /** Entrainment velocity [m s-1]. */

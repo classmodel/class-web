@@ -130,10 +130,14 @@ const untypedSchema = {
           },
           gammatheta: {
             symbol: "γ<sub>θ</sub>",
-            type: "number",
+            type: "array",
+            items: {
+              type: "number",
+            },
+            minItems: 1,
             "ui:group": "Mixed layer",
             unit: "K m⁻¹",
-            default: 0.006,
+            default: [0.006],
             title: "Free atmosphere potential temperature lapse rate",
           },
           wq: {
@@ -158,10 +162,14 @@ const untypedSchema = {
           },
           gammaq: {
             symbol: "γ<sub>q</sub>",
-            type: "number",
+            type: "array",
+            items: {
+              type: "number",
+            },
+            minItems: 1,
             "ui:group": "Mixed layer",
             unit: "kg kg⁻¹ m⁻¹",
-            default: 0,
+            default: [0],
             title: "Free atmosphere specific humidity lapse rate",
           },
           divU: {
@@ -218,10 +226,10 @@ export type Config = {
       dq: number;
       wtheta: number[];
       advtheta: number;
-      gammatheta: number;
+      gammatheta: number[];
       wq: number[];
       advq: number;
-      gammaq: number;
+      gammaq: number[];
       divU: number;
       beta: number;
     }
