@@ -36,6 +36,9 @@ pnpx @classmodel/class run --output output.csv --format csv config.json
 
 # To read from stdin use
 cat config.json | pnpx @classmodel/class -
+
+# To get the JSON schema of the config file use
+pnpx @classmodel/class schema -o config.schema.json
 ```
 If you do not have `pnpx` installed you can use `npx` instead.
 
