@@ -346,25 +346,42 @@ function createLabel(item: Base) {
   });
 }
 
-const DescriptionTooltip: Component<{ schema: SchemaOfProperty }> = (props) => {
+const LabelWithTooltip: Component<{
+  schema: SchemaOfProperty;
+  label: string;
+  extraDescription?: string;
+  for: string;
+}> = (props) => {
   const UiComponents = useFormContext().uiComponents;
   return (
     <Show
       when={
-        (props.schema.symbol && !props.schema.title) || props.schema.description
+        (props.schema.symbol && props.schema.title) ||
+        props.schema.description ||
+        props.extraDescription
+      }
+      fallback={
+        <UiComponents.Label
+          for={props.for}
+          class="h-auto p-2"
+          innerHTML={props.label}
+        />
       }
     >
       <UiComponents.Tooltip>
         <UiComponents.TooltipTrigger
-          as={Button<"button">}
+          as={UiComponents.Button<"button">}
           variant="ghost"
-          class="ml-2 size-8 rounded-full"
+          class="h-auto p-2"
         >
-          ?
+          <UiComponents.Label for={props.for} innerHTML={props.label} />
         </UiComponents.TooltipTrigger>
         <UiComponents.TooltipContent>
           <p>{!props.schema.symbol || props.schema.title}</p>
           <p>{props.schema.description}</p>
+          <Show when={props.extraDescription}>
+            <p>{props.extraDescription}</p>
+          </Show>
         </UiComponents.TooltipContent>
       </UiComponents.Tooltip>
     </Show>
@@ -433,6 +450,7 @@ interface ValueGetSet {
    */
   // TODO if error is truthy also update AccordionTrigger to havea an error badge
   error?: string;
+  extraDescription?: string;
 }
 
 const TextFieldWrapperControlled: ParentComponent<
@@ -443,6 +461,7 @@ const TextFieldWrapperControlled: ParentComponent<
   const UiComponents = useFormContext().uiComponents;
   return (
     <UiComponents.TextField
+      id={props.item.key}
       name={props.item.key}
       value={props.value}
       onChange={props.onChange}
@@ -452,8 +471,12 @@ const TextFieldWrapperControlled: ParentComponent<
     >
       <div class="flex items-center gap-2">
         <div class="basis-1/2">
-          <UiComponents.TextFieldLabel innerHTML={label()} />
-          <DescriptionTooltip schema={props.item.schema} />
+          <LabelWithTooltip
+            for={`${props.item.key}-input`}
+            schema={props.item.schema}
+            extraDescription={props.extraDescription}
+            label={label()}
+          />
         </div>
         <Show
           when={props.item.schema.unit}
@@ -550,8 +573,7 @@ const InputBoolean: Component<PropFieldProps> = (props) => {
   return (
     <div class="flex items-center space-x-2">
       <div class="basis-1/2">
-        <UiComponents.Label for={id}>{label()}</UiComponents.Label>
-        <DescriptionTooltip schema={props.item.schema} />
+        <LabelWithTooltip schema={props.item.schema} for={id} label={label()} />
       </div>
       <UiComponents.Checkbox
         id={id}
@@ -579,8 +601,7 @@ const InputTextEnum: Component<PropFieldProps> = (props) => {
   return (
     <div class="flex items-center gap-2">
       <div class="basis-1/2">
-        <UiComponents.Label for={id}>{label()}</UiComponents.Label>
-        <DescriptionTooltip schema={props.item.schema} />
+        <LabelWithTooltip schema={props.item.schema} for={id} label={label()} />
       </div>
       <UiComponents.RadioGroup
         id={id}
@@ -649,6 +670,7 @@ const InputNumbers: Component<PropFieldProps> = (props) => {
       value={stringVal()}
       onChange={onChange}
       error={error()}
+      extraDescription="Give multiple values seperated by commas"
     >
       <UiComponents.TextFieldInput
         placeholder={numbers2string(props.item.schema.default)}
