@@ -1,6 +1,6 @@
-import { BmiClass } from "@classmodel/class/bmi";
 import type { Config } from "@classmodel/class/config";
-import type { ClassOutput } from "@classmodel/class/runner";
+import { type ClassOutput, outputVariables } from "@classmodel/class/runner";
+import * as d3 from "d3";
 import { saveAs } from "file-saver";
 import { toBlob } from "html-to-image";
 import {
@@ -115,9 +115,15 @@ const uniqueTimes = () => [...new Set(_allTimes())].sort((a, b) => a - b);
 
 // TODO: could memoize all reactive elements here, would it make a difference?
 export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
-  const xVariableOptions = ["t"]; // TODO: separate plot types for timeseries and x-vs-y? Use time axis?
-  // TODO: add nice description from config as title and dropdown option for the variable picker.
-  const yVariableOptions = new BmiClass().get_output_var_names();
+  const symbols = Object.fromEntries(
+    outputVariables.map((v) => [v.key, v.symbol]),
+  );
+  const getKey = Object.fromEntries(
+    outputVariables.map((v) => [v.symbol, v.key]),
+  );
+  const labels = Object.fromEntries(
+    outputVariables.map((v) => [v.key, `${v.symbol} [${v.unit}]`]),
+  );
 
   const allX = () =>
     flatExperiments().flatMap((e) =>
@@ -128,7 +134,8 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
       e.output ? e.output[analysis.yVariable] : [],
     );
 
-  const xLim = () => getNiceAxisLimits(allX(), 0, 600);
+  const granularity = () => (analysis.xVariable === "t" ? 600 : undefined);
+  const xLim = () => getNiceAxisLimits(allX(), 0, granularity());
   const yLim = () => getNiceAxisLimits(allY());
 
   const chartData = () =>
@@ -158,14 +165,34 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
     setToggles(label, value);
   }
 
+  const setXVar = (symbol: string) => {
+    updateAnalysis(analysis, { xVariable: getKey[symbol] });
+    setResetPlot(analysis.id);
+  };
+
+  const setYVar = (symbol: string) => {
+    updateAnalysis(analysis, { yVariable: getKey[symbol] });
+    setResetPlot(analysis.id);
+  };
+
+  const formatX = () =>
+    analysis.xVariable === "t" ? formatSeconds : d3.format(".4");
+  const formatY = () =>
+    analysis.yVariable === "t" ? formatSeconds : d3.format(".4");
+
   return (
     <>
       {/* TODO: get label for yVariable from model config */}
       <ChartContainer>
         <Legend entries={chartData} toggles={toggles} onChange={toggleLine} />
-        <Chart id={analysis.id} title="Timeseries plot" formatX={formatSeconds}>
-          <AxisBottom domain={xLim} label="Time [s]" />
-          <AxisLeft domain={yLim} label={analysis.yVariable} />
+        <Chart
+          id={analysis.id}
+          title="Timeseries plot"
+          formatX={formatX}
+          formatY={formatY}
+        >
+          <AxisBottom domain={xLim} label={labels[analysis.xVariable]} />
+          <AxisLeft domain={yLim} label={labels[analysis.yVariable]} />
           <For each={chartData()}>
             {(d) => (
               <Show when={toggles[d.label]}>
@@ -177,15 +204,15 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
       </ChartContainer>
       <div class="flex justify-around">
         <Picker
-          value={() => analysis.xVariable}
-          setValue={(v) => updateAnalysis(analysis, { xVariable: v })}
-          options={xVariableOptions}
+          value={() => symbols[analysis.xVariable]}
+          setValue={(v) => setXVar(v)}
+          options={Object.values(symbols)}
           label="x-axis"
         />
         <Picker
-          value={() => analysis.yVariable}
-          setValue={(v) => updateAnalysis(analysis, { yVariable: v })}
-          options={yVariableOptions}
+          value={() => symbols[analysis.yVariable]}
+          setValue={(v) => setYVar(v)}
+          options={Object.values(symbols)}
           label="y-axis"
         />
       </div>
@@ -261,6 +288,11 @@ export function VerticalProfilePlot({
     setToggles(label, value);
   }
 
+  function changeVar(v: string) {
+    updateAnalysis(analysis, { variable: v });
+    setResetPlot(analysis.id);
+  }
+
   return (
     <>
       <div class="flex flex-col gap-2">
@@ -291,7 +323,7 @@ export function VerticalProfilePlot({
         </ChartContainer>
         <Picker
           value={() => analysis.variable}
-          setValue={(v) => updateAnalysis(analysis, { variable: v })}
+          setValue={(v) => changeVar(v)}
           options={Object.keys(variableOptions)}
           label="variable: "
         />
@@ -307,7 +339,7 @@ export function VerticalProfilePlot({
 
 type PickerProps = {
   value: Accessor<string>;
-  setValue: Setter<string>;
+  setValue: (value: string) => void;
   options: string[];
   label?: string;
 };

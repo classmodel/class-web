@@ -1,4 +1,4 @@
-import { BmiClass } from "@classmodel/class/bmi";
+import { runClass } from "@classmodel/class/runner";
 import { expose } from "comlink";
 
-expose(BmiClass);
+expose(runClass);

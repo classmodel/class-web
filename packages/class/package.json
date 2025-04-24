@@ -36,12 +36,6 @@
         "types": "./dist/runner.d.ts"
       }
     },
-    "./bmi": {
-      "import": {
-        "default": "./dist/bmi.js",
-        "types": "./dist/bmi.d.ts"
-      }
-    },
     "./validate": {
       "import": {
         "default": "./dist/validate.js",
