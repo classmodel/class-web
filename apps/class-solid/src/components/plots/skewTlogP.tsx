@@ -122,7 +122,7 @@ function Sounding(data: ChartData<SoundingRecord>) {
         clip-path="url(#clipper)"
         stroke={stroke()}
         stroke-dasharray={data.linestyle}
-        stroke-width={3}
+        stroke-width={2}
         fill="none"
         class="cursor-pointer"
       >
@@ -133,7 +133,7 @@ function Sounding(data: ChartData<SoundingRecord>) {
         clip-path="url(#clipper)"
         stroke={stroke()}
         stroke-dasharray="5,5"
-        stroke-width={3}
+        stroke-width={2}
         fill="none"
         class="cursor-pointer"
       >

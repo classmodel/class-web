@@ -27,7 +27,7 @@ export function Line(d: ChartData<Point>) {
       fill="none"
       stroke={stroke()}
       stroke-dasharray={d.linestyle}
-      stroke-width="3"
+      stroke-width="2"
       d={l(d.data) || ""}
       class="cursor-pointer"
     >

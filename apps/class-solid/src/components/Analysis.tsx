@@ -128,7 +128,7 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
       e.output ? e.output[analysis.yVariable] : [],
     );
 
-  const xLim = () => getNiceAxisLimits(allX());
+  const xLim = () => getNiceAxisLimits(allX(), 0, 600);
   const yLim = () => getNiceAxisLimits(allY());
 
   const chartData = () =>
@@ -418,8 +418,9 @@ async function takeScreenshot(event: MouseEvent, analyse: Analysis) {
     return;
   }
 
-  // TODO Make screenshot bigger than the original?
-  const scale = 1;
+  // Make screenshot bigger than the original
+  const scale = 10;
+
   // Can not use toSvg as legend is written in HTML
   // generated svg document contains foreignObject with html tag
   // which can only be rendered using web browser, not Inkscape or PowerPoint
