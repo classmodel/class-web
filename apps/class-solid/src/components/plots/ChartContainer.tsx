@@ -6,7 +6,9 @@ import {
   createSignal,
   useContext,
 } from "solid-js";
-import { type SetStoreFunction, createStore } from "solid-js/store";
+import { type SetStoreFunction, createStore, produce } from "solid-js/store";
+import { cn } from "~/lib/utils";
+import { resetPlot } from "../Analysis";
 
 export type SupportedScaleTypes =
   | d3.ScaleLinear<number, number, never>
@@ -35,6 +37,8 @@ interface Chart {
   formatX: (value: number) => string;
   formatY: (value: number) => string;
   transformX?: (x: number, y: number, scaleY: SupportedScaleTypes) => number;
+  zoom: number;
+  pan: [number, number];
 }
 type SetChart = SetStoreFunction<Chart>;
 const ChartContext = createContext<[Chart, SetChart]>();
@@ -65,24 +69,44 @@ export function ChartContainer(props: {
     scaleY: initialScale,
     formatX: d3.format(".4"),
     formatY: d3.format(".4"),
-  });
-  createEffect(() => {
-    // Update scaleXInstance when scaleX props change
-    const scaleX = supportedScales[chart.scalePropsX.type]()
-      .range(chart.scalePropsX.range)
-      .domain(chart.scalePropsX.domain);
-    // .nice(); // TODO: could use this instead of getNiceAxisLimits but messes up skewT
-    updateChart("scaleX", () => scaleX);
+    zoom: 1,
+    pan: [0, 0],
   });
 
+  // Update scales when props change
   createEffect(() => {
-    // Update scaleYInstance when scaleY props change
+    const [minX, maxX] = chart.scalePropsX.domain;
+    const [minY, maxY] = chart.scalePropsY.domain;
+    const [panX, panY] = chart.pan;
+    const zoom = chart.zoom;
+
+    const zoomedXDomain = getZoomedAndPannedDomainLinear(
+      minX,
+      maxX,
+      panX,
+      zoom,
+    );
+    const scaleX = supportedScales[chart.scalePropsX.type]()
+      .range(chart.scalePropsX.range)
+      .domain(zoomedXDomain);
+
+    const zoomedYDomain =
+      chart.scalePropsY.type === "log"
+        ? getZoomedAndPannedDomainLog(minY, maxY, panY, zoom)
+        : getZoomedAndPannedDomainLinear(minY, maxY, panY, zoom);
+
     const scaleY = supportedScales[chart.scalePropsY.type]()
       .range(chart.scalePropsY.range)
-      .domain(chart.scalePropsY.domain);
-    // .nice();
-    updateChart("scaleY", () => scaleY);
+      .domain(zoomedYDomain);
+
+    updateChart(
+      produce((prev) => {
+        prev.scaleX = scaleX;
+        prev.scaleY = scaleY;
+      }),
+    );
   });
+
   return (
     <ChartContext.Provider value={[chart, updateChart]}>
       <figure>{props.children}</figure>
@@ -93,16 +117,30 @@ export function ChartContainer(props: {
 /** Container for chart elements such as axes and lines */
 export function Chart(props: {
   children: JSX.Element;
+  id: string;
   title?: string;
   formatX?: (value: number) => string;
   formatY?: (value: number) => string;
   transformX?: (x: number, y: number, scaleY: SupportedScaleTypes) => number;
 }) {
   const [hovering, setHovering] = createSignal(false);
-  const [coords, setCoords] = createSignal<[number, number]>([0, 0]);
+  const [panning, setPanning] = createSignal(false);
+  const [dataCoords, setDataCoords] = createSignal<[number, number]>([0, 0]);
   const [chart, updateChart] = useChartContext();
   const title = props.title || "Default chart";
   const [marginTop, _, __, marginLeft] = chart.margin;
+  let panstart = [0, 0];
+
+  createEffect(() => {
+    if (resetPlot() === props.id) {
+      updateChart(
+        produce((prev) => {
+          prev.zoom = 1;
+          prev.pan = [0, 0];
+        }),
+      );
+    }
+  });
 
   if (props.formatX) {
     updateChart("formatX", () => props.formatX);
@@ -114,30 +152,106 @@ export function Chart(props: {
     updateChart("transformX", () => props.transformX);
   }
 
-  const onMouseMove = (e: MouseEvent) => {
+  // Utility function to calculate coordinates from mouse event
+  const getDataCoordsFromEvent = (e: MouseEvent) => {
     let x = e.offsetX - marginLeft;
     const y = e.offsetY - marginTop;
 
     if (chart.transformX) {
+      // Correct for skewed lines in thermodynamic diagram
       x = chart.transformX(x, y, chart.scaleY);
     }
 
-    setCoords([chart.scaleX.invert(x), chart.scaleY.invert(y)]);
+    return [chart.scaleX.invert(x), chart.scaleY.invert(y)];
+  };
+
+  const onMouseDown = (e: MouseEvent) => {
+    setPanning(true);
+    panstart = getDataCoordsFromEvent(e);
+  };
+
+  const onMouseMove = (e: MouseEvent) => {
+    const [x, y] = getDataCoordsFromEvent(e);
+
+    if (panning()) {
+      const [startX, startY] = panstart;
+
+      const dx =
+        chart.scalePropsX.type === "log"
+          ? Math.log10(x) - Math.log10(startX)
+          : x - startX;
+
+      const dy =
+        chart.scalePropsY.type === "log"
+          ? Math.log10(y) - Math.log10(startY)
+          : y - startY;
+
+      updateChart("pan", (prev) => [prev[0] - dx, prev[1] - dy]);
+    } else {
+      // Update the coordinate tracker in the plot
+      setDataCoords([x, y]);
+    }
+  };
+
+  const onWheel = (e: WheelEvent) => {
+    // Zoom towards cursor
+    e.preventDefault();
+    const zoomFactor = 1.1;
+    const zoomDirection = e.deltaY < 0 ? 1 : -1;
+    const zoomChange = zoomFactor ** zoomDirection;
+
+    const [cursorX, cursorY] = getDataCoordsFromEvent(e);
+
+    updateChart(
+      produce((draft) => {
+        const { scalePropsX, scalePropsY, pan } = draft;
+        const [panX, panY] = pan;
+
+        // Calculate x-pan (linear only for now)
+        const [xmin, xmax] = scalePropsX.domain;
+        const centerX = (xmin + xmax) / 2 + panX;
+        const dx = cursorX - centerX;
+
+        // Calculate y-pan
+        const [ymin, ymax] = scalePropsY.domain;
+        let dy: number;
+        if (scalePropsY.type === "log") {
+          const logCursor = Math.log10(Math.max(cursorY, 1e-10));
+          const logCenter = (Math.log10(ymin) + Math.log10(ymax)) / 2 + panY;
+          dy = logCursor - logCenter;
+        } else {
+          const centerY = (ymin + ymax) / 2 + panY;
+          dy = cursorY - centerY;
+        }
+
+        // Update the chart (mutating plays nicely with produce)
+        draft.zoom *= zoomChange;
+        draft.pan[0] += dx * (1 - 1 / zoomChange);
+        draft.pan[1] += dy * (1 - 1 / zoomChange);
+      }),
+    );
   };
 
   const renderXCoord = () =>
-    hovering() ? `x: ${chart.formatX(coords()[0])}` : "";
+    hovering() ? `x: ${chart.formatX(dataCoords()[0])}` : "";
   const renderYCoord = () =>
-    hovering() ? `y: ${chart.formatY(coords()[1])}` : "";
+    hovering() ? `y: ${chart.formatY(dataCoords()[1])}` : "";
 
   return (
     <svg
       width={chart.width}
       height={chart.height}
-      class="text-slate-500 text-xs tracking-wide"
+      class={cn(
+        "text-slate-500 text-xs tracking-wide",
+        panning() ? "cursor-grabbing select-none" : "cursor-grab",
+      )}
       onmouseover={() => setHovering(true)}
-      onmousemove={onMouseMove}
       onmouseout={() => setHovering(false)}
+      onmousedown={onMouseDown}
+      onmouseup={() => setPanning(false)}
+      onmousemove={onMouseMove}
+      onmouseleave={() => setPanning(false)}
+      onwheel={onWheel}
     >
       <title>{title}</title>
       <g transform={`translate(${marginLeft},${marginTop})`}>
@@ -149,6 +263,7 @@ export function Chart(props: {
           {renderYCoord()}
         </text>
       </g>
+      <ClipPath />
     </svg>
   );
 }
@@ -161,6 +276,17 @@ export function useChartContext() {
     );
   }
   return context;
+}
+
+// To constrain lines and other elements to the axes' extent
+function ClipPath() {
+  const [chart, _updateChart] = useChartContext();
+
+  return (
+    <clipPath id="clipper">
+      <rect x="0" y="0" width={chart.innerWidth} height={chart.innerHeight} />
+    </clipPath>
+  );
 }
 
 export interface ChartData<T> {
@@ -177,4 +303,33 @@ export function highlight(hex: string) {
       .toString(16)
       .padStart(2, "0");
   return `#${b(hex, 1)}${b(hex, 3)}${b(hex, 5)}`;
+}
+
+function getZoomedAndPannedDomainLinear(
+  min: number,
+  max: number,
+  pan: number,
+  zoom: number,
+): [number, number] {
+  const center = (min + max) / 2 + pan;
+  const halfExtent = (max - min) / (2 * zoom);
+  return [center - halfExtent, center + halfExtent];
+}
+
+function getZoomedAndPannedDomainLog(
+  min: number,
+  max: number,
+  pan: number,
+  zoom: number,
+): [number, number] {
+  const logMin = Math.log10(min);
+  const logMax = Math.log10(max);
+
+  const logCenter = (logMin + logMax) / 2 + pan;
+  const halfExtent = (logMax - logMin) / (2 * zoom);
+
+  const newLogMin = logCenter - halfExtent;
+  const newLogMax = logCenter + halfExtent;
+
+  return [10 ** newLogMin, 10 ** newLogMax];
 }

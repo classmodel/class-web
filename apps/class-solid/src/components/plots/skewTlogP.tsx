@@ -19,31 +19,22 @@ interface SoundingRecord {
 
 const deg2rad = Math.PI / 180;
 const tan = Math.tan(55 * deg2rad);
-const basep = 1050;
-const topPressure = 100;
 
 function getTempAtCursor(x: number, y: number, scaleY: SupportedScaleTypes) {
-  return x + 0.5 - (scaleY(basep) - y) / tan;
-}
-
-function ClipPath() {
-  const [chart, updateChart] = useChartContext();
-
-  return (
-    <clipPath id="clipper">
-      <rect x="0" y="0" width={chart.innerWidth} height={chart.innerHeight} />
-    </clipPath>
-  );
+  const basep = () => scaleY.domain()[0];
+  return x - (scaleY(basep()) - y) / tan;
 }
 
 function SkewTGridLine(temperature: number) {
   const [chart, updateChart] = useChartContext();
   const x = (temp: number) => chart.scaleX(temp);
   const y = (pres: number) => chart.scaleY(pres);
+  const basep = () => chart.scaleY.domain()[0];
+  const topPressure = () => chart.scaleY.domain()[1];
   return (
     <line
-      x1={x(temperature) - 0.5 + (y(basep) - y(100)) / tan}
-      x2={x(temperature) - 0.5}
+      x1={x(temperature) + (y(basep()) - y(topPressure())) / tan}
+      x2={x(temperature)}
       y1="0"
       y2={chart.innerHeight}
       clip-path="url(#clipper)"
@@ -67,6 +58,7 @@ function LogPGridLine(pressure: number) {
       stroke="#dfdfdf"
       stroke-width="0.75px"
       fill="none"
+      clip-path="url(#clipper)"
     />
   );
 }
@@ -76,13 +68,13 @@ function DryAdiabat(d: [number, number][]) {
   const [chart, updateChart] = useChartContext();
   const x = (temp: number) => chart.scaleX(temp);
   const y = (pres: number) => chart.scaleY(pres);
-
+  const basep = () => chart.scaleY.domain()[0];
   const dryline = d3
     .line()
     .x(
       (d) =>
         x((273.15 + d[1]) / (1000 / d[0]) ** 0.286 - 273.15) +
-        (y(basep) - y(d[0])) / tan,
+        (y(basep()) - y(d[0])) / tan,
     )
     .y((d) => y(d[0]));
   return (
@@ -103,15 +95,16 @@ function Sounding(data: ChartData<SoundingRecord>) {
   // Scales and axes. Note the inverted domain for the y-scale: bigger is up!
   const x = (temp: number) => chart.scaleX(temp);
   const y = (pres: number) => chart.scaleY(pres);
+  const basep = () => chart.scaleY.domain()[0];
 
   const temperatureLine = d3
     .line<SoundingRecord>()
-    .x((d) => x(d.T - 273.15) + (y(basep) - y(d.p)) / tan)
+    .x((d) => x(d.T - 273.15) + (y(basep()) - y(d.p)) / tan)
     .y((d) => y(d.p));
 
   const dewpointLine = d3
     .line<SoundingRecord>()
-    .x((d) => x(d.Td - 273.15) + (y(basep) - y(d.p)) / tan)
+    .x((d) => x(d.Td - 273.15) + (y(basep()) - y(d.p)) / tan)
     .y((d) => y(d.p));
 
   const titleT = () => `${data.label} T`;
@@ -131,6 +124,7 @@ function Sounding(data: ChartData<SoundingRecord>) {
         stroke-dasharray={data.linestyle}
         stroke-width={3}
         fill="none"
+        class="cursor-pointer"
       >
         <title>{titleT()}</title>
       </path>
@@ -141,6 +135,7 @@ function Sounding(data: ChartData<SoundingRecord>) {
         stroke-dasharray="5,5"
         stroke-width={3}
         fill="none"
+        class="cursor-pointer"
       >
         <title>{titleTd()}</title>
       </path>
@@ -150,11 +145,21 @@ function Sounding(data: ChartData<SoundingRecord>) {
 
 // Note: using temperatures in Kelvin as that's easiest to get from CLASS, but
 // perhaps not the most interoperable with other sounding data sources.
-export function SkewTPlot(props: { data: () => ChartData<SoundingRecord>[] }) {
+export function SkewTPlot(props: {
+  data: () => ChartData<SoundingRecord>[];
+  id: string;
+}) {
   const pressureLines = [1000, 850, 700, 500, 300, 200, 100];
   const temperatureLines = d3.range(-100, 45, 10);
 
-  const pressureGrid = d3.range(topPressure, basep + 1, 10);
+  const initialBasePressure = 1050;
+  const initialTopPressure = 100;
+
+  const pressureGrid = d3.range(
+    initialTopPressure,
+    initialBasePressure + 1,
+    10,
+  );
   const temperatureGrid = d3.range(-30, 240, 20);
   const dryAdiabats: [number, number][][] = temperatureGrid.map((temperature) =>
     pressureGrid.map((pressure) => [pressure, temperature]),
@@ -185,6 +190,7 @@ export function SkewTPlot(props: { data: () => ChartData<SoundingRecord>[] }) {
     <ChartContainer>
       <Legend entries={props.data} toggles={toggles} onChange={toggleLine} />
       <Chart
+        id={props.id}
         title="Thermodynamic diagram"
         formatX={d3.format(".0d")}
         formatY={d3.format(".0d")}
@@ -197,11 +203,10 @@ export function SkewTPlot(props: { data: () => ChartData<SoundingRecord>[] }) {
         />
         <AxisLeft
           type="log"
-          domain={() => [basep, topPressure]}
+          domain={() => [initialBasePressure, initialTopPressure]}
           tickValues={pressureLines}
           label="Pressure [hPa]"
         />
-        <ClipPath />
         <For each={temperatureLines}>{(t) => SkewTGridLine(t)}</For>
         <For each={pressureLines}>{(p) => LogPGridLine(p)}</For>
         <For each={dryAdiabats}>{(d) => <DryAdiabat {...d} />}</For>
