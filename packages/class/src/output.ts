@@ -100,13 +100,13 @@ export const outputVariables: OutputVariable[] = [
     key: "du",
     title: "U-wind jump at h",
     unit: "m s⁻¹",
-    symbol: "u",
+    symbol: "Δu",
   },
   {
     key: "dv",
     title: "V-wind jump at h",
     unit: "m s⁻¹",
-    symbol: "v",
+    symbol: "Δv",
   },
 ];
 
