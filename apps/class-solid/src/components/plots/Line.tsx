@@ -29,6 +29,7 @@ export function Line(d: ChartData<Point>) {
       stroke-dasharray={d.linestyle}
       stroke-width="2"
       d={l(d.data) || ""}
+      class="cursor-pointer"
     >
       <title>{d.label}</title>
     </path>
