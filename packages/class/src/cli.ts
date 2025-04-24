@@ -6,6 +6,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { EOL } from "node:os";
 import { Command, Option } from "@commander-js/extra-typings";
+import { jsonSchemaOfConfig } from "./config.js";
 import type { ClassOutput } from "./runner.js";
 import { runClass } from "./runner.js";
 import { parse } from "./validate.js";
@@ -135,6 +136,19 @@ function buildCommand() {
     .action((options) => {
       const defaultConfig = parse({});
       const output = JSON.stringify(defaultConfig, null, 2);
+      if (options.output === "-") {
+        console.log(output);
+      } else {
+        writeTextFile(output, options.output);
+      }
+    });
+
+  program
+    .command("schema")
+    .description("Print the JSON schema for the configuration file")
+    .option("-o, --output <output-file>", "Output file. Default is stdout", "-")
+    .action((options) => {
+      const output = JSON.stringify(jsonSchemaOfConfig, null, 2);
       if (options.output === "-") {
         console.log(output);
       } else {

@@ -1,34 +1,5 @@
 import type { JSONSchemaType } from "ajv/dist/2020.js";
 
-// TODO generate this from ./config.schema.json
-// at the momemt json-schema-to-typescript does not understand if/then/else
-// and cannot generate such minimalistic types
-export type Config = {
-  name: string;
-  description?: string;
-  dt: number;
-  runtime: number;
-} & ( // Mixed layer
-  | {
-      sw_ml: true;
-      h_0: number;
-      theta_0: number;
-      dtheta_0: number;
-      q_0: number;
-      dq_0: number;
-      wtheta: number[];
-      advtheta: number;
-      gammatheta: number;
-      wq: number;
-      advq: number;
-      gammaq: number;
-      divU: number;
-      beta: number;
-    }
-  // Else, sw_ml key should be absent or false
-  | { sw_ml?: false }
-);
-
 /*
 Notes for JSON schema
 put here because JSON does not support comments
@@ -41,9 +12,7 @@ put here because JSON does not support comments
 TODO move notes to documentation/issues
 */
 
-export type JsonSchemaOfConfig = JSONSchemaType<Config>;
-
-// TODO unable to use import with assert in app, so made copy of ./config.json here
+// Unable to use import with assert in app, so embedded JSON schema here instead
 const untypedSchema = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
   type: "object",
@@ -127,7 +96,7 @@ const untypedSchema = {
             symbol: "q",
             type: "number",
             "ui:group": "Mixed layer",
-            unit: "kg kg-1",
+            unit: "kg kg⁻¹",
             default: 0.008,
             title: "Mixed-layer specific humidity",
           },
@@ -135,7 +104,7 @@ const untypedSchema = {
             symbol: "Δq",
             type: "number",
             description: "Specific humidity jump at h",
-            unit: "kg kg-1",
+            unit: "kg kg⁻¹",
             default: -0.001,
             "ui:group": "Mixed layer",
           },
@@ -146,7 +115,7 @@ const untypedSchema = {
               type: "number",
             },
             "ui:group": "Mixed layer",
-            unit: "K m s-1",
+            unit: "K m s⁻¹",
             title: "Surface kinematic heat flux",
             default: [0.1],
             minItems: 1,
@@ -155,7 +124,7 @@ const untypedSchema = {
             symbol: "adv(θ)", // _adv not possible in unicode
             type: "number",
             "ui:group": "Mixed layer",
-            unit: "K s-1",
+            unit: "K s⁻¹",
             default: 0,
             title: "Advection of heat",
           },
@@ -163,7 +132,7 @@ const untypedSchema = {
             symbol: "γ<sub>θ</sub>",
             type: "number",
             "ui:group": "Mixed layer",
-            unit: "K m-1",
+            unit: "K m⁻¹",
             default: 0.006,
             title: "Free atmosphere potential temperature lapse rate",
           },
@@ -171,7 +140,7 @@ const untypedSchema = {
             symbol: "(w'q')ₛ",
             type: "number",
             "ui:group": "Mixed layer",
-            unit: "kg kg-1 m s-1",
+            unit: "kg kg⁻¹ m s⁻¹",
             default: 0.0001,
             title: "Surface kinematic moisture flux",
           },
@@ -179,7 +148,7 @@ const untypedSchema = {
             symbol: "adv(q)", // _adv not possible in unicode
             type: "number",
             "ui:group": "Mixed layer",
-            unit: "kg kg-1 s-1",
+            unit: "kg kg⁻¹ s⁻¹",
             default: 0,
             title: "Advection of moisture",
           },
@@ -187,7 +156,7 @@ const untypedSchema = {
             symbol: "γ<sub>q</sub>",
             type: "number",
             "ui:group": "Mixed layer",
-            unit: "kg kg-1 m-1",
+            unit: "kg kg⁻¹ m⁻¹",
             default: 0,
             title: "Free atmosphere specific humidity lapse rate",
           },
@@ -196,7 +165,7 @@ const untypedSchema = {
             type: "number",
             "ui:group": "Mixed layer",
             default: 0,
-            unit: "s-1",
+            unit: "s⁻¹",
             title: "Horizontal large-scale divergence of wind",
           },
           beta: {
@@ -227,5 +196,35 @@ const untypedSchema = {
   ],
 };
 
+// TODO generate this from ./config.schema.json
+// at the momemt json-schema-to-typescript does not understand if/then/else
+// and cannot generate such minimalistic types
+export type Config = {
+  name: string;
+  description?: string;
+  dt: number;
+  runtime: number;
+} & ( // Mixed layer
+  | {
+      sw_ml: true;
+      h_0: number;
+      theta_0: number;
+      dtheta_0: number;
+      q_0: number;
+      dq_0: number;
+      wtheta: number[];
+      advtheta: number;
+      gammatheta: number;
+      wq: number;
+      advq: number;
+      gammaq: number;
+      divU: number;
+      beta: number;
+    }
+  // Else, sw_ml key should be absent or false
+  | { sw_ml?: false }
+);
+
+export type JsonSchemaOfConfig = JSONSchemaType<Config>;
 export const jsonSchemaOfConfig =
   untypedSchema as unknown as JsonSchemaOfConfig;

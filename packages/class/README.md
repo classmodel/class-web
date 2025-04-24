@@ -36,6 +36,9 @@ pnpx @classmodel/class run --output output.csv --format csv config.json
 
 # To read from stdin use
 cat config.json | pnpx @classmodel/class -
+
+# To get the JSON schema of the config file use
+pnpx @classmodel/class schema -o config.schema.json
 ```
 If you do not have `pnpx` installed you can use `npx` instead.
 
@@ -70,19 +73,9 @@ This package is part of a [monorepo](https://github.com/classmodel/class-web) wi
 
 ### JSON schema
 
-The Class model uses a JSON schema to validate the input configuration. The schema is defined in the `@classmodel/class` package and can be found at [src/config.json](https://github.com/classmodel/class-web/blob/main/packages/class/src/config.json) (in [repo](./src/config.json)). The schema is used to validate the input configuration and to generate a form to input the configuration.
+The Class model uses a JSON schema to validate the input configuration. The schema is defined in the `@classmodel/class` package and can be found at [src/config.ts](https://github.com/classmodel/class-web/blob/main/packages/class/src/config.ts) (in [repo](./src/config.ts)). The schema is used to validate the input configuration and to generate a form to input the configuration.
 
 The `src/config.ts` file contains the embedded JSON schema and its Typescript type definition.
-
-<!-- When runnning `pnpm dev` or `pnpm build` the `src/config.ts` file is generated from the `src/config.json` file.
-
-To manually generate the `src/config.ts` file run the following command:
-
-```shell
-pnpm json2ts
-``` -->
-
-At the moment you manually have to keep the `src/config.ts` file in sync with the `src/config.json` file. By copying the content over and updating the TypeScript Config type.
 
 See the [form package](../form/README.md#json-schema) for additional keywords in the JSON schema.
 

@@ -23,7 +23,6 @@
         "types": "./dist/config.d.ts"
       }
     },
-    "./config.json": "./dist/config.json",
     "./config_utils": {
       "import": {
         "default": "./dist/config_utils.js",
@@ -54,23 +53,17 @@
   "files": ["dist"],
   "license": "GPL-3.0-only",
   "scripts": {
-    "dev": "concurrently -n \"tsc,json2ts\" -c \"blue,green\" \"pnpm dev:tsc\" \"pnpm json2ts --watch\"",
-    "dev:tsc": "tsc --watch",
-    "build:tsc": "tsc",
-    "build:config": "cp src/config.json dist/config.json",
-    "build": "pnpm json2ts && pnpm build:tsc && pnpm build:config",
+    "dev": "tsc --watch",
+    "build": "tsc",
     "prepack": "pnpm build",
     "test": "tsx --test src/*.test.ts",
     "typecheck": "tsc --noEmit",
-    "json2ts": "node scripts/json2ts.mjs",
     "docs": "typedoc",
     "clean": "rm -rf dist"
   },
   "bin": "./dist/cli.js",
   "devDependencies": {
     "@types/node": "^20.13.1",
-    "concurrently": "^9.0.1",
-    "json-schema-to-typescript": "^15.0.2",
     "tsx": "^4.16.5",
     "typedoc": "^0.26.10",
     "typescript": "^5.3.3"

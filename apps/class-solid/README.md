@@ -54,7 +54,7 @@ This allows you to trigger tests from the [playwright ui](https://playwright.dev
 An experiment can get started from a preset.
 
 The presets are stored in the `src/lib/presets/` directory.
-The format is JSON with content adhering to the [JSON schema](https://github.com/classmodel/class-web/blob/main/packages/class/src/config.json).
+The format is JSON with content adhering to the [JSON schema](https://github.com/classmodel/class-web/blob/main/packages/class/src/config.ts).
 
 The `src/lib/presets.ts` is used as an index of presets.
 If you add a preset the `src/lib/presets.ts` file needs to be updated.
