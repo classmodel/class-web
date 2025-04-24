@@ -124,6 +124,7 @@ function Sounding(data: ChartData<SoundingRecord>) {
         stroke-dasharray={data.linestyle}
         stroke-width={2}
         fill="none"
+        class="cursor-pointer"
       >
         <title>{titleT()}</title>
       </path>
@@ -134,6 +135,7 @@ function Sounding(data: ChartData<SoundingRecord>) {
         stroke-dasharray="5,5"
         stroke-width={2}
         fill="none"
+        class="cursor-pointer"
       >
         <title>{titleTd()}</title>
       </path>

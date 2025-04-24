@@ -32,7 +32,7 @@ import {
   experiments,
   updateAnalysis,
 } from "~/lib/store";
-import { MaterialSymbolsLightResetImage, MdiCamera, MdiDelete } from "./icons";
+import { MdiCamera, MdiDelete, MdiImageFilterCenterFocus } from "./icons";
 import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./plots/Axes";
 import { Chart, ChartContainer } from "./plots/ChartContainer";
 import { Legend } from "./plots/Legend";
@@ -460,7 +460,7 @@ export function AnalysisCard(analysis: Analysis) {
         <CardTitle id={id}>{analysis.name}</CardTitle>
         <div class="flex gap-1">
           <Button variant="outline" onclick={() => setResetPlot(analysis.id)}>
-            <MaterialSymbolsLightResetImage />
+            <MdiImageFilterCenterFocus />
           </Button>
           <Button
             variant="outline"

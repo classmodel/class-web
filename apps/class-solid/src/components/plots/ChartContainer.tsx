@@ -7,6 +7,7 @@ import {
   useContext,
 } from "solid-js";
 import { type SetStoreFunction, createStore, produce } from "solid-js/store";
+import { cn } from "~/lib/utils";
 import { resetPlot } from "../Analysis";
 
 export type SupportedScaleTypes =
@@ -240,7 +241,10 @@ export function Chart(props: {
     <svg
       width={chart.width}
       height={chart.height}
-      class="text-slate-500 text-xs tracking-wide"
+      class={cn(
+        "text-slate-500 text-xs tracking-wide",
+        panning() ? "cursor-grabbing select-none" : "cursor-grab",
+      )}
       onmouseover={() => setHovering(true)}
       onmouseout={() => setHovering(false)}
       onmousedown={onMouseDown}
