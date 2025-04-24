@@ -8,7 +8,14 @@ import type { Config } from "./config.js";
 import { type ClassOutput, outputVariables } from "./output.js";
 import { parse } from "./validate.js";
 
-export function runClass(config: Config): ClassOutput {
+/**
+ * Runs the CLASS model with the given configuration and frequency.
+ *
+ * @param config - The configuration object for the CLASS model.
+ * @param freq - The frequency in seconds at which to write output, defaults to 600.
+ * @returns An object containing the output variables collected during the simulation.
+ */
+export function runClass(config: Config, freq = 600): ClassOutput {
   const validatedConfig = parse(config);
   const model = new CLASS(validatedConfig);
 
@@ -32,7 +39,7 @@ export function runClass(config: Config): ClassOutput {
   while (model.t < config.runtime) {
     model.update();
 
-    if (model.t % 600 === 0) {
+    if (model.t % freq === 0) {
       writeOutput();
     }
   }

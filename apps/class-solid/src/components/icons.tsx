@@ -356,10 +356,7 @@ export function MdiCamera(props: JSX.IntrinsicElements["svg"]) {
   );
 }
 
-export function MaterialSymbolsLightResetImage(
-  props: JSX.IntrinsicElements["svg"],
-) {
-  // Icon from Material Symbols Light by Google - https://github.com/google/material-design-icons/blob/master/LICENSE
+export function MdiImageFilterCenterFocus(props: JSX.IntrinsicElements["svg"]) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -370,8 +367,8 @@ export function MaterialSymbolsLightResetImage(
     >
       <title>Reset plot</title>
       <path
-        fill="currentColor"
-        d="M4 9.77V5h1v3.235q1-1.896 2.851-3.066T12 4q2.739 0 4.849 1.627t2.824 4.142h-1.06q-.696-2.108-2.486-3.438T12 5Q9.979 5 8.36 6.044T5.909 8.77H8.77v1zm3.5 7.73h9.154l-2.827-3.77l-2.615 3.308l-1.75-2.115zM5.616 21q-.672 0-1.144-.472T4 19.385v-6.77h1v6.77q0 .269.173.442t.443.173h12.769q.269 0 .442-.173t.173-.442v-6.77h1v6.77q0 .67-.472 1.143q-.472.472-1.143.472z"
+        fill="#888888"
+        d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m7 10h-4v2h4a2 2 0 0 0 2-2v-4h-2m0-12h-4v2h4v4h2V5a2 2 0 0 0-2-2M5 5h4V3H5a2 2 0 0 0-2 2v4h2m0 6H3v4a2 2 0 0 0 2 2h4v-2H5z"
       />
     </svg>
   );

@@ -1,6 +1,5 @@
 import type { Config } from "@classmodel/class/config";
-import type { ClassOutput } from "@classmodel/class/output";
-import type { runClass } from "@classmodel/class/runner";
+import type { ClassOutput, runClass } from "@classmodel/class/runner";
 import { wrap } from "comlink";
 
 const worker = new Worker(new URL("./worker.ts", import.meta.url), {
