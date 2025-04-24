@@ -8,6 +8,7 @@ import { overwriteDefaultsInJsonSchema } from "@classmodel/form/utils";
 import type { DefinedError, JSONSchemaType, ValidateFunction } from "ajv";
 // TODO replace with preset of a forest fire
 import deathValley from "./presets/death-valley.json";
+import varnavas from "./presets/varnavas.json";
 
 const presetConfigs = [
   {
@@ -15,6 +16,7 @@ const presetConfigs = [
     description: "The classic default configuration",
   },
   deathValley,
+  varnavas,
 ] as const;
 
 export interface Preset {

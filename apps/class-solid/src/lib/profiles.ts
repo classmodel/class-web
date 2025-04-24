@@ -1,5 +1,6 @@
 import type { Config } from "@classmodel/class/config";
-import type { ClassOutput } from "@classmodel/class/runner";
+import type { ClassOutput } from "@classmodel/class/output";
+import { findInsertIndex } from "@classmodel/class/utils";
 import type { Point } from "~/components/plots/Line";
 import type { Observation } from "./experiment_config";
 
@@ -15,31 +16,126 @@ export function getVerticalProfiles(
     return [];
   }
 
-  // Extract height profile
-  const height = output.h.slice(t)[0];
-  const dh = 1600; // how much free troposphere to display?
-  const hProfile = [0, height, height, height + dh];
   if (variable === "theta") {
-    // Extract potential temperature profile
-    const theta = output.theta.slice(t)[0];
+    let z = output.h.slice(t)[0];
+    let theta = output.theta.slice(t)[0];
     const dtheta = output.dtheta.slice(t)[0];
     const gammatheta = config.gammatheta;
-    const thetaProfile = [
-      theta,
-      theta,
-      theta + dtheta,
-      theta + dtheta + dh * gammatheta,
+    const z_theta = config.z_theta;
+    const maxHeight = z_theta.slice(-1)[0];
+
+    // Mixed layer
+    const profile = [
+      { x: theta, y: 0 },
+      { x: theta, y: z },
     ];
-    return hProfile.map((h, i) => ({ x: thetaProfile[i], y: h }));
+
+    // Inversion
+    theta += dtheta;
+    profile.push({ x: theta, y: z });
+
+    // Free troposphere
+    while (z < maxHeight) {
+      const idx = findInsertIndex(z_theta, z);
+      const lapse_rate = gammatheta[idx] ?? 0;
+      const dz = z_theta[idx] - z;
+      z += dz;
+      theta += lapse_rate * dz;
+      profile.push({ x: theta, y: z });
+    }
+    return profile;
   }
+
   if (variable === "q") {
-    // Extract humidity profile
-    const q = output.q.slice(t)[0];
+    let z = output.h.slice(t)[0];
+    let q = output.q.slice(t)[0];
     const dq = output.dq.slice(t)[0];
     const gammaq = config.gammaq;
-    const qProfile = [q, q, q + dq, q + dq + dh * gammaq];
-    return hProfile.map((h, i) => ({ x: qProfile[i], y: h }));
+    const z_q = config.z_q;
+    const maxHeight = z_q.slice(-1)[0];
+
+    // Mixed layer
+    const profile = [
+      { x: q, y: 0 },
+      { x: q, y: z },
+    ];
+
+    // Inversion
+    q += dq;
+    profile.push({ x: q, y: z });
+
+    // Free troposphere
+    while (z < maxHeight) {
+      const idx = findInsertIndex(z_q, z);
+      const lapse_rate = gammaq[idx] ?? 0;
+      const dz = z_q[idx] - z;
+      z += dz;
+      q += lapse_rate * dz;
+      profile.push({ x: q, y: z });
+    }
+    return profile;
   }
+
+  if (config.sw_wind && variable === "u") {
+    let z = output.h.slice(t)[0];
+    let u = output.u.slice(t)[0];
+    const du = output.du.slice(t)[0];
+    const gammau = config.gamma_u;
+    const z_u = config.z_u;
+    const maxHeight = z_u.slice(-1)[0];
+
+    // Mixed layer
+    const profile = [
+      { x: u, y: 0 },
+      { x: u, y: z },
+    ];
+
+    // Inversion
+    u += du;
+    profile.push({ x: u, y: z });
+
+    // Free troposphere
+    while (z < maxHeight) {
+      const idx = findInsertIndex(z_u, z);
+      const lapse_rate = gammau[idx] ?? 0;
+      const dz = z_u[idx] - z;
+      z += dz;
+      u += lapse_rate * dz;
+      profile.push({ x: u, y: z });
+    }
+    return profile;
+  }
+
+  if (config.sw_wind && variable === "v") {
+    let z = output.h.slice(t)[0];
+    let v = output.v.slice(t)[0];
+    const dv = output.dv.slice(t)[0];
+    const gammav = config.gamma_v;
+    const z_v = config.z_v;
+    const maxHeight = z_v.slice(-1)[0];
+
+    // Mixed layer
+    const profile = [
+      { x: v, y: 0 },
+      { x: v, y: z },
+    ];
+
+    // Inversion
+    v += dv;
+    profile.push({ x: v, y: z });
+
+    // Free troposphere
+    while (z < maxHeight) {
+      const idx = findInsertIndex(z_v, z);
+      const lapse_rate = gammav[idx] ?? 0;
+      const dz = z_v[idx] - z;
+      z += dz;
+      v += lapse_rate * dz;
+      profile.push({ x: v, y: z });
+    }
+    return profile;
+  }
+
   return [];
 }
 
@@ -142,6 +238,8 @@ export function getThermodynamicProfiles(
   const h = output.h.slice(t)[0];
   const gammaTheta = config.gammatheta;
   const gammaq = config.gammaq;
+  const z_theta = config.z_theta;
+  const z_q = config.z_q;
 
   const nz = 25;
   let dz = h / nz;
@@ -169,11 +267,18 @@ export function getThermodynamicProfiles(
   soundingData.push({ p, T, Td });
 
   // Free troposphere
+  let z = zArrayMixedLayer.slice(-1)[0];
   dz = 200;
   while (p > 100) {
-    theta += dz * gammaTheta;
-    q += dz * gammaq;
+    // Note: idx can exceed length of anchor points, then lapse becomes undefined and profile stops
+    const idx_th = findInsertIndex(z_theta, z);
+    const lapse_theta = gammaTheta[idx_th];
+    const idx_q = findInsertIndex(z_q, z);
+    const lapse_q = gammaq[idx_q];
+    theta += dz * lapse_theta;
+    q += dz * lapse_q;
     p += pressureDiff(T, q, p, dz);
+    z += dz;
     T = thetaToT(theta, p);
     Td = dewpoint(q, p);
 
@@ -194,10 +299,23 @@ export function observationsForProfile(obs: Observation, variable = "theta") {
       const p = obs.pressure[i];
       const theta = tToTheta(T, p);
       const q = calculateSpecificHumidity(T, p, rh);
-      if (variable === "theta") {
-        return { y: h, x: theta };
+      const { u, v } = windSpeedDirectionToUV(
+        obs.windSpeed[i],
+        obs.windDirection[i],
+      );
+
+      switch (variable) {
+        case "theta":
+          return { y: h, x: theta };
+        case "q":
+          return { y: h, x: q };
+        case "u":
+          return { y: h, x: u };
+        case "v":
+          return { y: h, x: v };
+        default:
+          throw new Error(`Unknown variable '${variable}'`);
       }
-      return { y: h, x: q };
     }),
   };
 }
@@ -216,4 +334,16 @@ export function observationsForSounding(obs: Observation) {
     color: "#000000",
     linestyle: "none",
   };
+}
+
+function windSpeedDirectionToUV(
+  speed: number,
+  directionDeg: number,
+): { u: number; v: number } {
+  const directionRad = (directionDeg * Math.PI) / 180;
+
+  const u = -speed * Math.sin(directionRad); // zonal (east-west)
+  const v = -speed * Math.cos(directionRad); // meridional (north-south)
+
+  return { u, v };
 }

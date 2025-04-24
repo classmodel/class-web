@@ -1,5 +1,5 @@
 import type { Config } from "@classmodel/class/config";
-import { type ClassOutput, outputVariables } from "@classmodel/class/runner";
+import { type ClassOutput, outputVariables } from "@classmodel/class/output";
 import * as d3 from "d3";
 import { saveAs } from "file-saver";
 import { toBlob } from "html-to-image";
@@ -226,6 +226,8 @@ export function VerticalProfilePlot({
   const variableOptions = {
     "Potential temperature [K]": "theta",
     "Specific humidity [kg/kg]": "q",
+    "u-wind component [m/s]": "u",
+    "v-wind component [m/s]": "v",
   };
 
   const classVariable = () =>
@@ -233,26 +235,7 @@ export function VerticalProfilePlot({
 
   const observations = () =>
     flatObservations().map((o) => observationsForProfile(o, classVariable()));
-  const obsAllX = () =>
-    observations().flatMap((obs) => obs.data.map((d) => d.x));
-  const obsAllY = () =>
-    observations().flatMap((obs) => obs.data.map((d) => d.y));
 
-  const allValues = () => [
-    ...flatExperiments().flatMap((e) =>
-      e.output ? e.output[classVariable()] : [],
-    ),
-    ...obsAllX(),
-  ];
-  const allHeights = () => [
-    ...flatExperiments().flatMap((e) => (e.output ? e.output.h : [])),
-    ...obsAllY(),
-  ];
-
-  // TODO: better to include jump at top in extent calculation rather than adding random margin.
-  const xLim = () => getNiceAxisLimits(allValues(), 1);
-  const yLim = () =>
-    [0, getNiceAxisLimits(allHeights(), 0)[1]] as [number, number];
   const profileData = () =>
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
@@ -270,6 +253,19 @@ export function VerticalProfilePlot({
             : [],
       };
     });
+
+  const allX = () => [
+    ...profileData().flatMap((p) => p.data.map((d) => d.x)),
+    ...observations().flatMap((obs) => obs.data.map((d) => d.x)),
+  ];
+  const allY = () => [
+    ...profileData().flatMap((p) => p.data.map((d) => d.y)),
+    ...observations().flatMap((obs) => obs.data.map((d) => d.y)),
+  ];
+
+  // TODO: better to include jump at top in extent calculation rather than adding random margin.
+  const xLim = () => getNiceAxisLimits(allX(), 1);
+  const yLim = () => [0, getNiceAxisLimits(allY(), 0)[1]] as [number, number];
 
   function chartData() {
     return [...profileData(), ...observations()];

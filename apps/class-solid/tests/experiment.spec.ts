@@ -48,7 +48,7 @@ test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
   if (!config1.permutations[0].sw_ml) {
     throw new Error("sw_ml is not defined");
   }
-  expect(config1.permutations[0].h_0).toEqual(800);
+  expect(config1.permutations[0].h).toEqual(800);
 
   // Download configuration of experiment 2
   experiment2.getByRole("button", { name: "Download" }).click();
@@ -62,7 +62,7 @@ test("Duplicate experiment with a permutation", async ({ page }, testInfo) => {
     throw new Error("sw_ml is not defined");
   }
   expect(config2.reference.beta).toEqual(0.3);
-  expect(config2.permutations[0].h_0).toEqual(800);
+  expect(config2.permutations[0].h).toEqual(800);
 
   // visually check that timeseries plot has 4 non-overlapping lines
   await testInfo.attach("timeseries plot with 4 non-overlapping lines", {
@@ -114,7 +114,7 @@ test("Swap permutation with default reference", async ({ page }) => {
   if (!config1.reference.sw_ml) {
     throw new Error("Mixed layer is turned off");
   }
-  expect(config1.reference.h_0).toEqual(800);
+  expect(config1.reference.h).toEqual(800);
 });
 
 test("Swap permutation with custom reference", async ({ page }) => {
@@ -164,9 +164,9 @@ test("Swap permutation with custom reference", async ({ page }) => {
     throw new Error("sw_ml is not defined");
   }
 
-  expect(config1.reference.h_0).toEqual(800);
-  expect(config1.reference.dtheta_0).toEqual(0.8);
-  expect(config1.permutations[0].h_0).toEqual(400);
+  expect(config1.reference.h).toEqual(800);
+  expect(config1.reference.dtheta).toEqual(0.8);
+  expect(config1.permutations[0].h).toEqual(400);
 });
 
 test("Promote permutation to a new experiment", async ({ page }) => {
@@ -211,7 +211,7 @@ test("Promote permutation to a new experiment", async ({ page }) => {
   if (!config2.reference.sw_ml) {
     throw new Error("sw_ml is not defined");
   }
-  expect(config2.reference.h_0).toEqual(800);
+  expect(config2.reference.h).toEqual(800);
   expect(config2.permutations.length).toEqual(0);
 });
 
@@ -265,6 +265,6 @@ test("Duplicate permutation", async ({ page }) => {
   if (!config1.permutations[0].sw_ml || !config1.permutations[1].sw_ml) {
     throw new Error("sw_ml is not defined");
   }
-  expect(config1.permutations[0].h_0).toEqual(800);
-  expect(config1.permutations[1].h_0).toEqual(400);
+  expect(config1.permutations[0].h).toEqual(800);
+  expect(config1.permutations[1].h).toEqual(400);
 });

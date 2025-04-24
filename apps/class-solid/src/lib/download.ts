@@ -1,4 +1,4 @@
-import type { ClassOutput } from "@classmodel/class/runner";
+import type { ClassOutput } from "@classmodel/class/output";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
 import { toPartial } from "./encode";
 import type { ExperimentConfig } from "./experiment_config";

@@ -50,6 +50,12 @@ const untypedSchema = {
       title: "Mixed-layer switch",
       default: true,
     },
+    sw_wind: {
+      type: "boolean",
+      "ui:group": "Wind",
+      title: "Wind switch",
+      default: false,
+    },
   },
   required: ["name", "dt", "runtime"],
   allOf: [
@@ -64,7 +70,7 @@ const untypedSchema = {
       // biome-ignore lint/suspicious/noThenProperty: part of JSON Schema
       then: {
         properties: {
-          h_0: {
+          h: {
             symbol: "h",
             type: "number",
             title: "ABL height",
@@ -72,7 +78,7 @@ const untypedSchema = {
             default: 200,
             "ui:group": "Mixed layer",
           },
-          theta_0: {
+          theta: {
             symbol: "θ",
             type: "number",
             "ui:group": "Mixed layer",
@@ -84,7 +90,7 @@ const untypedSchema = {
               "The potential temperature of the mixed layer at the initial time.",
             unit: "K",
           },
-          dtheta_0: {
+          dtheta: {
             symbol: "Δθ",
             type: "number",
             title: "Temperature jump at h",
@@ -92,7 +98,7 @@ const untypedSchema = {
             default: 1,
             unit: "K",
           },
-          q_0: {
+          q: {
             symbol: "q",
             type: "number",
             "ui:group": "Mixed layer",
@@ -100,7 +106,7 @@ const untypedSchema = {
             default: 0.008,
             title: "Mixed-layer specific humidity",
           },
-          dq_0: {
+          dq: {
             symbol: "Δq",
             type: "number",
             description: "Specific humidity jump at h",
@@ -130,18 +136,26 @@ const untypedSchema = {
           },
           gammatheta: {
             symbol: "γ<sub>θ</sub>",
-            type: "number",
+            type: "array",
+            items: {
+              type: "number",
+            },
+            minItems: 1,
             "ui:group": "Mixed layer",
             unit: "K m⁻¹",
-            default: 0.006,
+            default: [0.006],
             title: "Free atmosphere potential temperature lapse rate",
           },
           wq: {
             symbol: "(w'q')ₛ",
-            type: "number",
+            type: "array",
+            items: {
+              type: "number",
+            },
             "ui:group": "Mixed layer",
             unit: "kg kg⁻¹ m s⁻¹",
-            default: 0.0001,
+            default: [0.0001],
+            minItems: 1,
             title: "Surface kinematic moisture flux",
           },
           advq: {
@@ -154,10 +168,14 @@ const untypedSchema = {
           },
           gammaq: {
             symbol: "γ<sub>q</sub>",
-            type: "number",
+            type: "array",
+            items: {
+              type: "number",
+            },
+            minItems: 1,
             "ui:group": "Mixed layer",
             unit: "kg kg⁻¹ m⁻¹",
-            default: 0,
+            default: [0],
             title: "Free atmosphere specific humidity lapse rate",
           },
           divU: {
@@ -175,13 +193,41 @@ const untypedSchema = {
             default: 0.2,
             title: "Entrainment ratio for virtual heat",
           },
+          z_theta: {
+            symbol: "z<sub>θ</sub>",
+            type: "array",
+            items: {
+              type: "number",
+            },
+            minItems: 1,
+            "ui:group": "Mixed layer",
+            unit: "m",
+            default: [5000],
+            title: "Anchor point(s) for γ_θ",
+            description:
+              "Each value specifies the end of the corresponding segment in γ_θ",
+          },
+          z_q: {
+            symbol: "z<sub>q</sub>",
+            type: "array",
+            items: {
+              type: "number",
+            },
+            minItems: 1,
+            "ui:group": "Mixed layer",
+            unit: "m",
+            default: [5000],
+            title: "Anchor point(s) for γ_q",
+            description:
+              "Each value specifies the end of the corresponding segment in γ_q",
+          },
         },
         required: [
-          "h_0",
-          "theta_0",
-          "dtheta_0",
-          "q_0",
-          "dq_0",
+          "h",
+          "theta",
+          "dtheta",
+          "q",
+          "dq",
           "wtheta",
           "advtheta",
           "gammatheta",
@@ -190,40 +236,202 @@ const untypedSchema = {
           "gammaq",
           "divU",
           "beta",
+          "z_theta",
+          "z_q",
+        ],
+      },
+    },
+    {
+      if: {
+        properties: {
+          sw_wind: {
+            const: true,
+          },
+        },
+      },
+      // biome-ignore lint/suspicious/noThenProperty: part of JSON Schema
+      then: {
+        properties: {
+          u: {
+            symbol: "u",
+            type: "number",
+            unit: "m s⁻¹",
+            default: 6,
+            title: "Mixed-layer u-wind speed",
+            "ui:group": "Wind",
+          },
+          du: {
+            symbol: "Δu",
+            type: "number",
+            unit: "m s⁻¹",
+            default: 4,
+            title: "U-wind jump at h",
+            "ui:group": "Wind",
+          },
+          advu: {
+            symbol: "adv(u)", // _adv not possible in unicode
+            type: "number",
+            "ui:group": "Wind",
+            unit: "m s⁻²",
+            default: 0,
+            title: "Advection of u-wind",
+          },
+          gamma_u: {
+            symbol: "γ<sub>u</sub>",
+            type: "array",
+            items: {
+              type: "number",
+            },
+            minItems: 1,
+            unit: "s⁻¹",
+            default: [0],
+            title: "Free atmosphere u-wind speed lapse rate",
+            description: "Specify one or multiple segments",
+            "ui:group": "Wind",
+          },
+          z_u: {
+            symbol: "z_u",
+            type: "array",
+            items: {
+              type: "number",
+            },
+            minItems: 1,
+            unit: "m",
+            default: [5000],
+            title: "Anchor point(s) for γ_u",
+            description:
+              "Each value specifies the end of the corresponding segment in γ_u",
+            "ui:group": "Wind",
+          },
+          v: {
+            symbol: "v",
+            type: "number",
+            unit: "m s⁻¹",
+            default: -4,
+            title: "Mixed-layer v-wind speed",
+            "ui:group": "Wind",
+          },
+          dv: {
+            symbol: "Δv",
+            type: "number",
+            unit: "m s⁻¹",
+            default: 4,
+            title: "V-wind jump at h",
+            "ui:group": "Wind",
+          },
+          advv: {
+            symbol: "adv(v)", // _adv not possible in unicode
+            type: "number",
+            "ui:group": "Wind",
+            unit: "m s⁻²",
+            default: 0,
+            title: "Advection of v-wind",
+          },
+          gamma_v: {
+            symbol: "γ<sub>v</sub>",
+            type: "array",
+            items: {
+              type: "number",
+            },
+            minItems: 1,
+            unit: "s⁻¹",
+            default: [0],
+            title: "Free atmosphere v-wind speed lapse rate",
+            description: "Specify one or multiple segments",
+            "ui:group": "Wind",
+          },
+          z_v: {
+            symbol: "z_v",
+            type: "array",
+            items: {
+              type: "number",
+            },
+            minItems: 1,
+            unit: "m",
+            default: [5000],
+            title: "Anchor point(s) for γ_v",
+            description:
+              "Each value specifies the end of the corresponding segment in γ_v",
+            "ui:group": "Wind",
+          },
+          ustar: {
+            symbol: "u*",
+            type: "number",
+            unit: "m s⁻¹",
+            title: "Surface friction velocity",
+            "ui:group": "Wind",
+            default: 0.3,
+          },
+        },
+        required: [
+          "u",
+          "du",
+          "advu",
+          "gamma_u",
+          "z_u",
+          "v",
+          "dv",
+          "advv",
+          "gamma_v",
+          "z_v",
+          "ustar",
         ],
       },
     },
   ],
 };
 
-// TODO generate this from ./config.schema.json
-// at the momemt json-schema-to-typescript does not understand if/then/else
-// and cannot generate such minimalistic types
-export type Config = {
+type GeneralConfig = {
   name: string;
   description?: string;
   dt: number;
   runtime: number;
-} & ( // Mixed layer
-  | {
-      sw_ml: true;
-      h_0: number;
-      theta_0: number;
-      dtheta_0: number;
-      q_0: number;
-      dq_0: number;
-      wtheta: number[];
-      advtheta: number;
-      gammatheta: number;
-      wq: number;
-      advq: number;
-      gammaq: number;
-      divU: number;
-      beta: number;
-    }
-  // Else, sw_ml key should be absent or false
-  | { sw_ml?: false }
-);
+};
+
+export type WindConfig = {
+  sw_wind: true;
+  u: number;
+  v: number;
+  du: number;
+  dv: number;
+  advu: number;
+  advv: number;
+  gamma_u: number[];
+  gamma_v: number[];
+  z_u: number[];
+  z_v: number[];
+  ustar: number;
+};
+type NoWindConfig = {
+  sw_wind?: false;
+};
+
+export type MixedLayerConfig = {
+  sw_ml: true;
+  h: number;
+  theta: number;
+  dtheta: number;
+  q: number;
+  dq: number;
+  wtheta: number[];
+  advtheta: number;
+  gammatheta: number[];
+  wq: number[];
+  advq: number;
+  gammaq: number[];
+  divU: number;
+  beta: number;
+  z_theta: number[];
+  z_q: number[];
+};
+type NoMixedLayerConfig = {
+  sw_ml?: false;
+};
+
+// TODO: Don't allow WindConfig with NoMixedLayerConfig
+export type Config = GeneralConfig &
+  (MixedLayerConfig | NoMixedLayerConfig) &
+  (WindConfig | NoWindConfig);
 
 export type JsonSchemaOfConfig = JSONSchemaType<Config>;
 export const jsonSchemaOfConfig =

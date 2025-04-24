@@ -40,7 +40,7 @@ test("Create share link from an experiment", async ({ page }) => {
     throw new Error("Mixed layer is turned off");
   }
 
-  expect(config1.reference.h_0).toEqual(800);
+  expect(config1.reference.h).toEqual(800);
 
   // TODO: finalheight is gone; implement alternative check to see that experiment finished
 });

@@ -2,7 +2,7 @@ import { createUniqueId } from "solid-js";
 import { createStore, produce, unwrap } from "solid-js/store";
 
 import type { Config } from "@classmodel/class/config";
-import type { ClassOutput } from "@classmodel/class/runner";
+import type { ClassOutput } from "@classmodel/class/output";
 
 import {
   mergeConfigurations,

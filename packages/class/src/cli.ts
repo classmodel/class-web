@@ -7,7 +7,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { EOL } from "node:os";
 import { Command, Option } from "@commander-js/extra-typings";
 import { jsonSchemaOfConfig } from "./config.js";
-import type { ClassOutput } from "./runner.js";
+import type { ClassOutput } from "./output.js";
 import { runClass } from "./runner.js";
 import { parse } from "./validate.js";
 
