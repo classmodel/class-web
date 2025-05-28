@@ -13,7 +13,7 @@ const CONSTANTS = {
 /**
  * Atmospheric vertical profiles
  */
-export type ClassProfile {
+export interface ClassProfile {
   z: number[]; // Height levels (cell centers) [m]
   theta: number[]; // Potential temperature [K]
   thetav: number[]; // Virtual potential temperature [K]
@@ -78,7 +78,7 @@ export function generateProfiles(
   const p = calculatePressureProfile(zh, p0, Rd, cp, g, thetavh, dz);
   const exner = p.map((pressure) => (pressure / p0) ** (Rd / cp));
   const T = exner.map((ex, i) => ex * thetaProf[i]);
-  const Td = p.map((p, i) => dewpoint(qtProfile[i], p/100));
+  const Td = p.map((p, i) => dewpoint(qtProfile[i], p / 100));
   const rho = p.map((pressure, i) => pressure / (Rd * exner[i] * thetav[i]));
 
   // Include wind
@@ -157,50 +157,50 @@ function piecewiseProfile(
   zSegments: number[],
   gammaSegments: number[],
 ): number[] {
-  const profile = new Array(z.length).fill(0);
+  const profile = new Array(z.length);
 
   for (let i = 0; i < z.length; i++) {
     const _z = z[i];
 
+    // Case 1: Mixed layer — constant value
     if (_z <= h) {
-      // Mixed layer: constant value
       profile[i] = mlValue;
-    } else {
-      // Above mixed layer: start with jump, then apply lapse rates
-      let currentValue = mlValue + jump;
-      let anchorPoint = h;
-
-      // Find which segment this height falls into
-      let segIdx = 0;
-      for (segIdx = 0; segIdx < zSegments.length; segIdx++) {
-        const zTop = zSegments[segIdx];
-
-        if (zTop < h) {
-          // Mixed layer has grown beyond this segment; irrelevant
-          continue;
-        }
-
-        if (_z >= zTop) {
-          // We've passed this segment; add its contribution and update anchor
-          const dz = zTop - anchorPoint;
-          currentValue += gammaSegments[segIdx] * dz;
-          anchorPoint = zTop;
-        } else {
-          // Height falls within this segment
-          const dz = _z - anchorPoint;
-          currentValue += gammaSegments[segIdx] * dz;
-          break;
-        }
-      }
-
-      // Handle case where we've gone beyond all segments
-      if (segIdx === zSegments.length && _z > zSegments[zSegments.length - 1]) {
-        const dz = _z - zSegments[zSegments.length - 1];
-        currentValue += gammaSegments[gammaSegments.length - 1] * dz;
-      }
-
-      profile[i] = currentValue;
+      continue;
     }
+
+    // Case 2: Above mixed layer
+    let value = mlValue + jump;
+    let lowerBound = h;
+
+    // Traverse lapse rate segments
+    for (let j = 0; j < zSegments.length; j++) {
+      const upperBound = zSegments[j];
+      const lapse = gammaSegments[j];
+
+      if (upperBound < h) {
+        // Mixed layer has fully consumed segment, skip it
+        continue;
+      }
+
+      if (_z > upperBound) {
+        // Entire segment is below current height
+        value += lapse * (upperBound - lowerBound);
+        lowerBound = upperBound;
+      } else {
+        // Partial segment contribution
+        value += lapse * (_z - lowerBound);
+        lowerBound = _z;
+        break; // done accumulating
+      }
+    }
+
+    // Case 3: Height is above all defined segments
+    if (_z > lowerBound) {
+      const lapse = gammaSegments[gammaSegments.length - 1];
+      value += lapse * (_z - lowerBound);
+    }
+
+    profile[i] = value;
   }
 
   return profile;
