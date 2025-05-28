@@ -113,3 +113,7 @@ export const outputVariables: OutputVariable[] = [
 export type ClassOutput = {
   [K in (typeof outputVariables)[number]["key"]]: number[];
 };
+
+export type ClassOutputAtSingleTime = {
+  [K in (typeof outputVariables)[number]["key"]]: number;
+};

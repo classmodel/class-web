@@ -131,7 +131,7 @@ export class CLASS {
   get dthetatend(): number {
     this.assertMixedLayer();
     const w_th_ft = 0.0; // TODO: add free troposphere switch
-    return this.gammatheta * this.we - this.thetatend + w_th_ft;
+    return this.gamma_theta * this.we - this.thetatend + w_th_ft;
   }
 
   /** Tendency of mixed-layer specific humidity [kg kg-1 s-1] */
@@ -144,7 +144,7 @@ export class CLASS {
   get dqtend(): number {
     this.assertMixedLayer();
     const w_q_ft = 0; // TODO: add free troposphere switch
-    return this.gammaq * this.we - this.qtend + w_q_ft;
+    return this.gamma_qt * this.we - this.qtend + w_q_ft;
   }
 
   /** Entrainment velocity [m s-1]. */
@@ -212,19 +212,19 @@ export class CLASS {
   // Lapse rates
 
   /** Free atmosphere potential temperature lapse rate */
-  get gammatheta(): number {
+  get gamma_theta(): number {
     this.assertMixedLayer();
-    const { z_theta, gammatheta } = this._cfg;
+    const { z_theta, gamma_theta } = this._cfg;
     const i = findInsertIndex(z_theta, this.ml.h);
-    return gammatheta[i] ?? 0;
+    return gamma_theta[i] ?? 0;
   }
 
   /** Free atmosphere specific humidity lapse rate */
-  get gammaq(): number {
+  get gamma_qt(): number {
     this.assertMixedLayer();
-    const { z_q, gammaq } = this._cfg;
-    const i = findInsertIndex(z_q, this.ml.h);
-    return gammaq[i] ?? 0;
+    const { z_qt, gamma_qt } = this._cfg;
+    const i = findInsertIndex(z_qt, this.ml.h);
+    return gamma_qt[i] ?? 0;
   }
 
   /** Free atmosphere u-wind lapse rate */

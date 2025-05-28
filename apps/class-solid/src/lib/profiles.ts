@@ -20,7 +20,7 @@ export function getVerticalProfiles(
     let z = output.h.slice(t)[0];
     let theta = output.theta.slice(t)[0];
     const dtheta = output.dtheta.slice(t)[0];
-    const gammatheta = config.gammatheta;
+    const gamma_theta = config.gamma_theta;
     const z_theta = config.z_theta;
     const maxHeight = z_theta.slice(-1)[0];
 
@@ -37,7 +37,7 @@ export function getVerticalProfiles(
     // Free troposphere
     while (z < maxHeight) {
       const idx = findInsertIndex(z_theta, z);
-      const lapse_rate = gammatheta[idx] ?? 0;
+      const lapse_rate = gamma_theta[idx] ?? 0;
       const dz = z_theta[idx] - z;
       z += dz;
       theta += lapse_rate * dz;
@@ -50,9 +50,9 @@ export function getVerticalProfiles(
     let z = output.h.slice(t)[0];
     let q = output.q.slice(t)[0];
     const dq = output.dq.slice(t)[0];
-    const gammaq = config.gammaq;
-    const z_q = config.z_q;
-    const maxHeight = z_q.slice(-1)[0];
+    const gamma_qt = config.gamma_qt;
+    const z_qt = config.z_qt;
+    const maxHeight = z_qt.slice(-1)[0];
 
     // Mixed layer
     const profile = [
@@ -66,9 +66,9 @@ export function getVerticalProfiles(
 
     // Free troposphere
     while (z < maxHeight) {
-      const idx = findInsertIndex(z_q, z);
-      const lapse_rate = gammaq[idx] ?? 0;
-      const dz = z_q[idx] - z;
+      const idx = findInsertIndex(z_qt, z);
+      const lapse_rate = gamma_qt[idx] ?? 0;
+      const dz = z_qt[idx] - z;
       z += dz;
       q += lapse_rate * dz;
       profile.push({ x: q, y: z });
@@ -236,10 +236,10 @@ export function getThermodynamicProfiles(
   const dtheta = output.dtheta.slice(t)[0];
   const dq = output.dq.slice(t)[0];
   const h = output.h.slice(t)[0];
-  const gammaTheta = config.gammatheta;
-  const gammaq = config.gammaq;
+  const gamma_theta = config.gamma_theta;
+  const gamma_qt = config.gamma_qt;
   const z_theta = config.z_theta;
-  const z_q = config.z_q;
+  const z_qt = config.z_qt;
 
   const nz = 25;
   let dz = h / nz;
@@ -272,9 +272,9 @@ export function getThermodynamicProfiles(
   while (p > 100) {
     // Note: idx can exceed length of anchor points, then lapse becomes undefined and profile stops
     const idx_th = findInsertIndex(z_theta, z);
-    const lapse_theta = gammaTheta[idx_th];
-    const idx_q = findInsertIndex(z_q, z);
-    const lapse_q = gammaq[idx_q];
+    const lapse_theta = gamma_theta[idx_th];
+    const idx_q = findInsertIndex(z_qt, z);
+    const lapse_q = gamma_qt[idx_q];
     theta += dz * lapse_theta;
     q += dz * lapse_q;
     p += pressureDiff(T, q, p, dz);
