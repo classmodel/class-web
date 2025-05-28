@@ -104,16 +104,16 @@ const untypedSchema = {
             default: 1,
             unit: "K",
           },
-          q: {
-            symbol: "q",
+          qt: {
+            symbol: "qt",
             type: "number",
             "ui:group": "Mixed layer",
             unit: "kg kg⁻¹",
             default: 0.008,
             title: "Mixed-layer specific humidity",
           },
-          dq: {
-            symbol: "Δq",
+          dqt: {
+            symbol: "Δqt",
             type: "number",
             description: "Specific humidity jump at h",
             unit: "kg kg⁻¹",
@@ -240,8 +240,8 @@ const untypedSchema = {
           "h",
           "theta",
           "dtheta",
-          "q",
-          "dq",
+          "qt",
+          "dqt",
           "wtheta",
           "advtheta",
           "gamma_theta",
@@ -506,8 +506,8 @@ export type MixedLayerConfig = {
   h: number;
   theta: number;
   dtheta: number;
-  q: number;
-  dq: number;
+  qt: number;
+  dqt: number;
   wtheta: number[];
   advtheta: number;
   gamma_theta: number[];

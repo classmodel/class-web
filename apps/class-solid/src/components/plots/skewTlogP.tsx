@@ -11,7 +11,7 @@ import {
   useChartContext,
 } from "./ChartContainer";
 import { Legend } from "./Legend";
-interface SoundingRecord {
+export interface SoundingRecord {
   p: number;
   T: number;
   Td: number;

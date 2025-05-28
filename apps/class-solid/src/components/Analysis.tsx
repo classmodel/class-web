@@ -1,5 +1,10 @@
 import type { Config } from "@classmodel/class/config";
-import { type ClassOutput, outputVariables } from "@classmodel/class/output";
+import {
+  type ClassOutput,
+  OutputVariableKey,
+  outputVariables,
+} from "@classmodel/class/output";
+import { type ClassProfile, NoProfile } from "@classmodel/class/profiles";
 import * as d3 from "d3";
 import { saveAs } from "file-saver";
 import { toBlob } from "html-to-image";
@@ -34,10 +39,10 @@ import {
 } from "~/lib/store";
 import { MdiCamera, MdiDelete, MdiImageFilterCenterFocus } from "./icons";
 import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./plots/Axes";
-import { Chart, ChartContainer } from "./plots/ChartContainer";
+import { Chart, ChartContainer, type ChartData } from "./plots/ChartContainer";
 import { Legend } from "./plots/Legend";
-import { Line } from "./plots/Line";
-import { SkewTPlot } from "./plots/skewTlogP";
+import { Line, type Point } from "./plots/Line";
+import { SkewTPlot, type SoundingRecord } from "./plots/skewTlogP";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import {
@@ -115,23 +120,20 @@ const uniqueTimes = () => [...new Set(_allTimes())].sort((a, b) => a - b);
 
 // TODO: could memoize all reactive elements here, would it make a difference?
 export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
-  const symbols = Object.fromEntries(
-    outputVariables.map((v) => [v.key, v.symbol]),
-  );
-  const getKey = Object.fromEntries(
-    outputVariables.map((v) => [v.symbol, v.key]),
-  );
+  const vars = Object.entries(outputVariables);
+  const symbols = Object.fromEntries(vars.map(([k, v]) => [k, v.symbol]));
+  const getKey = Object.fromEntries(vars.map(([k, v]) => [v.symbol, k]));
   const labels = Object.fromEntries(
-    outputVariables.map((v) => [v.key, `${v.symbol} [${v.unit}]`]),
+    vars.map(([k, v]) => [k, `${v.symbol} [${v.unit}]`]),
   );
 
   const allX = () =>
     flatExperiments().flatMap((e) =>
-      e.output ? e.output[analysis.xVariable] : [],
+      e.output ? e.output[analysis.xVariable as OutputVariableKey] : [],
     );
   const allY = () =>
     flatExperiments().flatMap((e) =>
-      e.output ? e.output[analysis.yVariable] : [],
+      e.output ? e.output[analysis.yVariable as OutputVariableKey] : [],
     );
 
   const granularity = () => (analysis.xVariable === "t" ? 600 : undefined);
@@ -146,8 +148,12 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
         data:
           // Zip x[] and y[] into [x, y][]
           output?.t.map((_, t) => ({
-            x: output ? output[analysis.xVariable][t] : Number.NaN,
-            y: output ? output[analysis.yVariable][t] : Number.NaN,
+            x: output
+              ? output[analysis.xVariable as OutputVariableKey][t]
+              : Number.NaN,
+            y: output
+              ? output[analysis.yVariable as OutputVariableKey][t]
+              : Number.NaN,
           })) || [],
       };
     });
@@ -225,10 +231,16 @@ export function VerticalProfilePlot({
 }: { analysis: ProfilesAnalysis }) {
   const variableOptions = {
     "Potential temperature [K]": "theta",
-    "Specific humidity [kg/kg]": "q",
+    "Virtual potential temperature [K]": "thetav",
+    "Specific humidity [kg/kg]": "qt",
     "u-wind component [m/s]": "u",
     "v-wind component [m/s]": "v",
-  };
+    "Pressure [Pa]": "p",
+    "Exner function [-]": "exner",
+    "Temperature [K]": "T",
+    "Dew point temperature [K]": "Td",
+    "Density [kg/m³]": "rho",
+  } as const satisfies Record<string, keyof ClassProfile>;
 
   const classVariable = () =>
     variableOptions[analysis.variable as keyof typeof variableOptions];
@@ -243,23 +255,33 @@ export function VerticalProfilePlot({
       return {
         ...formatting,
         data:
-          t !== -1 // -1 now means "not found in array" rather than last index
-            ? getVerticalProfiles(
-                e.output,
-                e.config,
-                classVariable(),
-                analysis.time,
-              )
-            : [],
+          t !== -1 && // -1 means time not found in array
+          output && // Output must be defined
+          config.sw_ml // config must include mixed layer
+            ? // TODO: can't we use t here?
+              getVerticalProfiles(e.output, e.config, analysis.time)
+            : NoProfile,
       };
     });
 
+  // TODO: There should be a way that this isn't needed.
+  const profileDataForPlot = () =>
+    profileData().map(({ data, label, color, linestyle }) => ({
+      label,
+      color,
+      linestyle,
+      data: data.z.map((z, i) => ({
+        x: data[classVariable()][i],
+        y: z,
+      })),
+    })) as ChartData<Point>[]
+
   const allX = () => [
-    ...profileData().flatMap((p) => p.data.map((d) => d.x)),
+    ...profileDataForPlot().flatMap((p) => p.data.map((d) => d.x)),
     ...observations().flatMap((obs) => obs.data.map((d) => d.x)),
   ];
   const allY = () => [
-    ...profileData().flatMap((p) => p.data.map((d) => d.y)),
+    ...profileDataForPlot().flatMap((p) => p.data.map((d) => d.y)),
     ...observations().flatMap((obs) => obs.data.map((d) => d.y)),
   ];
 
@@ -301,7 +323,7 @@ export function VerticalProfilePlot({
           <Chart id={analysis.id} title="Vertical profile plot">
             <AxisBottom domain={xLim} label={analysis.variable} />
             <AxisLeft domain={yLim} label="Height[m]" />
-            <For each={profileData()}>
+            <For each={profileDataForPlot()}>
               {(d) => (
                 <Show when={toggles[d.label]}>
                   <Line {...d} />
@@ -412,20 +434,37 @@ export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
       return {
         ...formatting,
         data:
-          t !== -1 // -1 now means "not found in array" rather than last index
-            ? getThermodynamicProfiles(e.output, e.config, t)
-            : [],
+          // TODO reuse get profiles now here
+          t !== -1 && // -1 means time not found in array
+          output && // Output must be defined
+          config.sw_ml // config must include mixed layer
+            ? getVerticalProfiles(e.output, e.config, t)
+            : NoProfile,
       };
     });
 
   const observations = () =>
     flatObservations().map((o) => observationsForSounding(o));
 
+  // TODO: There should be a way that this isn't needed.
+  const profileDataForPlot = () =>
+    skewTData().map(({ data, label, color, linestyle }) => ({
+      label,
+      color,
+      linestyle,
+      data: data.p.map((p, i) => ({
+        p: p / 100,
+        T: data.T[i],
+        Td: data.Td[i],
+      })),
+    })) as ChartData<SoundingRecord>[];
+
+  console.log(profileDataForPlot());
   return (
     <>
       <SkewTPlot
         id={analysis.id}
-        data={() => [...skewTData(), ...observations()]}
+        data={() => [...profileDataForPlot(), ...observations()]}
       />
       {TimeSlider(
         () => analysis.time,

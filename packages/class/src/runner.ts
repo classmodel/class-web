@@ -5,7 +5,11 @@
  */
 import { CLASS } from "./class.js";
 import type { Config } from "./config.js";
-import { type ClassOutput, outputVariables } from "./output.js";
+import {
+  type ClassOutput,
+  type OutputVariableKey,
+  outputVariables,
+} from "./output.js";
 import { parse } from "./validate.js";
 
 /**
@@ -19,18 +23,20 @@ export function runClass(config: Config, freq = 600): ClassOutput {
   const validatedConfig = parse(config);
   const model = new CLASS(validatedConfig);
 
+  const output_keys = Object.keys(outputVariables) as OutputVariableKey[];
+
   const writeOutput = () => {
-    for (const v of outputVariables) {
-      const value = model.getValue(v.key);
+    for (const key of output_keys) {
+      const value = model.getValue(key);
       if (value !== undefined) {
-        (output[v.key] as number[]).push(value as number);
+        (output[key] as number[]).push(value as number);
       }
     }
   };
 
   const output = Object.fromEntries(
-    outputVariables.map((v) => [v.key, []]),
-  ) as ClassOutput;
+    output_keys.map((key) => [key, []]),
+  ) as unknown as ClassOutput;
 
   // Initial time
   writeOutput();
