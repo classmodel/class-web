@@ -45,7 +45,7 @@ import { MdiCamera, MdiDelete, MdiImageFilterCenterFocus } from "./icons";
 import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./plots/Axes";
 import { Chart, ChartContainer, type ChartData } from "./plots/ChartContainer";
 import { Legend } from "./plots/Legend";
-import { Line, type Point } from "./plots/Line";
+import { Line, Plume, type Point } from "./plots/Line";
 import { SkewTPlot, type SoundingRecord } from "./plots/skewTlogP";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -347,6 +347,14 @@ export function VerticalProfilePlot({
               {(d) => (
                 <Show when={toggles[d.label]}>
                   <Line {...d} />
+                </Show>
+              )}
+            </For>
+            <For each={firePlumes()}>
+              {(d) => (
+                <Show when={toggles[d.label]}>
+                  <Plume d={d} variable="theta" />
+                  <Plume d={d} variable="thetav" />
                 </Show>
               )}
             </For>

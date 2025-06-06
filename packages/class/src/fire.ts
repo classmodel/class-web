@@ -34,7 +34,7 @@ const defaultPlumeConfig: PlumeConfig = {
 /**
  * Parcel properties at a given height
  */
-interface Parcel {
+export interface Parcel {
   z: number; // Height levels [m]
   w: number; // Vertical velocity [m/s]
   theta: number; // Potential temperature [K]
