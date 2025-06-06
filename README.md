@@ -6,6 +6,7 @@
 [![Checked with Biome](https://img.shields.io/badge/Checked_with-Biome-60a5fa?style=flat&logo=biome)](https://biomejs.dev)
 [![Research Software Directory Badge](https://img.shields.io/badge/rsd-00a3e3.svg)](https://research-software-directory.org/software/class-web)
 [![Documentation](https://img.shields.io/badge/docs-blue)](https://classmodel.github.io/class-web/docs/)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15609038.svg)](https://doi.org/10.5281/zenodo.15609038)
 
 This is an implementation of  the **C**hemistry **L**and-surface **A**tmosphere **S**oil **S**lab (CLASS) model that runs entirely in the browser.
 
