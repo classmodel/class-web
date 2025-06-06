@@ -40,16 +40,16 @@ export function Line(d: ChartData<Point>) {
 export function Plume({
   d,
   variable,
-}: { d: ChartData<Parcel>; variable: keyof Parcel }) {
+}: { d: ChartData<Parcel>; variable: () => keyof Parcel }) {
   const [chart, _updateChart] = useChartContext();
   const [hovered, setHovered] = createSignal(false);
 
   const l = d3.line<Parcel>(
-    (d) => chart.scaleX(d[variable]),
+    (d) => chart.scaleX(d[variable()]),
     (d) => chart.scaleY(d.z),
   );
 
-  const stroke = () => (hovered() ? highlight(d.color) : d.color);
+  const stroke = () => (hovered() ? highlight("#ff0000") : "#ff0000");
 
   return (
     <path
@@ -58,12 +58,12 @@ export function Plume({
       onMouseLeave={() => setHovered(false)}
       fill="none"
       stroke={stroke()}
-      stroke-dasharray={d.linestyle}
+      stroke-dasharray={"4"}
       stroke-width="2"
       d={l(d.data) || ""}
       class="cursor-pointer"
     >
-      <title>{d.label}</title>
+      <title>{`Fire plume for ${d.label}`}</title>
     </path>
   );
 }

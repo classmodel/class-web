@@ -1,5 +1,5 @@
 import type { Config, MixedLayerConfig } from "@classmodel/class/config";
-import { calculatePlume } from "@classmodel/class/fire";
+import { Parcel, calculatePlume } from "@classmodel/class/fire";
 import {
   type ClassOutput,
   type OutputVariableKey,
@@ -275,8 +275,6 @@ export function VerticalProfilePlot({
       return { ...formatting, data: [] };
     });
 
-  console.log(firePlumes());
-
   // TODO: There should be a way that this isn't needed.
   const profileDataForPlot = () =>
     profileData().map(({ data, label, color, linestyle }) => ({
@@ -324,6 +322,10 @@ export function VerticalProfilePlot({
     setResetPlot(analysis.id);
   }
 
+const showPlume = createMemo(() => {
+  return ["theta", "qt", "thetav"].includes(classVariable());
+});
+
   return (
     <>
       <div class="flex flex-col gap-2">
@@ -353,8 +355,12 @@ export function VerticalProfilePlot({
             <For each={firePlumes()}>
               {(d) => (
                 <Show when={toggles[d.label]}>
-                  <Plume d={d} variable="theta" />
-                  <Plume d={d} variable="thetav" />
+                  <Show when={showPlume()}>
+                    <Plume
+                      d={d}
+                      variable={classVariable as () => keyof Parcel}
+                    />
+                  </Show>
                 </Show>
               )}
             </For>
