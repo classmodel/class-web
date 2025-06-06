@@ -45,14 +45,12 @@
       "import": {
         "default": "./dist/profiles.js",
         "types": "./dist/profiles.d.ts"
-
       }
     },
     "./fire": {
       "import": {
         "default": "./dist/fire.js",
         "types": "./dist/fire.d.ts"
-
       }
     },
     "./utils": {

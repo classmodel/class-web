@@ -1,5 +1,5 @@
-import type { Config, MixedLayerConfig } from "@classmodel/class/config";
-import { Parcel, calculatePlume } from "@classmodel/class/fire";
+import type { Config } from "@classmodel/class/config";
+import { type Parcel, calculatePlume } from "@classmodel/class/fire";
 import {
   type ClassOutput,
   type OutputVariableKey,
@@ -322,9 +322,9 @@ export function VerticalProfilePlot({
     setResetPlot(analysis.id);
   }
 
-const showPlume = createMemo(() => {
-  return ["theta", "qt", "thetav", "T", "Td"].includes(classVariable());
-});
+  const showPlume = createMemo(() => {
+    return ["theta", "qt", "thetav", "T", "Td"].includes(classVariable());
+  });
 
   return (
     <>
