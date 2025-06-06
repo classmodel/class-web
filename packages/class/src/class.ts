@@ -216,7 +216,7 @@ export class CLASS {
     this.assertMixedLayer();
     const { z_theta, gamma_theta } = this._cfg;
     const i = findInsertIndex(z_theta, this.ml.h);
-    return gamma_theta[i] ?? 0;
+    return gamma_theta.slice(i)[0];
   }
 
   /** Free atmosphere specific humidity lapse rate */
@@ -224,7 +224,7 @@ export class CLASS {
     this.assertMixedLayer();
     const { z_qt, gamma_qt } = this._cfg;
     const i = findInsertIndex(z_qt, this.ml.h);
-    return gamma_qt[i] ?? 0;
+    return gamma_qt.slice(i)[0];
   }
 
   /** Free atmosphere u-wind lapse rate */
@@ -232,7 +232,7 @@ export class CLASS {
     this.assertWind();
     const { z_u, gamma_u } = this._cfg;
     const i = findInsertIndex(z_u, this.ml.h);
-    return gamma_u[i] ?? 0;
+    return gamma_u.slice(i)[0];
   }
 
   /** Free atmosphere v-wind lapse rate */
@@ -240,7 +240,7 @@ export class CLASS {
     this.assertWind();
     const { z_v, gamma_v } = this._cfg;
     const i = findInsertIndex(z_v, this.ml.h);
-    return gamma_v[i] ?? 0;
+    return gamma_v.slice(i)[0];
   }
 
   // Type guards
