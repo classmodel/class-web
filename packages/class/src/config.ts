@@ -56,6 +56,12 @@ const untypedSchema = {
       title: "Wind switch",
       default: false,
     },
+    sw_fire: {
+      type: "boolean",
+      "ui:group": "Fire",
+      title: "Fire switch",
+      default: false,
+    },
   },
   required: ["name", "dt", "runtime"],
   allOf: [
@@ -98,16 +104,16 @@ const untypedSchema = {
             default: 1,
             unit: "K",
           },
-          q: {
-            symbol: "q",
+          qt: {
+            symbol: "qt",
             type: "number",
             "ui:group": "Mixed layer",
             unit: "kg kg⁻¹",
             default: 0.008,
             title: "Mixed-layer specific humidity",
           },
-          dq: {
-            symbol: "Δq",
+          dqt: {
+            symbol: "Δqt",
             type: "number",
             description: "Specific humidity jump at h",
             unit: "kg kg⁻¹",
@@ -134,7 +140,7 @@ const untypedSchema = {
             default: 0,
             title: "Advection of heat",
           },
-          gammatheta: {
+          gamma_theta: {
             symbol: "γ<sub>θ</sub>",
             type: "array",
             items: {
@@ -166,7 +172,7 @@ const untypedSchema = {
             default: 0,
             title: "Advection of moisture",
           },
-          gammaq: {
+          gamma_qt: {
             symbol: "γ<sub>q</sub>",
             type: "array",
             items: {
@@ -193,6 +199,14 @@ const untypedSchema = {
             default: 0.2,
             title: "Entrainment ratio for virtual heat",
           },
+          p0: {
+            symbol: "p<sub>0</sub>",
+            type: "number",
+            default: 101300,
+            unit: "Pa",
+            "ui:group": "Mixed layer",
+            title: "Surface pressure",
+          },
           z_theta: {
             symbol: "z<sub>θ</sub>",
             type: "array",
@@ -207,7 +221,7 @@ const untypedSchema = {
             description:
               "Each value specifies the end of the corresponding segment in γ_θ",
           },
-          z_q: {
+          z_qt: {
             symbol: "z<sub>q</sub>",
             type: "array",
             items: {
@@ -226,18 +240,19 @@ const untypedSchema = {
           "h",
           "theta",
           "dtheta",
-          "q",
-          "dq",
+          "qt",
+          "dqt",
           "wtheta",
           "advtheta",
-          "gammatheta",
+          "gamma_theta",
           "wq",
+          "p0",
           "advq",
-          "gammaq",
+          "gamma_qt",
           "divU",
           "beta",
           "z_theta",
-          "z_q",
+          "z_qt",
         ],
       },
     },
@@ -378,6 +393,78 @@ const untypedSchema = {
         ],
       },
     },
+    {
+      if: {
+        properties: {
+          sw_fire: {
+            const: true,
+          },
+        },
+      },
+      // biome-ignore lint/suspicious/noThenProperty: part of JSON Schema
+      then: {
+        properties: {
+          L: {
+            symbol: "L<sub>fire</sub>",
+            type: "number",
+            unit: "m",
+            default: 10000,
+            title: "Length of the fire",
+            "ui:group": "Fire",
+          },
+          d: {
+            symbol: "d<sub>fire</sub>",
+            type: "number",
+            unit: "m",
+            default: 300,
+            title: "Depth of the fire",
+            "ui:group": "Fire",
+          },
+          h0: {
+            symbol: "h<sub>0, fire</sub>",
+            type: "number",
+            unit: "m",
+            default: 20,
+            title: "Height to start",
+            "ui:group": "Fire",
+          },
+          C: {
+            symbol: "C<sub>fire</sub>",
+            type: "number",
+            unit: "J kg⁻¹",
+            default: 17.781e6,
+            title: "Heat stored in fuel",
+            "ui:group": "Fire",
+          },
+          omega: {
+            symbol: "ω<sub>fire</sub>",
+            type: "number",
+            unit: "kg m⁻²",
+            default: 7.6,
+            title: "Fuel mass per area",
+            "ui:group": "Fire",
+          },
+          spread: {
+            symbol: "v<sub>fire</sub>",
+            type: "number",
+            unit: "m s⁻¹",
+            default: 1.5,
+            title: "Rate of spread of the fire",
+            "ui:group": "Fire",
+          },
+          radiativeLoss: {
+            symbol: "rl<sub>fire</sub>",
+            type: "number",
+            unit: "-",
+            default: 0.7,
+            title:
+              "Fraction of F converted into radiative heating, and not into diffused into the atmosphere",
+            "ui:group": "Fire",
+          },
+        },
+        required: ["L", "d", "h0", "C", "omega", "spread", "radiativeLoss"],
+      },
+    },
   ],
 };
 
@@ -402,7 +489,7 @@ export type WindConfig = {
   z_v: number[];
   ustar: number;
 };
-type NoWindConfig = {
+export type NoWindConfig = {
   sw_wind?: false;
 };
 
@@ -411,27 +498,43 @@ export type MixedLayerConfig = {
   h: number;
   theta: number;
   dtheta: number;
-  q: number;
-  dq: number;
+  qt: number;
+  dqt: number;
   wtheta: number[];
   advtheta: number;
-  gammatheta: number[];
+  gamma_theta: number[];
   wq: number[];
   advq: number;
-  gammaq: number[];
+  gamma_qt: number[];
   divU: number;
   beta: number;
+  p0: number;
   z_theta: number[];
-  z_q: number[];
+  z_qt: number[];
 };
 type NoMixedLayerConfig = {
   sw_ml?: false;
 };
 
+export type FireConfig = {
+  sw_fire: true;
+  L: number;
+  d: number;
+  h0: number;
+  C: number;
+  omega: number;
+  spread: number;
+  radiativeLoss: number;
+};
+export type NoFireConfig = {
+  sw_fire?: false;
+};
+
 // TODO: Don't allow WindConfig with NoMixedLayerConfig
 export type Config = GeneralConfig &
   (MixedLayerConfig | NoMixedLayerConfig) &
-  (WindConfig | NoWindConfig);
+  (WindConfig | NoWindConfig) &
+  (FireConfig | NoFireConfig);
 
 export type JsonSchemaOfConfig = JSONSchemaType<Config>;
 export const jsonSchemaOfConfig =

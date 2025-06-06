@@ -22,8 +22,8 @@ type MixedLayer = {
   h: number;
   theta: number;
   dtheta: number;
-  q: number;
-  dq: number;
+  qt: number;
+  dqt: number;
 };
 
 export class CLASS {
@@ -40,8 +40,8 @@ export class CLASS {
     this._cfg = config;
     // Initialize state variables from config
     if (config.sw_ml) {
-      const { h, theta, dtheta, q, dq } = config;
-      this.ml = { h, theta, dtheta, q, dq };
+      const { h, theta, dtheta, qt, dqt } = config;
+      this.ml = { h, theta, dtheta, qt, dqt };
 
       if (config.sw_wind) {
         const { u, v, du, dv } = config;
@@ -59,8 +59,8 @@ export class CLASS {
       this.ml.h += dt * this.htend;
       this.ml.theta += dt * this.thetatend;
       this.ml.dtheta += dt * this.dthetatend;
-      this.ml.q += dt * this.qtend;
-      this.ml.dq += dt * this.dqtend;
+      this.ml.qt += dt * this.qtend;
+      this.ml.dqt += dt * this.dqttend;
       if (this.wind) {
         this.wind.u += dt * this.utend;
         this.wind.v += dt * this.vtend;
@@ -131,7 +131,7 @@ export class CLASS {
   get dthetatend(): number {
     this.assertMixedLayer();
     const w_th_ft = 0.0; // TODO: add free troposphere switch
-    return this.gammatheta * this.we - this.thetatend + w_th_ft;
+    return this.gamma_theta * this.we - this.thetatend + w_th_ft;
   }
 
   /** Tendency of mixed-layer specific humidity [kg kg-1 s-1] */
@@ -141,10 +141,10 @@ export class CLASS {
   }
 
   /** Tendency of specific humidity jump at h[kg kg-1 s-1] */
-  get dqtend(): number {
+  get dqttend(): number {
     this.assertMixedLayer();
     const w_q_ft = 0; // TODO: add free troposphere switch
-    return this.gammaq * this.we - this.qtend + w_q_ft;
+    return this.gamma_qt * this.we - this.qtend + w_q_ft;
   }
 
   /** Entrainment velocity [m s-1]. */
@@ -174,7 +174,7 @@ export class CLASS {
   /** Entrainment moisture flux [kg kg-1 m s-1]. */
   get wqe(): number {
     this.assertMixedLayer();
-    return -this.we * this.ml.dq;
+    return -this.we * this.ml.dqt;
   }
 
   /** Entrainment kinematic virtual heat flux [K m s-1]. */
@@ -188,8 +188,8 @@ export class CLASS {
     this.assertMixedLayer();
     return (
       (this.ml.theta + this.ml.dtheta) *
-        (1.0 + 0.61 * (this.ml.q + this.ml.dq)) -
-      this.ml.theta * (1.0 + 0.61 * this.ml.q)
+        (1.0 + 0.61 * (this.ml.qt + this.ml.dqt)) -
+      this.ml.theta * (1.0 + 0.61 * this.ml.qt)
     );
   }
 
@@ -212,19 +212,19 @@ export class CLASS {
   // Lapse rates
 
   /** Free atmosphere potential temperature lapse rate */
-  get gammatheta(): number {
+  get gamma_theta(): number {
     this.assertMixedLayer();
-    const { z_theta, gammatheta } = this._cfg;
+    const { z_theta, gamma_theta } = this._cfg;
     const i = findInsertIndex(z_theta, this.ml.h);
-    return gammatheta[i] ?? 0;
+    return gamma_theta.slice(i)[0];
   }
 
   /** Free atmosphere specific humidity lapse rate */
-  get gammaq(): number {
+  get gamma_qt(): number {
     this.assertMixedLayer();
-    const { z_q, gammaq } = this._cfg;
-    const i = findInsertIndex(z_q, this.ml.h);
-    return gammaq[i] ?? 0;
+    const { z_qt, gamma_qt } = this._cfg;
+    const i = findInsertIndex(z_qt, this.ml.h);
+    return gamma_qt.slice(i)[0];
   }
 
   /** Free atmosphere u-wind lapse rate */
@@ -232,7 +232,7 @@ export class CLASS {
     this.assertWind();
     const { z_u, gamma_u } = this._cfg;
     const i = findInsertIndex(z_u, this.ml.h);
-    return gamma_u[i] ?? 0;
+    return gamma_u.slice(i)[0];
   }
 
   /** Free atmosphere v-wind lapse rate */
@@ -240,7 +240,7 @@ export class CLASS {
     this.assertWind();
     const { z_v, gamma_v } = this._cfg;
     const i = findInsertIndex(z_v, this.ml.h);
-    return gamma_v[i] ?? 0;
+    return gamma_v.slice(i)[0];
   }
 
   // Type guards
@@ -266,8 +266,8 @@ export class CLASS {
     }
   }
 
-  get q() {
-    return this.ml?.q || 999;
+  get qt() {
+    return this.ml?.qt || 999;
   }
 
   /**

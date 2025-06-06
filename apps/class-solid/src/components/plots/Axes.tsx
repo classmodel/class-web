@@ -81,12 +81,13 @@ export function getNiceAxisLimits(
   extraMargin = 0,
   roundTo?: number, // Optional rounding step, e.g. 600 for 10 minutes
 ): [number, number] {
-  const max = Math.max(...data);
-  const min = Math.min(...data);
+  const max = Math.max(...data.filter(Number.isFinite));
+  const min = Math.min(...data.filter(Number.isFinite));
   const range = max - min;
 
-  // Avoid NaNs on axis for constant values
-  if (range === 0) return [min - 1, max + 1];
+  if (range === 0)
+    // Avoid NaNs on axis for constant values
+    return [min - 1, max + 1];
 
   const step = roundTo ?? 10 ** Math.floor(Math.log10(range));
 

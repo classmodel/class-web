@@ -1,115 +1,106 @@
-export interface OutputVariable {
-  key: string;
+export interface VariableInfo {
   title: string;
   unit: string;
   symbol: string;
 }
 
-export const outputVariables: OutputVariable[] = [
-  {
-    key: "t",
+export const outputVariables = {
+  t: {
     title: "Time",
     unit: "s",
     symbol: "t",
   },
-  {
-    key: "h",
+  h: {
     title: "ABL height",
     unit: "m",
     symbol: "h",
   },
-  {
-    key: "theta",
+  theta: {
     title: "Potential temperature",
     unit: "K",
     symbol: "θ",
   },
-  {
-    key: "dtheta",
+  dtheta: {
     title: "Potential temperature jump",
     unit: "K",
     symbol: "Δθ",
   },
-  {
-    key: "q",
+  qt: {
     title: "Specific humidity",
     unit: "kg kg⁻¹",
     symbol: "q",
   },
-  {
-    key: "dq",
+  dqt: {
     title: "Specific humidity jump",
     unit: "kg kg⁻¹",
     symbol: "Δq",
   },
-  {
-    key: "dthetav",
+  dthetav: {
     title: "Virtual temperature jump at h",
     unit: "K",
     symbol: "Δθᵥ",
   },
-  {
-    key: "we",
+  we: {
     title: "Entrainment velocity",
     unit: "m s⁻¹",
     symbol: "wₑ",
   },
-  {
-    key: "ws",
+  ws: {
     title: "Large-scale vertical velocity",
     unit: "m s⁻¹",
     symbol: "wₛ",
   },
-  {
-    key: "wthetave",
+  wthetave: {
     title: "Entrainment virtual heat flux",
     unit: "K m s⁻¹",
     symbol: "(w'θ')ᵥₑ",
   },
-  {
-    key: "wthetav",
+  wthetav: {
     title: "Surface virtual heat flux",
     unit: "K m s⁻¹",
     symbol: "(w'θ')ᵥ",
   },
-  {
-    key: "wtheta",
+  wtheta: {
     title: "Surface kinematic heat flux",
     unit: "K m s⁻¹",
     symbol: "(w'θ')ₛ",
   },
-  {
-    key: "wq",
+  wq: {
     title: "Surface kinematic heat flux",
     unit: "kg kg⁻¹ m s⁻¹",
     symbol: "(w'q')ₛ",
   },
-  {
-    key: "u",
+  u: {
     title: "Mixed-layer u-wind component",
     unit: "m s⁻¹",
     symbol: "u",
   },
-  {
-    key: "v",
+  v: {
     title: "Mixed-layer v-wind component",
     unit: "m s⁻¹",
     symbol: "v",
   },
-  {
-    key: "du",
+  du: {
     title: "U-wind jump at h",
     unit: "m s⁻¹",
     symbol: "Δu",
   },
-  {
-    key: "dv",
+  dv: {
     title: "V-wind jump at h",
     unit: "m s⁻¹",
     symbol: "Δv",
   },
-];
+} as const satisfies Record<string, VariableInfo>;
 
-export type ClassOutput = {
-  [K in (typeof outputVariables)[number]["key"]]: number[];
-};
+export type OutputVariableKey = keyof typeof outputVariables;
+export type ClassOutput = Record<OutputVariableKey, number[]>;
+export type ClassOutputAtSingleTime = Record<OutputVariableKey, number>;
+
+export function getOutputAtTime(
+  output: ClassOutput,
+  timeIndex: number,
+): ClassOutputAtSingleTime {
+  return Object.fromEntries(
+    Object.entries(output).map(([key, values]) => [key, values[timeIndex]]),
+  ) as ClassOutputAtSingleTime;
+}

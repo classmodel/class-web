@@ -1,5 +1,16 @@
 import type { Config } from "@classmodel/class/config";
-import { type ClassOutput, outputVariables } from "@classmodel/class/output";
+import { type Parcel, calculatePlume } from "@classmodel/class/fire";
+import {
+  type ClassOutput,
+  type OutputVariableKey,
+  getOutputAtTime,
+  outputVariables,
+} from "@classmodel/class/output";
+import {
+  type ClassProfile,
+  NoProfile,
+  generateProfiles,
+} from "@classmodel/class/profiles";
 import * as d3 from "d3";
 import { saveAs } from "file-saver";
 import { toBlob } from "html-to-image";
@@ -18,8 +29,6 @@ import {
 import { createStore } from "solid-js/store";
 import type { Observation } from "~/lib/experiment_config";
 import {
-  getThermodynamicProfiles,
-  getVerticalProfiles,
   observationsForProfile,
   observationsForSounding,
 } from "~/lib/profiles";
@@ -34,10 +43,10 @@ import {
 } from "~/lib/store";
 import { MdiCamera, MdiDelete, MdiImageFilterCenterFocus } from "./icons";
 import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./plots/Axes";
-import { Chart, ChartContainer } from "./plots/ChartContainer";
+import { Chart, ChartContainer, type ChartData } from "./plots/ChartContainer";
 import { Legend } from "./plots/Legend";
-import { Line } from "./plots/Line";
-import { SkewTPlot } from "./plots/skewTlogP";
+import { Line, Plume, type Point } from "./plots/Line";
+import { SkewTPlot, type SoundingRecord } from "./plots/skewTlogP";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import {
@@ -115,23 +124,20 @@ const uniqueTimes = () => [...new Set(_allTimes())].sort((a, b) => a - b);
 
 // TODO: could memoize all reactive elements here, would it make a difference?
 export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
-  const symbols = Object.fromEntries(
-    outputVariables.map((v) => [v.key, v.symbol]),
-  );
-  const getKey = Object.fromEntries(
-    outputVariables.map((v) => [v.symbol, v.key]),
-  );
+  const vars = Object.entries(outputVariables);
+  const symbols = Object.fromEntries(vars.map(([k, v]) => [k, v.symbol]));
+  const getKey = Object.fromEntries(vars.map(([k, v]) => [v.symbol, k]));
   const labels = Object.fromEntries(
-    outputVariables.map((v) => [v.key, `${v.symbol} [${v.unit}]`]),
+    vars.map(([k, v]) => [k, `${v.symbol} [${v.unit}]`]),
   );
 
   const allX = () =>
     flatExperiments().flatMap((e) =>
-      e.output ? e.output[analysis.xVariable] : [],
+      e.output ? e.output[analysis.xVariable as OutputVariableKey] : [],
     );
   const allY = () =>
     flatExperiments().flatMap((e) =>
-      e.output ? e.output[analysis.yVariable] : [],
+      e.output ? e.output[analysis.yVariable as OutputVariableKey] : [],
     );
 
   const granularity = () => (analysis.xVariable === "t" ? 600 : undefined);
@@ -146,8 +152,12 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
         data:
           // Zip x[] and y[] into [x, y][]
           output?.t.map((_, t) => ({
-            x: output ? output[analysis.xVariable][t] : Number.NaN,
-            y: output ? output[analysis.yVariable][t] : Number.NaN,
+            x: output
+              ? output[analysis.xVariable as OutputVariableKey][t]
+              : Number.NaN,
+            y: output
+              ? output[analysis.yVariable as OutputVariableKey][t]
+              : Number.NaN,
           })) || [],
       };
     });
@@ -225,10 +235,16 @@ export function VerticalProfilePlot({
 }: { analysis: ProfilesAnalysis }) {
   const variableOptions = {
     "Potential temperature [K]": "theta",
-    "Specific humidity [kg/kg]": "q",
+    "Virtual potential temperature [K]": "thetav",
+    "Specific humidity [kg/kg]": "qt",
     "u-wind component [m/s]": "u",
     "v-wind component [m/s]": "v",
-  };
+    "Pressure [Pa]": "p",
+    "Exner function [-]": "exner",
+    "Temperature [K]": "T",
+    "Dew point temperature [K]": "Td",
+    "Density [kg/m³]": "rho",
+  } as const satisfies Record<string, keyof ClassProfile>;
 
   const classVariable = () =>
     variableOptions[analysis.variable as keyof typeof variableOptions];
@@ -240,26 +256,43 @@ export function VerticalProfilePlot({
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
       const t = output?.t.indexOf(uniqueTimes()[analysis.time]);
-      return {
-        ...formatting,
-        data:
-          t !== -1 // -1 now means "not found in array" rather than last index
-            ? getVerticalProfiles(
-                e.output,
-                e.config,
-                classVariable(),
-                analysis.time,
-              )
-            : [],
-      };
+      if (config.sw_ml && output && t !== undefined && t !== -1) {
+        const outputAtTime = getOutputAtTime(output, t);
+        return { ...formatting, data: generateProfiles(config, outputAtTime) };
+      }
+      return { ...formatting, data: NoProfile };
     });
 
+  const firePlumes = () =>
+    flatExperiments().map((e, i) => {
+      const { config, output, ...formatting } = e;
+      if (config.sw_fire) {
+        return {
+          ...formatting,
+          data: calculatePlume(config, profileData()[i].data),
+        };
+      }
+      return { ...formatting, data: [] };
+    });
+
+  // TODO: There should be a way that this isn't needed.
+  const profileDataForPlot = () =>
+    profileData().map(({ data, label, color, linestyle }) => ({
+      label,
+      color,
+      linestyle,
+      data: data.z.map((z, i) => ({
+        x: data[classVariable()][i],
+        y: z,
+      })),
+    })) as ChartData<Point>[];
+
   const allX = () => [
-    ...profileData().flatMap((p) => p.data.map((d) => d.x)),
+    ...profileDataForPlot().flatMap((p) => p.data.map((d) => d.x)),
     ...observations().flatMap((obs) => obs.data.map((d) => d.x)),
   ];
   const allY = () => [
-    ...profileData().flatMap((p) => p.data.map((d) => d.y)),
+    ...profileDataForPlot().flatMap((p) => p.data.map((d) => d.y)),
     ...observations().flatMap((obs) => obs.data.map((d) => d.y)),
   ];
 
@@ -289,6 +322,10 @@ export function VerticalProfilePlot({
     setResetPlot(analysis.id);
   }
 
+  const showPlume = createMemo(() => {
+    return ["theta", "qt", "thetav", "T", "Td"].includes(classVariable());
+  });
+
   return (
     <>
       <div class="flex flex-col gap-2">
@@ -301,7 +338,7 @@ export function VerticalProfilePlot({
           <Chart id={analysis.id} title="Vertical profile plot">
             <AxisBottom domain={xLim} label={analysis.variable} />
             <AxisLeft domain={yLim} label="Height[m]" />
-            <For each={profileData()}>
+            <For each={profileDataForPlot()}>
               {(d) => (
                 <Show when={toggles[d.label]}>
                   <Line {...d} />
@@ -312,6 +349,18 @@ export function VerticalProfilePlot({
               {(d) => (
                 <Show when={toggles[d.label]}>
                   <Line {...d} />
+                </Show>
+              )}
+            </For>
+            <For each={firePlumes()}>
+              {(d) => (
+                <Show when={toggles[d.label]}>
+                  <Show when={showPlume()}>
+                    <Plume
+                      d={d}
+                      variable={classVariable as () => keyof Parcel}
+                    />
+                  </Show>
                 </Show>
               )}
             </For>
@@ -405,27 +454,56 @@ function Picker(props: PickerProps) {
 }
 
 export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
-  const skewTData = () =>
+  const profileData = () =>
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
       const t = output?.t.indexOf(uniqueTimes()[analysis.time]);
-      return {
-        ...formatting,
-        data:
-          t !== -1 // -1 now means "not found in array" rather than last index
-            ? getThermodynamicProfiles(e.output, e.config, t)
-            : [],
-      };
+      if (config.sw_ml && output && t !== undefined && t !== -1) {
+        const outputAtTime = getOutputAtTime(output, t);
+        return { ...formatting, data: generateProfiles(config, outputAtTime) };
+      }
+      return { ...formatting, data: NoProfile };
     });
+
+  const firePlumes = () =>
+    flatExperiments().map((e, i) => {
+      const { config, output, ...formatting } = e;
+      if (config.sw_fire) {
+        return {
+          ...formatting,
+          color: "#ff0000",
+          label: `${formatting.label} - fire plume`,
+          data: calculatePlume(config, profileData()[i].data),
+        };
+      }
+      return { ...formatting, data: [] };
+    }) as ChartData<SoundingRecord>[];
 
   const observations = () =>
     flatObservations().map((o) => observationsForSounding(o));
+
+  // TODO: There should be a way that this isn't needed.
+  const profileDataForPlot = () =>
+    profileData().map(({ data, label, color, linestyle }) => ({
+      label,
+      color,
+      linestyle,
+      data: data.p.map((p, i) => ({
+        p: p / 100,
+        T: data.T[i],
+        Td: data.Td[i],
+      })),
+    })) as ChartData<SoundingRecord>[];
 
   return (
     <>
       <SkewTPlot
         id={analysis.id}
-        data={() => [...skewTData(), ...observations()]}
+        data={() => [
+          ...profileDataForPlot(),
+          ...observations(),
+          ...firePlumes(),
+        ]}
       />
       {TimeSlider(
         () => analysis.time,

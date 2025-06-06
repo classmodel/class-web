@@ -3,8 +3,10 @@ import { createUniqueId } from "solid-js";
 import type { ChartData } from "./ChartContainer";
 import { useChartContext } from "./ChartContainer";
 
+type LegendData = Omit<ChartData<unknown>, "data">;
+
 export interface LegendProps<T> {
-  entries: () => ChartData<T>[];
+  entries: () => LegendData[];
   toggles: Record<string, boolean>;
   onChange: (key: string, value: boolean) => void;
 }
