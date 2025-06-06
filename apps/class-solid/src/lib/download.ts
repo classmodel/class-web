@@ -1,4 +1,4 @@
-import type { ClassOutput } from "@classmodel/class/output";
+import type { ClassOutput, OutputVariableKey } from "@classmodel/class/output";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
 import { toPartial } from "./encode";
 import type { ExperimentConfig } from "./experiment_config";
@@ -12,7 +12,7 @@ export function toConfigBlob(experiment: ExperimentConfig) {
 }
 
 function outputToCsv(output: ClassOutput) {
-  const headers = Object.keys(output);
+  const headers = Object.keys(output) as OutputVariableKey[];
   const lines = [headers.join(",")];
   for (let i = 0; i < output[headers[0]].length; i++) {
     lines.push(headers.map((h) => output[h][i]).join(","));
