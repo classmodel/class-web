@@ -48,6 +48,13 @@
 
       }
     },
+    "./fire": {
+      "import": {
+        "default": "./dist/fire.js",
+        "types": "./dist/fire.d.ts"
+
+      }
+    },
     "./utils": {
       "import": {
         "default": "./dist/utils.js",

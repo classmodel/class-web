@@ -5,21 +5,6 @@ import { findInsertIndex } from "@classmodel/class/utils";
 import type { Point } from "~/components/plots/Line";
 import type { Observation } from "./experiment_config";
 
-// Get vertical profiles for a single class run
-export function getVerticalProfiles(
-  output: ClassOutput | undefined,
-  config: Config,
-  t = 0,
-) {
-  // Guard against undefined output
-  if (output === undefined || !config.sw_ml) {
-    return NoProfile;
-  }
-
-  const outputAtTime = getOutputAtTime(output, t);
-  return generateProfiles(config, outputAtTime);
-}
-
 /**
  * https://en.wikipedia.org/wiki/Dew_point#Calculating_the_dew_point
  * p should be in hPa

@@ -1,6 +1,6 @@
 // profiles.ts
 
-import type { Config as ClassConfig, MixedLayerConfig } from "./config.js";
+import type { MixedLayerConfig, NoWindConfig, WindConfig } from "./config.js";
 import type { ClassOutputAtSingleTime } from "./output.js";
 import { dewpoint, virtualTemperature } from "./thermodynamics.js";
 
@@ -27,7 +27,7 @@ export interface ClassProfile {
   rho: number[]; // Density [kg/m³]
 }
 
-export const NoProfile = {
+export const NoProfile: ClassProfile = {
   z: [],
   theta: [],
   thetav: [],
@@ -45,7 +45,7 @@ export const NoProfile = {
  * Generate vertical atmospheric profiles based on CLASS config + output
  */
 export function generateProfiles(
-  config: ClassConfig & MixedLayerConfig,
+  config: MixedLayerConfig & (WindConfig | NoWindConfig),
   output: ClassOutputAtSingleTime,
   dz = 1,
 ): ClassProfile {

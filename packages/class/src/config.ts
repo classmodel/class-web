@@ -404,7 +404,7 @@ const untypedSchema = {
       // biome-ignore lint/suspicious/noThenProperty: part of JSON Schema
       then: {
         properties: {
-          L_fire: {
+          L: {
             symbol: "L<sub>fire</sub>",
             type: "number",
             unit: "m",
@@ -412,7 +412,7 @@ const untypedSchema = {
             title: "Length of the fire",
             "ui:group": "Fire",
           },
-          d_fire: {
+          d: {
             symbol: "d<sub>fire</sub>",
             type: "number",
             unit: "m",
@@ -420,7 +420,7 @@ const untypedSchema = {
             title: "Depth of the fire",
             "ui:group": "Fire",
           },
-          h0_fire: {
+          h0: {
             symbol: "h<sub>0, fire</sub>",
             type: "number",
             unit: "m",
@@ -428,7 +428,7 @@ const untypedSchema = {
             title: "Height to start",
             "ui:group": "Fire",
           },
-          C_fire: {
+          C: {
             symbol: "C<sub>fire</sub>",
             type: "number",
             unit: "J kg⁻¹",
@@ -436,7 +436,7 @@ const untypedSchema = {
             title: "Heat stored in fuel",
             "ui:group": "Fire",
           },
-          omega_fire: {
+          omega: {
             symbol: "ω<sub>fire</sub>",
             type: "number",
             unit: "kg m⁻²",
@@ -444,7 +444,7 @@ const untypedSchema = {
             title: "Fuel mass per area",
             "ui:group": "Fire",
           },
-          v_fire: {
+          spread: {
             symbol: "v<sub>fire</sub>",
             type: "number",
             unit: "m s⁻¹",
@@ -452,7 +452,7 @@ const untypedSchema = {
             title: "Rate of spread of the fire",
             "ui:group": "Fire",
           },
-          radiative_loss_fire: {
+          radiativeLoss: {
             symbol: "rl<sub>fire</sub>",
             type: "number",
             unit: "-",
@@ -462,15 +462,7 @@ const untypedSchema = {
             "ui:group": "Fire",
           },
         },
-        required: [
-          "L_fire",
-          "d_fire",
-          "h0_fire",
-          "C_fire",
-          "omega_fire",
-          "v_fire",
-          "radiative_loss_fire",
-        ],
+        required: ["L", "d", "h0", "C", "omega", "spread", "radiativeLoss"],
       },
     },
   ],
@@ -497,7 +489,7 @@ export type WindConfig = {
   z_v: number[];
   ustar: number;
 };
-type NoWindConfig = {
+export type NoWindConfig = {
   sw_wind?: false;
 };
 
@@ -531,10 +523,10 @@ export type FireConfig = {
   h0: number;
   C: number;
   omega: number;
-  v: number;
-  radiative_loss: number;
+  spread: number;
+  radiativeLoss: number;
 };
-type NoFireConfig = {
+export type NoFireConfig = {
   sw_fire?: false;
 };
 

@@ -1,0 +1,22 @@
+{
+  "reference": {
+    "name": "Default",
+    "description": "The classic default configuration",
+    "h": 1000,
+    "theta": 300,
+    "dtheta": 2,
+    "qt": 0.0085,
+    "gamma_qt": [
+      -1e-7
+    ],
+    "z_theta": [
+      10000
+    ],
+    "z_qt": [
+      10000
+    ],
+    "sw_fire": true
+  },
+  "preset": "Default",
+  "permutations": []
+}

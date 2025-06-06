@@ -1,10 +1,16 @@
-import type { Config } from "@classmodel/class/config";
+import type { Config, MixedLayerConfig } from "@classmodel/class/config";
+import { calculatePlume } from "@classmodel/class/fire";
 import {
   type ClassOutput,
-  OutputVariableKey,
+  type OutputVariableKey,
+  getOutputAtTime,
   outputVariables,
 } from "@classmodel/class/output";
-import { type ClassProfile, NoProfile } from "@classmodel/class/profiles";
+import {
+  type ClassProfile,
+  NoProfile,
+  generateProfiles,
+} from "@classmodel/class/profiles";
 import * as d3 from "d3";
 import { saveAs } from "file-saver";
 import { toBlob } from "html-to-image";
@@ -23,8 +29,6 @@ import {
 import { createStore } from "solid-js/store";
 import type { Observation } from "~/lib/experiment_config";
 import {
-  getThermodynamicProfiles,
-  getVerticalProfiles,
   observationsForProfile,
   observationsForSounding,
 } from "~/lib/profiles";
@@ -252,17 +256,26 @@ export function VerticalProfilePlot({
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
       const t = output?.t.indexOf(uniqueTimes()[analysis.time]);
-      return {
-        ...formatting,
-        data:
-          t !== -1 && // -1 means time not found in array
-          output && // Output must be defined
-          config.sw_ml // config must include mixed layer
-            ? // TODO: can't we use t here?
-              getVerticalProfiles(e.output, e.config, analysis.time)
-            : NoProfile,
-      };
+      if (config.sw_ml && output && t !== undefined && t !== -1) {
+        const outputAtTime = getOutputAtTime(output, t);
+        return { ...formatting, data: generateProfiles(config, outputAtTime) };
+      }
+      return { ...formatting, data: NoProfile };
     });
+
+  const firePlumes = () =>
+    flatExperiments().map((e, i) => {
+      const { config, output, ...formatting } = e;
+      if (config.sw_fire) {
+        return {
+          ...formatting,
+          data: calculatePlume(config, profileData()[i].data),
+        };
+      }
+      return { ...formatting, data: [] };
+    });
+
+  console.log(firePlumes());
 
   // TODO: There should be a way that this isn't needed.
   const profileDataForPlot = () =>
@@ -274,7 +287,7 @@ export function VerticalProfilePlot({
         x: data[classVariable()][i],
         y: z,
       })),
-    })) as ChartData<Point>[]
+    })) as ChartData<Point>[];
 
   const allX = () => [
     ...profileDataForPlot().flatMap((p) => p.data.map((d) => d.x)),
@@ -427,20 +440,15 @@ function Picker(props: PickerProps) {
 }
 
 export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
-  const skewTData = () =>
+  const profileData = () =>
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
       const t = output?.t.indexOf(uniqueTimes()[analysis.time]);
-      return {
-        ...formatting,
-        data:
-          // TODO reuse get profiles now here
-          t !== -1 && // -1 means time not found in array
-          output && // Output must be defined
-          config.sw_ml // config must include mixed layer
-            ? getVerticalProfiles(e.output, e.config, t)
-            : NoProfile,
-      };
+      if (config.sw_ml && output && t !== undefined && t !== -1) {
+        const outputAtTime = getOutputAtTime(output, t);
+        return { ...formatting, data: generateProfiles(config, outputAtTime) };
+      }
+      return { ...formatting, data: NoProfile };
     });
 
   const observations = () =>
@@ -448,7 +456,7 @@ export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
 
   // TODO: There should be a way that this isn't needed.
   const profileDataForPlot = () =>
-    skewTData().map(({ data, label, color, linestyle }) => ({
+    profileData().map(({ data, label, color, linestyle }) => ({
       label,
       color,
       linestyle,
@@ -459,7 +467,6 @@ export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
       })),
     })) as ChartData<SoundingRecord>[];
 
-  console.log(profileDataForPlot());
   return (
     <>
       <SkewTPlot
