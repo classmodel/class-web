@@ -323,7 +323,7 @@ export function VerticalProfilePlot({
   }
 
 const showPlume = createMemo(() => {
-  return ["theta", "qt", "thetav"].includes(classVariable());
+  return ["theta", "qt", "thetav", "T", "Td"].includes(classVariable());
 });
 
   return (
@@ -465,6 +465,20 @@ export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
       return { ...formatting, data: NoProfile };
     });
 
+  const firePlumes = () =>
+    flatExperiments().map((e, i) => {
+      const { config, output, ...formatting } = e;
+      if (config.sw_fire) {
+        return {
+          ...formatting,
+          color: "#ff0000",
+          label: `${formatting.label} - fire plume`,
+          data: calculatePlume(config, profileData()[i].data),
+        };
+      }
+      return { ...formatting, data: [] };
+    }) as ChartData<SoundingRecord>[];
+
   const observations = () =>
     flatObservations().map((o) => observationsForSounding(o));
 
@@ -485,7 +499,11 @@ export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
     <>
       <SkewTPlot
         id={analysis.id}
-        data={() => [...profileDataForPlot(), ...observations()]}
+        data={() => [
+          ...profileDataForPlot(),
+          ...observations(),
+          ...firePlumes(),
+        ]}
       />
       {TimeSlider(
         () => analysis.time,

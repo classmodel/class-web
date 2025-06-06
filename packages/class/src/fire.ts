@@ -4,7 +4,7 @@
 
 import type { FireConfig } from "./config.js";
 import type { ClassProfile } from "./profiles.js";
-import { calcThetav } from "./thermodynamics.js";
+import { calcThetav, dewpoint } from "./thermodynamics.js";
 
 // Constants
 const g = 9.81; // Gravitational acceleration [m/s²]
@@ -46,6 +46,9 @@ export interface Parcel {
   area: number; // Cross-sectional area [m²]
   e: number; // Entrainment rate [kg/m²/s]
   d: number; // Detrainment rate [kg/m²/s]
+  T: number; // Temperature [K]
+  Td: number; // Dewpoint temperature [K]
+  p: number; // Pressure [hPa]
 }
 
 /**
@@ -86,6 +89,8 @@ function initializeFireParcel(
   // Calculate parcel buoyancy
   const b = (g / background.thetav[0]) * (thetav - thetavAmbient);
 
+  const T = background.exner[0] * theta;
+  const Td = dewpoint(qt, p / 100);
   // Store parcel props
   return {
     z,
@@ -99,6 +104,9 @@ function initializeFireParcel(
     m: rho * area * w,
     e: ((rho * area) / (2 * w)) * b,
     d: 0,
+    T,
+    Td,
+    p: background.p[0] / 100,
   };
 }
 
@@ -168,6 +176,9 @@ export function calculatePlume(
 
     const area = m / (bg.rho[i] * w);
 
+    const T = bg.exner[i] * theta;
+    const Td = dewpoint(qt, bg.p[i] / 100);
+
     // Update parcel
     parcel = {
       z,
@@ -181,6 +192,9 @@ export function calculatePlume(
       m,
       e,
       d,
+      T,
+      Td,
+      p: bg.p[i] / 100,
     };
 
     if (w < 0 || area <= 0) {

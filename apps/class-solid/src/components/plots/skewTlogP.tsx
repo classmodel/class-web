@@ -167,9 +167,12 @@ export function SkewTPlot(props: {
 
   const [toggles, setToggles] = createStore<Record<string, boolean>>({});
 
+  const dataForLegend = () =>
+    props.data().filter((d) => !d.label.includes("- fire plume"));
+
   // Initialize all lines as visible
   createEffect(() => {
-    for (const d of props.data()) {
+    for (const d of dataForLegend()) {
       setToggles(d.label, true);
     }
   });
@@ -183,12 +186,12 @@ export function SkewTPlot(props: {
     if (!toggles || !cd) {
       return true;
     }
-    return toggles[cd.label];
+    return toggles[cd.label.replace(" - fire plume", "")];
   }
 
   return (
     <ChartContainer>
-      <Legend entries={props.data} toggles={toggles} onChange={toggleLine} />
+      <Legend entries={dataForLegend} toggles={toggles} onChange={toggleLine} />
       <Chart
         id={props.id}
         title="Thermodynamic diagram"
