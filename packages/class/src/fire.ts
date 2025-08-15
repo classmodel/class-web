@@ -15,9 +15,10 @@ const Lv = 2.5e6; // Latent heat of vaporization [J/kg]
  * Configuration parameters for plume model
  */
 interface PlumeConfig {
-  zSl: number; // Surface layer height [m]
-  lambdaMix: number; // Mixing length in surface layer [m]
+  fac_ent: number; // factor for fractional entrainment (0.2 in Morton model)
   beta: number; // Fractional detrainment above surface layer
+  aW: number; // Factor scaling acceleration due to buoyancy
+  bW: number; // Factor scaling deceleration due to entrainment
   dz: number; // Grid spacing [m]
 }
 
@@ -25,9 +26,10 @@ interface PlumeConfig {
  * Default plume configuration
  */
 const defaultPlumeConfig: PlumeConfig = {
-  zSl: 100.0,
-  lambdaMix: 30.0,
+  fac_ent: 0.8,
   beta: 1.0,
+  aW: 1.0,
+  bW: 0.2,
   dz: 1.0,
 };
 
@@ -57,6 +59,7 @@ export interface Parcel {
 function initializeFireParcel(
   background: ClassProfile,
   fire: FireConfig,
+  plumeConfig: PlumeConfig = defaultPlumeConfig,
 ): Parcel {
   // Start with parcel props from ambient air
   const z = background.z[0];
@@ -71,26 +74,33 @@ function initializeFireParcel(
   const area = fire.L * fire.d;
   const FFire =
     ((fire.omega * fire.C * fire.spread) / fire.d) * (1 - fire.radiativeLoss);
-  const FqFire = 0.0 * FFire; // Dry plume for now
+  const FqFire = (fire.omega * fire.Cq * fire.spread) / fire.d;
+  const FvFire = FFire * (1 + 0.61 * theta * FqFire);
 
   // Use cube root as the root may be negative and js will yield NaN for a complex number result
   const w = Math.cbrt(
-    (3 * g * FFire * fire.h0) / (2 * rho * cp * thetavAmbient),
+    (3 * g * FvFire * fire.h0) / (2 * rho * cp * thetavAmbient),
   );
 
   // Add excess temperature/humidity and update thetav/qsat accordingly
   const dtheta = FFire / (rho * cp * w);
-  const dqv = FqFire / (rho * Lv * w);
+  const dqv = FqFire / (rho * w);
   theta += dtheta;
   qt += dqv;
 
   const [thetav, qsat] = calcThetav(theta, qt, p, exner);
 
   // Calculate parcel buoyancy
-  const b = (g / background.thetav[0]) * (thetav - thetavAmbient);
+  const b = (g / thetavAmbient) * (thetav - thetavAmbient);
 
   const T = background.exner[0] * theta;
   const Td = dewpoint(qt, p / 100);
+
+  // Calculate initial entrainment/detrainment
+  const epsi0 = plumeConfig.fac_ent / Math.sqrt(area);
+  const m = rho * area * w;
+  const e = epsi0 * m;
+
   // Store parcel props
   return {
     z,
@@ -100,9 +110,9 @@ function initializeFireParcel(
     thetav,
     qsat,
     b,
-    area: fire.L * fire.d,
-    m: rho * area * w,
-    e: ((rho * area) / (2 * w)) * b,
+    area,
+    m,
+    e,
     d: 0,
     T,
     Td,
@@ -122,10 +132,9 @@ export function calculatePlume(
   let parcel = initializeFireParcel(bg, fire);
   const plume: Parcel[] = [parcel];
 
-  const detrainmentRate0 = plumeConfig.lambdaMix ** 0.5 / parcel.area ** 0.5;
-  let crossedSl = false;
-  let epsi = 0;
-  let delt = 0;
+  // Constant fractional entrainment and detrainment with height
+  const epsi = plumeConfig.fac_ent / Math.sqrt(parcel.area);
+  const delt = epsi / plumeConfig.beta;
 
   for (let i = 1; i < bg.z.length; i++) {
     const z = bg.z[i];
@@ -141,38 +150,21 @@ export function calculatePlume(
     const b = (g / bg.thetav[i]) * (thetav - bg.thetav[i]);
 
     // Solve vertical velocity equation
-    const aW = 1;
-    const bW = 0;
-    const w =
-      parcel.w +
-      ((-bW * parcel.e * parcel.w +
-        aW * parcel.area * bg.rho[i - 1] * parcel.b) /
-        parcel.m) *
+    const w2 =
+      parcel.w * parcel.w +
+      2 *
+        (plumeConfig.aW * b - plumeConfig.bW * epsi * parcel.w * parcel.w) *
         dz;
+    let w: number;
+    if (w2 < 0) {
+      w = 0;
+    } else {
+      w = Math.sqrt(w2);
+    }
 
     // Calculate entrainment and detrainment
-    let e: number;
-    let d: number;
-
-    if (z < plumeConfig.zSl) {
-      // Surface layer formulation
-      e = ((parcel.area * bg.rho[i - 1]) / (2 * parcel.w)) * parcel.b;
-      d =
-        parcel.area *
-        bg.rho[i - 1] *
-        detrainmentRate0 *
-        ((z ** 0.5 * (w - parcel.w)) / dz + parcel.w / (2 * z ** 0.5));
-    } else {
-      // Above surface layer
-      if (!crossedSl) {
-        epsi = parcel.e / parcel.m;
-        delt = epsi / plumeConfig.beta;
-        crossedSl = true;
-      }
-
-      e = epsi * m;
-      d = delt * m;
-    }
+    const e = epsi * m;
+    const d = delt * m;
 
     const area = m / (bg.rho[i] * w);
 
@@ -197,7 +189,7 @@ export function calculatePlume(
       p: bg.p[i] / 100,
     };
 
-    if (w < 0 || area <= 0) {
+    if (w <= 0 || area <= 0) {
       break;
     }
 
