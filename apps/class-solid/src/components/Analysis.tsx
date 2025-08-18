@@ -1,5 +1,5 @@
 import type { Config } from "@classmodel/class/config";
-import { type Parcel, calculatePlume } from "@classmodel/class/fire";
+import { transposePlumeData } from "@classmodel/class/fire";
 import {
   type ClassOutput,
   type OutputVariableKey,
@@ -45,7 +45,7 @@ import { MdiCamera, MdiDelete, MdiImageFilterCenterFocus } from "./icons";
 import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./plots/Axes";
 import { Chart, ChartContainer, type ChartData } from "./plots/ChartContainer";
 import { Legend } from "./plots/Legend";
-import { Line, Plume, type Point } from "./plots/Line";
+import { Line, type Point } from "./plots/Line";
 import { SkewTPlot, type SoundingRecord } from "./plots/skewTlogP";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -239,6 +239,7 @@ export function VerticalProfilePlot({
     "Specific humidity [kg/kg]": "qt",
     "u-wind component [m/s]": "u",
     "v-wind component [m/s]": "v",
+    "vertical velocity [m/s]": "w",
     "Pressure [Pa]": "p",
     "Exner function [-]": "exner",
     "Temperature [K]": "T",
@@ -268,9 +269,16 @@ export function VerticalProfilePlot({
     flatExperiments().map((e, i) => {
       const { config, output, ...formatting } = e;
       if (config.sw_fire) {
+        const plume = transposePlumeData(
+          calculatePlume(config, profileData()[i].data),
+        );
         return {
           ...formatting,
-          data: calculatePlume(config, profileData()[i].data),
+          linestyle: "4",
+          data: plume.z.map((z, i) => ({
+            x: plume[classVariable()][i],
+            y: z,
+          })),
         };
       }
       return { ...formatting, data: [] };
@@ -289,10 +297,12 @@ export function VerticalProfilePlot({
     })) as ChartData<Point>[];
 
   const allX = () => [
+    ...firePlumes().flatMap((p) => p.data.map((d) => d.x)),
     ...profileDataForPlot().flatMap((p) => p.data.map((d) => d.x)),
     ...observations().flatMap((obs) => obs.data.map((d) => d.x)),
   ];
   const allY = () => [
+    ...firePlumes().flatMap((p) => p.data.map((d) => d.y)),
     ...profileDataForPlot().flatMap((p) => p.data.map((d) => d.y)),
     ...observations().flatMap((obs) => obs.data.map((d) => d.y)),
   ];
@@ -324,7 +334,9 @@ export function VerticalProfilePlot({
   }
 
   const showPlume = createMemo(() => {
-    return ["theta", "qt", "thetav", "T", "Td", "rh"].includes(classVariable());
+    return ["theta", "qt", "thetav", "T", "Td", "rh", "w"].includes(
+      classVariable(),
+    );
   });
 
   return (
@@ -357,10 +369,7 @@ export function VerticalProfilePlot({
               {(d) => (
                 <Show when={toggles[d.label]}>
                   <Show when={showPlume()}>
-                    <Plume
-                      d={d}
-                      variable={classVariable as () => keyof Parcel}
-                    />
+                    <Line {...d} />
                   </Show>
                 </Show>
               )}

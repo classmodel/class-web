@@ -25,6 +25,7 @@ export interface ClassProfile {
   qt: number[]; // Total specific humidity [kg/kg]
   u: number[]; // U-component of wind [m/s]
   v: number[]; // V-component of wind [m/s]
+  w: number[]; // W-component of wind [m/s]
   p: number[]; // Pressure [Pa]
   exner: number[]; // Exner function [-]
   T: number[]; // Temperature [K]
@@ -40,6 +41,7 @@ export const NoProfile: ClassProfile = {
   qt: [],
   u: [],
   v: [],
+  w: [],
   p: [],
   exner: [],
   T: [],
@@ -58,7 +60,7 @@ export function generateProfiles(
 ): ClassProfile {
   const { Rd, cp, g } = CONSTANTS;
   const { h, theta, qt, u, v, dtheta, dqt, du, dv } = output;
-  const { z_theta, z_qt, gamma_theta, gamma_qt } = config;
+  const { z_theta, z_qt, gamma_theta, gamma_qt, divU } = config;
   const { p0 } = config;
 
   // Determine top of profile based on the lowest z value across all variables
@@ -105,12 +107,16 @@ export function generateProfiles(
     vProfile = new Array(z.length).fill(999);
   }
 
+  // Vertical velocity from constant divergence
+  const w = z.map((zi) => -divU * zi);
+
   return {
     z,
     theta: thetaProf,
     qt: qtProfile,
     u: uProfile,
     v: vProfile,
+    w,
     thetav,
     p,
     exner,
