@@ -84,9 +84,10 @@ function initializeFireParcel(
   const FvFire = FFire * (1 + 0.61 * theta * FqFire);
 
   // Use cube root as the root may be negative and js will yield NaN for a complex number result
-  const w = Math.cbrt(
-    (3 * g * FvFire * fire.h0) / (2 * rho * cp * thetavAmbient),
-  );
+  const fac_w =
+    (3 * g * plumeConfig.aW * FvFire) /
+    (rho * cp * thetavAmbient * (1 + plumeConfig.bW));
+  const w = Math.cbrt(fac_w * fire.h0);
 
   // Add excess temperature/humidity and update thetav/qsat accordingly
   const dtheta = FFire / (rho * cp * w);
@@ -106,9 +107,11 @@ function initializeFireParcel(
   const b = (g / thetavAmbient) * (thetav - thetavAmbient);
 
   // Calculate initial entrainment/detrainment
-  const epsi0 = plumeConfig.fac_ent / Math.sqrt(area);
   const m = rho * area * w;
-  const e = epsi0 * m;
+  const e = ((rho * area * fac_w) / 3) * (fac_w * fire.h0) ** (-2.0 / 3); // consistent with our w-eq
+  // const e = 80 * rho * area / (2 * w) * b; // Rio et al
+  // const e = rho * area * w / fire.h0;
+  const d = 0;
 
   // Store parcel props
   return {
@@ -122,7 +125,7 @@ function initializeFireParcel(
     area,
     m,
     e,
-    d: 0,
+    d,
     T,
     Td,
     p: background.p[0] / 100,
@@ -142,7 +145,7 @@ export function calculatePlume(
   let parcel = initializeFireParcel(bg, fire);
   const plume: Parcel[] = [parcel];
 
-  // Constant fractional entrainment and detrainment with height
+  // Constant fractional entrainment and detrainment with height above surface layer
   const epsi = plumeConfig.fac_ent / Math.sqrt(parcel.area);
   const delt = epsi / plumeConfig.beta;
 

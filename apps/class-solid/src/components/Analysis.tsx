@@ -1,5 +1,5 @@
 import type { Config } from "@classmodel/class/config";
-import { transposePlumeData } from "@classmodel/class/fire";
+import { calculatePlume, transposePlumeData } from "@classmodel/class/fire";
 import {
   type ClassOutput,
   type OutputVariableKey,
