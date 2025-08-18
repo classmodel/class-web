@@ -25,6 +25,7 @@ interface PlumeConfig {
   aW: number; // Factor scaling acceleration due to buoyancy
   bW: number; // Factor scaling deceleration due to entrainment
   dz: number; // Grid spacing [m]
+  fac_area: number; // prescribed surface-layer area growth factor
 }
 
 /**
@@ -36,6 +37,7 @@ const defaultPlumeConfig: PlumeConfig = {
   aW: 1.0,
   bW: 0.2,
   dz: 1.0,
+  fac_area: 10,
 };
 
 /**
@@ -86,7 +88,7 @@ function initializeFireParcel(
   // Use cube root as the root may be negative and js will yield NaN for a complex number result
   const fac_w =
     (3 * g * plumeConfig.aW * FvFire) /
-    (rho * cp * thetavAmbient * (1 + plumeConfig.bW));
+    (2 * rho * cp * thetavAmbient * (1 + plumeConfig.bW));
   const w = Math.cbrt(fac_w * fire.h0);
 
   // Add excess temperature/humidity and update thetav/qsat accordingly
@@ -108,9 +110,8 @@ function initializeFireParcel(
 
   // Calculate initial entrainment/detrainment
   const m = rho * area * w;
-  const e = ((rho * area * fac_w) / 3) * (fac_w * fire.h0) ** (-2.0 / 3); // consistent with our w-eq
-  // const e = 80 * rho * area / (2 * w) * b; // Rio et al
-  // const e = rho * area * w / fire.h0;
+  let e = ((rho * area) / (2 * w)) * b; // Entrainment assuming constant area with height in surface layer
+  e = e + (rho * w * area * (1 + plumeConfig.fac_area)) / fire.h0; // Additional, prescribed plume growth over surface layer
   const d = 0;
 
   // Store parcel props
