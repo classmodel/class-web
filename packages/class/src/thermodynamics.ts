@@ -29,18 +29,17 @@ export function dqsatdTLiq(p: number, t: number): number {
   );
 }
 
-export function calcThetav(
+export function saturationAdjustment(
   thl: number,
   qt: number,
   p: number,
   exner: number,
-): [number, number] {
+): number {
   const tl = exner * thl;
   let qsat = qsatLiq(p, tl);
-  let ql = 0.0;
 
   if (qt <= qsat) {
-    return [virtualTemperature(thl, qt, 0.0), qsat];
+    return tl;
   }
 
   // Newton-Raphson iteration
@@ -57,9 +56,7 @@ export function calcThetav(
     tnr -= f / f_prime;
     iter++;
   }
-
-  ql = qt - qsat;
-  return [virtualTemperature(tnr / exner, qt, ql), qsat];
+  return tnr;
 }
 
 /**

@@ -244,6 +244,7 @@ export function VerticalProfilePlot({
     "Temperature [K]": "T",
     "Dew point temperature [K]": "Td",
     "Density [kg/m³]": "rho",
+    "Relative humidity [%]": "rh",
   } as const satisfies Record<string, keyof ClassProfile>;
 
   const classVariable = () =>
@@ -323,7 +324,7 @@ export function VerticalProfilePlot({
   }
 
   const showPlume = createMemo(() => {
-    return ["theta", "qt", "thetav", "T", "Td"].includes(classVariable());
+    return ["theta", "qt", "thetav", "T", "Td", "rh"].includes(classVariable());
   });
 
   return (

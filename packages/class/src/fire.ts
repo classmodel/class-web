@@ -4,7 +4,12 @@
 
 import type { FireConfig } from "./config.js";
 import type { ClassProfile } from "./profiles.js";
-import { calcThetav, dewpoint } from "./thermodynamics.js";
+import {
+  dewpoint,
+  qsatLiq,
+  saturationAdjustment,
+  virtualTemperature,
+} from "./thermodynamics.js";
 
 // Constants
 const g = 9.81; // Gravitational acceleration [m/s²]
@@ -51,6 +56,7 @@ export interface Parcel {
   T: number; // Temperature [K]
   Td: number; // Dewpoint temperature [K]
   p: number; // Pressure [hPa]
+  rh: number; // Relative humidity [%]
 }
 
 /**
@@ -88,13 +94,16 @@ function initializeFireParcel(
   theta += dtheta;
   qt += dqv;
 
-  const [thetav, qsat] = calcThetav(theta, qt, p, exner);
+  // Thermodynamics
+  const T = saturationAdjustment(theta, qt, p, exner);
+  const qsat = qsatLiq(p, T);
+  const ql = Math.max(qt - qsat, 0);
+  const thetav = virtualTemperature(theta, qt, ql);
+  const rh = ((qt - ql) / qsat) * 100;
+  const Td = dewpoint(qt, p / 100);
 
   // Calculate parcel buoyancy
   const b = (g / thetavAmbient) * (thetav - thetavAmbient);
-
-  const T = background.exner[0] * theta;
-  const Td = dewpoint(qt, p / 100);
 
   // Calculate initial entrainment/detrainment
   const epsi0 = plumeConfig.fac_ent / Math.sqrt(area);
@@ -117,6 +126,7 @@ function initializeFireParcel(
     T,
     Td,
     p: background.p[0] / 100,
+    rh,
   };
 }
 
@@ -145,8 +155,13 @@ export function calculatePlume(
     const theta = parcel.theta - emz * (parcel.theta - bg.theta[i - 1]);
     const qt = parcel.qt - emz * (parcel.qt - bg.qt[i - 1]);
 
-    // Calculate virtual potential temperature and buoyancy
-    const [thetav, qsat] = calcThetav(theta, qt, bg.p[i], bg.exner[i]);
+    // Thermodynamics and buoyancy
+    const T = saturationAdjustment(theta, qt, bg.p[i], bg.exner[i]);
+    const qsat = qsatLiq(bg.p[i], T);
+    const ql = Math.max(qt - qsat, 0);
+    const thetav = virtualTemperature(theta, qt, ql);
+    const rh = ((qt - ql) / qsat) * 100;
+    const Td = dewpoint(qt, bg.p[i] / 100);
     const b = (g / bg.thetav[i]) * (thetav - bg.thetav[i]);
 
     // Solve vertical velocity equation
@@ -168,9 +183,6 @@ export function calculatePlume(
 
     const area = m / (bg.rho[i] * w);
 
-    const T = bg.exner[i] * theta;
-    const Td = dewpoint(qt, bg.p[i] / 100);
-
     // Update parcel
     parcel = {
       z,
@@ -187,6 +199,7 @@ export function calculatePlume(
       T,
       Td,
       p: bg.p[i] / 100,
+      rh,
     };
 
     if (w <= 0 || area <= 0) {
