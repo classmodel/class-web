@@ -251,6 +251,12 @@ export function VerticalProfilePlot({
   const classVariable = () =>
     variableOptions[analysis.variable as keyof typeof variableOptions];
 
+  const showPlume = createMemo(() => {
+    return ["theta", "qt", "thetav", "T", "Td", "rh", "w"].includes(
+      classVariable(),
+    );
+  });
+
   const observations = () =>
     flatObservations().map((o) => observationsForProfile(o, classVariable()));
 
@@ -268,7 +274,7 @@ export function VerticalProfilePlot({
   const firePlumes = () =>
     flatExperiments().map((e, i) => {
       const { config, output, ...formatting } = e;
-      if (config.sw_fire) {
+      if (config.sw_fire && showPlume()) {
         const plume = transposePlumeData(
           calculatePlume(config, profileData()[i].data),
         );
@@ -332,12 +338,6 @@ export function VerticalProfilePlot({
     updateAnalysis(analysis, { variable: v });
     setResetPlot(analysis.id);
   }
-
-  const showPlume = createMemo(() => {
-    return ["theta", "qt", "thetav", "T", "Td", "rh", "w"].includes(
-      classVariable(),
-    );
-  });
 
   return (
     <>

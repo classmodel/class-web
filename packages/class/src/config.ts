@@ -530,6 +530,7 @@ export type FireConfig = {
   d: number;
   h0: number;
   C: number;
+  Cq: number;
   omega: number;
   spread: number;
   radiativeLoss: number;
