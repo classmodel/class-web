@@ -251,7 +251,6 @@ export function VerticalProfilePlot({
   const classVariable = () =>
     variableOptions[analysis.variable as keyof typeof variableOptions];
 
-
   type PlumeVariable = "theta" | "qt" | "thetav" | "T" | "Td" | "rh" | "w";
   function isPlumeVariable(v: string): v is PlumeVariable {
     return ["theta", "qt", "thetav", "T", "Td", "rh", "w"].includes(v);
