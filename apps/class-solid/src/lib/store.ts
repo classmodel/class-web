@@ -279,7 +279,7 @@ export function addAnalysis(name: string) {
         description: "",
         type: "timeseries",
         name: "Timeseries",
-        xVariable: "t",
+        xVariable: "utcTime",
         yVariable: "h",
       } as TimeseriesAnalysis;
       break;

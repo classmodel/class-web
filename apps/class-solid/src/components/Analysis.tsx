@@ -119,7 +119,7 @@ const flatObservations: () => Observation[] = createMemo(() => {
 });
 
 const _allTimes = () =>
-  new Set(flatExperiments().flatMap((e) => e.output?.t ?? []));
+  new Set(flatExperiments().flatMap((e) => e.output?.utcTime ?? []));
 const uniqueTimes = () => [...new Set(_allTimes())].sort((a, b) => a - b);
 
 // TODO: could memoize all reactive elements here, would it make a difference?
@@ -188,7 +188,7 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
   // Define axis format
   const formatters: Record<string, (value: number) => string> = {
     t: formatSeconds,
-    utcTime: (t) => d3.utcFormat("%H:%M")(new Date(t)),
+    utcTime: formatUTC,
     default: d3.format(".4"),
   };
   const formatX = () => formatters[analysis.xVariable] ?? formatters.default;
@@ -267,7 +267,7 @@ export function VerticalProfilePlot({
   const profileData = () =>
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
-      const t = output?.t.indexOf(uniqueTimes()[analysis.time]);
+      const t = output?.utcTime.indexOf(uniqueTimes()[analysis.time]);
       if (config.sw_ml && output && t !== undefined && t !== -1) {
         const outputAtTime = getOutputAtTime(output, t);
         return { ...formatting, data: generateProfiles(config, outputAtTime) };
@@ -410,6 +410,10 @@ function formatSeconds(seconds: number): string {
   return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
 }
 
+function formatUTC(milliseconds: number): string {
+  return d3.utcFormat("%H:%M")(new Date(milliseconds));
+}
+
 function TimeSlider(
   time: Accessor<number>,
   timeOptions: Accessor<number[]>,
@@ -432,12 +436,12 @@ function TimeSlider(
       class="w-full max-w-md"
     >
       <div class="flex w-full items-center gap-5">
-        <p>Time: </p>
+        <p class="whitespace-nowrap">Time (UTC): </p>
         <SliderTrack>
           <SliderFill />
           <SliderThumb />
         </SliderTrack>
-        <p>{formatSeconds(timeOptions()[time()])}</p>
+        <p>{formatUTC(timeOptions()[time()])}</p>
       </div>
     </Slider>
   );
@@ -471,7 +475,7 @@ export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
   const profileData = () =>
     flatExperiments().map((e) => {
       const { config, output, ...formatting } = e;
-      const t = output?.t.indexOf(uniqueTimes()[analysis.time]);
+      const t = output?.utcTime.indexOf(uniqueTimes()[analysis.time]);
       if (config.sw_ml && output && t !== undefined && t !== -1) {
         const outputAtTime = getOutputAtTime(output, t);
         return { ...formatting, data: generateProfiles(config, outputAtTime) };
