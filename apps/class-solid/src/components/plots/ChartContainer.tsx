@@ -179,13 +179,14 @@ export function Chart(props: {
   };
 
   const onMouseMove = (e: MouseEvent) => {
+    // Update the coordinate tracker in the plot
+    const [xdSkew, ydSkew] = getDataCoordsFromEvent(e, true);
+    setDataCoords([xdSkew, ydSkew]);
+
+    // Update zoom rectangle if drawing
     const [xd, yd] = getDataCoordsFromEvent(e, false);
     const [xp, yp] = getPixelCoordsFromEvent(e);
 
-    // Update the coordinate tracker in the plot
-    setDataCoords([xd, yd]);
-
-    // Update zoom rectangle if drawing
     setZoomRectPixel((zr) => (zr ? { ...zr, x1: xp, y1: yp } : null));
     setZoomRectData((zr) => (zr ? { ...zr, x1: xd, y1: yd } : null));
   };
