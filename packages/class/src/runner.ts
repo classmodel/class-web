@@ -42,7 +42,7 @@ export function runClass(config: Config, freq = 600): ClassOutput {
   writeOutput();
 
   // Update loop
-  while (model.t < config.runtime) {
+  while (model.t <= config.runtime) {
     model.update();
 
     if (model.t % freq === 0) {
