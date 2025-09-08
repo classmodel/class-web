@@ -32,13 +32,13 @@ interface Chart {
   innerHeight: number;
   scalePropsX: ScaleProps;
   scalePropsY: ScaleProps;
+  originalDomainX: [number, number];
+  originalDomainY: [number, number];
   scaleX: SupportedScaleTypes;
   scaleY: SupportedScaleTypes;
   formatX: (value: number) => string;
   formatY: (value: number) => string;
   transformX?: (x: number, y: number, scaleY: SupportedScaleTypes) => number;
-  zoom: number;
-  pan: [number, number];
 }
 type SetChart = SetStoreFunction<Chart>;
 const ChartContext = createContext<[Chart, SetChart]>();
@@ -65,39 +65,26 @@ export function ChartContainer(props: {
     innerWidth,
     scalePropsX: { type: "linear", domain: [0, 1], range: [0, innerWidth] },
     scalePropsY: { type: "linear", domain: [0, 1], range: [innerHeight, 0] },
+    originalDomainX: [0, 1],
+    originalDomainY: [0, 1],
     scaleX: initialScale,
     scaleY: initialScale,
     formatX: d3.format(".4"),
     formatY: d3.format(".4"),
-    zoom: 1,
-    pan: [0, 0],
   });
+  // Set original domains based on initial scale props
+  updateChart("originalDomainX", () => chart.scalePropsX.domain);
+  updateChart("originalDomainY", () => chart.scalePropsY.domain);
 
   // Update scales when props change
   createEffect(() => {
-    const [minX, maxX] = chart.scalePropsX.domain;
-    const [minY, maxY] = chart.scalePropsY.domain;
-    const [panX, panY] = chart.pan;
-    const zoom = chart.zoom;
-
-    const zoomedXDomain = getZoomedAndPannedDomainLinear(
-      minX,
-      maxX,
-      panX,
-      zoom,
-    );
     const scaleX = supportedScales[chart.scalePropsX.type]()
       .range(chart.scalePropsX.range)
-      .domain(zoomedXDomain);
-
-    const zoomedYDomain =
-      chart.scalePropsY.type === "log"
-        ? getZoomedAndPannedDomainLog(minY, maxY, panY, zoom)
-        : getZoomedAndPannedDomainLinear(minY, maxY, panY, zoom);
+      .domain(chart.scalePropsX.domain);
 
     const scaleY = supportedScales[chart.scalePropsY.type]()
       .range(chart.scalePropsY.range)
-      .domain(zoomedYDomain);
+      .domain(chart.scalePropsY.domain);
 
     updateChart(
       produce((prev) => {
@@ -123,46 +110,53 @@ export function Chart(props: {
   formatY?: () => (value: number) => string;
   transformX?: (x: number, y: number, scaleY: SupportedScaleTypes) => number;
 }) {
+  const [zoomRectData, setZoomRectData] = createSignal<{
+    x0: number;
+    y0: number;
+    x1: number;
+    y1: number;
+  } | null>(null);
+  const [zoomRectPixel, setZoomRectPixel] = createSignal<{
+    x0: number;
+    y0: number;
+    x1: number;
+    y1: number;
+  } | null>(null);
   const [hovering, setHovering] = createSignal(false);
-  const [panning, setPanning] = createSignal(false);
   const [dataCoords, setDataCoords] = createSignal<[number, number]>([0, 0]);
   const [chart, updateChart] = useChartContext();
   const title = props.title || "Default chart";
   const [marginTop, _, __, marginLeft] = chart.margin;
-  let panstart = [0, 0];
 
-  createEffect(() => {
-    if (resetPlot() === props.id) {
-      updateChart(
-        produce((prev) => {
-          prev.zoom = 1;
-          prev.pan = [0, 0];
-        }),
-      );
-    }
-  });
-
-  createEffect(() => {
-    if (props.formatX) {
-      updateChart("formatX", () => props.formatX?.());
-    }
-  });
-  createEffect(() => {
-    if (props.formatY) {
-      updateChart("formatY", () => props.formatY?.());
-    }
-  });
-
-  if (props.transformX) {
-    updateChart("transformX", () => props.transformX);
+  function resetZoom() {
+    updateChart(
+      produce((draft) => {
+        draft.scalePropsX.domain = draft.originalDomainX;
+        draft.scalePropsY.domain = draft.originalDomainY;
+      }),
+    );
   }
 
+  // Reset zoom/pan when requested from outside (button outside chart area)
+  createEffect(() => {
+    if (resetPlot() === props.id) {
+      resetZoom();
+    }
+  });
+
+  // Update formatters and transform function when props change
+  createEffect(() => {
+    if (props.formatX) updateChart("formatX", () => props.formatX?.());
+    if (props.formatY) updateChart("formatY", () => props.formatY?.());
+    if (props.transformX) updateChart("transformX", () => props.transformX);
+  });
+
   // Utility function to calculate coordinates from mouse event
-  const getDataCoordsFromEvent = (e: MouseEvent) => {
+  const getDataCoordsFromEvent = (e: MouseEvent, applyTransform = true) => {
     let x = e.offsetX - marginLeft;
     const y = e.offsetY - marginTop;
 
-    if (chart.transformX) {
+    if (applyTransform && chart.transformX) {
       // Correct for skewed lines in thermodynamic diagram
       x = chart.transformX(x, y, chart.scaleY);
     }
@@ -170,71 +164,75 @@ export function Chart(props: {
     return [chart.scaleX.invert(x), chart.scaleY.invert(y)];
   };
 
+  function getPixelCoordsFromEvent(e: MouseEvent) {
+    const x = e.offsetX - marginLeft; // x relative to chart area
+    const y = e.offsetY - marginTop; // y relative to chart area
+    return [x, y] as [number, number];
+  }
+
   const onMouseDown = (e: MouseEvent) => {
-    setPanning(true);
-    panstart = getDataCoordsFromEvent(e);
+    const [xd, yd] = getDataCoordsFromEvent(e, false);
+    const [xp, yp] = getPixelCoordsFromEvent(e);
+
+    setZoomRectPixel({ x0: xp, y0: yp, x1: xp, y1: yp });
+    setZoomRectData({ x0: xd, y0: yd, x1: xd, y1: yd });
   };
 
   const onMouseMove = (e: MouseEvent) => {
-    const [x, y] = getDataCoordsFromEvent(e);
+    const [xd, yd] = getDataCoordsFromEvent(e, false);
+    const [xp, yp] = getPixelCoordsFromEvent(e);
 
-    if (panning()) {
-      const [startX, startY] = panstart;
+    // Update the coordinate tracker in the plot
+    setDataCoords([xd, yd]);
 
-      const dx =
-        chart.scalePropsX.type === "log"
-          ? Math.log10(x) - Math.log10(startX)
-          : x - startX;
-
-      const dy =
-        chart.scalePropsY.type === "log"
-          ? Math.log10(y) - Math.log10(startY)
-          : y - startY;
-
-      updateChart("pan", (prev) => [prev[0] - dx, prev[1] - dy]);
-    } else {
-      // Update the coordinate tracker in the plot
-      setDataCoords([x, y]);
-    }
+    // Update zoom rectangle if drawing
+    setZoomRectPixel((zr) => (zr ? { ...zr, x1: xp, y1: yp } : null));
+    setZoomRectData((zr) => (zr ? { ...zr, x1: xd, y1: yd } : null));
   };
 
-  const onWheel = (e: WheelEvent) => {
-    // Zoom towards cursor
-    e.preventDefault();
-    const zoomFactor = 1.1;
-    const zoomDirection = e.deltaY < 0 ? 1 : -1;
-    const zoomChange = zoomFactor ** zoomDirection;
+  const onMouseUp = () => {
+    // Apply zoom if a rectangle was drawn
+    const newZoomData = zoomRectData(); // enable type narrowing for null check
+    const newZoomPixels = zoomRectData();
 
-    const [cursorX, cursorY] = getDataCoordsFromEvent(e);
+    if (!newZoomData || !newZoomPixels) return;
+
+    // Don't zoom if the rectangle is too small (ie just a click)
+    const { x0: x0p, x1: x1p, y0: y0p, y1: y1p } = newZoomPixels;
+    if (Math.abs(x1p - x0p) < 5 || Math.abs(y1p - y0p) < 5) {
+      setZoomRectData(null);
+      setZoomRectPixel(null);
+      return;
+    }
+
+    const { x0, x1, y0, y1 } = newZoomData;
 
     updateChart(
       produce((draft) => {
-        const { scalePropsX, scalePropsY, pan } = draft;
-        const [panX, panY] = pan;
+        // Handle log scales
+        const scaleX = draft.scalePropsX;
+        const scaleY = draft.scalePropsY;
 
-        // Calculate x-pan (linear only for now)
-        const [xmin, xmax] = scalePropsX.domain;
-        const centerX = (xmin + xmax) / 2 + panX;
-        const dx = cursorX - centerX;
+        draft.scalePropsX.domain =
+          scaleX.type === "log"
+            ? [Math.max(Math.min(x0, x1), 1e-10), Math.max(x0, x1)]
+            : [Math.min(x0, x1), Math.max(x0, x1)];
 
-        // Calculate y-pan
-        const [ymin, ymax] = scalePropsY.domain;
-        let dy: number;
-        if (scalePropsY.type === "log") {
-          const logCursor = Math.log10(Math.max(cursorY, 1e-10));
-          const logCenter = (Math.log10(ymin) + Math.log10(ymax)) / 2 + panY;
-          dy = logCursor - logCenter;
-        } else {
-          const centerY = (ymin + ymax) / 2 + panY;
-          dy = cursorY - centerY;
-        }
-
-        // Update the chart (mutating plays nicely with produce)
-        draft.zoom *= zoomChange;
-        draft.pan[0] += dx * (1 - 1 / zoomChange);
-        draft.pan[1] += dy * (1 - 1 / zoomChange);
+        draft.scalePropsY.domain =
+          // logY is used for skew-T, use inverse Y-axis and prevent zero/negative
+          scaleY.type === "log"
+            ? [Math.max(y0, y1), Math.max(Math.min(y0, y1), 1e-10)]
+            : [Math.min(y0, y1), Math.max(y0, y1)];
       }),
     );
+
+    setZoomRectData(null);
+    setZoomRectPixel(null);
+  };
+
+  const cancelZoomRect = () => {
+    setZoomRectData(null);
+    setZoomRectPixel(null);
   };
 
   const renderXCoord = () =>
@@ -242,21 +240,40 @@ export function Chart(props: {
   const renderYCoord = () =>
     hovering() ? `y: ${chart.formatY(dataCoords()[1])}` : "";
 
+  const drawZoomRect = () => {
+    const newBounds = zoomRectPixel();
+    if (!newBounds) return;
+
+    const { x0, y0, x1, y1 } = newBounds;
+
+    return (
+      <rect
+        x={Math.min(x0, x1)}
+        y={Math.min(y0, y1)}
+        width={Math.abs(x1 - x0)}
+        height={Math.abs(y1 - y0)}
+        fill="rgba(0,0,255,0.2)"
+        stroke="blue"
+        stroke-width={1}
+      />
+    );
+  };
+
   return (
     <svg
       width={chart.width}
       height={chart.height}
       class={cn(
         "text-slate-500 text-xs tracking-wide",
-        panning() ? "cursor-grabbing select-none" : "cursor-grab",
+        zoomRectData() ? "cursor-crosshair select-none" : "cursor-crosshair",
       )}
       onmouseover={() => setHovering(true)}
       onmouseout={() => setHovering(false)}
       onmousedown={onMouseDown}
-      onmouseup={() => setPanning(false)}
       onmousemove={onMouseMove}
-      onmouseleave={() => setPanning(false)}
-      onwheel={onWheel}
+      onmouseup={onMouseUp}
+      ondblclick={resetZoom}
+      onmouseleave={cancelZoomRect}
     >
       <title>{title}</title>
       <g transform={`translate(${marginLeft},${marginTop})`}>
@@ -267,6 +284,7 @@ export function Chart(props: {
         <text x="5" y="20">
           {renderYCoord()}
         </text>
+        {zoomRectData() && drawZoomRect()}
       </g>
       <ClipPath />
     </svg>
@@ -308,33 +326,4 @@ export function highlight(hex: string) {
       .toString(16)
       .padStart(2, "0");
   return `#${b(hex, 1)}${b(hex, 3)}${b(hex, 5)}`;
-}
-
-function getZoomedAndPannedDomainLinear(
-  min: number,
-  max: number,
-  pan: number,
-  zoom: number,
-): [number, number] {
-  const center = (min + max) / 2 + pan;
-  const halfExtent = (max - min) / (2 * zoom);
-  return [center - halfExtent, center + halfExtent];
-}
-
-function getZoomedAndPannedDomainLog(
-  min: number,
-  max: number,
-  pan: number,
-  zoom: number,
-): [number, number] {
-  const logMin = Math.log10(min);
-  const logMax = Math.log10(max);
-
-  const logCenter = (logMin + logMax) / 2 + pan;
-  const halfExtent = (logMax - logMin) / (2 * zoom);
-
-  const newLogMin = logCenter - halfExtent;
-  const newLogMax = logCenter + halfExtent;
-
-  return [10 ** newLogMin, 10 ** newLogMax];
 }
