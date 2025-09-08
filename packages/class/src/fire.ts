@@ -4,7 +4,12 @@
 
 import type { FireConfig } from "./config.js";
 import type { ClassProfile } from "./profiles.js";
-import { calcThetav, dewpoint } from "./thermodynamics.js";
+import {
+  dewpoint,
+  qsatLiq,
+  saturationAdjustment,
+  virtualTemperature,
+} from "./thermodynamics.js";
 
 // Constants
 const g = 9.81; // Gravitational acceleration [m/s²]
@@ -15,20 +20,24 @@ const Lv = 2.5e6; // Latent heat of vaporization [J/kg]
  * Configuration parameters for plume model
  */
 interface PlumeConfig {
-  zSl: number; // Surface layer height [m]
-  lambdaMix: number; // Mixing length in surface layer [m]
+  fac_ent: number; // factor for fractional entrainment (0.2 in Morton model)
   beta: number; // Fractional detrainment above surface layer
+  aW: number; // Factor scaling acceleration due to buoyancy
+  bW: number; // Factor scaling deceleration due to entrainment
   dz: number; // Grid spacing [m]
+  fac_area: number; // prescribed surface-layer area growth factor
 }
 
 /**
  * Default plume configuration
  */
 const defaultPlumeConfig: PlumeConfig = {
-  zSl: 100.0,
-  lambdaMix: 30.0,
+  fac_ent: 0.8,
   beta: 1.0,
+  aW: 1.0,
+  bW: 0.2,
   dz: 1.0,
+  fac_area: 10,
 };
 
 /**
@@ -49,6 +58,7 @@ export interface Parcel {
   T: number; // Temperature [K]
   Td: number; // Dewpoint temperature [K]
   p: number; // Pressure [hPa]
+  rh: number; // Relative humidity [%]
 }
 
 /**
@@ -57,6 +67,7 @@ export interface Parcel {
 function initializeFireParcel(
   background: ClassProfile,
   fire: FireConfig,
+  plumeConfig: PlumeConfig = defaultPlumeConfig,
 ): Parcel {
   // Start with parcel props from ambient air
   const z = background.z[0];
@@ -71,26 +82,38 @@ function initializeFireParcel(
   const area = fire.L * fire.d;
   const FFire =
     ((fire.omega * fire.C * fire.spread) / fire.d) * (1 - fire.radiativeLoss);
-  const FqFire = 0.0 * FFire; // Dry plume for now
+  const FqFire = (fire.omega * fire.Cq * fire.spread) / fire.d;
+  const FvFire = FFire * (1 + 0.61 * theta * FqFire);
 
   // Use cube root as the root may be negative and js will yield NaN for a complex number result
-  const w = Math.cbrt(
-    (3 * g * FFire * fire.h0) / (2 * rho * cp * thetavAmbient),
-  );
+  const fac_w =
+    (3 * g * plumeConfig.aW * FvFire) /
+    (2 * rho * cp * thetavAmbient * (1 + plumeConfig.bW));
+  const w = Math.cbrt(fac_w * fire.h0);
 
   // Add excess temperature/humidity and update thetav/qsat accordingly
   const dtheta = FFire / (rho * cp * w);
-  const dqv = FqFire / (rho * Lv * w);
+  const dqv = FqFire / (rho * w);
   theta += dtheta;
   qt += dqv;
 
-  const [thetav, qsat] = calcThetav(theta, qt, p, exner);
+  // Thermodynamics
+  const T = saturationAdjustment(theta, qt, p, exner);
+  const qsat = qsatLiq(p, T);
+  const ql = Math.max(qt - qsat, 0);
+  const thetav = virtualTemperature(theta, qt, ql);
+  const rh = ((qt - ql) / qsat) * 100;
+  const Td = dewpoint(qt, p / 100);
 
   // Calculate parcel buoyancy
-  const b = (g / background.thetav[0]) * (thetav - thetavAmbient);
+  const b = (g / thetavAmbient) * (thetav - thetavAmbient);
 
-  const T = background.exner[0] * theta;
-  const Td = dewpoint(qt, p / 100);
+  // Calculate initial entrainment/detrainment
+  const m = rho * area * w;
+  let e = ((rho * area) / (2 * w)) * b; // Entrainment assuming constant area with height in surface layer
+  e = e + (rho * w * area * (1 + plumeConfig.fac_area)) / fire.h0; // Additional, prescribed plume growth over surface layer
+  const d = 0;
+
   // Store parcel props
   return {
     z,
@@ -100,13 +123,14 @@ function initializeFireParcel(
     thetav,
     qsat,
     b,
-    area: fire.L * fire.d,
-    m: rho * area * w,
-    e: ((rho * area) / (2 * w)) * b,
-    d: 0,
+    area,
+    m,
+    e,
+    d,
     T,
     Td,
     p: background.p[0] / 100,
+    rh,
   };
 }
 
@@ -122,10 +146,9 @@ export function calculatePlume(
   let parcel = initializeFireParcel(bg, fire);
   const plume: Parcel[] = [parcel];
 
-  const detrainmentRate0 = plumeConfig.lambdaMix ** 0.5 / parcel.area ** 0.5;
-  let crossedSl = false;
-  let epsi = 0;
-  let delt = 0;
+  // Constant fractional entrainment and detrainment with height above surface layer
+  const epsi = plumeConfig.fac_ent / Math.sqrt(parcel.area);
+  const delt = epsi / plumeConfig.beta;
 
   for (let i = 1; i < bg.z.length; i++) {
     const z = bg.z[i];
@@ -136,48 +159,33 @@ export function calculatePlume(
     const theta = parcel.theta - emz * (parcel.theta - bg.theta[i - 1]);
     const qt = parcel.qt - emz * (parcel.qt - bg.qt[i - 1]);
 
-    // Calculate virtual potential temperature and buoyancy
-    const [thetav, qsat] = calcThetav(theta, qt, bg.p[i], bg.exner[i]);
+    // Thermodynamics and buoyancy
+    const T = saturationAdjustment(theta, qt, bg.p[i], bg.exner[i]);
+    const qsat = qsatLiq(bg.p[i], T);
+    const ql = Math.max(qt - qsat, 0);
+    const thetav = virtualTemperature(theta, qt, ql);
+    const rh = ((qt - ql) / qsat) * 100;
+    const Td = dewpoint(qt, bg.p[i] / 100);
     const b = (g / bg.thetav[i]) * (thetav - bg.thetav[i]);
 
     // Solve vertical velocity equation
-    const aW = 1;
-    const bW = 0;
-    const w =
-      parcel.w +
-      ((-bW * parcel.e * parcel.w +
-        aW * parcel.area * bg.rho[i - 1] * parcel.b) /
-        parcel.m) *
+    const w2 =
+      parcel.w * parcel.w +
+      2 *
+        (plumeConfig.aW * b - plumeConfig.bW * epsi * parcel.w * parcel.w) *
         dz;
-
-    // Calculate entrainment and detrainment
-    let e: number;
-    let d: number;
-
-    if (z < plumeConfig.zSl) {
-      // Surface layer formulation
-      e = ((parcel.area * bg.rho[i - 1]) / (2 * parcel.w)) * parcel.b;
-      d =
-        parcel.area *
-        bg.rho[i - 1] *
-        detrainmentRate0 *
-        ((z ** 0.5 * (w - parcel.w)) / dz + parcel.w / (2 * z ** 0.5));
+    let w: number;
+    if (w2 < 0) {
+      w = 0;
     } else {
-      // Above surface layer
-      if (!crossedSl) {
-        epsi = parcel.e / parcel.m;
-        delt = epsi / plumeConfig.beta;
-        crossedSl = true;
-      }
-
-      e = epsi * m;
-      d = delt * m;
+      w = Math.sqrt(w2);
     }
 
-    const area = m / (bg.rho[i] * w);
+    // Calculate entrainment and detrainment
+    const e = epsi * m;
+    const d = delt * m;
 
-    const T = bg.exner[i] * theta;
-    const Td = dewpoint(qt, bg.p[i] / 100);
+    const area = m / (bg.rho[i] * w);
 
     // Update parcel
     parcel = {
@@ -195,9 +203,10 @@ export function calculatePlume(
       T,
       Td,
       p: bg.p[i] / 100,
+      rh,
     };
 
-    if (w < 0 || area <= 0) {
+    if (w <= 0 || area <= 0) {
       break;
     }
 

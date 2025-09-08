@@ -2,7 +2,12 @@
 
 import type { MixedLayerConfig, NoWindConfig, WindConfig } from "./config.js";
 import type { ClassOutputAtSingleTime } from "./output.js";
-import { dewpoint, virtualTemperature } from "./thermodynamics.js";
+import {
+  dewpoint,
+  qsatLiq,
+  saturationAdjustment,
+  virtualTemperature,
+} from "./thermodynamics.js";
 
 const CONSTANTS = {
   g: 9.81, // Gravity [m/s²]
@@ -20,11 +25,13 @@ export interface ClassProfile {
   qt: number[]; // Total specific humidity [kg/kg]
   u: number[]; // U-component of wind [m/s]
   v: number[]; // V-component of wind [m/s]
+  w: number[]; // W-component of wind [m/s]
   p: number[]; // Pressure [Pa]
   exner: number[]; // Exner function [-]
   T: number[]; // Temperature [K]
   Td: number[]; // Dew point temperature [K]
   rho: number[]; // Density [kg/m³]
+  rh: number[]; // Relative humidity [%]
 }
 
 export const NoProfile: ClassProfile = {
@@ -34,11 +41,13 @@ export const NoProfile: ClassProfile = {
   qt: [],
   u: [],
   v: [],
+  w: [],
   p: [],
   exner: [],
   T: [],
   Td: [],
   rho: [],
+  rh: [],
 };
 
 /**
@@ -51,7 +60,7 @@ export function generateProfiles(
 ): ClassProfile {
   const { Rd, cp, g } = CONSTANTS;
   const { h, theta, qt, u, v, dtheta, dqt, du, dv } = output;
-  const { z_theta, z_qt, gamma_theta, gamma_qt } = config;
+  const { z_theta, z_qt, gamma_theta, gamma_qt, divU } = config;
   const { p0 } = config;
 
   // Determine top of profile based on the lowest z value across all variables
@@ -68,18 +77,23 @@ export function generateProfiles(
   const thetah = piecewiseProfile(zh, h, theta, dtheta, z_theta, gamma_theta);
   const qth = piecewiseProfile(zh, h, qt, dqt, z_qt, gamma_qt);
 
-  // Calculate virtual temperature, asssume base state is dry, so no saturation adjustment
-  const thetav = thetaProf.map((t, i) =>
-    virtualTemperature(t, qtProfile[i], 0),
-  );
+  // Calculate virtual temperature on half levels (no saturation) for pressure calc.
   const thetavh = thetah.map((t, i) => virtualTemperature(t, qth[i], 0));
 
-  // Pressure and other thermodynamic variables
+  // Pressure and other thermodynamic variables, incl. saturation adjustment (taking theta = theta_l)
   const p = calculatePressureProfile(zh, p0, Rd, cp, g, thetavh, dz);
   const exner = p.map((pressure) => (pressure / p0) ** (Rd / cp));
-  const T = exner.map((ex, i) => ex * thetaProf[i]);
+  const T = thetaProf.map((t, i) =>
+    saturationAdjustment(t, qtProfile[i], p[i], exner[i]),
+  );
+  const qsat = T.map((t, i) => qsatLiq(p[i], t));
+  const ql = qtProfile.map((q, i) => Math.max(q - qsat[i], 0));
+  const thetav = thetaProf.map((t, i) =>
+    virtualTemperature(t, qtProfile[i], ql[i]),
+  );
   const Td = p.map((p, i) => dewpoint(qtProfile[i], p / 100));
   const rho = p.map((pressure, i) => pressure / (Rd * exner[i] * thetav[i]));
+  const rh = qtProfile.map((q, i) => ((q - ql[i]) / qsat[i]) * 100);
 
   // Include wind
   let uProfile: number[];
@@ -93,18 +107,23 @@ export function generateProfiles(
     vProfile = new Array(z.length).fill(999);
   }
 
+  // Vertical velocity from constant divergence
+  const w = z.map((zi) => -divU * zi);
+
   return {
     z,
     theta: thetaProf,
     qt: qtProfile,
     u: uProfile,
     v: vProfile,
+    w,
     thetav,
     p,
     exner,
     T,
     Td,
     rho,
+    rh,
   };
 }
 

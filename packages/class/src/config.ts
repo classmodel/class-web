@@ -408,7 +408,7 @@ const untypedSchema = {
             symbol: "L<sub>fire</sub>",
             type: "number",
             unit: "m",
-            default: 10000,
+            default: 1000,
             title: "Length of the fire",
             "ui:group": "Fire",
           },
@@ -416,7 +416,7 @@ const untypedSchema = {
             symbol: "d<sub>fire</sub>",
             type: "number",
             unit: "m",
-            default: 300,
+            default: 10,
             title: "Depth of the fire",
             "ui:group": "Fire",
           },
@@ -432,16 +432,24 @@ const untypedSchema = {
             symbol: "C<sub>fire</sub>",
             type: "number",
             unit: "J kg⁻¹",
-            default: 17.781e6,
+            default: 18.6208e6,
             title: "Heat stored in fuel",
+            "ui:group": "Fire",
+          },
+          Cq: {
+            symbol: "C<sub>q,fire</sub>",
+            type: "number",
+            unit: "kg kg⁻¹",
+            default: 0,
+            title: "Moisture per kg fuel released into plume",
             "ui:group": "Fire",
           },
           omega: {
             symbol: "ω<sub>fire</sub>",
             type: "number",
             unit: "kg m⁻²",
-            default: 7.6,
-            title: "Fuel mass per area",
+            default: 0.1,
+            title: "Consumed fuel mass per area",
             "ui:group": "Fire",
           },
           spread: {
@@ -458,7 +466,7 @@ const untypedSchema = {
             unit: "-",
             default: 0.7,
             title:
-              "Fraction of F converted into radiative heating, and not into diffused into the atmosphere",
+              "Fraction of F converted into radiative heating, and not diffused into the atmosphere",
             "ui:group": "Fire",
           },
         },
@@ -522,6 +530,7 @@ export type FireConfig = {
   d: number;
   h0: number;
   C: number;
+  Cq: number;
   omega: number;
   spread: number;
   radiativeLoss: number;
