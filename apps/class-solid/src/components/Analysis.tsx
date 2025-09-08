@@ -140,9 +140,15 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
       e.output ? e.output[analysis.yVariable as OutputVariableKey] : [],
     );
 
-  const granularity = () => (analysis.xVariable === "t" ? 600 : undefined);
-  const xLim = () => getNiceAxisLimits(allX(), 0, granularity());
-  const yLim = () => getNiceAxisLimits(allY());
+  const granularities: Record<string, number | undefined> = {
+    t: 600, // 10 minutes in seconds
+    utcTime: 60_000, // 1 minute in milliseconds
+    default: undefined,
+  };
+
+  const roundTo = (v: string) => granularities[v] ?? granularities.default;
+  const xLim = () => getNiceAxisLimits(allX(), 0, roundTo(analysis.xVariable));
+  const yLim = () => getNiceAxisLimits(allY(), 0, roundTo(analysis.yVariable));
 
   const chartData = () =>
     flatExperiments().map((e) => {
