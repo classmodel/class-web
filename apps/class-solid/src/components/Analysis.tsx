@@ -185,11 +185,14 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
     setResetPlot(analysis.id);
   };
 
-  const formatX = () =>
-    analysis.xVariable === "t" ? formatSeconds : d3.format(".4");
-  const formatY = () =>
-    analysis.yVariable === "t" ? formatSeconds : d3.format(".4");
-
+  // Define axis format
+  const formatters: Record<string, (value: number) => string> = {
+    t: formatSeconds,
+    utcTime: (t) => d3.utcFormat("%H:%M")(new Date(t)),
+    default: d3.format(".4"),
+  };
+  const formatX = () => formatters[analysis.xVariable] ?? formatters.default;
+  const formatY = () => formatters[analysis.yVariable] ?? formatters.default;
   return (
     <>
       {/* TODO: get label for yVariable from model config */}

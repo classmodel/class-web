@@ -50,6 +50,7 @@ describe("parse", () => {
     const output = parse(input);
 
     const expected = {
+      t0: output.t0, // dynamic default
       h: 200,
       theta: 288,
       dtheta: 1,

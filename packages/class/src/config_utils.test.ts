@@ -7,6 +7,7 @@ describe("pruneConfig()", () => {
     const preset = {
       name: "Default",
       description: "Default configuration",
+      t0: "2025-09-08T14:30:00Z",
       theta_0: 323,
       h_0: 200,
       dtheta_0: 1,
@@ -26,6 +27,7 @@ describe("pruneConfig()", () => {
     const reference = {
       name: "Higher and Hotter",
       description: "Higher h_0",
+      t0: "2025-09-08T14:30:00Z",
       h_0: 211,
       theta_0: 323,
       dtheta_0: 1,
@@ -45,6 +47,7 @@ describe("pruneConfig()", () => {
     const permutation = {
       name: "Higher",
       description: "",
+      t0: "2025-09-08T14:30:00Z",
       h_0: 222,
       theta_0: 323,
       dtheta_0: 1,

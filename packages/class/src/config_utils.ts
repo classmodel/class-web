@@ -73,7 +73,7 @@ export function pruneConfig(
   for (const key in config) {
     const k = key as keyof typeof config;
     const k2 = key as keyof typeof config;
-    if (typeof config[k] === "string") {
+    if (k === "name" || k === "description") {
       // Do not prune name and description
       continue;
     }
