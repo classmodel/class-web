@@ -25,6 +25,15 @@ function getTempAtCursor(x: number, y: number, scaleY: SupportedScaleTypes) {
   return x - (scaleY(basep()) - y) / tan;
 }
 
+export function getXPixelFromTemp(
+  T: number,
+  p: number,
+  scaleY: SupportedScaleTypes,
+) {
+  const basep = () => scaleY.domain()[0];
+  return T + (scaleY(basep()) - scaleY(p)) / tan;
+}
+
 function SkewTGridLine(temperature: number) {
   const [chart, updateChart] = useChartContext();
   const x = (temp: number) => chart.scaleX(temp);
