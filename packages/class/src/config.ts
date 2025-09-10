@@ -28,6 +28,13 @@ const untypedSchema = {
       default: "",
       "ui:widget": "textarea",
     },
+    // Start date / time in utc
+    t0: {
+      type: "string",
+      title: "Start date and time (ISO 8601)",
+      default: new Date().toISOString(),
+      "ui:group": "Time Control",
+    },
     dt: {
       type: "integer",
       unit: "s",
@@ -63,7 +70,7 @@ const untypedSchema = {
       default: false,
     },
   },
-  required: ["name", "dt", "runtime"],
+  required: ["name", "t0", "dt", "runtime"],
   allOf: [
     {
       if: {
@@ -479,6 +486,7 @@ const untypedSchema = {
 type GeneralConfig = {
   name: string;
   description?: string;
+  t0: string;
   dt: number;
   runtime: number;
 };

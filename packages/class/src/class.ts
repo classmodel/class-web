@@ -270,6 +270,13 @@ export class CLASS {
     return this.ml?.qt || 999;
   }
 
+  get utcTime() {
+    // export time in milliseconds since epoch so bounds calculation and
+    // rendering can happen on app side
+    const t0 = new Date(this._cfg.t0).getTime();
+    return t0 + this.t * 1000;
+  }
+
   /**
    * Retrieve a value by name, treating nested state (wind, ml) as if it's flat.
    *

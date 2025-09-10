@@ -10,6 +10,11 @@ export const outputVariables = {
     unit: "s",
     symbol: "t",
   },
+  utcTime: {
+    title: "Time (UTC)",
+    unit: "-",
+    symbol: "UTC",
+  },
   h: {
     title: "ABL height",
     unit: "m",
