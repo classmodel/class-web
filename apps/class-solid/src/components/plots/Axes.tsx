@@ -13,11 +13,9 @@ type AxisProps = {
 export const AxisBottom = (props: AxisProps) => {
   const [chart, updateChart] = useChartContext();
 
-  // Store original domain on first render
-  props.domain && updateChart("originalDomainX", props.domain());
-
   // Update scale props when domain or type changes
   createEffect(() => {
+    props.domain && updateChart("originalDomainX", props.domain());
     props.domain && updateChart("scalePropsX", { domain: props.domain() });
     props.type && updateChart("scalePropsX", { type: props.type });
   });
@@ -46,11 +44,9 @@ export const AxisBottom = (props: AxisProps) => {
 export const AxisLeft = (props: AxisProps) => {
   const [chart, updateChart] = useChartContext();
 
-  // Store original domain on first render
-  props.domain && updateChart("originalDomainY", props.domain());
-
   // Update scale props when domain or type changes
   createEffect(() => {
+    props.domain && updateChart("originalDomainY", props.domain());
     props.domain && updateChart("scalePropsY", { domain: props.domain() });
     props.type && updateChart("scalePropsY", { type: props.type });
   });

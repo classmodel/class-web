@@ -193,7 +193,7 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
 
   // Define axis format
   const formatters: Record<string, (value: number) => string> = {
-    t: formatSeconds,
+    t: d3.format(".0f"),
     utcTime: formatUTC,
     default: d3.format(".4"),
   };
