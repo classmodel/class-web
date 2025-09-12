@@ -1,6 +1,6 @@
 {
   "name": "@classmodel/form",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Generate form from JSON schema with Solid UI components",
   "type": "module",
   "repository": {
