@@ -8,12 +8,17 @@ export const outputVariables = {
   t: {
     title: "Time",
     unit: "s",
-    symbol: "time",
+    symbol: "time (s)",
+  },
+  time_hour: {
+    title: "Time",
+    unit: "h",
+    symbol: "time (h)",
   },
   utcTime: {
     title: "Time UTC",
     unit: "h",
-    symbol: "time UTC",
+    symbol: "time (h UTC)",
   },
   h: {
     title: "ABL height",
