@@ -210,6 +210,13 @@ export class CLASS {
     return this.wtheta + 0.61 * this.ml.theta * this.wq;
   }
 
+   /** RH at surface */
+  get RH(): number {
+    this.assertMixedLayer();
+    /** this is compatible with the inaccurate original CLASS method with rho = 1.2 */
+    const qsat_h = qsatLiq(this._cfg.p0, this.ml.theta)
+    return 100.0*this.ml.qt/qsat_h
+  }
    /** RH at h */
   get RH_h(): number {
     this.assertMixedLayer();
@@ -282,6 +289,10 @@ export class CLASS {
 
   get qt() {
     return this.ml?.qt || 999;
+  }
+
+  get time_hour() {
+    return this.t / 3600.0
   }
 
   get utcTime() {

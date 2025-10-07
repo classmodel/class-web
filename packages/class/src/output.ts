@@ -11,9 +11,9 @@ export const outputVariables = {
     symbol: "time",
   },
   utcTime: {
-    title: "Time (UTC)",
-    unit: "-",
-    symbol: "time h UTC",
+    title: "Time UTC",
+    unit: "h",
+    symbol: "time UTC",
   },
   h: {
     title: "ABL height",
@@ -95,11 +95,16 @@ export const outputVariables = {
     unit: "m s⁻¹",
     symbol: "Δv",
   },
-RH_h: {
-    title: "Relative humidity at h",
-    unit: "%",
-    symbol: "RH_h",
-  },
+  RH: {
+      title: "Relative humidity at the surface",
+      unit: "%",
+      symbol: "RH",
+    },
+  RH_h: {
+      title: "Relative humidity at h",
+      unit: "%",
+      symbol: "RH_h",
+    },
 } as const satisfies Record<string, VariableInfo>;
 
 export type OutputVariableKey = keyof typeof outputVariables;
