@@ -8,12 +8,12 @@ export const outputVariables = {
   t: {
     title: "Time",
     unit: "s",
-    symbol: "t",
+    symbol: "time",
   },
   utcTime: {
     title: "Time (UTC)",
     unit: "-",
-    symbol: "UTC",
+    symbol: "time h UTC",
   },
   h: {
     title: "ABL height",
@@ -94,6 +94,11 @@ export const outputVariables = {
     title: "V-wind jump at h",
     unit: "m s⁻¹",
     symbol: "Δv",
+  },
+RH_h: {
+    title: "Relative humidity at h",
+    unit: "%",
+    symbol: "RH_h",
   },
 } as const satisfies Record<string, VariableInfo>;
 
