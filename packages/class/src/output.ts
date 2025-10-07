@@ -101,15 +101,15 @@ export const outputVariables = {
     symbol: "Δv",
   },
   RH: {
-      title: "Relative humidity at the surface",
-      unit: "%",
-      symbol: "RH",
-    },
+    title: "Relative humidity at the surface",
+    unit: "%",
+    symbol: "RH",
+  },
   RH_h: {
-      title: "Relative humidity at h",
-      unit: "%",
-      symbol: "RH_h",
-    },
+    title: "Relative humidity at h",
+    unit: "%",
+    symbol: "RH_h",
+  },
 } as const satisfies Record<string, VariableInfo>;
 
 export type OutputVariableKey = keyof typeof outputVariables;

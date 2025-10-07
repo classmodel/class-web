@@ -210,24 +210,24 @@ export class CLASS {
     return this.wtheta + 0.61 * this.ml.theta * this.wq;
   }
 
-   /** RH at surface */
+  /** RH at surface */
   get RH(): number {
     this.assertMixedLayer();
     /** this is compatible with the inaccurate original CLASS method with rho = 1.2 */
-    const qsat_h = qsatLiq(this._cfg.p0, this.ml.theta)
-    return 100.0*this.ml.qt/qsat_h
+    const qsat_h = qsatLiq(this._cfg.p0, this.ml.theta);
+    return (100.0 * this.ml.qt) / qsat_h;
   }
-   /** RH at h */
+  /** RH at h */
   get RH_h(): number {
     this.assertMixedLayer();
     /** this is compatible with the inaccurate original CLASS method with rho = 1.2 */
-    const rho = 1.2
-    const g = 9.81
-    const cp = 1005.0
-    const p_h = this._cfg.p0 - this.ml.h * rho * g
-    const T_h = this.ml.theta - (g/cp * this.ml.h)
-    const qsat_h = qsatLiq(p_h, T_h)
-    return 100.0*this.ml.qt/qsat_h
+    const rho = 1.2;
+    const g = 9.81;
+    const cp = 1005.0;
+    const p_h = this._cfg.p0 - this.ml.h * rho * g;
+    const T_h = this.ml.theta - (g / cp) * this.ml.h;
+    const qsat_h = qsatLiq(p_h, T_h);
+    return (100.0 * this.ml.qt) / qsat_h;
   }
 
   // Lapse rates
@@ -292,7 +292,7 @@ export class CLASS {
   }
 
   get time_hour() {
-    return this.t / 3600.0
+    return this.t / 3600.0;
   }
 
   get utcTime() {
