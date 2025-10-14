@@ -51,7 +51,7 @@ export function toPartial(config: ExperimentConfig): PartialExperimentConfig {
     reference,
     preset: config.preset,
     permutations: config.permutations.map((perm) =>
-      pruneConfig(perm, config.reference, preset.config),
+      pruneConfig(perm, config.reference),
     ),
     observations: config.observations,
   };
