@@ -110,6 +110,11 @@ export const outputVariables = {
     unit: "%",
     symbol: "RH_h",
   },
+  LCL: {
+    title: "Lifting condensation level",
+    unit: "m",
+    symbol: "LCL",
+  },
 } as const satisfies Record<string, VariableInfo>;
 
 export type OutputVariableKey = keyof typeof outputVariables;

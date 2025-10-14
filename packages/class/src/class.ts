@@ -230,6 +230,35 @@ export class CLASS {
     return (100.0 * this.ml.qt) / qsat_h;
   }
 
+  /** LCL */
+  get LCL(): number {
+    this.assertMixedLayer();
+    /** this is also copied from the original CLASS, in turn from Bolton (2008) */
+
+    // Iterative solution for LCL
+    const g = 9.81;
+    const cp = 1005.0;
+    const Rd = 287.05;
+    const Rv = 461.5;
+    const Lv = 2.5e6;
+
+    let i = 0;
+    let RHlcl = 0.9998;
+    let lcl = this.ml.h;
+
+    while ((RHlcl <= 0.9999 || RHlcl >= 1.0001) && i < 20) {
+      // Limit max iter to 20, in case of e.g. q=0
+      lcl = lcl + (1 - RHlcl) * 1000;
+      const Plcl = this._cfg.p0 / Math.exp((g * lcl) / (Rd * this.ml.theta));
+      const Tlcl = this.ml.theta / (this._cfg.p0 / Plcl) ** (Rd / cp);
+      const esatlcl = 0.611e3 * Math.exp((Lv / Rv) * (1 / 273.15 - 1 / Tlcl));
+      const elcl = (this.ml.qt * Plcl) / 0.622;
+      RHlcl = elcl / esatlcl;
+      i++;
+    }
+    return lcl;
+  }
+
   // Lapse rates
 
   /** Free atmosphere potential temperature lapse rate */
