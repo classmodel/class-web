@@ -72,7 +72,7 @@ function initializeFireParcel(
 ): Parcel {
   // Start with parcel props from ambient air
   const z = background.z[0];
-  let thetal = background.theta[0]; // CLASS assumes RH_near-surf < 100% 
+  let thetal = background.theta[0]; // CLASS assumes RH_near-surf < 100%
   const thetavAmbient = background.thetav[0];
   let qt = background.qt[0];
   const rho = background.rho[0];
@@ -92,7 +92,7 @@ function initializeFireParcel(
     (2 * rho * cp * thetavAmbient * (1 + plumeConfig.bW));
   const w = Math.cbrt(fac_w * fire.h0);
 
-  // Add excess temperature/humidity 
+  // Add excess temperature/humidity
   const dtheta = FFire / (rho * cp * w);
   const dqv = FqFire / (rho * w);
   thetal += dtheta;
@@ -102,7 +102,7 @@ function initializeFireParcel(
   const T = saturationAdjustment(thetal, qt, p, exner);
   const qsat = qsatLiq(p, T);
   const ql = Math.max(qt - qsat, 0);
-  const theta = thetal + Lv / cp / exner * ql
+  const theta = thetal + (Lv / cp / exner) * ql;
   const thetav = virtualTemperature(theta, qt, ql);
   const rh = ((qt - ql) / qsat) * 100;
   const Td = dewpoint(qt, p / 100);
@@ -167,7 +167,7 @@ export function calculatePlume(
     const T = saturationAdjustment(thetal, qt, bg.p[i], bg.exner[i]);
     const qsat = qsatLiq(bg.p[i], T);
     const ql = Math.max(qt - qsat, 0);
-    const theta = thetal + Lv / cp / bg.exner[i] * ql
+    const theta = thetal + (Lv / cp / bg.exner[i]) * ql;
     const thetav = virtualTemperature(theta, qt, ql);
     const rh = ((qt - ql) / qsat) * 100;
     const Td = dewpoint(qt, bg.p[i] / 100);
