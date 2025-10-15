@@ -8,6 +8,7 @@ const Lv = 2.5e6; // Latent heat of vaporization [J/kg]
 const ep = Rd / Rv;
 
 export function virtualTemperature(t: number, qt: number, ql: number): number {
+  // Note t is theta, not thl as conserved by the plume
   return t * (1.0 - (1.0 - Rv / Rd) * qt - (Rv / Rd) * ql);
 }
 
