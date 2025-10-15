@@ -148,12 +148,13 @@ export function calculatePlume(
   const { dz } = plumeConfig;
   let parcel = initializeFireParcel(bg, fire);
   const plume: Parcel[] = [parcel];
+  plume.push(parcel);
 
   // Constant fractional entrainment and detrainment with height above surface layer
   const epsi = plumeConfig.fac_ent / Math.sqrt(parcel.area);
   const delt = epsi / plumeConfig.beta;
 
-  for (let i = 1; i < bg.z.length; i++) {
+  for (let i = 2; i < bg.z.length; i++) {
     const z = bg.z[i];
 
     // Mass flux through plume
