@@ -171,13 +171,12 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
   const [toggles, setToggles] = createStore<Record<string, boolean>>({});
 
   // Initialize all lines as visible
-  createEffect(() => {
-    for (const d of chartData()) {
-      setToggles(d.label, true);
-    }
-  });
+  for (const d of chartData()) {
+    setToggles(d.label, true);
+  }
 
   function toggleLine(label: string, value: boolean) {
+    console.log("toggleLine called");
     setToggles(label, value);
   }
 
@@ -334,11 +333,9 @@ export function VerticalProfilePlot({
   const [toggles, setToggles] = createStore<Record<string, boolean>>({});
 
   // Initialize all lines as visible
-  createEffect(() => {
-    for (const d of chartData()) {
-      setToggles(d.label, true);
-    }
-  });
+  for (const d of chartData()) {
+    setToggles(d.label, true);
+  }
 
   function toggleLine(label: string, value: boolean) {
     setToggles(label, value);

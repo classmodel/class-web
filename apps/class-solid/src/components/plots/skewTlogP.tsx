@@ -1,6 +1,6 @@
 // Code modified from https://github.com/rsobash/d3-skewt/ (MIT license)
 import * as d3 from "d3";
-import { For, Show, createEffect, createSignal } from "solid-js";
+import { For, Show, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import { AxisBottom, AxisLeft } from "./Axes";
 import type { ChartData, SupportedScaleTypes } from "./ChartContainer";
@@ -180,11 +180,9 @@ export function SkewTPlot(props: {
     props.data().filter((d) => !d.label.includes("- fire plume"));
 
   // Initialize all lines as visible
-  createEffect(() => {
-    for (const d of dataForLegend()) {
-      setToggles(d.label, true);
-    }
-  });
+  for (const d of dataForLegend()) {
+    setToggles(d.label, true);
+  }
 
   function toggleLine(label: string, value: boolean) {
     setToggles(label, value);
