@@ -59,9 +59,8 @@ export async function runExperiment(id: number) {
 
   // If no analyis are set then add all of them
   if (analyses.length === 0) {
-    for (const name of analysisNames) {
-      addAnalysis(name);
-    }
+    addAnalysis("Vertical profiles");
+    addAnalysis("Timeseries");
   }
 }
 
