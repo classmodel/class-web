@@ -93,6 +93,8 @@ describe("parse", () => {
       sw_ml: true,
       sw_wind: false,
       sw_fire: false,
+      sw_dc: false,
+      t_dc: 13,
     };
     assert.deepEqual(output, expected);
   });

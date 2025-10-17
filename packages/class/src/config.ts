@@ -57,6 +57,12 @@ const untypedSchema = {
       title: "Mixed-layer switch",
       default: true,
     },
+    sw_dc: {
+      type: "boolean",
+      "ui:group": "Diurnal cycle",
+      title: "Diurnal cycle switch",
+      default: false,
+    },
     sw_wind: {
       type: "boolean",
       "ui:group": "Wind",
@@ -261,6 +267,29 @@ const untypedSchema = {
           "z_theta",
           "z_qt",
         ],
+      },
+    },
+    {
+      if: {
+        properties: {
+          sw_dc: {
+            const: true,
+          },
+        },
+      },
+      // biome-ignore lint/suspicious/noThenProperty: <explanation>
+      then: {
+        properties: {
+          t_dc: {
+            symbol: "T<sub>diurnal</sub>",
+            type: "number",
+            unit: "h",
+            default: 13,
+            title: "Period of diurnal cycle",
+            "ui:group": "Diurnal cycle",
+          },
+        },
+        required: ["t_dc"],
       },
     },
     {
@@ -532,6 +561,14 @@ type NoMixedLayerConfig = {
   sw_ml?: false;
 };
 
+export type DiurnalCycleConfig = {
+  sw_dc: true;
+  t_dc: number;
+};
+export type NoDiurnalCycleConfig = {
+  sw_dc?: false;
+};
+
 export type FireConfig = {
   sw_fire: true;
   L: number;
@@ -551,7 +588,8 @@ export type NoFireConfig = {
 export type Config = GeneralConfig &
   (MixedLayerConfig | NoMixedLayerConfig) &
   (WindConfig | NoWindConfig) &
-  (FireConfig | NoFireConfig);
+  (FireConfig | NoFireConfig) &
+  (DiurnalCycleConfig | NoDiurnalCycleConfig);
 
 export type JsonSchemaOfConfig = JSONSchemaType<Config>;
 export const jsonSchemaOfConfig =
