@@ -62,6 +62,8 @@ export interface Parcel {
   rh: number; // Relative humidity [%]
 }
 
+export type FirePlume = Parcel[];
+
 /**
  * Initialize fire parcel with ambient conditions and fire properties
  */
@@ -144,7 +146,7 @@ export function calculatePlume(
   fire: FireConfig,
   bg: ClassProfile,
   plumeConfig: PlumeConfig = defaultPlumeConfig,
-): Parcel[] {
+): FirePlume {
   const { dz } = plumeConfig;
   let parcel = initializeFireParcel(bg, fire);
   const plume: Parcel[] = [parcel];

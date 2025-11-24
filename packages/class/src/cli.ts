@@ -7,7 +7,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { EOL } from "node:os";
 import { Command, Option } from "@commander-js/extra-typings";
 import { jsonSchemaOfConfig } from "./config.js";
-import type { ClassOutput, OutputVariableKey } from "./output.js";
+import type { ClassTimeSeries, OutputVariableKey } from "./output.js";
 import { runClass } from "./runner.js";
 import { parse } from "./validate.js";
 
@@ -51,7 +51,7 @@ async function writeTextFile(body: string, fn: string): Promise<void> {
 /**
  * Create a DSV (delimiter-separated values) string from an object of arrays.
  */
-function dsv(output: ClassOutput, delimiter: string): string {
+function dsv(output: ClassTimeSeries, delimiter: string): string {
   const keys = Object.keys(output) as OutputVariableKey[];
   // order of headers is now in which they were added to the object
   // TODO make configurable: which columns and in which order
@@ -67,7 +67,7 @@ function dsv(output: ClassOutput, delimiter: string): string {
 /**
  * Format the output.
  */
-function formatOutput(output: ClassOutput, format: string): string {
+function formatOutput(output: ClassTimeSeries, format: string): string {
   switch (format) {
     case "json":
       return JSON.stringify(output, null, 2);

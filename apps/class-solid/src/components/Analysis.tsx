@@ -1,7 +1,7 @@
 import type { Config } from "@classmodel/class/config";
 import { calculatePlume, transposePlumeData } from "@classmodel/class/fire";
 import {
-  type ClassOutput,
+  type ClassTimeSeries,
   type OutputVariableKey,
   getOutputAtTime,
   outputVariables,
@@ -78,7 +78,7 @@ interface FlatExperiment {
   color: string;
   linestyle: string;
   config: Config;
-  output?: ClassOutput;
+  output?: ClassTimeSeries;
 }
 
 // Create a derived store for looping over all outputs:
@@ -322,8 +322,7 @@ export function VerticalProfilePlot({
     ...observations().flatMap((obs) => obs.data.map((d) => d.y)),
   ];
 
-  // TODO: better to include jump at top in extent calculation rather than adding random margin.
-  const xLim = () => getNiceAxisLimits(allX(), 1);
+  const xLim = () => getNiceAxisLimits(allX(), 0);
   const yLim = () => [0, getNiceAxisLimits(allY(), 0)[1]] as [number, number];
 
   function chartData() {

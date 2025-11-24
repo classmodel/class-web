@@ -1,7 +1,7 @@
 // profiles.ts
 
 import type { MixedLayerConfig, NoWindConfig, WindConfig } from "./config.js";
-import type { ClassOutputAtSingleTime } from "./output.js";
+import type { ClassOutput } from "./output.js";
 import {
   dewpoint,
   qsatLiq,
@@ -55,7 +55,7 @@ export const NoProfile: ClassProfile = {
  */
 export function generateProfiles(
   config: MixedLayerConfig & (WindConfig | NoWindConfig),
-  output: ClassOutputAtSingleTime,
+  output: ClassOutput,
   dz = 1,
 ): ClassProfile {
   const { Rd, cp, g } = CONSTANTS;
