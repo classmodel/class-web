@@ -122,6 +122,11 @@ async function loadExperimentFromUrl(url: string) {
   showToastPromise(
     async () => {
       const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to download experiment from ${url}: ${response.status} ${response.statusText}`,
+        );
+      }
       const rawData = await response.json();
       await uploadExperiment(rawData);
       // clear ?e from URL after loading, as any edits would make URL a lie
