@@ -94,7 +94,7 @@ export function ShareButton() {
                 large.
               </p>
               <p>
-                Alternativly you can create your own shareable link by hosting
+                Alternatively you can create your own shareable link by hosting
                 the state remotely:
               </p>
               <ol class="list-inside list-decimal space-y-1">

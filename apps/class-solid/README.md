@@ -64,9 +64,9 @@ For example to load <src/lib/presets/death-valley.json> use `http://localhost:30
 
 ## Loading experiment from URL
 
-A saved experiment (`<experiment-name>.json` file) can be loaded from a URL with the `e` search query parameter.
+A saved state (`class-<experiment-name>.json` file) can be loaded from a URL with the `s` search query parameter.
 
-For example `https://classmodel.github.io/class-web?e=https://wildfiredataportal.eu/fire/batea/class.json` will load the experiment from `https://wildfiredataportal.eu/fire/batea/class.json`.
+For example `https://classmodel.github.io/class-web?s=https://wildfiredataportal.eu/fire/batea/class.json` will load the experiment from `https://wildfiredataportal.eu/fire/batea/class.json`.
 
 The server hosting the JSON file must have CORS enabled so the CLASS web application is allowed to download it, see [https://enable-cors.org](https://enable-cors.org) for details.
 
@@ -77,7 +77,7 @@ Besides the `pnpm dev` start a static web server hosting the `./mock-wildfiredat
 
 ```shell
 mkdir -p ./mock-wildfiredataportal
-# Create a mocked experiment similar to https://wildfiredataportal.eu/fire/batea/
+# Create a mocked state with experiment similar to https://wildfiredataportal.eu/fire/batea/
 cat <<EOF > ./mock-wildfiredataportal/batea.json
 {
   "experiments": [{
