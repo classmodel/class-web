@@ -108,9 +108,15 @@ export function observationsForProfile(obs: Observation, variable = "theta") {
           return { y: h, x: u };
         case "v":
           return { y: h, x: v };
+        case "rh":
+          return { y: h, x: rh };
+        case "T":
+          return { y: h, x: T };
+        case "p":
+          return { y: h, x: p };
         default:
           console.warn(
-            "Unknown variable '${variable}' for observation profile.",
+            `Unknown variable '${variable}' for observation profile.`,
           );
           return { y: Number.NaN, x: Number.NaN };
       }
