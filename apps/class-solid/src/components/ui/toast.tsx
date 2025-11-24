@@ -181,6 +181,8 @@ function showToastPromise<T, U>(
       toastId={props.toastId}
       variant={variant[props.state]}
       duration={options.duration}
+      // Only hide toast after duration if it's in success state
+      persistent={props.state !== "fulfilled"}
     >
       <Switch>
         <Match when={props.state === "pending"}>{options.loading}</Match>
@@ -191,6 +193,7 @@ function showToastPromise<T, U>(
         <Match when={props.state === "rejected"}>
           {/* biome-ignore lint/style/noNonNullAssertion: <explanation> */}
           {options.error?.(props.error!)}
+          <ToastClose />
         </Match>
       </Switch>
     </Toast>
