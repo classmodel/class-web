@@ -62,8 +62,8 @@ export async function runExperiment(id: number) {
       permConfig,
     ) as Config;
     try {
-      const newOutput = await runClassAsync(combinedConfig);
-      setExperiments(id, "output", "permutations", permCounter, newOutput);
+    const newOutput = await runClassAsync(combinedConfig);
+    setExperiments(id, "output", "permutations", permCounter, newOutput);
     } catch (error) {
       showToast({
         title: `Error running permutation: ${permConfig.name}`,
