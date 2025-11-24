@@ -1,4 +1,4 @@
-import { Show, createMemo, createSignal } from "solid-js";
+import { Show, createMemo, createSignal, onCleanup } from "solid-js";
 import { Button } from "~/components/ui/button";
 import { encodeAppState } from "~/lib/encode";
 import { analyses, experiments } from "~/lib/store";
@@ -23,17 +23,33 @@ export function ShareButton() {
   const [open, setOpen] = createSignal(false);
   const [isCopied, setIsCopied] = createSignal(false);
   let inputRef: HTMLInputElement | undefined;
-  const shareableLink = createMemo(() => {
+  const encodedAppState = createMemo(() => {
     if (!open()) {
       return "";
     }
-
-    const appState = encodeAppState(experiments, analyses);
+    return encodeAppState(experiments, analyses);
+  });
+  const shareableLink = createMemo(() => {
     const basePath = import.meta.env.DEV
       ? ""
       : import.meta.env.BASE_URL.replace("/_build", "");
-    const url = `${window.location.origin}${basePath}#${appState}`;
+    const url = `${window.location.origin}${basePath}#${encodedAppState()}`;
     return url;
+  });
+  const downloadUrl = createMemo(() => {
+    return URL.createObjectURL(
+      new Blob([decodeURI(encodedAppState())], {
+        type: "application/json",
+      }),
+    );
+  });
+  onCleanup(() => {
+    URL.revokeObjectURL(downloadUrl());
+  });
+
+  const filename = createMemo(() => {
+    const names = experiments.map((e) => e.config.reference.name).join("-");
+    return `class-${names.slice(0, 120)}.json`;
   });
 
   async function copyToClipboard() {
@@ -72,11 +88,50 @@ export function ShareButton() {
         <Show
           when={shareableLink().length < MAX_SHAREABLE_LINK_LENGTH}
           fallback={
-            <p>
-              Cannot share application state, it is too large. Please download
-              each experiment by itself or make it smaller by removing
-              permutations and/or experiments.
-            </p>
+            <>
+              <p>
+                Cannot embed application state in shareable link, it is too
+                large.
+              </p>
+              <p>
+                Alternativly you can create your own shareable link by hosting
+                the state remotely:
+              </p>
+              <ol class="list-inside list-decimal space-y-1">
+                <li>
+                  <a
+                    class="underline"
+                    href={downloadUrl()}
+                    download={filename()}
+                    type="application/json"
+                  >
+                    Download state
+                  </a>{" "}
+                  as file
+                </li>
+                <li>
+                  Upload the state file to some static hosting service like your
+                  own web server or an AWS S3 bucket.
+                </li>
+                <li>
+                  Open the CLASS web application with
+                  "https://classmodel.github.io/class-web?s=&lt;your remote
+                  url&gt;".
+                </li>
+              </ol>
+              <p>
+                Make sure the CLASS web application is{" "}
+                <a
+                  href="https://enable-cors.org/server.html"
+                  target="_blank"
+                  rel="noreferrer"
+                  class="underline"
+                >
+                  allowed to download from remote location
+                </a>
+                .
+              </p>
+            </>
           }
         >
           <Show

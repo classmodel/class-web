@@ -44,9 +44,9 @@ export function loadFromLocalStorage() {
 export async function onPageLoad() {
   const location = useLocation();
   const navigate = useNavigate();
-  const experimentUrl = location.query.e;
-  if (experimentUrl) {
-    return await loadExperimentFromUrl(experimentUrl);
+  const stateUrl = location.query.s;
+  if (stateUrl) {
+    return await loadStateFromURL(stateUrl);
   }
   const presetUrl = location.query.preset;
   if (presetUrl) {
@@ -117,7 +117,7 @@ export function saveToLocalStorage() {
   });
 }
 
-async function loadExperimentFromUrl(url: string) {
+async function loadStateFromURL(url: string) {
   const navigate = useNavigate();
   showToastPromise(
     async () => {
@@ -127,8 +127,8 @@ async function loadExperimentFromUrl(url: string) {
           `Failed to download experiment from ${url}: ${response.status} ${response.statusText}`,
         );
       }
-      const rawData = await response.json();
-      await uploadExperiment(rawData);
+      const rawData = await response.text();
+      await loadStateFromString(rawData);
       // clear ?e from URL after loading, as any edits would make URL a lie
       navigate("/");
     },
