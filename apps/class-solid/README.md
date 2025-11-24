@@ -59,27 +59,28 @@ The format is JSON with content adhering to the [JSON schema](https://github.com
 The `src/lib/presets.ts` is used as an index of presets.
 If you add a preset the `src/lib/presets.ts` file needs to be updated.
 
-An experiment from a preset can be opened from a url like `?preset=<preset-name>`.
+An experiment from a preset can be opened from a URL like `?preset=<preset-name>`.
 For example to load <src/lib/presets/death-valley.json> use `http://localhost:3000/?preset=Death%20Valley`.
 
-## Loading experiments from url
+## Loading experiment from URL
 
-A saved experiment can be loaded from a url with the `preset` search query parameter.
+A saved experiment (`<experiment-name>.json` file) can be loaded from a URL with the `e` search query parameter.
 
 For example `https://classmodel.github.io/class-web?e=https://wildfiredataportal.eu/fire/batea/class.json` will load the experiment from `https://wildfiredataportal.eu/fire/batea/class.json`.
 
-The server hosting the json file must have CORS enabled for this to work, see https://enable-cors.org/ for details.
+The server hosting the JSON file must have CORS enabled so the CLASS web application is allowed to download it, see [https://enable-cors.org](https://enable-cors.org) for details.
 
 <details>
 <summary>Local development</summary>
 
-Besides the `pnpm dev` start a static web server hosting `apps/class-solid/src/lib/presets/` directory.
+The `./mock-wildfiredataportal/` directory contains mocked experiment similar to a wildfire at https://wildfiredataportal.eu/data/wildfire-data-portal/.
+
+Besides the `pnpm dev` start a static web server hosting the `./mock-wildfiredataportal/` directory.
 
 ```shell
-# TODO
+pnpm exec serve --cors --listen 3001 ./mock-wildfiredataportal
 ```
 
-
-Visit http://localhost:3000/?preset=http://localhost:8080/death-valley.json .
+Visit [http://localhost:3000/?e=http://localhost:3001/batea.json](http://localhost:3000/?e=http://localhost:3001/batea.json).
 
 </details>
