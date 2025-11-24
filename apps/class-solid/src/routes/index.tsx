@@ -16,7 +16,8 @@ import { Flex } from "~/components/ui/flex";
 import { Toaster } from "~/components/ui/toast";
 import { onPageLoad } from "~/lib/state";
 
-import { addAnalysis, analysisNames, experiments } from "~/lib/store";
+import { analysisNames } from "~/lib/analysis_type";
+import { addAnalysis, experiments } from "~/lib/store";
 import { analyses } from "~/lib/store";
 
 export default function Home() {

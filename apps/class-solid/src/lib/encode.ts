@@ -1,12 +1,14 @@
 import { pruneConfig } from "@classmodel/class/config_utils";
 import { unwrap } from "solid-js/store";
+import { parseAnalysis } from "./analysis_type";
+import type { Analysis } from "./analysis_type";
 import {
   type ExperimentConfig,
   type PartialExperimentConfig,
   parseExperimentConfig,
 } from "./experiment_config";
 import { findPresetByName } from "./presets";
-import type { Analysis, Experiment } from "./store";
+import type { Experiment } from "./store";
 
 export function decodeAppState(encoded: string): [Experiment[], Analysis[]] {
   const decoded = decodeURI(encoded);
@@ -28,8 +30,14 @@ export function decodeAppState(encoded: string): [Experiment[], Analysis[]] {
   } else {
     console.error("No experiments found in ", encoded);
   }
-
   const analyses: Analysis[] = [];
+  if (typeof parsed === "object" && Array.isArray(parsed.analyses)) {
+    for (const analysisRaw of parsed.analyses) {
+      const analysis = parseAnalysis(analysisRaw);
+      analyses.push(analysis);
+    }
+  }
+
   return [experiments, analyses];
 }
 
@@ -38,8 +46,10 @@ export function encodeAppState(
   analyses: Analysis[],
 ) {
   const rawExperiments = unwrap(experiments);
+  const rawAnalyses = unwrap(analyses);
   const minimizedState = {
     experiments: rawExperiments.map((exp) => toPartial(exp.config)),
+    analyses: rawAnalyses,
   };
   return encodeURI(JSON.stringify(minimizedState, undefined, 0));
 }
