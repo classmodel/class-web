@@ -18,7 +18,7 @@ const CONSTANTS = {
 /**
  * Atmospheric vertical profiles
  */
-export interface ClassProfile {
+export interface ClassProfile extends Record<string, number[]> {
   z: number[]; // Height levels (cell centers) [m]
   theta: number[]; // Potential temperature [K]
   thetav: number[]; // Virtual potential temperature [K]
@@ -34,7 +34,7 @@ export interface ClassProfile {
   rh: number[]; // Relative humidity [%]
 }
 
-export const NoProfile: ClassProfile = {
+export const noProfile: ClassProfile = {
   z: [],
   theta: [],
   thetav: [],

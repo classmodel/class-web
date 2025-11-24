@@ -17,7 +17,11 @@ import { parse } from "./validate.js";
 type ClassTimeSeries = Record<OutputVariableKey, number[]>;
 type ClassProfiles = ClassProfile[];
 type ClassFirePlumes = FirePlume[];
-export type ClassData = [ClassTimeSeries, ClassProfiles?, ClassFirePlumes?];
+export interface ClassData {
+  timeseries: ClassTimeSeries;
+  profiles?: ClassProfiles;
+  plumes?: ClassFirePlumes;
+}
 
 /**
  * Runs the CLASS model with the given configuration and frequency.
@@ -38,7 +42,7 @@ export function runClass(config: Config, freq = 600): ClassData {
       const value = model.getValue(key);
       if (value !== undefined) {
         output[key] = model.getValue(key);
-        timeSeries[key].push(value as number);
+        timeseries[key].push(value as number);
       }
 
       // Include profiles
@@ -49,18 +53,18 @@ export function runClass(config: Config, freq = 600): ClassData {
         // Include fireplumes
         if (config.sw_fire) {
           const plume = calculatePlume(config, profile);
-          firePlumes.push(plume);
+          plumes.push(plume);
         }
       }
     }
   };
 
   // Initialize output arrays
-  const timeSeries = Object.fromEntries(
+  const timeseries = Object.fromEntries(
     outputKeys.map((key) => [key, []]),
   ) as unknown as ClassTimeSeries;
   const profiles: ClassProfiles = [];
-  const firePlumes: ClassFirePlumes = [];
+  const plumes: ClassFirePlumes = [];
 
   // Initial time
   writeOutput();
@@ -77,9 +81,9 @@ export function runClass(config: Config, freq = 600): ClassData {
   // Construct ClassData
   if (config.sw_ml) {
     if (config.sw_fire) {
-      return [timeSeries, profiles, firePlumes];
+      return { timeseries, profiles, plumes };
     }
-    return [timeSeries, profiles];
+    return { timeseries, profiles };
   }
-  return [timeSeries];
+  return { timeseries };
 }
