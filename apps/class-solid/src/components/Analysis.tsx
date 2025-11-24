@@ -269,75 +269,60 @@ export function VerticalProfilePlot({
 
   const showPlume = createMemo(() => isPlumeVariable(classVariable()));
 
-  const observations = () =>
+  // Precalculate profile lines for classVariable() for all times
+  const allProfileLines = () =>
+    flatExperiments().flatMap((e) => {
+      const { config, output, ...formatting } = e;
+
+      return uniqueTimes().map((time, tIndex) => {
+        const profile = output?.profiles?.[tIndex] ?? noProfile;
+
+        return {
+          ...formatting,
+          time,
+          tIndex,
+          data: extractLine(profile, classVariable(), "z"),
+        };
+      });
+    });
+
+  // Also precalculate plume lines
+  const allPlumeLines = () =>
+    flatExperiments().flatMap((e) => {
+      const { config, output, ...formatting } = e;
+
+      return uniqueTimes().map((time, tIndex) => {
+        const plume = output?.plumes?.[tIndex] ?? noPlume;
+
+        return {
+          ...formatting,
+          time,
+          tIndex,
+          linestyle: "4",
+          data: extractLine(plume, classVariable() as PlumeVariable, "z"),
+        };
+      });
+    });
+
+  const observationLines = () =>
     flatObservations().map((o) => observationsForProfile(o, classVariable()));
 
-  function extractLines<T extends Record<string, number[]>>(
-    data: T,
-    xvar: keyof T,
-    yvar: keyof T,
-  ) {
-    const xs = data[xvar] ?? [];
-    const ys = data[yvar] ?? [];
-
-    const n = Math.min(xs.length, ys.length);
-
-    const result = new Array(n);
-    for (let i = 0; i < n; i++) {
-      result[i] = { x: xs[i], y: ys[i] };
-    }
-
-    return result;
-  }
-
-  const profileData = () =>
-    flatExperiments().map((e) => {
-      const { config, output, ...formatting } = e;
-
-      const targetTime = uniqueTimes()[analysis.time];
-      const t = output?.timeseries.utcTime.indexOf(targetTime);
-
-      const profile =
-        (t != null && t !== -1 && output?.profiles?.[t]) || noProfile;
-
-      return {
-        ...formatting,
-        data: extractLines(profile, classVariable(), "z"),
-      };
-    });
-
-  const firePlumes = () =>
-    flatExperiments().map((e) => {
-      const { config, output, ...formatting } = e;
-
-      const targetTime = uniqueTimes()[analysis.time];
-      const t = output?.timeseries.utcTime.indexOf(targetTime);
-
-      const plume = (t != null && t !== -1 && output?.plumes?.[t]) || noPlume;
-
-      return {
-        ...formatting,
-        linestyle: "4",
-        data: extractLines(plume, classVariable() as PlumeVariable, "z"),
-      };
-    });
-    
-  const allX = () => [
-    ...firePlumes().flatMap((p) => p.data.map((d) => d.x)),
-    ...profileDataForPlot().flatMap((p) => p.data.map((d) => d.x)),
-    ...observations().flatMap((obs) => obs.data.map((d) => d.x)),
-  ];
-  const allY = () => [
-    ...firePlumes().flatMap((p) => p.data.map((d) => d.z)),
-    ...profileDataForPlot().flatMap((p) => p.data.map((d) => d.z)),
-    ...observations().flatMap((obs) => obs.data.map((d) => d.z)),
+  const allLines = () => [
+    ...allPlumeLines(),
+    ...allProfileLines(),
+    ...observationLines(),
   ];
 
-  const xLim = () => getNiceAxisLimits(allX(), 0);
-  const yLim = () => [0, getNiceAxisLimits(allY(), 0)[1]] as [number, number];
+  const limits = () => {
+    const { xmin, xmax, ymin, ymax } = extractLimits(allLines());
+    return { xLim: [xmin, xmax], yLim: [ymin, ymax] };
+  };
+
+  const xLim = () => getNiceAxisLimits(limits().xLim);
+  const yLim = () => getNiceAxisLimits(limits().yLim);
 
   function chartData() {
-    return [...profileData(), ...observations()];
+    return [...allPlumeLines(), ...observationLines()];
   }
 
   const [toggles, setToggles] = createStore<Record<string, boolean>>({});
@@ -356,33 +341,43 @@ export function VerticalProfilePlot({
     setResetPlot(analysis.id);
   }
 
+  const profilesAtSelectedTime = () => {
+    const t = analysis.time;
+    return allProfileLines().filter((line) => line.tIndex === t);
+  };
+
+  const plumesAtSelectedTime = () => {
+    const t = analysis.time;
+    return allPlumeLines().filter((line) => line.tIndex === t);
+  };
+
   return (
     <>
       <div class="flex flex-col gap-2">
         <ChartContainer>
           <Legend
-            entries={() => [...profileData(), ...observations()]}
+            entries={() => [...profilesAtSelectedTime(), ...observationLines()]}
             toggles={toggles}
             onChange={toggleLine}
           />
           <Chart id={analysis.id} title="Vertical profile plot">
             <AxisBottom domain={xLim} label={analysis.variable} />
             <AxisLeft domain={yLim} label="Height[m]" />
-            <For each={profileDataForPlot()}>
+            <For each={profilesAtSelectedTime()}>
               {(d) => (
                 <Show when={toggles[d.label]}>
                   <Line {...d} />
                 </Show>
               )}
             </For>
-            <For each={observations()}>
+            <For each={observationLines()}>
               {(d) => (
                 <Show when={toggles[d.label]}>
                   <Line {...d} />
                 </Show>
               )}
             </For>
-            <For each={firePlumes()}>
+            <For each={plumesAtSelectedTime()}>
               {(d) => (
                 <Show when={toggles[d.label]}>
                   <Show when={showPlume()}>
@@ -629,4 +624,42 @@ export function AnalysisCard(analysis: Analysis) {
       </CardContent>
     </Card>
   );
+}
+
+// Helper functions
+
+function extractLine<T extends Record<string, number[]>>(
+  data: T,
+  xvar: keyof T,
+  yvar: keyof T,
+) {
+  const xs = data[xvar] ?? [];
+  const ys = data[yvar] ?? [];
+
+  const n = Math.min(xs.length, ys.length);
+
+  const result = new Array(n);
+  for (let i = 0; i < n; i++) {
+    result[i] = { x: xs[i], y: ys[i] };
+  }
+
+  return result;
+}
+
+function extractLimits(lines: { data: { x: number; y: number }[] }[]) {
+  let xmin = Number.POSITIVE_INFINITY;
+  let xmax = Number.NEGATIVE_INFINITY;
+  let ymin = Number.POSITIVE_INFINITY;
+  let ymax = Number.NEGATIVE_INFINITY;
+
+  for (const line of lines) {
+    for (const p of line.data) {
+      if (p.x < xmin) xmin = p.x;
+      if (p.x > xmax) xmax = p.x;
+      if (p.y < ymin) ymin = p.y;
+      if (p.y > ymax) ymax = p.y;
+    }
+  }
+
+  return { xmin, xmax, ymin, ymax };
 }

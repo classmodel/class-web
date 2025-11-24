@@ -56,7 +56,7 @@ export const noProfile: ClassProfile = {
 export function generateProfiles(
   config: MixedLayerConfig & (WindConfig | NoWindConfig),
   output: ClassOutput,
-  dz = 1,
+  dz = 10,
 ): ClassProfile {
   const { Rd, cp, g } = CONSTANTS;
   const { h, theta, qt, u, v, dtheta, dqt, du, dv } = output;
