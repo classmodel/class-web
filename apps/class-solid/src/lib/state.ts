@@ -46,7 +46,11 @@ export async function onPageLoad() {
   const navigate = useNavigate();
   const stateUrl = location.query.s;
   if (stateUrl) {
-    return await loadStateFromURL(stateUrl);
+    await loadStateFromURL(stateUrl);
+    // Remove query parameter after loading state from URL,
+    // as after editing the experiment the URL gets out of sync
+    navigate("/");
+    return;
   }
   const presetUrl = location.query.preset;
   if (presetUrl) {
@@ -118,8 +122,7 @@ export function saveToLocalStorage() {
 }
 
 async function loadStateFromURL(url: string) {
-  const navigate = useNavigate();
-  showToastPromise(
+  await showToastPromise(
     async () => {
       const response = await fetch(url);
       if (!response.ok) {
@@ -129,8 +132,6 @@ async function loadStateFromURL(url: string) {
       }
       const rawData = await response.text();
       await loadStateFromString(rawData);
-      // clear ?e from URL after loading, as any edits would make URL a lie
-      navigate("/");
     },
     {
       loading: "Loading experiment from URL...",
