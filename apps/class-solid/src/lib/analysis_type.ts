@@ -33,6 +33,7 @@ export function parseAnalysis(raw: unknown): Analysis {
   const schema = {
     oneOf: [
       {
+        type: "object",
         required: [
           "id",
           "description",
