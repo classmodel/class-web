@@ -233,35 +233,34 @@ export function swapPermutationAndReferenceConfiguration(
 
 export async function loadStateFromString(rawState: string): Promise<void> {
   const [loadedExperiments, loadedAnalyses] = decodeAppState(rawState);
+  setAnalyses(loadedAnalyses);
   setExperiments(loadedExperiments);
   await Promise.all(loadedExperiments.map((_, i) => runExperiment(i)));
 }
 
-export interface Analysis {
+export interface BaseAnalysis {
   id: string;
   description: string;
   type: string;
   name: string;
 }
 
-export type TimeseriesAnalysis = Analysis & {
+export type TimeseriesAnalysis = BaseAnalysis & {
   xVariable: string;
   yVariable: string;
 };
 
-export type ProfilesAnalysis = Analysis & {
+export type ProfilesAnalysis = BaseAnalysis & {
   variable: string;
   time: number;
 };
 
-export type SkewTAnalysis = Analysis & {
+export type SkewTAnalysis = BaseAnalysis & {
   time: number;
 };
 
-export type AnalysisType =
-  | TimeseriesAnalysis
-  | ProfilesAnalysis
-  | SkewTAnalysis;
+// When modifying type of Analysis also update JSON schema in Analysis.tsx
+export type Analysis = TimeseriesAnalysis | ProfilesAnalysis | SkewTAnalysis;
 export const analysisNames = [
   "Vertical profiles",
   "Timeseries",
