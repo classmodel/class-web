@@ -8,6 +8,7 @@ import {
   mergeConfigurations,
   pruneConfig,
 } from "@classmodel/class/config_utils";
+import { showToast } from "~/components/ui/toast";
 import { decodeAppState } from "./encode";
 import { parseExperimentConfig } from "./experiment_config";
 import type { ExperimentConfig } from "./experiment_config";
@@ -38,9 +39,19 @@ export async function runExperiment(id: number) {
 
   // Run reference
   const referenceConfig = unwrap(exp.config.reference);
-  const newOutput = await runClassAsync(referenceConfig);
-
-  setExperiments(id, "output", "reference", newOutput);
+  try {
+    const newOutput = await runClassAsync(referenceConfig);
+    setExperiments(id, "output", "reference", newOutput);
+  } catch (error) {
+    showToast({
+      title: "Error running reference configuration",
+      description: `${(error as Error).message}; Please correct configuration and try again.`,
+      variant: "destructive",
+      duration: Number.POSITIVE_INFINITY,
+    });
+    setExperiments(id, "output", "running", false);
+    return;
+  }
 
   // Run permutations
   let permCounter = 0;
@@ -50,8 +61,19 @@ export async function runExperiment(id: number) {
       referenceConfig,
       permConfig,
     ) as Config;
+    try {
     const newOutput = await runClassAsync(combinedConfig);
     setExperiments(id, "output", "permutations", permCounter, newOutput);
+    } catch (error) {
+      showToast({
+        title: `Error running permutation: ${permConfig.name}`,
+        description: `${(error as Error).message}. Please correct configuration and try again.`,
+        variant: "destructive",
+        duration: Number.POSITIVE_INFINITY,
+      });
+      setExperiments(id, "output", "running", false);
+      return;
+    }
     permCounter++;
   }
 
