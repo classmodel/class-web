@@ -61,3 +61,25 @@ If you add a preset the `src/lib/presets.ts` file needs to be updated.
 
 An experiment from a preset can be opened from a url like `?preset=<preset-name>`.
 For example to load <src/lib/presets/death-valley.json> use `http://localhost:3000/?preset=Death%20Valley`.
+
+## Loading experiments from url
+
+A saved experiment can be loaded from a url with the `preset` search query parameter.
+
+For example `https://classmodel.github.io/class-web?e=https://wildfiredataportal.eu/fire/batea/class.json` will load the experiment from `https://wildfiredataportal.eu/fire/batea/class.json`.
+
+The server hosting the json file must have CORS enabled for this to work, see https://enable-cors.org/ for details.
+
+<details>
+<summary>Local development</summary>
+
+Besides the `pnpm dev` start a static web server hosting `apps/class-solid/src/lib/presets/` directory.
+
+```shell
+# TODO
+```
+
+
+Visit http://localhost:3000/?preset=http://localhost:8080/death-valley.json .
+
+</details>
