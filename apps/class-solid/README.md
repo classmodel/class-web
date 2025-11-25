@@ -76,6 +76,7 @@ The server hosting the JSON file must have CORS enabled so the CLASS web applica
 Besides the `pnpm dev` start a static web server hosting the `./mock-wildfiredataportal/` directory.
 
 ```shell
+cd apps/class-solid # If you are not already in the directory of this README.md
 mkdir -p ./mock-wildfiredataportal
 # Create a mocked state with experiment similar to https://wildfiredataportal.eu/fire/batea/
 cat <<EOF > ./mock-wildfiredataportal/batea.json
