@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "@solidjs/router";
-import { showToast } from "~/components/ui/toast";
+import { showToast, showToastPromise } from "~/components/ui/toast";
 import { encodeAppState } from "./encode";
 import { findPresetByName } from "./presets";
 import {
@@ -44,6 +44,14 @@ export function loadFromLocalStorage() {
 export async function onPageLoad() {
   const location = useLocation();
   const navigate = useNavigate();
+  const stateUrl = location.query.s;
+  if (stateUrl) {
+    await loadStateFromURL(stateUrl);
+    // Remove query parameter after loading state from URL,
+    // as after editing the experiment the URL gets out of sync
+    navigate("/");
+    return;
+  }
   const presetUrl = location.query.preset;
   if (presetUrl) {
     return await loadExperimentPreset(presetUrl);
@@ -111,4 +119,25 @@ export function saveToLocalStorage() {
     variant: "success",
     duration: 1000,
   });
+}
+
+async function loadStateFromURL(url: string) {
+  await showToastPromise(
+    async () => {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to download experiment from ${url}: ${response.status} ${response.statusText}`,
+        );
+      }
+      const rawData = await response.text();
+      await loadStateFromString(rawData);
+    },
+    {
+      loading: "Loading experiment from URL...",
+      success: () => "Experiment loaded from URL",
+      error: (error) => `Failed to load experiment from URL: ${error}`,
+      duration: 1000,
+    },
+  );
 }
