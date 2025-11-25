@@ -5,12 +5,23 @@
  */
 import { CLASS } from "./class.js";
 import type { Config } from "./config.js";
+import { type FirePlume, calculatePlume } from "./fire.js";
 import {
   type ClassOutput,
   type OutputVariableKey,
   outputVariables,
 } from "./output.js";
+import { type ClassProfile, generateProfiles } from "./profiles.js";
 import { parse } from "./validate.js";
+
+type ClassTimeSeries = Record<OutputVariableKey, number[]>;
+type ClassProfiles = ClassProfile[];
+type ClassFirePlumes = FirePlume[];
+export interface ClassData {
+  timeseries: ClassTimeSeries;
+  profiles?: ClassProfiles;
+  plumes?: ClassFirePlumes;
+}
 
 /**
  * Runs the CLASS model with the given configuration and frequency.
@@ -19,24 +30,41 @@ import { parse } from "./validate.js";
  * @param freq - The frequency in seconds at which to write output, defaults to 600.
  * @returns An object containing the output variables collected during the simulation.
  */
-export function runClass(config: Config, freq = 600): ClassOutput {
+export function runClass(config: Config, freq = 600): ClassData {
   const validatedConfig = parse(config);
   const model = new CLASS(validatedConfig);
 
-  const output_keys = Object.keys(outputVariables) as OutputVariableKey[];
+  const outputKeys = Object.keys(outputVariables) as OutputVariableKey[];
 
   const writeOutput = () => {
-    for (const key of output_keys) {
+    const output: Partial<ClassOutput> = {};
+    for (const key of outputKeys) {
       const value = model.getValue(key);
       if (value !== undefined) {
-        (output[key] as number[]).push(value as number);
+        output[key] = model.getValue(key);
+        timeseries[key].push(value as number);
+      }
+
+      // Include profiles
+      if (config.sw_ml) {
+        const profile = generateProfiles(config, output as ClassOutput);
+        profiles.push(profile);
+
+        // Include fireplumes
+        if (config.sw_fire) {
+          const plume = calculatePlume(config, profile);
+          plumes.push(plume);
+        }
       }
     }
   };
 
-  const output = Object.fromEntries(
-    output_keys.map((key) => [key, []]),
-  ) as unknown as ClassOutput;
+  // Initialize output arrays
+  const timeseries = Object.fromEntries(
+    outputKeys.map((key) => [key, []]),
+  ) as unknown as ClassTimeSeries;
+  const profiles: ClassProfiles = [];
+  const plumes: ClassFirePlumes = [];
 
   // Initial time
   writeOutput();
@@ -50,5 +78,12 @@ export function runClass(config: Config, freq = 600): ClassOutput {
     }
   }
 
-  return output;
+  // Construct ClassData
+  if (config.sw_ml) {
+    if (config.sw_fire) {
+      return { timeseries, profiles, plumes };
+    }
+    return { timeseries, profiles };
+  }
+  return { timeseries };
 }

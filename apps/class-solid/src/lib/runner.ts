@@ -1,6 +1,5 @@
 import type { Config } from "@classmodel/class/config";
-import type { ClassOutput } from "@classmodel/class/output";
-import type { runClass } from "@classmodel/class/runner";
+import type { ClassData, runClass } from "@classmodel/class/runner";
 import { wrap } from "comlink";
 
 const worker = new Worker(new URL("./worker.ts", import.meta.url), {
@@ -9,7 +8,7 @@ const worker = new Worker(new URL("./worker.ts", import.meta.url), {
 
 const asyncRunner = wrap<typeof runClass>(worker);
 
-export async function runClassAsync(config: Config): Promise<ClassOutput> {
+export async function runClassAsync(config: Config): Promise<ClassData> {
   try {
     const output = asyncRunner(config);
     return output;

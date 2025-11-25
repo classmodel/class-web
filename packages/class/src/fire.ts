@@ -62,6 +62,26 @@ export interface Parcel {
   rh: number; // Relative humidity [%]
 }
 
+export type FirePlume = Record<keyof Parcel, number[]>;
+export const noPlume: FirePlume = {
+  z: [],
+  w: [],
+  thetal: [],
+  theta: [],
+  qt: [],
+  thetav: [],
+  qsat: [],
+  b: [],
+  m: [],
+  area: [],
+  e: [],
+  d: [],
+  T: [],
+  Td: [],
+  p: [],
+  rh: [],
+};
+
 /**
  * Initialize fire parcel with ambient conditions and fire properties
  */
@@ -144,7 +164,7 @@ export function calculatePlume(
   fire: FireConfig,
   bg: ClassProfile,
   plumeConfig: PlumeConfig = defaultPlumeConfig,
-): Parcel[] {
+): FirePlume {
   const { dz } = plumeConfig;
   let parcel = initializeFireParcel(bg, fire);
   const plume: Parcel[] = [parcel];
@@ -219,15 +239,13 @@ export function calculatePlume(
 
     plume.push(parcel);
   }
-  return plume;
+  return transposePlumeData(plume);
 }
 
 /**
  * Convert array of objects into object of arrays
  */
-export function transposePlumeData(
-  plume: Parcel[],
-): Record<keyof Parcel, number[]> {
+export function transposePlumeData(plume: Parcel[]): FirePlume {
   if (plume.length === 0) {
     return {} as Record<keyof Parcel, number[]>;
   }
