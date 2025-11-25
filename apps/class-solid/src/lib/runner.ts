@@ -11,11 +11,9 @@ const asyncRunner = wrap<typeof runClass>(worker);
 
 export async function runClassAsync(config: Config): Promise<ClassOutput> {
   try {
-    const output = asyncRunner(config);
-    return output;
+    return await asyncRunner(config);
   } catch (error) {
     console.error({ config, error });
-    // TODO use toast to give feedback to the user
+    throw error;
   }
-  throw new Error("Model run failed");
 }

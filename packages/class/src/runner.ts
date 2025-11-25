@@ -41,6 +41,11 @@ export function runClass(config: Config, freq = 600): ClassOutput {
   // Initial time
   writeOutput();
 
+  // TODO remove when we see this error rendered
+  if (config.runtime === 42_000) {
+    throw new Error("Runtime cannot be 42_000 seconds.");
+  }
+
   // Update loop
   while (model.t <= config.runtime) {
     model.update();
