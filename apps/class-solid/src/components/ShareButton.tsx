@@ -19,6 +19,66 @@ import { showToast } from "./ui/toast";
 
 const MAX_SHAREABLE_LINK_LENGTH = 32_000;
 
+function ShareStateAsFile({ state }: { state: string }) {
+  const downloadUrl = createMemo(() => {
+    return URL.createObjectURL(
+      new Blob([decodeURI(state)], {
+        type: "application/json",
+      }),
+    );
+  });
+  onCleanup(() => {
+    URL.revokeObjectURL(downloadUrl());
+  });
+
+  const filename = createMemo(() => {
+    const names = experiments.map((e) => e.config.reference.name).join("-");
+    return `class-${names.slice(0, 120)}.json`;
+  });
+
+  return (
+    <>
+      <p>
+        Alternatively you can create your own shareable link by hosting the
+        state remotely:
+      </p>
+      <ol class="list-inside list-decimal space-y-1">
+        <li>
+          <a
+            class="underline"
+            href={downloadUrl()}
+            download={filename()}
+            type="application/json"
+          >
+            Download state
+          </a>{" "}
+          as file
+        </li>
+        <li>
+          Upload the state file to some static hosting service like your own web
+          server or an AWS S3 bucket.
+        </li>
+        <li>
+          Open the CLASS web application with
+          "https://classmodel.github.io/class-web?s=&lt;your remote url&gt;".
+        </li>
+      </ol>
+      <p>
+        Make sure the CLASS web application is{" "}
+        <a
+          href="https://enable-cors.org/server.html"
+          target="_blank"
+          rel="noreferrer"
+          class="underline"
+        >
+          allowed to download from remote location
+        </a>
+        .
+      </p>
+    </>
+  );
+}
+
 export function ShareButton() {
   const [open, setOpen] = createSignal(false);
   const [isCopied, setIsCopied] = createSignal(false);
@@ -35,21 +95,6 @@ export function ShareButton() {
       : import.meta.env.BASE_URL.replace("/_build", "");
     const url = `${window.location.origin}${basePath}#${encodedAppState()}`;
     return url;
-  });
-  const downloadUrl = createMemo(() => {
-    return URL.createObjectURL(
-      new Blob([decodeURI(encodedAppState())], {
-        type: "application/json",
-      }),
-    );
-  });
-  onCleanup(() => {
-    URL.revokeObjectURL(downloadUrl());
-  });
-
-  const filename = createMemo(() => {
-    const names = experiments.map((e) => e.config.reference.name).join("-");
-    return `class-${names.slice(0, 120)}.json`;
   });
 
   async function copyToClipboard() {
@@ -93,44 +138,7 @@ export function ShareButton() {
                 Cannot embed application state in shareable link, it is too
                 large.
               </p>
-              <p>
-                Alternatively you can create your own shareable link by hosting
-                the state remotely:
-              </p>
-              <ol class="list-inside list-decimal space-y-1">
-                <li>
-                  <a
-                    class="underline"
-                    href={downloadUrl()}
-                    download={filename()}
-                    type="application/json"
-                  >
-                    Download state
-                  </a>{" "}
-                  as file
-                </li>
-                <li>
-                  Upload the state file to some static hosting service like your
-                  own web server or an AWS S3 bucket.
-                </li>
-                <li>
-                  Open the CLASS web application with
-                  "https://classmodel.github.io/class-web?s=&lt;your remote
-                  url&gt;".
-                </li>
-              </ol>
-              <p>
-                Make sure the CLASS web application is{" "}
-                <a
-                  href="https://enable-cors.org/server.html"
-                  target="_blank"
-                  rel="noreferrer"
-                  class="underline"
-                >
-                  allowed to download from remote location
-                </a>
-                .
-              </p>
+              <ShareStateAsFile state={encodedAppState()} />
             </>
           }
         >
@@ -177,6 +185,7 @@ export function ShareButton() {
                 </Show>
               </Button>
             </div>
+            <ShareStateAsFile state={encodedAppState()} />
           </Show>
         </Show>
         <div aria-live="polite" class="sr-only">
