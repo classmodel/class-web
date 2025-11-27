@@ -8,6 +8,12 @@ import {
   mergeConfigurations,
   pruneConfig,
 } from "@classmodel/class/config_utils";
+import type {
+  Analysis,
+  ProfilesAnalysis,
+  SkewTAnalysis,
+  TimeseriesAnalysis,
+} from "./analysis_type";
 import { decodeAppState } from "./encode";
 import { parseExperimentConfig } from "./experiment_config";
 import type { ExperimentConfig } from "./experiment_config";
@@ -233,40 +239,10 @@ export function swapPermutationAndReferenceConfiguration(
 
 export async function loadStateFromString(rawState: string): Promise<void> {
   const [loadedExperiments, loadedAnalyses] = decodeAppState(rawState);
+  setAnalyses(loadedAnalyses);
   setExperiments(loadedExperiments);
   await Promise.all(loadedExperiments.map((_, i) => runExperiment(i)));
 }
-
-export interface Analysis {
-  id: string;
-  description: string;
-  type: string;
-  name: string;
-}
-
-export type TimeseriesAnalysis = Analysis & {
-  xVariable: string;
-  yVariable: string;
-};
-
-export type ProfilesAnalysis = Analysis & {
-  variable: string;
-  time: number;
-};
-
-export type SkewTAnalysis = Analysis & {
-  time: number;
-};
-
-export type AnalysisType =
-  | TimeseriesAnalysis
-  | ProfilesAnalysis
-  | SkewTAnalysis;
-export const analysisNames = [
-  "Vertical profiles",
-  "Timeseries",
-  "Thermodynamic diagram",
-];
 
 export function addAnalysis(name: string) {
   let newAnalysis: Analysis;

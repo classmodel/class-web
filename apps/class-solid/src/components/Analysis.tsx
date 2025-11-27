@@ -27,20 +27,18 @@ import {
   createUniqueId,
 } from "solid-js";
 import { createStore } from "solid-js/store";
+import type {
+  Analysis,
+  ProfilesAnalysis,
+  SkewTAnalysis,
+  TimeseriesAnalysis,
+} from "~/lib/analysis_type";
 import type { Observation } from "~/lib/experiment_config";
 import {
   observationsForProfile,
   observationsForSounding,
 } from "~/lib/profiles";
-import {
-  type Analysis,
-  type ProfilesAnalysis,
-  type SkewTAnalysis,
-  type TimeseriesAnalysis,
-  deleteAnalysis,
-  experiments,
-  updateAnalysis,
-} from "~/lib/store";
+import { deleteAnalysis, experiments, updateAnalysis } from "~/lib/store";
 import { MdiCamera, MdiDelete, MdiImageFilterCenterFocus } from "./icons";
 import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./plots/Axes";
 import { Chart, ChartContainer, type ChartData } from "./plots/ChartContainer";
