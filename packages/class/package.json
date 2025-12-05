@@ -74,7 +74,9 @@
   "bugs": {
     "url": "https://github.com/classmodel/class-web/issues"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "license": "GPL-3.0-only",
   "scripts": {
     "dev": "tsc --watch",
@@ -87,15 +89,15 @@
   },
   "bin": "./dist/cli.js",
   "devDependencies": {
-    "@types/node": "^20.13.1",
-    "tsx": "^4.16.5",
-    "typedoc": "^0.26.10",
-    "typescript": "^5.3.3"
+    "@types/node": "^24.10.1",
+    "tsx": "^4.21.0",
+    "typedoc": "^0.28.15",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@commander-js/extra-typings": "^12.1.0",
+    "@commander-js/extra-typings": "^14.0.0",
     "ajv": "^8.17.1",
-    "commander": "^12.1.0"
+    "commander": "^14.0.2"
   },
   "private": false,
   "publishConfig": {

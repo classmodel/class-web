@@ -14,35 +14,35 @@
   "dependencies": {
     "@classmodel/class": "workspace:*",
     "@classmodel/form": "workspace:*",
-    "@kobalte/core": "^0.13.3",
-    "@solid-primitives/refs": "^1.0.8",
-    "@solidjs/router": "^0.14.1",
-    "@solidjs/start": "^1.0.4",
-    "@zip.js/zip.js": "^2.7.52",
+    "@kobalte/core": "^0.13.11",
+    "@solid-primitives/refs": "^1.1.2",
+    "@solidjs/router": "^0.15.4",
+    "@solidjs/start": "^1.2.0",
+    "@zip.js/zip.js": "^2.8.11",
     "ajv": "^8.17.1",
-    "autoprefixer": "^10.4.19",
-    "class-variance-authority": "^0.7.0",
+    "autoprefixer": "^10.4.22",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "comlink": "^4.4.1",
+    "comlink": "^4.4.2",
     "d3": "^7.9.0",
     "file-saver": "^2.0.5",
     "html-to-image": "^1.11.13",
-    "postcss": "^8.4.38",
-    "solid-js": "^1.8.18",
-    "tailwind-merge": "^2.4.0",
-    "tailwindcss": "^3.4.4",
+    "postcss": "^8.5.6",
+    "solid-js": "^1.9.10",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss": "^3.4.18",
     "tailwindcss-animate": "^1.0.7",
-    "vinxi": "^0.3.14"
+    "vinxi": "^0.5.8"
   },
   "engines": {
     "node": ">=18"
   },
   "devDependencies": {
-    "@playwright/test": "^1.45.3",
+    "@playwright/test": "^1.57.0",
     "@types/d3": "^7.4.3",
     "@types/file-saver": "^2.0.7",
-    "@types/node": "^20.13.1",
-    "serve": "^14.2.3",
-    "typescript": "^5.3.3"
+    "@types/node": "^24.10.1",
+    "serve": "^14.2.5",
+    "typescript": "^5.9.3"
   }
 }
