@@ -3,13 +3,12 @@ import { calculatePlume, transposePlumeData } from "@classmodel/class/fire";
 import {
   type ClassOutput,
   type OutputVariableKey,
-  getOutputAtTime,
   outputVariables,
 } from "@classmodel/class/output";
 import {
-  type ClassProfile,
-  NoProfile,
+  ClassProfile,
   generateProfiles,
+  noProfile,
 } from "@classmodel/class/profiles";
 import * as d3 from "d3";
 import { saveAs } from "file-saver";
@@ -275,7 +274,7 @@ export function VerticalProfilePlot({
         const outputAtTime = getOutputAtTime(output, t);
         return { ...formatting, data: generateProfiles(config, outputAtTime) };
       }
-      return { ...formatting, data: NoProfile };
+      return { ...formatting, data: noProfile };
     });
 
   const firePlumes = () =>
