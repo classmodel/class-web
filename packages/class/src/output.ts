@@ -118,14 +118,4 @@ export const outputVariables = {
 } as const satisfies Record<string, VariableInfo>;
 
 export type OutputVariableKey = keyof typeof outputVariables;
-export type ClassOutput = Record<OutputVariableKey, number[]>;
-export type ClassOutputAtSingleTime = Record<OutputVariableKey, number>;
-
-export function getOutputAtTime(
-  output: ClassOutput,
-  timeIndex: number,
-): ClassOutputAtSingleTime {
-  return Object.fromEntries(
-    Object.entries(output).map(([key, values]) => [key, values[timeIndex]]),
-  ) as ClassOutputAtSingleTime;
-}
+export type ClassOutput = Record<OutputVariableKey, number>;
