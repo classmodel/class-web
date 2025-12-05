@@ -19,10 +19,11 @@ import { parseExperimentConfig } from "./experiment_config";
 import type { ExperimentConfig } from "./experiment_config";
 import { findPresetByName } from "./presets";
 import { runClassAsync } from "./runner";
+import { ClassData } from "@classmodel/class/runner";
 
 interface ExperimentOutput {
-  reference?: ClassOutput;
-  permutations: Array<ClassOutput | undefined>;
+  reference?: ClassData;
+  permutations: Array<ClassData | undefined>;
   running: number | false;
 }
 
