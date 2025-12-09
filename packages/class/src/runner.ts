@@ -13,9 +13,9 @@ import {
 
 import simplify from "simplify-js";
 
-import { parse } from "./validate.js";
-import { calculatePlume } from "./fire.js";
+import { type Parcel, calculatePlume } from "./fire.js";
 import { generateProfiles } from "./profiles.js";
+import { parse } from "./validate.js";
 
 export type TimeSeries0D = Record<OutputVariableKey, number[]>;
 export type TimeSeries1D = Record<string, { x: number; y: number }[][]>;
@@ -74,12 +74,15 @@ export function runClass(config: Config, freq = 600): ClassData {
       // Generate plumes
       if (config.sw_fire) {
         const plume = calculatePlume(config, profile);
-        const plumeXY = profileToXY(plume as unknown as Profile);
+        const plumeXY = plumeToXY(plume);
+        console.log("profile:", profile);
+        console.log("plume:", plume);
 
         for (const key of Object.keys(plumeXY)) {
           plumes[key] = plumes[key] || [];
           plumes[key].push(simplifyLine(plumeXY[key], 0.01));
         }
+
       }
     }
   };
@@ -133,6 +136,21 @@ function profileToXY(profile: Profile): Record<string, { x: number; y: number }[
   return result;
 }
 
+function plumeToXY(plume: Parcel[]) {
+  const vars = Object.keys(plume[0]).filter((k) => k !== "z");
+  const result: Record<string, { x: number; y: number }[]> = {};
+
+  for (const v of vars) result[v] = [];
+
+  for (const row of plume) {
+    for (const v of vars) {
+      result[v].push({ x: row[v as keyof Parcel], y: row.z });
+    }
+  }
+  return result;
+}
+
+
 /**
  * Compress a line by discarding points that are within a certain relative tolerance.
  * Using the simplify-js package, which implements the 
@@ -148,7 +166,7 @@ function simplifyLine(line: { x: number; y: number }[], tolerance = 0.01): { x: 
   const relTol = Math.min(xRange, yRange) * tolerance;
 
   const simplified = simplify(line, relTol, true);
-  // console.log(`Simplified from ${line.length} to ${simplified.length} points`);
+  console.log(`Simplified from ${line.length} to ${simplified.length} points`);
   // console.log(`Simplified`);
   return simplified;
 }

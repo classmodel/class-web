@@ -1,15 +1,14 @@
 import type { Config } from "@classmodel/class/config";
-import { calculatePlume, transposePlumeData } from "@classmodel/class/fire";
+import { calculatePlume } from "@classmodel/class/fire";
 import {
-  type ClassOutput,
   type OutputVariableKey,
   outputVariables,
 } from "@classmodel/class/output";
 import {
-  ClassProfile,
+  type ClassProfile,
   generateProfiles,
-  noProfile,
 } from "@classmodel/class/profiles";
+import type { ClassData } from "@classmodel/class/runner";
 import * as d3 from "d3";
 import { saveAs } from "file-saver";
 import { toBlob } from "html-to-image";
@@ -42,7 +41,7 @@ import { MdiCamera, MdiDelete, MdiImageFilterCenterFocus } from "./icons";
 import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./plots/Axes";
 import { Chart, ChartContainer, type ChartData } from "./plots/ChartContainer";
 import { Legend } from "./plots/Legend";
-import { Line, type Point } from "./plots/Line";
+import { Line } from "./plots/Line";
 import { SkewTPlot, type SoundingRecord } from "./plots/skewTlogP";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -54,7 +53,6 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Slider, SliderFill, SliderThumb, SliderTrack } from "./ui/slider";
-import { ClassData } from "@classmodel/class/runner";
 
 /** https://github.com/d3/d3-scale-chromatic/blob/main/src/categorical/Tableau10.js */
 const colors = [
@@ -258,6 +256,7 @@ export function VerticalProfilePlot({
     variableOptions[analysis.variable as keyof typeof variableOptions];
 
   type PlumeVariable = "theta" | "qt" | "thetav" | "T" | "Td" | "rh" | "w";
+
   function isPlumeVariable(v: string): v is PlumeVariable {
     return ["theta", "qt", "thetav", "T", "Td", "rh", "w"].includes(v);
   }
@@ -281,15 +280,15 @@ function getLinesForExperiment(
 
   if (!output) return { label, color, linestyle, data: [] };
 
-  const container = output[type];
-  if (!container) return { label, color, linestyle, data: [] };
+  const profile = output[type];
+  if (!profile) return { label, color, linestyle, data: [] };
 
   // Find experiment-specific time index
   const tIndex = output.timeseries?.utcTime?.indexOf(timeVal);
   if (tIndex === undefined || tIndex === -1) return { label, color, linestyle, data: [] };
 
   const lineStyle = type === "plumes" ? "4" : linestyle;
-  const linesAtTime = container[variable]?.[tIndex] ?? [];
+  const linesAtTime = profile[variable]?.[tIndex] ?? [];
 
   return { label, color, linestyle: lineStyle, data: linesAtTime.flat() };
 }
