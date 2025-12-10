@@ -87,8 +87,15 @@ export function getNiceAxisLimits(
   extraMargin = 0,
   roundTo?: number, // Optional rounding step, e.g. 600 for 10 minutes
 ): [number, number] {
-  const max = Math.max(...data.filter(Number.isFinite));
-  const min = Math.min(...data.filter(Number.isFinite));
+  const finiteData = data.filter(Number.isFinite);
+
+  if (!finiteData.length) {
+    // Fallback limits if no data yet
+    return [0, 1];
+  }
+
+  const max = Math.max(...finiteData);
+  const min = Math.min(...finiteData);
   const range = max - min;
 
   if (range === 0)
