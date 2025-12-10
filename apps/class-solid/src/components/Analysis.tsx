@@ -1,16 +1,10 @@
 import type { Config } from "@classmodel/class/config";
-import { calculatePlume, transposePlumeData } from "@classmodel/class/fire";
 import {
-  type ClassOutput,
   type OutputVariableKey,
-  getOutputAtTime,
   outputVariables,
 } from "@classmodel/class/output";
-import {
-  type ClassProfile,
-  NoProfile,
-  generateProfiles,
-} from "@classmodel/class/profiles";
+import type { ClassProfile } from "@classmodel/class/profiles";
+import type { ClassData } from "@classmodel/class/runner";
 import * as d3 from "d3";
 import { saveAs } from "file-saver";
 import { toBlob } from "html-to-image";
@@ -43,7 +37,7 @@ import { MdiCamera, MdiDelete, MdiImageFilterCenterFocus } from "./icons";
 import { AxisBottom, AxisLeft, getNiceAxisLimits } from "./plots/Axes";
 import { Chart, ChartContainer, type ChartData } from "./plots/ChartContainer";
 import { Legend } from "./plots/Legend";
-import { Line, type Point } from "./plots/Line";
+import { Line } from "./plots/Line";
 import { SkewTPlot, type SoundingRecord } from "./plots/skewTlogP";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -76,7 +70,7 @@ interface FlatExperiment {
   color: string;
   linestyle: string;
   config: Config;
-  output?: ClassOutput;
+  output?: ClassData;
 }
 
 // Create a derived store for looping over all outputs:
@@ -117,7 +111,7 @@ const flatObservations: () => Observation[] = createMemo(() => {
 });
 
 const _allTimes = () =>
-  new Set(flatExperiments().flatMap((e) => e.output?.utcTime ?? []));
+  new Set(flatExperiments().flatMap((e) => e.output?.timeseries.utcTime ?? []));
 const uniqueTimes = () => [...new Set(_allTimes())].sort((a, b) => a - b);
 
 // TODO: could memoize all reactive elements here, would it make a difference?
@@ -131,11 +125,15 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
 
   const allX = () =>
     flatExperiments().flatMap((e) =>
-      e.output ? e.output[analysis.xVariable as OutputVariableKey] : [],
+      e.output
+        ? e.output.timeseries[analysis.xVariable as OutputVariableKey]
+        : [],
     );
   const allY = () =>
     flatExperiments().flatMap((e) =>
-      e.output ? e.output[analysis.yVariable as OutputVariableKey] : [],
+      e.output
+        ? e.output.timeseries[analysis.yVariable as OutputVariableKey]
+        : [],
     );
 
   const granularities: Record<string, number | undefined> = {
@@ -155,12 +153,12 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
         ...formatting,
         data:
           // Zip x[] and y[] into [x, y][]
-          output?.t.map((_, t) => ({
+          output?.timeseries.t.map((_, t) => ({
             x: output
-              ? output[analysis.xVariable as OutputVariableKey][t]
+              ? output.timeseries[analysis.xVariable as OutputVariableKey][t]
               : Number.NaN,
             y: output
-              ? output[analysis.yVariable as OutputVariableKey][t]
+              ? output.timeseries[analysis.yVariable as OutputVariableKey][t]
               : Number.NaN,
           })) || [],
       };
@@ -258,87 +256,90 @@ export function VerticalProfilePlot({
     variableOptions[analysis.variable as keyof typeof variableOptions];
 
   type PlumeVariable = "theta" | "qt" | "thetav" | "T" | "Td" | "rh" | "w";
+
   function isPlumeVariable(v: string): v is PlumeVariable {
     return ["theta", "qt", "thetav", "T", "Td", "rh", "w"].includes(v);
   }
 
-  const showPlume = createMemo(() => isPlumeVariable(classVariable()));
+  type LineSet = {
+    label: string;
+    color: string;
+    linestyle: string;
+    data: { x: number; y: number }[];
+  };
 
-  const observations = () =>
-    flatObservations().map((o) => observationsForProfile(o, classVariable()));
+  function getLinesForExperiment(
+    e: FlatExperiment,
+    variable: string,
+    type: "profiles" | "plumes",
+    timeVal: number,
+  ): LineSet {
+    const { label, color, linestyle, output } = e;
 
-  const profileData = () =>
-    flatExperiments().map((e) => {
-      const { config, output, ...formatting } = e;
-      const t = output?.utcTime.indexOf(uniqueTimes()[analysis.time]);
-      if (config.sw_ml && output && t !== undefined && t !== -1) {
-        const outputAtTime = getOutputAtTime(output, t);
-        return { ...formatting, data: generateProfiles(config, outputAtTime) };
-      }
-      return { ...formatting, data: NoProfile };
-    });
+    if (!output) return { label, color, linestyle, data: [] };
 
-  const firePlumes = () =>
-    flatExperiments().map((e, i) => {
-      const { config, output, ...formatting } = e;
-      if (config.sw_fire && isPlumeVariable(classVariable())) {
-        const plume = transposePlumeData(
-          calculatePlume(config, profileData()[i].data),
-        );
-        return {
-          ...formatting,
-          linestyle: "4",
-          data: plume.z.map((z, i) => ({
-            x: plume[classVariable() as PlumeVariable][i],
-            y: z,
-          })),
-        };
-      }
-      return { ...formatting, data: [] };
-    });
+    const profile = output[type];
+    if (!profile) return { label, color, linestyle, data: [] };
 
-  // TODO: There should be a way that this isn't needed.
-  const profileDataForPlot = () =>
-    profileData().map(({ data, label, color, linestyle }) => ({
-      label,
+    // Find experiment-specific time index
+    const tIndex = output.timeseries?.utcTime?.indexOf(timeVal);
+    if (tIndex === undefined || tIndex === -1)
+      return { label, color, linestyle, data: [] };
+
+    const linesAtTime = profile[variable]?.[tIndex] ?? [];
+
+    return {
+      label: type === "plumes" ? `${label} - plume` : label,
       color,
-      linestyle,
-      data: data.z.map((z, i) => ({
-        x: data[classVariable()][i],
-        y: z,
-      })),
-    })) as ChartData<Point>[];
+      linestyle: type === "plumes" ? "4" : linestyle,
+      data: linesAtTime.flat(),
+    };
+  }
 
-  const allX = () => [
-    ...firePlumes().flatMap((p) => p.data.map((d) => d.x)),
-    ...profileDataForPlot().flatMap((p) => p.data.map((d) => d.x)),
-    ...observations().flatMap((obs) => obs.data.map((d) => d.x)),
-  ];
-  const allY = () => [
-    ...firePlumes().flatMap((p) => p.data.map((d) => d.y)),
-    ...profileDataForPlot().flatMap((p) => p.data.map((d) => d.y)),
-    ...observations().flatMap((obs) => obs.data.map((d) => d.y)),
-  ];
+  /** Collect all lines across experiments for a given type */
+  function collectLines(type: "profiles" | "plumes"): LineSet[] {
+    const variable = classVariable();
+    return flatExperiments().map((e) =>
+      getLinesForExperiment(e, variable, type, uniqueTimes()[analysis.time]),
+    );
+  }
 
-  // TODO: better to include jump at top in extent calculation rather than adding random margin.
+  /** Lines to plot */
+  const profileLines = () => collectLines("profiles");
+  // Only collect plumes for experiments that actually have plume output
+  const plumeLines = () =>
+    flatExperiments()
+      .filter((e) => e.output?.plumes) // only show plume when firemodel enabled
+      .filter((e) => isPlumeVariable(classVariable())) // only show plume for plume vars
+      .map((e) =>
+        getLinesForExperiment(
+          e,
+          classVariable(),
+          "plumes",
+          uniqueTimes()[analysis.time],
+        ),
+      );
+  const obsLines = () =>
+    flatObservations().map((o) => observationsForProfile(o, classVariable()));
+  const allLines = () => [...profileLines(), ...plumeLines(), ...obsLines()];
+
+  /** Global axes extents across all experiments, times, and observations */
+  const allX = () => allLines().flatMap((d) => d.data.map((p) => p.x));
+  const allY = () => allLines().flatMap((d) => d.data.map((p) => p.y));
+
   const xLim = () => getNiceAxisLimits(allX(), 1);
   const yLim = () => [0, getNiceAxisLimits(allY(), 0)[1]] as [number, number];
 
-  function chartData() {
-    return [...profileData(), ...observations()];
-  }
-
+  /** Initialize toggles for legend */
   const [toggles, setToggles] = createStore<Record<string, boolean>>({});
-
-  // Initialize all lines as visible
-  for (const d of chartData()) {
-    setToggles(d.label, true);
+  for (const line of allLines()) {
+    setToggles(line.label, true);
   }
-
   function toggleLine(label: string, value: boolean) {
     setToggles(label, value);
   }
 
+  /** Change variable handler */
   function changeVar(v: string) {
     updateAnalysis(analysis, { variable: v });
     setResetPlot(analysis.id);
@@ -348,39 +349,20 @@ export function VerticalProfilePlot({
     <>
       <div class="flex flex-col gap-2">
         <ChartContainer>
-          <Legend
-            entries={() => [...profileData(), ...observations()]}
-            toggles={toggles}
-            onChange={toggleLine}
-          />
+          <Legend entries={allLines} toggles={toggles} onChange={toggleLine} />
           <Chart id={analysis.id} title="Vertical profile plot">
             <AxisBottom domain={xLim} label={analysis.variable} />
             <AxisLeft domain={yLim} label="Height[m]" />
-            <For each={profileDataForPlot()}>
+            <For each={allLines()}>
               {(d) => (
                 <Show when={toggles[d.label]}>
                   <Line {...d} />
-                </Show>
-              )}
-            </For>
-            <For each={observations()}>
-              {(d) => (
-                <Show when={toggles[d.label]}>
-                  <Line {...d} />
-                </Show>
-              )}
-            </For>
-            <For each={firePlumes()}>
-              {(d) => (
-                <Show when={toggles[d.label]}>
-                  <Show when={showPlume()}>
-                    <Line {...d} />
-                  </Show>
                 </Show>
               )}
             </For>
           </Chart>
         </ChartContainer>
+
         <Picker
           value={() => analysis.variable}
           setValue={(v) => changeVar(v)}
@@ -473,46 +455,70 @@ function Picker(props: PickerProps) {
 }
 
 export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
-  const profileData = () =>
+  /** Extract profile lines from CLASS output at the current time index */
+  const profileDataForPlot = () =>
     flatExperiments().map((e) => {
-      const { config, output, ...formatting } = e;
-      const t = output?.utcTime.indexOf(uniqueTimes()[analysis.time]);
-      if (config.sw_ml && output && t !== undefined && t !== -1) {
-        const outputAtTime = getOutputAtTime(output, t);
-        return { ...formatting, data: generateProfiles(config, outputAtTime) };
-      }
-      return { ...formatting, data: NoProfile };
-    });
+      const { output, label, color, linestyle } = e;
+      if (!output?.profiles) return { label, color, linestyle, data: [] };
+
+      const tIndex = output.timeseries?.utcTime?.indexOf(
+        uniqueTimes()[analysis.time],
+      );
+      if (tIndex === undefined || tIndex === -1)
+        return { label, color, linestyle, data: [] };
+
+      // Make sure each variable exists and has data at this time
+      const pLine = output.profiles.p?.[tIndex] ?? [];
+      const TLine = output.profiles.T?.[tIndex] ?? [];
+      const TdLine = output.profiles.Td?.[tIndex] ?? [];
+
+      // If any line is empty, return empty data
+      if (!pLine.length || !TLine.length || !TdLine.length)
+        return { label, color, linestyle, data: [] };
+
+      const data: SoundingRecord[] = pLine.map((_, i) => ({
+        p: pLine[i].x / 100,
+        T: TLine[i].x,
+        Td: TdLine[i].x,
+      }));
+
+      return { label, color, linestyle, data };
+    }) as ChartData<SoundingRecord>[];
 
   const firePlumes = () =>
-    flatExperiments().map((e, i) => {
-      const { config, output, ...formatting } = e;
-      if (config.sw_fire) {
+    flatExperiments()
+      .map((e) => {
+        const output = e.output;
+        if (!output?.plumes) return null; // skip if no plume
+
+        const tIndex = output.timeseries?.utcTime?.indexOf(
+          uniqueTimes()[analysis.time],
+        );
+        if (tIndex === undefined || tIndex === -1) return null;
+
+        const pLine = output.plumes.p?.[tIndex] ?? [];
+        const TLine = output.plumes.T?.[tIndex] ?? [];
+        const TdLine = output.plumes.Td?.[tIndex] ?? [];
+
+        if (!pLine.length || !TLine.length || !TdLine.length) return null;
+
+        const data: SoundingRecord[] = pLine.map((_, i) => ({
+          p: pLine[i].x,
+          T: TLine[i].x,
+          Td: TdLine[i].x,
+        }));
+
         return {
-          ...formatting,
+          label: `${e.label} - fire plume`,
           color: "#ff0000",
-          label: `${formatting.label} - fire plume`,
-          data: calculatePlume(config, profileData()[i].data),
+          linestyle: "4",
+          data,
         };
-      }
-      return { ...formatting, data: [] };
-    }) as ChartData<SoundingRecord>[];
+      })
+      .filter((d): d is ChartData<SoundingRecord> => d !== null);
 
   const observations = () =>
     flatObservations().map((o) => observationsForSounding(o));
-
-  // TODO: There should be a way that this isn't needed.
-  const profileDataForPlot = () =>
-    profileData().map(({ data, label, color, linestyle }) => ({
-      label,
-      color,
-      linestyle,
-      data: data.p.map((p, i) => ({
-        p: p / 100,
-        T: data.T[i],
-        Td: data.Td[i],
-      })),
-    })) as ChartData<SoundingRecord>[];
 
   return (
     <>

@@ -1,4 +1,5 @@
-import type { ClassOutput, OutputVariableKey } from "@classmodel/class/output";
+import type { OutputVariableKey } from "@classmodel/class/output";
+import type { TimeSeries0D } from "@classmodel/class/runner";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
 import { toPartial } from "./encode";
 import type { ExperimentConfig } from "./experiment_config";
@@ -11,12 +12,21 @@ export function toConfigBlob(experiment: ExperimentConfig) {
   });
 }
 
-function outputToCsv(output: ClassOutput) {
+export function outputToCsv(output: TimeSeries0D) {
   const headers = Object.keys(output) as OutputVariableKey[];
-  const lines = [headers.join(",")];
-  for (let i = 0; i < output[headers[0]].length; i++) {
-    lines.push(headers.map((h) => output[h][i]).join(","));
+  const lines: string[] = [];
+
+  // CSV header
+  lines.push(headers.join(","));
+
+  // Determine number of rows from the first variable
+  const nRows = output[headers[0]]?.length ?? 0;
+
+  for (let i = 0; i < nRows; i++) {
+    const row = headers.map((h) => output[h][i]);
+    lines.push(row.join(","));
   }
+
   return lines.join("\n");
 }
 
@@ -32,9 +42,12 @@ export async function createArchive(experiment: Experiment) {
   await zipWriter.add("config.json", new BlobReader(configBlob));
 
   if (experiment.output.reference) {
-    const csvBlob = new Blob([outputToCsv(experiment.output.reference)], {
-      type: "text/csv",
-    });
+    const csvBlob = new Blob(
+      [outputToCsv(experiment.output.reference.timeseries)],
+      {
+        type: "text/csv",
+      },
+    );
     await zipWriter.add(
       `${experiment.config.reference.name}.csv`,
       new BlobReader(csvBlob),
@@ -45,7 +58,7 @@ export async function createArchive(experiment: Experiment) {
     const permConfig = experiment.config.permutations[index];
     const permutationOutput = experiment.output.permutations[index];
     if (permutationOutput) {
-      const csvBlob = new Blob([outputToCsv(permutationOutput)], {
+      const csvBlob = new Blob([outputToCsv(permutationOutput.timeseries)], {
         type: "text/csv",
       });
       await zipWriter.add(`${permConfig.name}.csv`, new BlobReader(csvBlob));

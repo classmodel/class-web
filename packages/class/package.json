@@ -95,7 +95,8 @@
   "dependencies": {
     "@commander-js/extra-typings": "^12.1.0",
     "ajv": "^8.17.1",
-    "commander": "^12.1.0"
+    "commander": "^12.1.0",
+    "simplify-js": "^1.2.4"
   },
   "private": false,
   "publishConfig": {

@@ -1,7 +1,7 @@
 // profiles.ts
 
 import type { MixedLayerConfig, NoWindConfig, WindConfig } from "./config.js";
-import type { ClassOutputAtSingleTime } from "./output.js";
+import type { ClassOutput } from "./output.js";
 import {
   dewpoint,
   qsatLiq,
@@ -18,7 +18,7 @@ const CONSTANTS = {
 /**
  * Atmospheric vertical profiles
  */
-export interface ClassProfile {
+export interface ClassProfile extends Record<string, number[]> {
   z: number[]; // Height levels (cell centers) [m]
   theta: number[]; // Potential temperature [K]
   thetav: number[]; // Virtual potential temperature [K]
@@ -34,7 +34,7 @@ export interface ClassProfile {
   rh: number[]; // Relative humidity [%]
 }
 
-export const NoProfile: ClassProfile = {
+export const noProfile: ClassProfile = {
   z: [],
   theta: [],
   thetav: [],
@@ -55,7 +55,7 @@ export const NoProfile: ClassProfile = {
  */
 export function generateProfiles(
   config: MixedLayerConfig & (WindConfig | NoWindConfig),
-  output: ClassOutputAtSingleTime,
+  output: ClassOutput,
   dz = 1,
 ): ClassProfile {
   const { Rd, cp, g } = CONSTANTS;
