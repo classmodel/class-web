@@ -324,11 +324,69 @@ export function VerticalProfilePlot({
   const allLines = () => [...profileLines(), ...plumeLines(), ...obsLines()];
 
   /** Global axes extents across all experiments, times, and observations */
-  const allX = () => allLines().flatMap((d) => d.data.map((p) => p.x));
-  const allY = () => allLines().flatMap((d) => d.data.map((p) => p.y));
+  const axisLimits = createMemo(() => {
+    const variable = classVariable();
 
-  const xLim = () => getNiceAxisLimits(allX(), 1);
-  const yLim = () => [0, getNiceAxisLimits(allY(), 0)[1]] as [number, number];
+    let xMin = Number.POSITIVE_INFINITY;
+    let xMax = Number.NEGATIVE_INFINITY;
+    let yMin = Number.POSITIVE_INFINITY;
+    let yMax = Number.NEGATIVE_INFINITY;
+
+    const updateMinMax = (x: number, y: number) => {
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+      if (x < xMin) xMin = x;
+      if (x > xMax) xMax = x;
+      if (y < yMin) yMin = y;
+      if (y > yMax) yMax = y;
+    };
+
+    // --- 1. Profiles ---
+    for (const e of flatExperiments()) {
+      const output = e.output;
+      if (!output) continue;
+
+      const profilesVar = output.profiles?.[variable];
+      if (profilesVar) {
+        output.timeseries.utcTime.forEach((_, tIndex) => {
+          const pts = profilesVar[tIndex];
+          if (!pts) return;
+          for (const p of pts.flat()) updateMinMax(p.x, p.y);
+        });
+      }
+
+      // --- 2. Plumes ---
+      if (isPlumeVariable(variable)) {
+        const plumesVar = output.plumes?.[variable];
+        if (plumesVar) {
+          output.timeseries.utcTime.forEach((_, tIndex) => {
+            const pts = plumesVar[tIndex];
+            if (!pts) return;
+            for (const p of pts.flat()) updateMinMax(p.x, p.y);
+          });
+        }
+      }
+    }
+
+    // --- 3. Observations ---
+    for (const obs of flatObservations()) {
+      const o = observationsForProfile(obs, variable);
+      if (o?.data) {
+        for (const p of o.data) updateMinMax(p.x, p.y);
+      }
+    }
+
+    // No valid data
+    if (xMin === Number.POSITIVE_INFINITY || yMin === Number.POSITIVE_INFINITY)
+      return undefined;
+
+    const xLimits = getNiceAxisLimits([xMin, xMax]);
+    const yLimits = getNiceAxisLimits([yMin, yMax]);
+
+    return { xLimits, yLimits };
+  });
+
+  const xLim = () => axisLimits()?.xLimits ?? [0, 1];
+  const yLim = () => axisLimits()?.yLimits ?? [0, 1];
 
   /** Initialize toggles for legend */
   const [toggles, setToggles] = createStore<Record<string, boolean>>({});
