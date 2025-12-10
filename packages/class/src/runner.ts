@@ -203,16 +203,12 @@ function simplifyProfile(
     return simplified; // nothing to align
   }
 
-  // // Build union Z grid from all simplified variables
-  // const zSet = new Set<number>(
-  //   Object.values(simplified).flatMap((line) => line.map((pt) => pt.y)),
-  // );
   // Step 3: Build union Z grid only for keys to align
   const zSet = new Set<number>(
     keysToAlign.flatMap((key) => simplified[key]?.map((pt) => pt.y) ?? []),
   );
 
-  console.log(zSet.size);
+  // console.log(zSet.size);
 
   // Align selected variables using original profileXY
   for (const key of keysToAlign) {

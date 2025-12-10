@@ -446,46 +446,73 @@ function Picker(props: PickerProps) {
 }
 
 export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
-  const profileData = () =>
+
+  /** Extract profile lines from CLASS output at the current time index */
+  const profileDataForPlot = () =>
     flatExperiments().map((e) => {
-      const { config, output, ...formatting } = e;
-      const t = output?.utcTime.indexOf(uniqueTimes()[analysis.time]);
-      if (config.sw_ml && output && t !== undefined && t !== -1) {
-        const outputAtTime = getOutputAtTime(output, t);
-        return { ...formatting, data: generateProfiles(config, outputAtTime) };
-      }
-      return { ...formatting, data: NoProfile };
-    });
+      const { output, label, color, linestyle } = e;
+      if (!output?.profiles) return { label, color, linestyle, data: [] };
+
+      const tIndex = output.timeseries?.utcTime?.indexOf(
+        uniqueTimes()[analysis.time],
+      );
+      if (tIndex === undefined || tIndex === -1)
+        return { label, color, linestyle, data: [] };
+
+      // Make sure each variable exists and has data at this time
+      const pLine = output.profiles.p?.[tIndex] ?? [];
+      const TLine = output.profiles.T?.[tIndex] ?? [];
+      const TdLine = output.profiles.Td?.[tIndex] ?? [];
+
+      // If any line is empty, return empty data
+      if (!pLine.length || !TLine.length || !TdLine.length)
+        return { label, color, linestyle, data: [] };
+
+      const data: SoundingRecord[] = pLine.map((_, i) => ({
+        p: pLine[i].x / 100,
+        T: TLine[i].x,
+        Td: TdLine[i].x,
+      }));
+
+      return { label, color, linestyle, data };
+    }) as ChartData<SoundingRecord>[];
 
   const firePlumes = () =>
-    flatExperiments().map((e, i) => {
-      const { config, output, ...formatting } = e;
-      if (config.sw_fire) {
-        return {
-          ...formatting,
-          color: "#ff0000",
-          label: `${formatting.label} - fire plume`,
-          data: calculatePlume(config, profileData()[i].data),
-        };
-      }
-      return { ...formatting, data: [] };
+    flatExperiments().map((e) => {
+      const { output, label, color, linestyle } = e;
+      if (!output?.plumes) return { label, color, linestyle, data: [] };
+
+      const tIndex = output.timeseries?.utcTime?.indexOf(
+        uniqueTimes()[analysis.time],
+      );
+      if (tIndex === undefined || tIndex === -1)
+        return { label, color, linestyle, data: [] };
+
+      // Make sure each variable exists and has data at this time
+      const pLine = output.plumes.p?.[tIndex] ?? [];
+      const TLine = output.plumes.T?.[tIndex] ?? [];
+      const TdLine = output.plumes.Td?.[tIndex] ?? [];
+
+      // If any line is empty, return empty data
+      if (!pLine.length || !TLine.length || !TdLine.length)
+        return { label, color, linestyle, data: [] };
+
+      const data: SoundingRecord[] = pLine.map((_, i) => ({
+        p: pLine[i].x,
+        T: TLine[i].x,
+        Td: TdLine[i].x,
+      }));
+
+      return {
+        label: `${label} - fire plume`,
+        color: "#ff0000",
+        linestyle: "4",
+        data,
+      };
     }) as ChartData<SoundingRecord>[];
 
   const observations = () =>
     flatObservations().map((o) => observationsForSounding(o));
-
-  // TODO: There should be a way that this isn't needed.
-  const profileDataForPlot = () =>
-    profileData().map(({ data, label, color, linestyle }) => ({
-      label,
-      color,
-      linestyle,
-      data: data.p.map((p, i) => ({
-        p: p / 100,
-        T: data.T[i],
-        Td: data.Td[i],
-      })),
-    })) as ChartData<SoundingRecord>[];
 
   return (
     <>
@@ -505,6 +532,7 @@ export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
     </>
   );
 }
+
 
 async function takeScreenshot(event: MouseEvent, analyse: Analysis) {
   const target = event.target as HTMLElement;
