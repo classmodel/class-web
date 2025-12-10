@@ -2,12 +2,12 @@ import { createUniqueId } from "solid-js";
 import { createStore, produce, unwrap } from "solid-js/store";
 
 import type { Config } from "@classmodel/class/config";
-import type { ClassOutput } from "@classmodel/class/output";
 
 import {
   mergeConfigurations,
   pruneConfig,
 } from "@classmodel/class/config_utils";
+import type { ClassData } from "@classmodel/class/runner";
 import type {
   Analysis,
   ProfilesAnalysis,
@@ -19,7 +19,6 @@ import { parseExperimentConfig } from "./experiment_config";
 import type { ExperimentConfig } from "./experiment_config";
 import { findPresetByName } from "./presets";
 import { runClassAsync } from "./runner";
-import { ClassData } from "@classmodel/class/runner";
 
 interface ExperimentOutput {
   reference?: ClassData;

@@ -74,9 +74,7 @@
   "bugs": {
     "url": "https://github.com/classmodel/class-web/issues"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "license": "GPL-3.0-only",
   "scripts": {
     "dev": "tsc --watch",

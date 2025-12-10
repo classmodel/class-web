@@ -1,13 +1,9 @@
 import type { Config } from "@classmodel/class/config";
-import { calculatePlume } from "@classmodel/class/fire";
 import {
   type OutputVariableKey,
   outputVariables,
 } from "@classmodel/class/output";
-import {
-  type ClassProfile,
-  generateProfiles,
-} from "@classmodel/class/profiles";
+import type { ClassProfile } from "@classmodel/class/profiles";
 import type { ClassData } from "@classmodel/class/runner";
 import * as d3 from "d3";
 import { saveAs } from "file-saver";
@@ -129,11 +125,15 @@ export function TimeSeriesPlot({ analysis }: { analysis: TimeseriesAnalysis }) {
 
   const allX = () =>
     flatExperiments().flatMap((e) =>
-      e.output ? e.output.timeseries[analysis.xVariable as OutputVariableKey] : [],
+      e.output
+        ? e.output.timeseries[analysis.xVariable as OutputVariableKey]
+        : [],
     );
   const allY = () =>
     flatExperiments().flatMap((e) =>
-      e.output ? e.output.timeseries[analysis.yVariable as OutputVariableKey] : [],
+      e.output
+        ? e.output.timeseries[analysis.yVariable as OutputVariableKey]
+        : [],
     );
 
   const granularities: Record<string, number | undefined> = {
@@ -270,47 +270,47 @@ export function VerticalProfilePlot({
     data: { x: number; y: number }[];
   };
 
-function getLinesForExperiment(
-  e: FlatExperiment,
-  variable: string,
-  type: "profiles" | "plumes",
-  timeVal: number
-): LineSet {
-  const { label, color, linestyle, output } = e;
+  function getLinesForExperiment(
+    e: FlatExperiment,
+    variable: string,
+    type: "profiles" | "plumes",
+    timeVal: number,
+  ): LineSet {
+    const { label, color, linestyle, output } = e;
 
-  if (!output) return { label, color, linestyle, data: [] };
+    if (!output) return { label, color, linestyle, data: [] };
 
-  const profile = output[type];
-  if (!profile) return { label, color, linestyle, data: [] };
+    const profile = output[type];
+    if (!profile) return { label, color, linestyle, data: [] };
 
-  // Find experiment-specific time index
-  const tIndex = output.timeseries?.utcTime?.indexOf(timeVal);
-  if (tIndex === undefined || tIndex === -1)
-    return { label, color, linestyle, data: [] };
+    // Find experiment-specific time index
+    const tIndex = output.timeseries?.utcTime?.indexOf(timeVal);
+    if (tIndex === undefined || tIndex === -1)
+      return { label, color, linestyle, data: [] };
 
-  const linesAtTime = profile[variable]?.[tIndex] ?? [];
+    const linesAtTime = profile[variable]?.[tIndex] ?? [];
 
-  return {
-    label: type === "plumes" ? `${label} - plume` : label,
-    color,
-    linestyle: type === "plumes" ? "4" : linestyle,
-    data: linesAtTime.flat(),
-  };
-}
-
-    /** Collect all lines across experiments for a given type */
-  function collectLines(
-    type: "profiles" | "plumes"
-  ): LineSet[] {
-    const variable = classVariable();
-    return flatExperiments().map((e) => getLinesForExperiment(e, variable, type, uniqueTimes()[analysis.time]));
+    return {
+      label: type === "plumes" ? `${label} - plume` : label,
+      color,
+      linestyle: type === "plumes" ? "4" : linestyle,
+      data: linesAtTime.flat(),
+    };
   }
 
-  
+  /** Collect all lines across experiments for a given type */
+  function collectLines(type: "profiles" | "plumes"): LineSet[] {
+    const variable = classVariable();
+    return flatExperiments().map((e) =>
+      getLinesForExperiment(e, variable, type, uniqueTimes()[analysis.time]),
+    );
+  }
+
   /** Lines to plot */
   const profileLines = () => collectLines("profiles");
-  const plumeLines =  () => showPlume() ? collectLines("plumes") : [];
-  const obsLines =  () => flatObservations().map((o) => observationsForProfile(o, classVariable()));
+  const plumeLines = () => (showPlume() ? collectLines("plumes") : []);
+  const obsLines = () =>
+    flatObservations().map((o) => observationsForProfile(o, classVariable()));
   const allLines = () => [...profileLines(), ...plumeLines(), ...obsLines()];
 
   /** Global axes extents across all experiments, times, and observations */
@@ -319,7 +319,6 @@ function getLinesForExperiment(
 
   const xLim = () => getNiceAxisLimits(allX(), 1);
   const yLim = () => [0, getNiceAxisLimits(allY(), 0)[1]] as [number, number];
-
 
   /** Initialize toggles for legend */
   const [toggles, setToggles] = createStore<Record<string, boolean>>({});
@@ -363,7 +362,7 @@ function getLinesForExperiment(
         {TimeSlider(
           () => analysis.time,
           uniqueTimes,
-          (t) => updateAnalysis(analysis, { time: t })
+          (t) => updateAnalysis(analysis, { time: t }),
         )}
       </div>
     </>
@@ -446,7 +445,6 @@ function Picker(props: PickerProps) {
 }
 
 export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
-
   /** Extract profile lines from CLASS output at the current time index */
   const profileDataForPlot = () =>
     flatExperiments().map((e) => {
@@ -532,7 +530,6 @@ export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
     </>
   );
 }
-
 
 async function takeScreenshot(event: MouseEvent, analyse: Analysis) {
   const target = event.target as HTMLElement;

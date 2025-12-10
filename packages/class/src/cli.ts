@@ -7,8 +7,8 @@ import { readFile, writeFile } from "node:fs/promises";
 import { EOL } from "node:os";
 import { Command, Option } from "@commander-js/extra-typings";
 import { jsonSchemaOfConfig } from "./config.js";
-import type { ClassOutput, OutputVariableKey } from "./output.js";
-import { runClass, type TimeSeries0D } from "./runner.js";
+import type { OutputVariableKey } from "./output.js";
+import { type TimeSeries0D, runClass } from "./runner.js";
 import { parse } from "./validate.js";
 
 /**
