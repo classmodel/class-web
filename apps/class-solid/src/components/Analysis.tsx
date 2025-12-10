@@ -261,8 +261,6 @@ export function VerticalProfilePlot({
     return ["theta", "qt", "thetav", "T", "Td", "rh", "w"].includes(v);
   }
 
-  const showPlume = createMemo(() => isPlumeVariable(classVariable()));
-
   type LineSet = {
     label: string;
     color: string;
@@ -308,7 +306,19 @@ export function VerticalProfilePlot({
 
   /** Lines to plot */
   const profileLines = () => collectLines("profiles");
-  const plumeLines = () => (showPlume() ? collectLines("plumes") : []);
+  // Only collect plumes for experiments that actually have plume output
+  const plumeLines = () =>
+    flatExperiments()
+      .filter((e) => e.output?.plumes) // only show plume when firemodel enabled
+      .filter((e) => isPlumeVariable(classVariable())) // only show plume for plume vars
+      .map((e) =>
+        getLinesForExperiment(
+          e,
+          classVariable(),
+          "plumes",
+          uniqueTimes()[analysis.time],
+        ),
+      );
   const obsLines = () =>
     flatObservations().map((o) => observationsForProfile(o, classVariable()));
   const allLines = () => [...profileLines(), ...plumeLines(), ...obsLines()];
@@ -476,38 +486,36 @@ export function ThermodynamicPlot({ analysis }: { analysis: SkewTAnalysis }) {
     }) as ChartData<SoundingRecord>[];
 
   const firePlumes = () =>
-    flatExperiments().map((e) => {
-      const { output, label, color, linestyle } = e;
-      if (!output?.plumes) return { label, color, linestyle, data: [] };
+    flatExperiments()
+      .map((e) => {
+        const output = e.output;
+        if (!output?.plumes) return null; // skip if no plume
 
-      const tIndex = output.timeseries?.utcTime?.indexOf(
-        uniqueTimes()[analysis.time],
-      );
-      if (tIndex === undefined || tIndex === -1)
-        return { label, color, linestyle, data: [] };
+        const tIndex = output.timeseries?.utcTime?.indexOf(
+          uniqueTimes()[analysis.time],
+        );
+        if (tIndex === undefined || tIndex === -1) return null;
 
-      // Make sure each variable exists and has data at this time
-      const pLine = output.plumes.p?.[tIndex] ?? [];
-      const TLine = output.plumes.T?.[tIndex] ?? [];
-      const TdLine = output.plumes.Td?.[tIndex] ?? [];
+        const pLine = output.plumes.p?.[tIndex] ?? [];
+        const TLine = output.plumes.T?.[tIndex] ?? [];
+        const TdLine = output.plumes.Td?.[tIndex] ?? [];
 
-      // If any line is empty, return empty data
-      if (!pLine.length || !TLine.length || !TdLine.length)
-        return { label, color, linestyle, data: [] };
+        if (!pLine.length || !TLine.length || !TdLine.length) return null;
 
-      const data: SoundingRecord[] = pLine.map((_, i) => ({
-        p: pLine[i].x,
-        T: TLine[i].x,
-        Td: TdLine[i].x,
-      }));
+        const data: SoundingRecord[] = pLine.map((_, i) => ({
+          p: pLine[i].x,
+          T: TLine[i].x,
+          Td: TdLine[i].x,
+        }));
 
-      return {
-        label: `${label} - fire plume`,
-        color: "#ff0000",
-        linestyle: "4",
-        data,
-      };
-    }) as ChartData<SoundingRecord>[];
+        return {
+          label: `${e.label} - fire plume`,
+          color: "#ff0000",
+          linestyle: "4",
+          data,
+        };
+      })
+      .filter((d): d is ChartData<SoundingRecord> => d !== null);
 
   const observations = () =>
     flatObservations().map((o) => observationsForSounding(o));
