@@ -285,12 +285,17 @@ function getLinesForExperiment(
 
   // Find experiment-specific time index
   const tIndex = output.timeseries?.utcTime?.indexOf(timeVal);
-  if (tIndex === undefined || tIndex === -1) return { label, color, linestyle, data: [] };
+  if (tIndex === undefined || tIndex === -1)
+    return { label, color, linestyle, data: [] };
 
-  const lineStyle = type === "plumes" ? "4" : linestyle;
   const linesAtTime = profile[variable]?.[tIndex] ?? [];
 
-  return { label, color, linestyle: lineStyle, data: linesAtTime.flat() };
+  return {
+    label: type === "plumes" ? `${label} - plume` : label,
+    color,
+    linestyle: type === "plumes" ? "4" : linestyle,
+    data: linesAtTime.flat(),
+  };
 }
 
     /** Collect all lines across experiments for a given type */

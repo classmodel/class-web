@@ -46,12 +46,12 @@ export function runClass(config: Config, freq = 600): ClassData {
   const profiles: TimeSeries1D = {};
   const plumes: TimeSeries1D = {};
 
-  // Helper function to parse class output 
-  // calculate profiles and fireplumes, 
+  // Helper function to parse class output
+  // calculate profiles and fireplumes,
   // and export as timeseries
   const writeOutput = () => {
     const output: Partial<ClassOutput> = {};
-    
+
     // Generate timeseries
     for (const key of outputKeys) {
       const value = model.getValue(key);
@@ -62,31 +62,30 @@ export function runClass(config: Config, freq = 600): ClassData {
     }
 
     // Generate profiles
+    const keysToAlign = ["p", "T", "Td"];
     if (config.sw_ml) {
       const profile = generateProfiles(config, output as ClassOutput);
       const profileXY = profileToXY(profile as unknown as Profile);
+      const simplifiedProfile = simplifyProfile(profileXY, 0.01, keysToAlign);
 
-      for (const key of Object.keys(profileXY)) {
+      for (const key of Object.keys(simplifiedProfile)) {
         profiles[key] = profiles[key] || []; // Initialize if not exists
-        profiles[key].push(simplifyLine(profileXY[key], 0.01));
+        profiles[key].push(simplifiedProfile[key]);
       }
 
       // Generate plumes
       if (config.sw_fire) {
         const plume = calculatePlume(config, profile);
         const plumeXY = plumeToXY(plume);
-        console.log("profile:", profile);
-        console.log("plume:", plume);
+        const simplifiedPlume = simplifyProfile(plumeXY, 0.01, keysToAlign);
 
-        for (const key of Object.keys(plumeXY)) {
+        for (const key of Object.keys(simplifiedPlume)) {
           plumes[key] = plumes[key] || [];
-          plumes[key].push(simplifyLine(plumeXY[key], 0.01));
+          plumes[key].push(simplifiedPlume[key]);
         }
-
       }
     }
   };
-
 
   // Initial time
   writeOutput();
@@ -110,17 +109,19 @@ export function runClass(config: Config, freq = 600): ClassData {
   return { timeseries };
 }
 
-type Profile = Record<string, number[]> & {z: number[]};
+type Profile = Record<string, number[]> & { z: number[] };
 
 /**
- * 
+ *
  * Convert a profile like {z: [], theta: [], qt: [], ...}
  * to a profile like: {theta: {x: [], y: []}, qt: {x: [], y:[]}, ...}
  *
  * Useful to simplify profiles independently for each variable
  * and also to quickly obtain the data for a line plot
  */
-function profileToXY(profile: Profile): Record<string, { x: number; y: number }[]> {
+function profileToXY(
+  profile: Profile,
+): Record<string, { x: number; y: number }[]> {
   const result: Record<string, { x: number; y: number }[]> = {};
 
   for (const key of Object.keys(profile)) {
@@ -150,23 +151,75 @@ function plumeToXY(plume: Parcel[]) {
   return result;
 }
 
-
 /**
  * Compress a line by discarding points that are within a certain relative tolerance.
- * Using the simplify-js package, which implements the 
+ * Using the simplify-js package, which implements the
  * Ramer-Douglas-Peucker algorithm
  */
-function simplifyLine(line: { x: number; y: number }[], tolerance = 0.01): { x: number; y: number }[] {
+function simplifyLine(
+  line: { x: number; y: number }[],
+  tolerance = 0.01,
+): { x: number; y: number }[] {
   if (line.length <= 2) return line; // Nothing to simplify
 
-  const xs = line.map(p => p.x);
-  const ys = line.map(p => p.y);
+  const xs = line.map((p) => p.x);
+  const ys = line.map((p) => p.y);
   const xRange = Math.max(...xs) - Math.min(...xs);
   const yRange = Math.max(...ys) - Math.min(...ys);
   const relTol = Math.min(xRange, yRange) * tolerance;
 
   const simplified = simplify(line, relTol, true);
-  console.log(`Simplified from ${line.length} to ${simplified.length} points`);
+  // console.log(`Simplified from ${line.length} to ${simplified.length} points`);
   // console.log(`Simplified`);
+  return simplified;
+}
+
+/**
+ * Simplify and optionally align a profile.
+ *
+ * @param profileXY - Profile in {x: number; y: number}[] format
+ * @param tolerance - Relative tolerance for simplification (default 0.01)
+ * @param alignKeys - Array of variable keys to align. If `true`, align all. If `false` or empty, skip alignment.
+ * @returns The simplified (and optionally partially aligned) profile
+ */
+function simplifyProfile(
+  profileXY: Record<string, { x: number; y: number }[]>,
+  tolerance = 0.01,
+  alignKeys: string[] | true | false = true,
+): Record<string, { x: number; y: number }[]> {
+  // Simplify each variable
+  const simplified: Record<string, { x: number; y: number }[]> = {};
+  for (const key in profileXY) {
+    simplified[key] = simplifyLine(profileXY[key], tolerance);
+  }
+
+  // Decide which keys to align
+  let keysToAlign: string[];
+  if (alignKeys === true) {
+    keysToAlign = Object.keys(profileXY);
+  } else if (Array.isArray(alignKeys) && alignKeys.length > 0) {
+    keysToAlign = alignKeys;
+  } else {
+    return simplified; // nothing to align
+  }
+
+  // // Build union Z grid from all simplified variables
+  // const zSet = new Set<number>(
+  //   Object.values(simplified).flatMap((line) => line.map((pt) => pt.y)),
+  // );
+  // Step 3: Build union Z grid only for keys to align
+  const zSet = new Set<number>(
+    keysToAlign.flatMap((key) => simplified[key]?.map((pt) => pt.y) ?? []),
+  );
+
+  console.log(zSet.size);
+
+  // Align selected variables using original profileXY
+  for (const key of keysToAlign) {
+    if (profileXY[key]) {
+      simplified[key] = profileXY[key].filter((pt) => zSet.has(pt.y));
+    }
+  }
+
   return simplified;
 }
